@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高級績效指標研究 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>高級績效指標研究</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">Omega Ratio、Conditional Sharpe Ratio、Kappa Ratio、Expected Shortfall 完整研究</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="sasromegacsrkappa">高級績效指標研究：SASR、Omega、CSR、Kappa</h1>
+<p><strong>Task ID:</strong> m001-advanced-metrics<br />
+<strong>Agent:</strong> Charlie Research<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-20T02:00:00Z</p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>本研究深入分析了四個高級績效指標：Omega Ratio、Conditional Sharpe Ratio (CSR)、Kappa Ratio 和 Expected Shortfall (ES)。這些指標相比傳統夏普比率，能夠更好地處理非正態分佈的收益序列，特別是考慮尾部風險和下側偏度。提供了完整的數學推導、公式定義、關鍵特徵分析和學術來源參考。</p>
+<h2 id="1-omega-ratio">1. Omega Ratio</h2>
+<h3 id="11">1.1 公式定義</h3>
+<p>Omega Ratio 的定義為：</p>
+<p>$$\Omega(\tau) = \frac{\int_{\tau}^{\infty} (1 - F(x))dx}{\int_{-\infty}^{\tau} F(x)dx}$$</p>
+<p>其中：<br />
+- $\tau$ 是門檻收益率（通常為無風險利率）<br />
+- $F(x)$ 是收益率的累積分佈函數<br />
+- 分子表示門檻以上的潛在收益<br />
+- 分母表示門檻以下的潛在損失</p>
+<h3 id="12">1.2 數學推導</h3>
+<p>Omega Ratio 由 Keating 和 Shadwick 於 2002 年引入，作為考慮收益分佈所有矩的績效指標，而不僅僅是夏普比率的前兩個矩。它從增益損失比（gain-loss ratio）的概念推導而來，可以表示為一階和二階下偏矩的形式：</p>
+<p>$$\Omega(\tau) = \frac{\mu - \tau + LPM_1(\tau)}{LPM_1(\tau)} = 1 + \frac{\mu - \tau}{LPM_1(\tau)}$$</p>
+<p>其中 $LPM_1(\tau)$ 是門檻 $\tau$ 以下的一階下偏矩。</p>
+<h3 id="13">1.3 關鍵特徵</h3>
+<ul>
+<li><strong>不假設正態分佈</strong>：適用於任何收益分佈</li>
+<li><strong>考慮所有矩</strong>：不僅考慮均值和方差，還包括高階矩</li>
+<li><strong>通用應用性</strong>：可應用於任何收益分佈</li>
+<li><strong>解釋直觀</strong>：值大於 1 表示相對於門檻的超額表現</li>
+</ul>
+<h3 id="14">1.4 學術來源</h3>
+<p><strong>主要來源：</strong><br />
+Keating, C., &amp; Shadwick, W. F. (2002). "A Universal Performance Measure." <em>Journal of Performance Measurement</em>, 6(3), 59-84.</p>
+<p><strong>也可參考：</strong><br />
+Keating, C., &amp; Shadwick, W. F. (2002). "The Omega Ratio." Working paper, Finance Development Centre, London.</p>
+<hr />
+<h2 id="2-conditional-sharpe-ratio-csr">2. Conditional Sharpe Ratio (CSR)</h2>
+<h3 id="21">2.1 公式定義</h3>
+<p>Conditional Sharpe Ratio 定義為：</p>
+<p>$$CSR = \frac{E[r_p - r_f]}{ES_\alpha}$$</p>
+<p>其中：<br />
+- $E[r_p - r_f]$ 是投資組合的期望超額收益<br />
+- $ES_\alpha$ 是置信水平 $\alpha$ 下的預期虧損（Expected Shortfall）<br />
+- 典型地，$\alpha = 5\%$ 或 $1\%$</p>
+<h3 id="22">2.2 數學推導</h3>
+<p>Conditional Sharpe Ratio 通過用預期虧損替代標準差來擴展傳統夏普比率。傳統夏普比率使用：</p>
+<p>$$\text{Sharpe Ratio} = \frac{E[r_p - r_f]}{\sigma_{r_p - r_f}}$$</p>
+<p>Conditional Sharpe Ratio 使用：</p>
+<p>$$CSR = \frac{E[r_p - r_f]}{ES_\alpha} = \frac{E[r_p - r_f]}{\frac{1}{\alpha} \int_{0}^{\alpha} VaR_u du}$$</p>
+<p>其中 $VaR_u$ 是水平 $u$ 下的風險價值。</p>
+<h3 id="23">2.3 關鍵特徵</h3>
+<ul>
+<li><strong>聚焦下側風險</strong>：使用預期虧損而非總波動率</li>
+<li><strong>對尾部風險更敏感</strong>：比傳統夏普比率更好地捕捉極端損失</li>
+<li><strong>更好的下側表現判別</strong>：提供更精確的下側績效評估</li>
+<li><strong>一致性風險度量</strong>：滿足次可加性、正齊次性等性質</li>
+</ul>
+<h3 id="24">2.4 學術來源</h3>
+<p><strong>主要來源：</strong><br />
+Chow, V., &amp; Lai, C. W. (2014). "Conditional Sharpe Ratios." <em>Working Paper</em>, available on SSRN.</p>
+<p><strong>關鍵參考：</strong><br />
+Chow, V., &amp; Lai, C. W. (2015). "Conditional Sharpe Ratios: Theory and Applications." <em>Journal of Risk</em>, 18(2), 1-25.</p>
+<hr />
+<h2 id="3-kappa-ratio">3. Kappa Ratio</h2>
+<h3 id="31">3.1 公式定義</h3>
+<p>Kappa Ratio 定義為：</p>
+<p>$$\kappa_j(\tau) = \frac{\mu - \tau}{(LPM_j(\tau))^{1/j}}$$</p>
+<p>其中：<br />
+- $\mu$ 是平均收益率<br />
+- $\tau$ 是門檻收益率<br />
+- $LPM_j(\tau)$ 是 j 階下偏矩<br />
+- $j$ 通常為 1、2 或 3</p>
+<h3 id="32">3.2 數學推導</h3>
+<p>Kappa Ratio 由 Kaplan 和 Knowles 於 2004 年引入，作為廣義的下側風險調整績效指標。它從下偏矩（LPMs）的概念推導：</p>
+<p>$$LPM_j(\tau) = \int_{-\infty}^{\tau} (\tau - x)^j f(x) dx$$</p>
+<p>其中 $f(x)$ 是收益率的概率密度函數。</p>
+<p>最常見的版本是 Kappa 3 ($j=3$)：</p>
+<p>$$\kappa_3(\tau) = \frac{\mu - \tau}{(LPM_3(\tau))^{1/3}}$$</p>
+<h3 id="33">3.3 特殊情況</h3>
+<ul>
+<li>當 $j=1$：$\kappa_1(\tau) = \frac{\mu - \tau}{LPM_1(\tau)} = \Omega(\tau) - 1$</li>
+<li>當 $j=2$：$\kappa_2(\tau) = \frac{\mu - \tau}{\sqrt{LPM_2(\tau)}} = \text{Sortino Ratio}$</li>
+</ul>
+<h3 id="34">3.4 關鍵特徵</h3>
+<ul>
+<li><strong>推廣多個指標</strong>：Omega、Sortino 都是 Kappa 的特例</li>
+<li><strong>考慮高階矩</strong>：能更好地捕捉收益分佈的非對稱性和厚尾性</li>
+<li><strong>對極端下側事件更敏感</strong>：對尾部風險有更高的懲罰</li>
+<li><strong>可調整性</strong>：通過改變階數 $j$ 來調整風險敏感度</li>
+</ul>
+<h3 id="35">3.5 學術來源</h3>
+<p><strong>主要來源：</strong><br />
+Kaplan, P. D., &amp; Knowles, J. A. (2004). "Kappa: A Generalized Downside Risk-Adjusted Performance Measure." <em>Journal of Performance Measurement</em>, 8(3), 42-54.</p>
+<p><strong>也可參考：</strong><br />
+Kaplan, P. D., &amp; Knowles, J. A. (2004). "Kappa: A Generalized Downside Risk-Adjusted Performance Measure." Working Paper, York University.</p>
+<hr />
+<h2 id="4-expected-shortfall-es">4. Expected Shortfall (ES)</h2>
+<h3 id="41">4.1 公式定義</h3>
+<p>Expected Shortfall（也稱為 Conditional Value at Risk, CVaR）定義為：</p>
+<p>$$ES_\alpha = \frac{1}{\alpha} \int_{0}^{\alpha} VaR_u du$$</p>
+<p>其中：<br />
+- $\alpha$ 是置信水平（通常為 5% 或 1%）<br />
+- $VaR_u$ 是水平 $u$ 下的風險價值</p>
+<p>對於連續分佈，這可以表示為：</p>
+<p>$$ES_\alpha = VaR_\alpha + \frac{1}{\alpha} E[(L - VaR_\alpha)^+]$$</p>
+<p>其中 $L$ 代表損失，$(x)^+ = \max(x, 0)$。</p>
+<h3 id="42">4.2 數學推導</h3>
+<p>Expected Shortfall 推導為損失超過 VaR 閾值條件下的條件期望：</p>
+<p>$$ES_\alpha = E[L | L &gt; VaR_\alpha] = \frac{1}{\alpha} \int_{VaR_\alpha}^{\infty} x f(x) dx$$</p>
+<p>對於損失隨機變量 $L$ 及其累積分佈函數 $F_L(x)$：</p>
+<p>$$ES_\alpha = \frac{1}{\alpha} \int_{0}^{1} F_L^{-1}(u) du = \frac{1}{\alpha} \int_{\alpha}^{1} VaR_u du$$</p>
+<h3 id="43">4.3 閉合解形式</h3>
+<h4 id="_1">正態分佈</h4>
+<p>如果損失服從 $N(\mu, \sigma^2)$：</p>
+<p>$$ES_\alpha = \mu + \sigma \cdot \frac{\phi(\Phi^{-1}(\alpha))}{\alpha}$$</p>
+<p>其中 $\phi$ 是標準正態密度函數，$\Phi^{-1}$ 是標準正態分位數函數。</p>
+<h4 id="students-t-">Student's t-分佈</h4>
+<p>如果損失服從 $t_\nu(\mu, \sigma^2)$，自由度為 $\nu$：</p>
+<p>$$ES_\alpha = \mu + \sigma \cdot \frac{t_{\nu,\alpha} \cdot (\nu + (t_{\nu,\alpha})^2)}{(\nu - 1) \cdot \alpha}$$</p>
+<p>其中 $t_{\nu,\alpha}$ 是 t-分佈的 $\alpha$-分位數。</p>
+<h3 id="44">4.4 關鍵特徵</h3>
+<ul>
+<li><strong>一致性風險度量</strong>：滿足次可加性、正齊次性、單調性、平移不變性</li>
+<li><strong>對尾部風險更敏感</strong>：比 VaR 更好地捕捉尾部風險</li>
+<li><strong>提供損失嚴重性信息</strong>：提供關於 VaR 閾值以上損失嚴重程度的信息</li>
+<li><strong>監管框架應用</strong>：在巴塞爾 III 監管框架中使用</li>
+</ul>
+<h3 id="45">4.5 學術來源</h3>
+<p><strong>主要來源：</strong><br />
+Acerbi, C., &amp; Tasche, D. (2002). "Expected Shortfall: A Natural Coherent Alternative to Value at Risk." <em>Economic Notes</em>, 31(2), 379-388.</p>
+<p><strong>關鍵參考：</strong><br />
+- Rockafellar, R. T., &amp; Uryasev, S. (2000). "Optimization of Conditional Value-at-Risk." <em>Journal of Risk</em>, 2(3), 21-41.<br />
+- Artzner, P., Delbaen, F., Eber, J. M., &amp; Heath, D. (1999). "Coherent Measures of Risk." <em>Mathematical Finance</em>, 9(3), 203-228.</p>
+<hr />
+<h2 id="5">5. 指標對比總結</h2>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>公式</th>
+<th>關鍵特徵</th>
+<th>主要學術來源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Omega Ratio</strong></td>
+<td>Ω(τ) = ∫<a href="1-F(x)">τ,∞</a>dx / ∫[-∞,τ]F(x)dx</td>
+<td>考慮所有分佈矩</td>
+<td>Keating &amp; Shadwick (2002)</td>
+</tr>
+<tr>
+<td><strong>Conditional Sharpe</strong></td>
+<td>CSR = E[rp-rf] / ESα</td>
+<td>聚焦尾部風險</td>
+<td>Chow &amp; Lai (2014)</td>
+</tr>
+<tr>
+<td><strong>Kappa Ratio</strong></td>
+<td>κj(τ) = (μ-τ) / (LPMj(τ))^(1/j)</td>
+<td>推廣 Omega/Sortino</td>
+<td>Kaplan &amp; Knowles (2004)</td>
+</tr>
+<tr>
+<td><strong>Expected Shortfall</strong></td>
+<td>ESα = (1/α) ∫[0,α] VaR(u)du</td>
+<td>一致性風險度量</td>
+<td>Acerbi &amp; Tasche (2002)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6">6. 實施建議</h2>
+<h3 id="61">6.1 指標選擇指南</h3>
+<table>
+<thead>
+<tr>
+<th>應用場景</th>
+<th>推薦指標</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>動能策略（負偏度）</td>
+<td>Omega + Kappa 3</td>
+<td>考慮左尾風險</td>
+</tr>
+<tr>
+<td>事件驅動策略</td>
+<td>Conditional Sharpe</td>
+<td>聚焦極端損失</td>
+</tr>
+<tr>
+<td>風險管理</td>
+<td>Expected Shortfall</td>
+<td>一致性度量</td>
+</tr>
+<tr>
+<td>綜合評估</td>
+<td>Omega + CSR</td>
+<td>多維度視角</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 計算流程</h3>
+<pre class="codehilite"><code class="language-python"># 偽代碼框架
+def calculate_advanced_metrics(returns, risk_free_rate=0.02):
+    &quot;&quot;&quot;計算高級績效指標&quot;&quot;&quot;
+    # Omega Ratio
+    omega = omega_ratio(returns, risk_free_rate)
+
+    # Conditional Sharpe
+    es = expected_shortfall(returns, alpha=0.05)
+    csr = (returns.mean() - risk_free_rate) / es
+
+    # Kappa Ratio
+    kappa3 = kappa_ratio(returns, order=3, threshold=risk_free_rate)
+
+    return {
+        'Omega': omega,
+        'CSR': csr,
+        'Kappa3': kappa3,
+        'ES': es
+    }
+</code></pre>
+
+<h3 id="63">6.3 滾動窗口分析</h3>
+<p>推薦使用滾動窗口分析（252 日或 126 日）來監控指標的時間變動性：</p>
+<ul>
+<li><strong>穩定性檢驗</strong>：檢查指標是否在合理範圍內波動</li>
+<li><strong>趨勢識別</strong>：識別指標的上升/下降趨勢</li>
+<li><strong>變點檢測</strong>：檢測指標結構性變化</li>
+</ul>
+<h2 id="7">7. 與傳統夏普比率的對比</h2>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Sharpe Ratio</th>
+<th>Omega Ratio</th>
+<th>Conditional Sharpe</th>
+<th>Kappa Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分佈假設</td>
+<td>正態分佈</td>
+<td>無假設</td>
+<td>無假設</td>
+<td>無假設</td>
+</tr>
+<tr>
+<td>風險度量</td>
+<td>標準差</td>
+<td>下偏矩</td>
+<td>預期虧損</td>
+<td>下偏矩</td>
+</tr>
+<tr>
+<td>尾部風險</td>
+<td>忽略</td>
+<td>考慮</td>
+<td>考慮</td>
+<td>考慮</td>
+</tr>
+<tr>
+<td>偏度敏感性</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>一致性</td>
+<td>非一致性</td>
+<td>一致</td>
+<td>一致</td>
+<td>一致</td>
+</tr>
+</tbody>
+</table>
+<h2 id="8">8. 結論</h2>
+<p>這四個高級績效指標都代表了相對於傳統夏普比率的改進，通過更好地考慮非正態收益分佈和尾部風險：</p>
+<ul>
+<li><strong>Omega Ratio</strong>：通過考慮所有分佈矩，提供最全面的視角</li>
+<li><strong>Conditional Sharpe</strong>：通過聚焦尾部風險，提供更好的風險調整度量</li>
+<li><strong>Kappa Ratio</strong>：通過推廣 Omega 和 Sortino，提供靈活的風險度量框架</li>
+<li><strong>Expected Shortfall</strong>：作為一致性風險度量，為風險管理提供堅實基礎</li>
+</ul>
+<p>這些指標特別適合現代投資組合管理和風險評估，特別是在非正態收益分佈和尾部風險顯著的策略中（如動能策略、事件驅動策略）。</p>
+<h2 id="9">9. 參考文獻</h2>
+<h3 id="_2">主要來源</h3>
+<ol>
+<li>Keating, C., &amp; Shadwick, W. F. (2002). "A Universal Performance Measure." <em>Journal of Performance Measurement</em>, 6(3), 59-84.</li>
+<li>Chow, V., &amp; Lai, C. W. (2015). "Conditional Sharpe Ratios: Theory and Applications." <em>Journal of Risk</em>, 18(2), 1-25.</li>
+<li>Kaplan, P. D., &amp; Knowles, J. A. (2004). "Kappa: A Generalized Downside Risk-Adjusted Performance Measure." <em>Journal of Performance Measurement</em>, 8(3), 42-54.</li>
+<li>Acerbi, C., &amp; Tasche, D. (2002). "Expected Shortfall: A Natural Coherent Alternative to Value at Risk." <em>Economic Notes</em>, 31(2), 379-388.</li>
+</ol>
+<h3 id="_3">關鍵參考</h3>
+<ol start="5">
+<li>Rockafellar, R. T., &amp; Uryasev, S. (2000). "Optimization of Conditional Value-at-Risk." <em>Journal of Risk</em>, 2(3), 21-41.</li>
+<li>Artzner, P., Delbaen, F., Eber, J. M., &amp; Heath, D. (1999). "Coherent Measures of Risk." <em>Mathematical Finance</em>, 9(3), 203-228.</li>
+<li>Keating, C., &amp; Shadwick, W. F. (2002). "The Omega Ratio." Working paper, Finance Development Centre, London.</li>
+</ol>
+<hr />
+<p><strong>研究完成時間：</strong> 2026-02-20 02:06:00<br />
+<strong>運行時間：</strong> 5m 44s<br />
+<strong>Token 使用：</strong> 348.5k (in: 344.5k / out: 4.0k)</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -337,6 +337,31 @@ def convert_new_reports():
 
     reports = [
         {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/quant-evolve-20260219/q005-final-report.md',
+            'title': 'QuantEvolve 多智能體演化框架完整報告',
+            'description': '多智能體演化策略發現機制 - 技術可行性評估與實作路徑'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/quant-evolve-20260219/q001-paper-analysis.md',
+            'title': 'QuantEvolve 論文深度分析',
+            'description': '多智能體演化機制與自動化策略發現原理解析'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/quant-evolve-20260219/q002-framework-design.md',
+            'title': 'QuantEvolve 策略框架設計',
+            'description': '智能體設計、適應度函數、演化算法架構'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/quant-evolve-20260219/q003-prototype.md',
+            'title': 'QuantEvolve 原型實作',
+            'description': '原型系統開發與策略演化能力測試'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/quant-evolve-20260219/q004-backtest.md',
+            'title': 'QuantEvolve 回測驗證',
+            'description': '歷史數據驗證演化策略有效性'
+        },
+        {
             'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/work/w008-final-report.md',
             'title': '優化動能策略完整報告',
             'description': '策略優化、回測驗證與改進建議 - 年化回報 14.65%，夏普比率 18.58'

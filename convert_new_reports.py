@@ -375,6 +375,36 @@ def convert_new_reports():
             'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/work/w007-strategy-verification.md',
             'title': '動能策略驗證報告',
             'description': '策略代碼驗證與初步回測結果'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t006-ml-trend.md',
+            'title': '完整趨勢交易系統整合',
+            'description': '六層系統架構：數據處理 → 策略分析 → 風險管理 → 執行 → 監控 → 優化'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t005-tail-hedge.md',
+            'title': '趨勢跟隮 + 尾部風險對沖',
+            'description': '看跌期權、VIX 期權、CPPI、Delta 對沖等四種對沖方法與動態對沖比例調整'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t004-volatility-adaptive.md',
+            'title': '波動率適應性趨勢跟隮',
+            'description': '四種波動率測量方法 + 五級波動率分類 + Kelly 公式集成'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t003-failure-monitor.md',
+            'title': '趨勢策略失效監控系統',
+            'description': '四大失效模式監控 + 四級預警系統 + 自動應對措施'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t002-multi-timeframe.md',
+            'title': '多時間框架趨勢確認策略',
+            'description': '三層結構（D1/H4/H1）+ 多層驗證機制 + 動態倉位管理'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t001-strength-score.md',
+            'title': '趨勢強度評分系統',
+            'description': '綜合 ADX、MACD、趨勢線分析算法與智能信號過濾'
         }
     ]
     

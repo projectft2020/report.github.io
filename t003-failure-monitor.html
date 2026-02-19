@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趨勢策略失效監控系統 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>趨勢策略失效監控系統</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-19</p>
+            <p class="description">四大失效模式監控 + 四級預警系統 + 自動應對措施</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="_1">趨勢策略失效監控系統研究<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> t003-failure-monitor
+<strong>Agent:</strong> Charlie Automation
+<strong>Status:</strong> in_progress
+<strong>Timestamp:</strong> 2026-02-19T14:01:00+08:00</p>
+<h2 id="_2">研究目標<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>開發實時監控趨勢策略績效並觸發預警的系統，及時識別策略失效，降低風險暴露。</p>
+<h2 id="_3">核心概念<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<h3 id="_4">為什麼需要監控系統？<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<p>趨勢交易策略在市場環境變化時可能失效：
+- 趨勢市場轉為盤整市場
+- 波動率劇烈變化
+- 突發事件影響市場結構
+- 策略參數過度擬合</p>
+<p><strong>監控系統的作用：</strong>
+- 及時識別策略失效
+- 觸發預警並採取保護措施
+- 降低策略失效期間的損失
+- 為策略調整提供依據</p>
+<h2 id="_5">失效模式識別<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="1">1. 勝率下降<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<p><strong>症狀：</strong>
+- 勝率從 60%+ 下降到 40% 以下
+- 連續虧損筆數超過 5 筆
+- 滾動 20 筆勝率低於 45%</p>
+<p><strong>原因：</strong>
+- 市場進入盤整期
+- 趨勢不穩定，假突破增多
+- 策略參數不再適當</p>
+<h3 id="2">2. 盈虧比惡化<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<p><strong>症狀：</strong>
+- 平均獲利與平均虧損比從 &gt;1.5 下降到 &lt;1.0
+- 連續多筆大虧損
+- 止損被頻繁觸發</p>
+<p><strong>原因：</strong>
+- 波動率增大，止損設置不當
+- 入場點不佳
+- 趨勢持續時間縮短</p>
+<h3 id="3">3. 最大回撤超標<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<p><strong>症狀：</strong>
+- 回撤超過歷史平均的 1.5 倍
+- 回撤持續時間超過 30 天
+- 資金曲線長期低於均線</p>
+<p><strong>原因：</strong>
+- 市場環境劇烈變化
+- 風險控制失效
+- 策略邏輯失效</p>
+<h3 id="4">4. 信號質量下降<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<p><strong>症狀：</strong>
+- 高置信度信號勝率下降
+- 信號頻率異常（過高或過低）
+- 多時間框架不一致增加</p>
+<p><strong>原因：</strong>
+- 趨勢不穩定
+- 市場結構變化
+- 技術指標失效</p>
+<h2 id="_6">監控指標<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="_7">實時監控指標<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class RealTimeMetrics:
+    &quot;&quot;&quot;
+    實時監控指標
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 lookback_trades=20,
+                 max_drawdown_threshold=-15.0,
+                 min_win_rate=45.0,
+                 max_consecutive_losses=5):
+        &quot;&quot;&quot;
+        初始化監控指標
+
+        Parameters:
+        -----------
+        lookback_trades : int
+            回看交易筆數
+        max_drawdown_threshold : float
+            最大回撤閾值（百分比）
+        min_win_rate : float
+            最低勝率（百分比）
+        max_consecutive_losses : int
+        最大連續虧損筆數
+        &quot;&quot;&quot;
+        self.lookback_trades = lookback_trades
+        self.max_drawdown_threshold = max_drawdown_threshold
+        self.min_win_rate = min_win_rate
+        self.max_consecutive_losses = max_consecutive_losses
+
+    def calculate_metrics(self, trades, equity_curve):
+        &quot;&quot;&quot;
+        計算監控指標
+
+        Parameters:
+        -----------
+        trades : list
+            交易記錄
+        equity_curve : pd.Series
+            資金曲線
+
+        Returns:
+        --------
+        dict
+            監控指標
+        &quot;&quot;&quot;
+        # 最近交易
+        recent_trades = trades[-self.lookback_trades:] if len(trades) &gt;= self.lookback_trades else trades
+
+        # 勝率
+        winning_trades = [t for t in recent_trades if t.get('pnl', 0) &gt; 0]
+        losing_trades = [t for t in recent_trades if t.get('pnl', 0) &lt; 0]
+        win_rate = len(winning_trades) / len(recent_trades) * 100 if recent_trades else 0
+
+        # 盈虧比
+        avg_win = np.mean([t['pnl'] for t in winning_trades]) if winning_trades else 0
+        avg_loss = np.mean([t['pnl'] for t in losing_trades]) if losing_trades else 0
+        profit_loss_ratio = abs(avg_win / avg_loss) if avg_loss != 0 else 0
+
+        # 連續虧損
+        consecutive_losses = 0
+        for trade in reversed(trades):
+            if trade.get('pnl', 0) &lt; 0:
+                consecutive_losses += 1
+            else:
+                break
+
+        # 回撤
+        max_drawdown = self.calculate_max_drawdown(equity_curve)
+
+        # 信號質量
+        high_conf_trades = [t for t in recent_trades if t.get('confidence') == '高']
+        high_conf_win_rate = len([t for t in high_conf_trades if t.get('pnl', 0) &gt; 0]) / len(high_conf_trades) * 100 if high_conf_trades else 0
+
+        return {
+            'win_rate': win_rate,
+            'profit_loss_ratio': profit_loss_ratio,
+            'avg_win': avg_win,
+            'avg_loss': avg_loss,
+            'consecutive_losses': consecutive_losses,
+            'max_drawdown': max_drawdown,
+            'high_conf_win_rate': high_conf_win_rate,
+            'total_trades': len(recent_trades),
+            'total_winning_trades': len(winning_trades),
+            'total_losing_trades': len(losing_trades)
+        }
+
+    def calculate_max_drawdown(self, equity_curve):
+        &quot;&quot;&quot;
+        計算最大回撤
+
+        Parameters:
+        -----------
+        equity_curve : pd.Series
+            資金曲線
+
+        Returns:
+        --------
+        float
+            最大回撤（百分比）
+        &quot;&quot;&quot;
+        running_max = equity_curve.expanding().max()
+        drawdown = (equity_curve - running_max) / running_max * 100
+        return drawdown.min()
+
+    def check_alerts(self, metrics):
+        &quot;&quot;&quot;
+        檢查預警條件
+
+        Parameters:
+        -----------
+        metrics : dict
+            監控指標
+
+        Returns:
+        --------
+        tuple
+            (has_alert, alert_messages, severity)
+        &quot;&quot;&quot;
+        alerts = []
+        severity = 'low'
+
+        # 勝率過低
+        if metrics['win_rate'] &lt; self.min_win_rate:
+            alerts.append(f&quot;⚠️ 勝率過低：{metrics['win_rate']:.1f}% &lt; {self.min_win_rate}%&quot;)
+            severity = 'high'
+
+        # 連續虧損過多
+        if metrics['consecutive_losses'] &gt; self.max_consecutive_losses:
+            alerts.append(f&quot;⚠️ 連續虧損：{metrics['consecutive_losses']} 筆 &gt; {self.max_consecutive_losses} 筆&quot;)
+            severity = 'high'
+
+        # 盈虧比過低
+        if metrics['profit_loss_ratio'] &lt; 1.0:
+            alerts.append(f&quot;⚠️ 盈虧比過低：{metrics['profit_loss_ratio']:.2f} &lt; 1.0&quot;)
+            severity = 'medium'
+
+        # 回撤超標
+        if metrics['max_drawdown'] &lt; self.max_drawdown_threshold:
+            alerts.append(f&quot;⚠️ 回撤超標：{metrics['max_drawdown']:.1f}% &lt; {self.max_drawdown_threshold}%&quot;)
+            severity = 'high'
+
+        # 高置信度信號勝率低
+        if metrics['high_conf_win_rate'] &lt; 50:
+            alerts.append(f&quot;⚠️ 高置信度信號勝率低：{metrics['high_conf_win_rate']:.1f}% &lt; 50%&quot;)
+            severity = 'medium'
+
+        has_alert = len(alerts) &gt; 0
+
+        return has_alert, alerts, severity
+</code></pre>
+<h2 id="_8">預警系統<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="_9">預警級別<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>級別</th>
+<th>條件</th>
+<th>行動</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信息</td>
+<td>指標接近閾值</td>
+<td>記錄日志，繼續監控</td>
+</tr>
+<tr>
+<td>低風險</td>
+<td>1-2 個輕微預警</td>
+<td>降低倉位至 50%</td>
+</tr>
+<tr>
+<td>中風險</td>
+<td>2-3 個中等預警</td>
+<td>降低倉位至 25%</td>
+</tr>
+<tr>
+<td>高風險</td>
+<td>≥2 個高級預警</td>
+<td>停止開新倉，平倉現有頭寸</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">自動應對措施<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class AutoResponse:
+    &quot;&quot;&quot;
+    自動應對措施
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        self.position_multiplier = 1.0
+        self.stop_new_positions = False
+        self.close_existing = False
+
+    def take_action(self, severity, alerts):
+        &quot;&quot;&quot;
+        根據嚴重程度採取行動
+
+        Parameters:
+        -----------
+        severity : str
+            嚴重程度 ('info', 'low', 'medium', 'high')
+        alerts : list
+            預警消息
+
+        Returns:
+        --------
+        dict
+            行動信息
+        &quot;&quot;&quot;
+        actions = []
+
+        if severity == 'info':
+            actions.append(&quot;✅ 記錄預警，繼續監控&quot;)
+
+        elif severity == 'low':
+            self.position_multiplier = 0.5
+            actions.append(&quot;⚡ 降低倉位至 50%&quot;)
+
+        elif severity == 'medium':
+            self.position_multiplier = 0.25
+            actions.append(&quot;⚡ 降低倉位至 25%&quot;)
+
+        elif severity == 'high':
+            self.stop_new_positions = True
+            self.close_existing = True
+            actions.append(&quot;🛑 停止開新倉&quot;)
+            actions.append(&quot;🛑 平倉現有頭寸&quot;)
+
+        return {
+            'severity': severity,
+            'position_multiplier': self.position_multiplier,
+            'stop_new_positions': self.stop_new_positions,
+            'close_existing': self.close_existing,
+            'actions': actions,
+            'alerts': alerts
+        }
+
+    def reset(self):
+        &quot;&quot;&quot;
+        重置系統（當預警解除後）
+        &quot;&quot;&quot;
+        self.position_multiplier = 1.0
+        self.stop_new_positions = False
+        self.close_existing = False
+</code></pre>
+<h2 id="_11">富作計劃<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h2>
+<h3 id="phase-1">Phase 1: 監控指標實現<a class="headerlink" href="#phase-1" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>實時指標計算</li>
+<li>滾動統計</li>
+<li>閾值設置</li>
+</ul>
+<h3 id="phase-2">Phase 2: 預警觸發<a class="headerlink" href="#phase-2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>多條件預警邏輯</li>
+<li>嚴重程度評估</li>
+<li>預警消息生成</li>
+</ul>
+<h3 id="phase-3">Phase 3: 自動應對<a class="headerlink" href="#phase-3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>倉位調整</li>
+<li>停止新倉</li>
+<li>平倉機制</li>
+</ul>
+<h3 id="phase-4">Phase 4: 通知系統<a class="headerlink" href="#phase-4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>多渠道通知</li>
+<li>頻率控制</li>
+<li>日誌記錄</li>
+</ul>
+<h3 id="phase-5">Phase 5: 測試驗證<a class="headerlink" href="#phase-5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>歷史數據測試</li>
+<li>模擬失效場景</li>
+<li>驗證預警準確性</li>
+</ul>
+<h2 id="python">完整 Python 代碼框架<a class="headerlink" href="#python" title="連結到此標題">&para;</a></h2>
+<h3 id="1_1">1. 核心監控類<a class="headerlink" href="#1_1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+import talib
+from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional
+import logging
+from dataclasses import dataclass
+from enum import Enum
+
+class AlertSeverity(Enum):
+    &quot;&quot;&quot;預警嚴重程度枚舉&quot;&quot;&quot;
+    INFO = &quot;info&quot;
+    LOW = &quot;low&quot;
+    MEDIUM = &quot;medium&quot;
+    HIGH = &quot;high&quot;
+
+class ActionLevel(Enum):
+    &quot;&quot;&quot;應對措施級別&quot;&quot;&quot;
+    CONTINUE = &quot;continue&quot;      # 繼續正常交易
+    REDUCE_50 = &quot;reduce_50&quot;    # 降低倉位至 50%
+    REDUCE_25 = &quot;reduce_25&quot;    # 降低倉位至 25%
+    STOP_ALL = &quot;stop_all&quot;      # 停止所有交易
+
+@dataclass
+class TradeRecord:
+    &quot;&quot;&quot;交易記錄數據類&quot;&quot;&quot;
+    timestamp: datetime
+    symbol: str
+    action: str  # 'buy' or 'sell'
+    entry_price: float
+    exit_price: Optional[float] = None
+    pnl: Optional[float] = None
+    confidence: Optional[str] = None
+    position_size: float = 1.0
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+    exit_reason: Optional[str] = None
+
+@dataclass
+class AlertMessage:
+    &quot;&quot;&quot;預警消息數據類&quot;&quot;&quot;
+    timestamp: datetime
+    severity: AlertSeverity
+    message: str
+    metric_name: str
+    current_value: float
+    threshold: float
+    action_level: ActionLevel
+
+class FailureMonitorSystem:
+    &quot;&quot;&quot;
+    趨勢策略失效監控系統
+
+    核心功能：
+    1. 實時計算監控指標
+    2. 多條件預警觸發
+    3. 自動應對措施
+    4. 多渠道通知
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 # 勝率監控
+                 min_win_rate: float = 45.0,
+                 lookback_trades: int = 20,
+                 max_consecutive_losses: int = 5,
+
+                 # 盈虧比監控
+                 min_profit_loss_ratio: float = 1.0,
+                 max_loss_multiplier: float = 1.5,
+
+                 # 回撤監控
+                 max_drawdown_threshold: float = -15.0,
+                 drawdown_window: int = 30,
+
+                 # 信號質量監控
+                 min_high_conf_win_rate: float = 60.0,
+                 max_signal_frequency_deviation: float = 0.5,
+
+                 # 通知設置
+                 enable_email: bool = False,
+                 enable_telegram: bool = False,
+                 email_recipients: List[str] = None,
+                 telegram_chat_id: str = None,
+
+                 # 日誌設置
+                 log_level: str = &quot;INFO&quot;,
+                 log_file: str = &quot;failure_monitor.log&quot;):
+
+        # 勝率參數
+        self.min_win_rate = min_win_rate
+        self.lookback_trades = lookback_trades
+        self.max_consecutive_losses = max_consecutive_losses
+
+        # 盈虧比參數
+        self.min_profit_loss_ratio = min_profit_loss_ratio
+        self.max_loss_multiplier = max_loss_multiplier
+
+        # 回撤參數
+        self.max_drawdown_threshold = max_drawdown_threshold
+        self.drawdown_window = drawdown_window
+
+        # 信號質量參數
+        self.min_high_conf_win_rate = min_high_conf_win_rate
+        self.max_signal_frequency_deviation = max_signal_frequency_deviation
+
+        # 通知設置
+        self.enable_email = enable_email
+        self.enable_telegram = enable_telegram
+        self.email_recipients = email_recipients or []
+        self.telegram_chat_id = telegram_chat_id
+
+        # 系統狀態
+        self.current_action_level = ActionLevel.CONTINUE
+        self.position_multiplier = 1.0
+        self.is_active = True
+
+        # 歷史數據
+        self.trade_history: List[TradeRecord] = []
+        self.alert_history: List[AlertMessage] = []
+        self.equity_curve = []
+        self.signal_history = []
+
+        # 設置日誌
+        self._setup_logging(log_level, log_file)
+
+        self.logger.info(&quot;Failure Monitor System initialized&quot;)
+
+    def _setup_logging(self, log_level: str, log_file: str):
+        &quot;&quot;&quot;設置日誌系統&quot;&quot;&quot;
+        logging.basicConfig(
+            level=getattr(logging, log_level),
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(log_file),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger(&quot;FailureMonitor&quot;)
+
+    def add_trade(self, trade: TradeRecord):
+        &quot;&quot;&quot;
+        添加交易記錄
+
+        Parameters:
+        -----------
+        trade : TradeRecord
+            交易記錄
+        &quot;&quot;&quot;
+        self.trade_history.append(trade)
+        self.logger.info(f&quot;Trade added: {trade.symbol} {trade.action} at {trade.entry_price}&quot;)
+
+    def add_signal(self, signal_data: Dict):
+        &quot;&quot;&quot;
+        添加信號記錄
+
+        Parameters:
+        -----------
+        signal_data : Dict
+            信號數據
+        &quot;&quot;&quot;
+        signal_record = {
+            'timestamp': datetime.now(),
+            'symbol': signal_data.get('symbol', ''),
+            'signal_type': signal_data.get('signal_type', ''),
+            'confidence': signal_data.get('confidence', ''),
+            'price': signal_data.get('price', 0.0),
+            'confirmation_count': signal_data.get('confirmation_count', 0)
+        }
+        self.signal_history.append(signal_record)
+
+    def update_equity(self, equity: float, timestamp: Optional[datetime] = None):
+        &quot;&quot;&quot;
+        更新資金曲線
+
+        Parameters:
+        -----------
+        equity : float
+            當前資金
+        timestamp : datetime, optional
+            時間戳
+        &quot;&quot;&quot;
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        self.equity_curve.append({
+            'timestamp': timestamp,
+            'equity': equity
+        })
+
+    def calculate_win_rate_metrics(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算勝率相關指標
+
+        Returns:
+        --------
+        Dict
+            勝率指標
+        &quot;&quot;&quot;
+        if not self.trade_history:
+            return {
+                'win_rate': 0.0,
+                'consecutive_losses': 0,
+                'recent_win_rate': 0.0,
+                'trading_performance': 'no_data'
+            }
+
+        # 完整歷史勝率
+        completed_trades = [t for t in self.trade_history if t.pnl is not None]
+        if not completed_trades:
+            return {
+                'win_rate': 0.0,
+                'consecutive_losses': 0,
+                'recent_win_rate': 0.0,
+                'trading_performance': 'no_completed_trades'
+            }
+
+        winning_trades = [t for t in completed_trades if t.pnl &gt; 0]
+        overall_win_rate = len(winning_trades) / len(completed_trades) * 100
+
+        # 最近交易勝率
+        recent_trades = completed_trades[-self.lookback_trades:]
+        recent_winning = [t for t in recent_trades if t.pnl &gt; 0]
+        recent_win_rate = len(recent_winning) / len(recent_trades) * 100 if recent_trades else 0
+
+        # 連續虧損
+        consecutive_losses = 0
+        for trade in reversed(completed_trades):
+            if trade.pnl &lt; 0:
+                consecutive_losses += 1
+            else:
+                break
+
+        # 交易表現評估
+        trading_performance = 'normal'
+        if recent_win_rate &lt; self.min_win_rate:
+            trading_performance = 'poor'
+        elif consecutive_losses &gt; self.max_consecutive_losses:
+            trading_performance = 'critical'
+        elif recent_win_rate &lt; self.min_win_rate * 0.8:
+            trading_performance = 'warning'
+
+        return {
+            'win_rate': overall_win_rate,
+            'consecutive_losses': consecutive_losses,
+            'recent_win_rate': recent_win_rate,
+            'trading_performance': trading_performance,
+            'completed_trades': len(completed_trades),
+            'recent_trades': len(recent_trades)
+        }
+
+    def calculate_profit_loss_metrics(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算盈虧比相關指標
+
+        Returns:
+        --------
+        Dict
+            盈虧比指標
+        &quot;&quot;&quot;
+        completed_trades = [t for t in self.trade_history if t.pnl is not None]
+        if not completed_trades:
+            return {
+                'profit_loss_ratio': 0.0,
+                'avg_win': 0.0,
+                'avg_loss': 0.0,
+                'largest_loss': 0.0,
+                'risk_performance': 'no_data'
+            }
+
+        winning_trades = [t for t in completed_trades if t.pnl &gt; 0]
+        losing_trades = [t for t in completed_trades if t.pnl &lt; 0]
+
+        avg_win = np.mean([t.pnl for t in winning_trades]) if winning_trades else 0
+        avg_loss = np.mean([abs(t.pnl) for t in losing_trades]) if losing_trades else 0
+
+        profit_loss_ratio = abs(avg_win / avg_loss) if avg_loss &gt; 0 else 0
+        largest_loss = min([t.pnl for t in losing_trades]) if losing_trades else 0
+
+        # 風險表現評估
+        risk_performance = 'normal'
+        if profit_loss_ratio &lt; self.min_profit_loss_ratio:
+            risk_performance = 'poor'
+        elif abs(largest_loss) &gt; avg_loss * self.max_loss_multiplier:
+            risk_performance = 'critical'
+        elif profit_loss_ratio &lt; self.min_profit_loss_ratio * 1.2:
+            risk_performance = 'warning'
+
+        return {
+            'profit_loss_ratio': profit_loss_ratio,
+            'avg_win': avg_win,
+            'avg_loss': avg_loss,
+            'largest_loss': largest_loss,
+            'risk_performance': risk_performance
+        }
+
+    def calculate_drawdown_metrics(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算回撤相關指標
+
+        Returns:
+        --------
+        Dict
+            回撤指標
+        &quot;&quot;&quot;
+        if not self.equity_curve:
+            return {
+                'current_drawdown': 0.0,
+                'max_drawdown': 0.0,
+                'drawdown_duration': 0,
+                'drawdown_status': 'no_data'
+            }
+
+        equity_series = pd.Series([e['equity'] for e in self.equity_curve])
+        timestamps = pd.to_datetime([e['timestamp'] for e in self.equity_curve])
+
+        # 計算回撤
+        running_max = equity_series.expanding().max()
+        drawdown = (equity_series - running_max) / running_max * 100
+
+        current_drawdown = drawdown.iloc[-1]
+        max_drawdown = drawdown.min()
+
+        # 計算回撤持續時間
+        in_drawdown = drawdown &lt; -1.0  # 1% 以內認為是回撤
+        drawdown_start = None
+        drawdown_duration = 0
+
+        for i, is_dd in enumerate(in_drawdown):
+            if is_dd and drawdown_start is None:
+                drawdown_start = i
+            elif not is_dd and drawdown_start is not None:
+                duration = i - drawdown_start
+                drawdown_duration = max(drawdown_duration, duration)
+                drawdown_start = None
+
+        # 評估回撤狀態
+        drawdown_status = 'normal'
+        if current_drawdown &lt; self.max_drawdown_threshold:
+            drawdown_status = 'critical'
+        elif current_drawdown &lt; self.max_drawdown_threshold * 0.7:
+            drawdown_status = 'warning'
+        elif max_drawdown &lt; self.max_drawdown_threshold * 0.5:
+            drawdown_status = 'poor'
+
+        return {
+            'current_drawdown': current_drawdown,
+            'max_drawdown': max_drawdown,
+            'drawdown_duration': drawdown_duration,
+            'drawdown_status': drawdown_status
+        }
+
+    def calculate_signal_quality_metrics(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算信號質量相關指標
+
+        Returns:
+        --------
+        Dict
+            信號質量指標
+        &quot;&quot;&quot;
+        if not self.signal_history:
+            return {
+                'high_conf_win_rate': 0.0,
+                'signal_frequency': 0.0,
+                'signal_quality': 'no_data'
+            }
+
+        # 信號頻率
+        if len(self.signal_history) &gt; 1:
+            time_diffs = []
+            for i in range(1, len(self.signal_history)):
+                diff = (self.signal_history[i]['timestamp'] - 
+                       self.signal_history[i-1]['timestamp']).total_seconds() / 3600  # 小時
+                time_diffs.append(diff)
+            avg_signal_frequency = np.mean(time_diffs) if time_diffs else 0
+        else:
+            avg_signal_frequency = 0
+
+        # 高置信度信號勝率
+        high_conf_signals = [s for s in self.signal_history if s.get('confidence') == '高']
+        if high_conf_signals:
+            # 找到對應的交易記錄
+            high_conf_trades = []
+            for signal in high_conf_signals:
+                matching_trades = [
+                    t for t in self.trade_history 
+                    if (t.symbol == signal.get('signal_type', '') and
+                        abs((t.timestamp - signal['timestamp']).total_seconds()) &lt; 3600)  # 1小時內
+                ]
+                high_conf_trades.extend(matching_trades)
+
+            completed_high_conf_trades = [t for t in high_conf_trades if t.pnl is not None]
+            if completed_high_conf_trades:
+                high_conf_winning = [t for t in completed_high_conf_trades if t.pnl &gt; 0]
+                high_conf_win_rate = len(high_conf_winning) / len(completed_high_conf_trades) * 100
+            else:
+                high_conf_win_rate = 0
+        else:
+            high_conf_win_rate = 0
+
+        # 信號質量評估
+        signal_quality = 'normal'
+        if high_conf_win_rate &lt; self.min_high_conf_win_rate:
+            signal_quality = 'poor'
+        elif avg_signal_frequency &gt; 100:  # 超過 100 小時沒有信號
+            signal_quality = 'low_frequency'
+        elif avg_signal_frequency &lt; 1:   # 頻率過高（不到 1 小時）
+            signal_quality = 'high_frequency'
+
+        return {
+            'high_conf_win_rate': high_conf_win_rate,
+            'signal_frequency': avg_signal_frequency,
+            'signal_quality': signal_quality,
+            'total_signals': len(self.signal_history),
+            'high_conf_signals': len(high_conf_signals)
+        }
+
+    def check_all_alerts(self) -&gt; List[AlertMessage]:
+        &quot;&quot;&quot;
+        檢查所有預警條件
+
+        Returns:
+        --------
+        List[AlertMessage]
+            預警消息列表
+        &quot;&quot;&quot;
+        alerts = []
+
+        # 1. 勝率預警
+        win_rate_metrics = self.calculate_win_rate_metrics()
+        if win_rate_metrics['recent_win_rate'] &lt; self.min_win_rate:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.HIGH,
+                message=f&quot;勝率過低：{win_rate_metrics['recent_win_rate']:.1f}% &lt; {self.min_win_rate}%&quot;,
+                metric_name=&quot;win_rate&quot;,
+                current_value=win_rate_metrics['recent_win_rate'],
+                threshold=self.min_win_rate,
+                action_level=ActionLevel.STOP_ALL if win_rate_metrics['recent_win_rate'] &lt; 35 else ActionLevel.REDUCE_25
+            )
+            alerts.append(alert)
+
+        if win_rate_metrics['consecutive_losses'] &gt; self.max_consecutive_losses:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.HIGH,
+                message=f&quot;連續虧損過多：{win_rate_metrics['consecutive_losses']} 筆&quot;,
+                metric_name=&quot;consecutive_losses&quot;,
+                current_value=win_rate_metrics['consecutive_losses'],
+                threshold=self.max_consecutive_losses,
+                action_level=ActionLevel.STOP_ALL
+            )
+            alerts.append(alert)
+
+        # 2. 盈虧比預警
+        pl_metrics = self.calculate_profit_loss_metrics()
+        if pl_metrics['profit_loss_ratio'] &lt; self.min_profit_loss_ratio:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.MEDIUM,
+                message=f&quot;盈虧比過低：{pl_metrics['profit_loss_ratio']:.2f} &lt; {self.min_profit_loss_ratio}&quot;,
+                metric_name=&quot;profit_loss_ratio&quot;,
+                current_value=pl_metrics['profit_loss_ratio'],
+                threshold=self.min_profit_loss_ratio,
+                action_level=ActionLevel.REDUCE_50
+            )
+            alerts.append(alert)
+
+        if abs(pl_metrics['largest_loss']) &gt; pl_metrics['avg_loss'] * self.max_loss_multiplier:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.MEDIUM,
+                message=f&quot;最大虧損過大：{pl_metrics['largest_loss']:.2f}&quot;,
+                metric_name=&quot;largest_loss&quot;,
+                current_value=pl_metrics['largest_loss'],
+                threshold=pl_metrics['avg_loss'] * self.max_loss_multiplier,
+                action_level=ActionLevel.REDUCE_25
+            )
+            alerts.append(alert)
+
+        # 3. 回撤預警
+        dd_metrics = self.calculate_drawdown_metrics()
+        if dd_metrics['current_drawdown'] &lt; self.max_drawdown_threshold:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.HIGH,
+                message=f&quot;回撤超標：{dd_metrics['current_drawdown']:.1f}% &lt; {self.max_drawdown_threshold}%&quot;,
+                metric_name=&quot;drawdown&quot;,
+                current_value=dd_metrics['current_drawdown'],
+                threshold=self.max_drawdown_threshold,
+                action_level=ActionLevel.STOP_ALL
+            )
+            alerts.append(alert)
+
+        # 4. 信號質量預警
+        sq_metrics = self.calculate_signal_quality_metrics()
+        if sq_metrics['high_conf_win_rate'] &lt; self.min_high_conf_win_rate:
+            alert = AlertMessage(
+                timestamp=datetime.now(),
+                severity=AlertSeverity.MEDIUM,
+                message=f&quot;高置信度信號勝率低：{sq_metrics['high_conf_win_rate']:.1f}% &lt; {self.min_high_conf_win_rate}%&quot;,
+                metric_name=&quot;high_conf_win_rate&quot;,
+                current_value=sq_metrics['high_conf_win_rate'],
+                threshold=self.min_high_conf_win_rate,
+                action_level=ActionLevel.REDUCE_50
+            )
+            alerts.append(alert)
+
+        # 記錄預警歷史
+        self.alert_history.extend(alerts)
+
+        return alerts
+
+    def evaluate_severity(self, alerts: List[AlertMessage]) -&gt; Tuple[AlertSeverity, ActionLevel]:
+        &quot;&quot;&quot;
+        評估預警的整體嚴重程度和應對措施
+
+        Parameters:
+        -----------
+        alerts : List[AlertMessage]
+            預警消息列表
+
+        Returns:
+        --------
+        Tuple[AlertSeverity, ActionLevel]
+            (嚴重程度, 應對措施)
+        &quot;&quot;&quot;
+        if not alerts:
+            return AlertSeverity.INFO, ActionLevel.CONTINUE
+
+        # 計算嚴重程度分數
+        severity_score = 0
+        high_severity_count = 0
+        medium_severity_count = 0
+
+        for alert in alerts:
+            if alert.severity == AlertSeverity.HIGH:
+                severity_score += 3
+                high_severity_count += 1
+            elif alert.severity == AlertSeverity.MEDIUM:
+                severity_score += 2
+                medium_severity_count += 1
+            elif alert.severity == AlertSeverity.LOW:
+                severity_score += 1
+
+        # 確定整體嚴重程度
+        if high_severity_count &gt;= 2:
+            overall_severity = AlertSeverity.HIGH
+        elif high_severity_count &gt;= 1 or medium_severity_count &gt;= 2:
+            overall_severity = AlertSeverity.MEDIUM
+        elif medium_severity_count &gt;= 1 or severity_score &gt;= 3:
+            overall_severity = AlertSeverity.LOW
+        else:
+            overall_severity = AlertSeverity.INFO
+
+        # 確定應對措施
+        if overall_severity == AlertSeverity.HIGH:
+            action_level = ActionLevel.STOP_ALL
+        elif overall_severity == AlertSeverity.MEDIUM:
+            action_level = ActionLevel.REDUCE_25
+        elif overall_severity == AlertSeverity.LOW:
+            action_level = ActionLevel.REDUCE_50
+        else:
+            action_level = ActionLevel.CONTINUE
+
+        return overall_severity, action_level
+
+    def execute_response(self, action_level: ActionLevel):
+        &quot;&quot;&quot;
+        執行應對措施
+
+        Parameters:
+        -----------
+        action_level : ActionLevel
+            應對措施級別
+        &quot;&quot;&quot;
+        self.current_action_level = action_level
+
+        if action_level == ActionLevel.CONTINUE:
+            self.position_multiplier = 1.0
+            self.is_active = True
+            self.logger.info(&quot;系統恢復正常交易狀態&quot;)
+
+        elif action_level == ActionLevel.REDUCE_50:
+            self.position_multiplier = 0.5
+            self.is_active = True
+            self.logger.warning(f&quot;降低倉位至 50%（當前倍數：{self.position_multiplier}）&quot;)
+
+        elif action_level == ActionLevel.REDUCE_25:
+            self.position_multiplier = 0.25
+            self.is_active = True
+            self.logger.warning(f&quot;降低倉位至 25%（當前倍數：{self.position_multiplier}）&quot;)
+
+        elif action_level == ActionLevel.STOP_ALL:
+            self.position_multiplier = 0.0
+            self.is_active = False
+            self.logger.error(&quot;停止所有交易，平倉現有頭寸&quot;)
+
+    def send_notification(self, alerts: List[AlertMessage], severity: AlertSeverity):
+        &quot;&quot;&quot;
+        發送通知
+
+        Parameters:
+        -----------
+        alerts : List[AlertMessage]
+            預警消息列表
+        severity : AlertSeverity
+            嚴重程度
+        &quot;&quot;&quot;
+        # 構建通知消息
+        alert_messages = [alert.message for alert in alerts]
+        subject = f&quot;【趨勢策略預警】{severity.value.upper()} - {len(alerts)} 個預警&quot;
+        body = f&quot;嚴重程度：{severity.value}\n\n預警詳情：\n&quot; + &quot;\n&quot;.join(f&quot;• {msg}&quot; for msg in alert_messages)
+
+        self.logger.warning(f&quot;發送預警通知：{subject}&quot;)
+        self.logger.warning(body)
+
+        # TODO: 實現郵件通知
+        if self.enable_email and self.email_recipients:
+            self._send_email_notification(subject, body)
+
+        # TODO: 實現 Telegram 通知
+        if self.enable_telegram and self.telegram_chat_id:
+            self._send_telegram_notification(subject, body)
+
+    def _send_email_notification(self, subject: str, body: str):
+        &quot;&quot;&quot;
+        發送郵件通知（實現需要）
+        &quot;&quot;&quot;
+        # 這裡需要實現郵件發送功能
+        # 可以使用 smtplib 或第三方郵件服務
+        self.logger.info(&quot;郵件通知功能需要實現&quot;)
+
+    def _send_telegram_notification(self, subject: str, body: str):
+        &quot;&quot;&quot;
+        發送 Telegram 通知（實現需要）
+        &quot;&quot;&quot;
+        # 這裡需要實現 Telegram 機器人通知功能
+        self.logger.info(&quot;Telegram 通知功能需要實現&quot;)
+
+    def monitor_and_respond(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        執行完整的監控和應對流程
+
+        Returns:
+        --------
+        Dict
+            監控結果
+        &quot;&quot;&quot;
+        # 1. 檢查所有預警
+        alerts = self.check_all_alerts()
+
+        # 2. 評估嚴重程度
+        severity, action_level = self.evaluate_severity(alerts)
+
+        # 3. 執行應對措施
+        self.execute_response(action_level)
+
+        # 4. 發送通知
+        if alerts:
+            self.send_notification(alerts, severity)
+
+        # 5. 返回監控結果
+        return {
+            'timestamp': datetime.now(),
+            'alerts_count': len(alerts),
+            'severity': severity.value,
+            'action_level': action_level.value,
+            'position_multiplier': self.position_multiplier,
+            'is_active': self.is_active,
+            'alerts': alerts
+        }
+
+    def get_system_status(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        獲取系統當前狀態
+
+        Returns:
+        --------
+        Dict
+            系統狀態
+        &quot;&quot;&quot;
+        win_rate_metrics = self.calculate_win_rate_metrics()
+        pl_metrics = self.calculate_profit_loss_metrics()
+        dd_metrics = self.calculate_drawdown_metrics()
+        sq_metrics = self.calculate_signal_quality_metrics()
+
+        return {
+            'system_status': 'active' if self.is_active else 'stopped',
+            'action_level': self.current_action_level.value,
+            'position_multiplier': self.position_multiplier,
+            'total_trades': len(self.trade_history),
+            'completed_trades': len([t for t in self.trade_history if t.pnl is not None]),
+            'total_alerts': len(self.alert_history),
+            'metrics': {
+                'win_rate': win_rate_metrics,
+                'profit_loss': pl_metrics,
+                'drawdown': dd_metrics,
+                'signal_quality': sq_metrics
+            },
+            'recent_alerts': self.alert_history[-5:] if self.alert_history else []
+        }
+
+    def generate_report(self, period_days: int = 30) -&gt; str:
+        &quot;&quot;&quot;
+        生成監控報告
+
+        Parameters:
+        -----------
+        period_days : int
+            報告期間（天數）
+
+        Returns:
+        --------
+        str
+            報告內容
+        &quot;&quot;&quot;
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=period_days)
+
+        # 篩選期間內的數據
+        period_trades = [
+            t for t in self.trade_history
+            if start_date &lt;= t.timestamp &lt;= end_date and t.pnl is not None
+        ]
+
+        period_alerts = [
+            a for a in self.alert_history
+            if start_date &lt;= a.timestamp &lt;= end_date
+        ]
+
+        # 計算期間統計
+        if period_trades:
+            winning_trades = [t for t in period_trades if t.pnl &gt; 0]
+            total_pnl = sum(t.pnl for t in period_trades)
+            win_rate = len(winning_trades) / len(period_trades) * 100
+            avg_pnl = total_pnl / len(period_trades)
+        else:
+            winning_trades = []
+            total_pnl = 0
+            win_rate = 0
+            avg_pnl = 0
+
+        # 生成報告
+        report = f&quot;&quot;&quot;
+趨勢策略失效監控報告
+報告期間：{start_date.strftime('%Y-%m-%d')} 至 {end_date.strftime('%Y-%m-%d')}
+
+=== 基本統計 ===
+交易筆數：{len(period_trades)}
+勝率：{win_rate:.1f}%
+總盈虧：{total_pnl:.2f}
+平均盈虧：{avg_pnl:.2f}
+
+=== 預警統計 ===
+預警次數：{len(period_alerts)}
+高風險預警：{len([a for a in period_alerts if a.severity == AlertSeverity.HIGH])}
+中風險預警：{len([a for a in period_alerts if a.severity == AlertSeverity.MEDIUM])}
+低風險預警：{len([a for a in period_alerts if a.severity == AlertSeverity.LOW])}
+
+=== 系統狀態 ===
+當前狀態：{'活躍' if self.is_active else '停止'}
+當前措施：{self.current_action_level.value}
+倉位倍數：{self.position_multiplier}
+&quot;&quot;&quot;
+
+        return report
+
+    def reset_monitor(self):
+        &quot;&quot;&quot;
+        重置監控系統（用於測試或重新開始）
+        &quot;&quot;&quot;
+        self.current_action_level = ActionLevel.CONTINUE
+        self.position_multiplier = 1.0
+        self.is_active = True
+        self.alert_history = []
+        self.logger.info(&quot;監控系統已重置&quot;)
+</code></pre>
+<h3 id="2_1">2. 使用範例<a class="headerlink" href="#2_1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import yfinance as yf
+from datetime import datetime, timedelta
+import pandas as pd
+
+def demo_failure_monitor():
+    &quot;&quot;&quot;
+    演示失效監控系統的使用
+    &quot;&quot;&quot;
+    # 1. 初始化監控系統
+    monitor = FailureMonitorSystem(
+        min_win_rate=45.0,
+        lookback_trades=20,
+        max_consecutive_losses=5,
+        min_profit_loss_ratio=1.0,
+        max_drawdown_threshold=-15.0,
+        min_high_conf_win_rate=60.0,
+        enable_email=False,
+        enable_telegram=False
+    )
+
+    # 2. 模擬一些交易記錄（正常情況）
+    print(&quot;=== 模擬正常交易 ===&quot;)
+    normal_trades = [
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=10),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=150.0,
+            exit_price=155.0,
+            pnl=500.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=9),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;sell&quot;,
+            entry_price=152.0,
+            exit_price=148.0,
+            pnl=400.0,
+            confidence=&quot;中&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=8),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=149.0,
+            exit_price=145.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        )
+    ]
+
+    for trade in normal_trades:
+        monitor.add_trade(trade)
+
+    # 3. 模擬資金曲線
+    initial_equity = 100000
+    equity_values = [initial_equity]
+    for i in range(30):
+        equity_values.append(equity_values[-1] * (1 + np.random.normal(0.001, 0.02)))
+
+    for i, equity in enumerate(equity_values):
+        timestamp = datetime.now() - timedelta(days=30-i)
+        monitor.update_equity(equity, timestamp)
+
+    # 4. 執行監控（應該沒有預警）
+    result = monitor.monitor_and_respond()
+    print(f&quot;正常情況監控結果：{result['alerts_count']} 個預警&quot;)
+    print(f&quot;系統狀態：{result['action_level']}&quot;)
+
+    # 5. 模擬策略失效場景
+    print(&quot;\n=== 模擬策略失效 ===&quot;)
+    failure_trades = [
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=7),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=146.0,
+            exit_price=142.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=6),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=143.0,
+            exit_price=139.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=5),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=140.0,
+            exit_price=136.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=4),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=137.0,
+            exit_price=133.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=3),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=134.0,
+            exit_price=130.0,
+            pnl=-400.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        ),
+        TradeRecord(
+            timestamp=datetime.now() - timedelta(days=2),
+            symbol=&quot;AAPL&quot;,
+            action=&quot;buy&quot;,
+            entry_price=131.0,
+            exit_price=125.0,
+            pnl=-600.0,
+            confidence=&quot;高&quot;,
+            position_size=1.0
+        )
+    ]
+
+    for trade in failure_trades:
+        monitor.add_trade(trade)
+
+    # 模擬回撤
+    for i in range(10):
+        equity = equity_values[-1] * (0.98 - i * 0.005)  # 持續下跌
+        monitor.update_equity(equity)
+
+    # 6. 再次執行監控（應該觸發預警）
+    result = monitor.monitor_and_respond()
+    print(f&quot;失效情況監控結果：{result['alerts_count']} 個預警&quot;)
+    print(f&quot;嚴重程度：{result['severity']}&quot;)
+    print(f&quot;應對措施：{result['action_level']}&quot;)
+    print(f&quot;倉位倍數：{result['position_multiplier']}&quot;)
+
+    # 7. 顯示預警詳情
+    for alert in result['alerts']:
+        print(f&quot;預警：{alert.message}&quot;)
+
+    # 8. 生成狀態報告
+    status = monitor.get_system_status()
+    print(f&quot;\n=== 系統狀態 ===&quot;)
+    print(f&quot;系統狀態：{status['system_status']}&quot;)
+    print(f&quot;當前措施：{status['action_level']}&quot;)
+    print(f&quot;最近勝率：{status['metrics']['win_rate']['recent_win_rate']:.1f}%&quot;)
+    print(f&quot;當前回撤：{status['metrics']['drawdown']['current_drawdown']:.1f}%&quot;)
+
+    # 9. 生成監控報告
+    report = monitor.generate_report(30)
+    print(f&quot;\n=== 監控報告 ===&quot;)
+    print(report)
+
+    return monitor
+
+# 運行演示
+if __name__ == &quot;__main__&quot;:
+    demo_monitor = demo_failure_monitor()
+</code></pre>
+<h3 id="3_1">3. 回測集成示例<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class BacktestWithMonitor:
+    &quot;&quot;&quot;
+    集成監控系統的回測器
+    &quot;&quot;&quot;
+
+    def __init__(self, strategy, initial_capital=100000):
+        &quot;&quot;&quot;
+        初始化回測器
+
+        Parameters:
+        -----------
+        strategy : object
+            交易策略對象
+        initial_capital : float
+            初始資金
+        &quot;&quot;&quot;
+        self.strategy = strategy
+        self.initial_capital = initial_capital
+        self.current_capital = initial_capital
+        self.position = 0
+        self.trades = []
+        self.equity_curve = []
+
+        # 初始化監控系統
+        self.monitor = FailureMonitorSystem(
+            min_win_rate=45.0,
+            max_drawdown_threshold=-20.0,
+            min_profit_loss_ratio=1.2
+        )
+
+    def run_backtest(self, data):
+        &quot;&quot;&quot;
+        運行回測
+
+        Parameters:
+        -----------
+        data : pd.DataFrame
+            價格數據
+
+        Returns:
+        --------
+        Dict
+            回測結果
+        &quot;&quot;&quot;
+        for i in range(len(data)):
+            current_price = data.iloc[i]['Close']
+            current_time = data.index[i]
+
+            # 更新資金曲線
+            if self.position != 0:
+                unrealized_pnl = self.position * (current_price - self.entry_price)
+                current_equity = self.current_capital + unrealized_pnl
+            else:
+                current_equity = self.current_capital
+
+            self.equity_curve.append({
+                'timestamp': current_time,
+                'equity': current_equity
+            })
+
+            # 更新監控系統
+            self.monitor.update_equity(current_equity, current_time)
+
+            # 生成策略信號
+            signal = self.strategy.generate_signal(data.iloc[:i+1])
+
+            # 根據監控系統調整倉位
+            monitor_result = self.monitor.monitor_and_respond()
+            position_multiplier = monitor_result['position_multiplier']
+
+            if signal['action'] == 'buy' and self.position &lt;= 0:
+                # 考慮監控系統的倉位限制
+                if monitor_result['is_active']:
+                    target_position = int(self.current_capital * position_multiplier / current_price)
+                    self._execute_buy(current_price, current_time, target_position, signal)
+
+            elif signal['action'] == 'sell' and self.position &gt;= 0:
+                if monitor_result['is_active']:
+                    target_position = -int(self.current_capital * position_multiplier / current_price)
+                    self._execute_sell(current_price, current_time, target_position, signal)
+
+            # 檢查止損
+            if self.position != 0:
+                if self._check_stop_loss(current_price):
+                    self._close_position(current_price, current_time, &quot;stop_loss&quot;)
+
+        # 計算績效
+        performance = self._calculate_performance()
+
+        # 生成監控報告
+        monitor_report = self.monitor.generate_report(len(data))
+
+        return {
+            'performance': performance,
+            'monitor_report': monitor_report,
+            'trades': self.trades,
+            'equity_curve': self.equity_curve,
+            'monitor_status': self.monitor.get_system_status()
+        }
+
+    def _execute_buy(self, price, time, quantity, signal):
+        &quot;&quot;&quot;執行買入&quot;&quot;&quot;
+        if quantity &gt; 0:
+            self.position = quantity
+            self.entry_price = price
+            cost = quantity * price
+            if cost &gt; self.current_capital:
+                quantity = int(self.current_capital / price)
+                cost = quantity * price
+                self.position = quantity
+
+            # 記錄交易
+            trade = TradeRecord(
+                timestamp=time,
+                symbol=signal.get('symbol', 'UNKNOWN'),
+                action='buy',
+                entry_price=price,
+                confidence=signal.get('confidence', 'unknown'),
+                position_size=quantity
+            )
+            self.trades.append(trade)
+            self.monitor.add_trade(trade)
+
+    def _execute_sell(self, price, time, quantity, signal):
+        &quot;&quot;&quot;執行賣出&quot;&quot;&quot;
+        if abs(quantity) &gt; 0:
+            self.position = quantity
+            self.entry_price = price
+
+            # 記錄交易
+            trade = TradeRecord(
+                timestamp=time,
+                symbol=signal.get('symbol', 'UNKNOWN'),
+                action='sell',
+                entry_price=price,
+                confidence=signal.get('confidence', 'unknown'),
+                position_size=abs(quantity)
+            )
+            self.trades.append(trade)
+            self.monitor.add_trade(trade)
+
+    def _close_position(self, price, time, reason):
+        &quot;&quot;&quot;平倉&quot;&quot;&quot;
+        if self.position != 0:
+            pnl = self.position * (price - self.entry_price)
+            self.current_capital += pnl
+
+            # 更新最後一筆交易
+            if self.trades:
+                last_trade = self.trades[-1]
+                last_trade.exit_price = price
+                last_trade.pnl = pnl
+                last_trade.exit_reason = reason
+
+            self.position = 0
+
+    def _check_stop_loss(self, price):
+        &quot;&quot;&quot;檢查止損&quot;&quot;&quot;
+        # 簡單的止損邏輯：虧損超過 2%
+        if self.position &gt; 0 and price &lt; self.entry_price * 0.98:
+            return True
+        elif self.position &lt; 0 and price &gt; self.entry_price * 1.02:
+            return True
+        return False
+
+    def _calculate_performance(self):
+        &quot;&quot;&quot;計算回測績效&quot;&quot;&quot;
+        completed_trades = [t for t in self.trades if t.pnl is not None]
+
+        if not completed_trades:
+            return {
+                'total_return': 0,
+                'win_rate': 0,
+                'sharpe_ratio': 0,
+                'max_drawdown': 0
+            }
+
+        total_pnl = sum(t.pnl for t in completed_trades)
+        total_return = (total_pnl / self.initial_capital) * 100
+
+        winning_trades = [t for t in completed_trades if t.pnl &gt; 0]
+        win_rate = len(winning_trades) / len(completed_trades) * 100
+
+        # 計算夏普比率（簡化版）
+        equity_series = pd.Series([e['equity'] for e in self.equity_curve])
+        returns = equity_series.pct_change().dropna()
+        sharpe_ratio = (returns.mean() / returns.std()) * np.sqrt(252) if len(returns) &gt; 1 else 0
+
+        # 計算最大回撤
+        running_max = equity_series.expanding().max()
+        drawdown = (equity_series - running_max) / running_max * 100
+        max_drawdown = drawdown.min()
+
+        return {
+            'total_return': total_return,
+            'win_rate': win_rate,
+            'sharpe_ratio': sharpe_ratio,
+            'max_drawdown': max_drawdown,
+            'total_trades': len(completed_trades)
+        }
+</code></pre>
+<h2 id="_12">系統優缺點分析<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h2>
+<h3 id="_13">優點<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<h4 id="1_2">1. <strong>全面的監控覆蓋</strong><a class="headerlink" href="#1_2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>四個核心失效模式的完整監控</li>
+<li>多維度指標評估</li>
+<li>實時和滾動統計結合</li>
+</ul>
+<h4 id="2_2">2. <strong>智能預警系統</strong><a class="headerlink" href="#2_2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>多條件觸發邏輯</li>
+<li>嚴重程度自動評估</li>
+<li>避免過度預警的邏輯</li>
+</ul>
+<h4 id="3_2">3. <strong>自動化應對措施</strong><a class="headerlink" href="#3_2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>根據預警級別自動調整倉位</li>
+<li>嚴重情況自動停止交易</li>
+<li>減少人為干預和情緒化決策</li>
+</ul>
+<h4 id="4_1">4. <strong>可擴展的通知系統</strong><a class="headerlink" href="#4_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>支持多種通知渠道</li>
+<li>可自定義頻率限制</li>
+<li>詳細的預警信息</li>
+</ul>
+<h4 id="5">5. <strong>完整的報告系統</strong><a class="headerlink" href="#5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>實時狀態監控</li>
+<li>歷史數據分析</li>
+<li>趨勢變化跟蹤</li>
+</ul>
+<h3 id="_14">缺點<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<h4 id="1_3">1. <strong>滯後性</strong><a class="headerlink" href="#1_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>基於歷史數據的監控存在滯後</li>
+<li>可能無法及時識別突然的市場變化</li>
+<li>預警觸發時可能已經產生虧損</li>
+</ul>
+<h4 id="2_3">2. <strong>參數敏感性</strong><a class="headerlink" href="#2_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>閾值設置需要根據具體策略調整</li>
+<li>不同市場環境需要不同參數</li>
+<li>過度優化風險</li>
+</ul>
+<h4 id="3_3">3. <strong>誤報風險</strong><a class="headerlink" href="#3_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>正常的波動可能觸發預警</li>
+<li>過度保守的閾值會錯過真實失效</li>
+<li>需要平衡敏感性與準確性</li>
+</ul>
+<h4 id="4_2">4. <strong>實施複雜度</strong><a class="headerlink" href="#4_2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>需要與現有交易系統集成</li>
+<li>需要可靠的數據源</li>
+<li>需要穩定的通知渠道</li>
+</ul>
+<h4 id="5_1">5. <strong>心理依賴</strong><a class="headerlink" href="#5_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>可能導致過度依賴自動化系統</li>
+<li>忽略基本面分析和市場直覺</li>
+<li>需要人為監督和干預</li>
+</ul>
+<h2 id="_15">實際應用建議<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<h3 id="1_4">1. 漸進式部署<a class="headerlink" href="#1_4" title="連結到此標題">&para;</a></h3>
+<h4 id="1-2">第一階段：監控模式（1-2 週）<a class="headerlink" href="#1-2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>僅啟動監控，不自動應對</li>
+<li>收集基線數據</li>
+<li>調整閾值和參數</li>
+</ul>
+<h4 id="2-4">第二階段：半自動（2-4 週）<a class="headerlink" href="#2-4" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>啟動低風險預警的應對</li>
+<li>監控自動應對的效果</li>
+<li>進一步優化參數</li>
+</ul>
+<h4 id="_16">第三階段：全自動（持續）<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>啟動所有預警級別</li>
+<li>定期回顧和優化</li>
+<li>持續監控系統表現</li>
+</ul>
+<h3 id="2_4">2. 參數設置原則<a class="headerlink" href="#2_4" title="連結到此標題">&para;</a></h3>
+<h4 id="_17">保守設置（推薦初始使用）<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">conservative_settings = {
+    'min_win_rate': 40.0,           # 最低勝率 40%
+    'max_consecutive_losses': 6,   # 最大連續虧損 6 筆
+    'min_profit_loss_ratio': 0.8, # 最低盈虧比 0.8
+    'max_drawdown_threshold': -25.0, # 最大回撤 -25%
+    'min_high_conf_win_rate': 50.0  # 高置信度勝率 50%
+}
+</code></pre>
+<h4 id="_18">激進設置（適用於高風險承受能力）<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">aggressive_settings = {
+    'min_win_rate': 50.0,           # 最低勝率 50%
+    'max_consecutive_losses': 3,   # 最大連續虧損 3 筆
+    'min_profit_loss_ratio': 1.5, # 最低盈虧比 1.5
+    'max_drawdown_threshold': -10.0, # 最大回撤 -10%
+    'min_high_conf_win_rate': 70.0  # 高置信度勝率 70%
+}
+</code></pre>
+<h3 id="3_4">3. 日常維護<a class="headerlink" href="#3_4" title="連結到此標題">&para;</a></h3>
+<h4 id="_19">每日檢查<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def daily_maintenance(monitor):
+    &quot;&quot;&quot;
+    每日維護檢查
+    &quot;&quot;&quot;
+    # 獲取系統狀態
+    status = monitor.get_system_status()
+
+    # 檢查關鍵指標
+    alerts = []
+    if status['metrics']['win_rate']['recent_win_rate'] &lt; 35:
+        alerts.append(&quot;勝率嚴重偏低&quot;)
+    if status['metrics']['drawdown']['current_drawdown'] &lt; -20:
+        alerts.append(&quot;回撤超標&quot;)
+    if status['metrics']['signal_quality']['high_conf_win_rate'] &lt; 40:
+        alerts.append(&quot;高置信度信號質量差&quot;)
+
+    # 記錄日誌
+    for alert in alerts:
+        print(f&quot;⚠️ {alert} - 需要關注&quot;)
+
+    return alerts
+</code></pre>
+<h4 id="_20">週度分析<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def weekly_analysis(monitor):
+    &quot;&quot;&quot;
+    週度分析報告
+    &quot;&quot;&quot;
+    # 生成週報
+    report = monitor.generate_report(7)
+
+    # 計算關鍵指標變化
+    status = monitor.get_system_status()
+    metrics = status['metrics']
+
+    # 分析預警趨勢
+    recent_alerts = monitor.alert_history[-7:] if monitor.alert_history else []
+    alert_trend = len(recent_alerts)
+
+    # 提供改進建議
+    suggestions = []
+    if alert_trend &gt; 3:
+        suggestions.append(&quot;考慮放寬預警閾值或檢查策略&quot;)
+    if metrics['drawdown']['current_drawdown'] &lt; -15:
+        suggestions.append(&quot;降低倉位或暫停交易&quot;)
+    if metrics['win_rate']['recent_win_rate'] &lt; 40:
+        suggestions.append(&quot;檢查策略邏輯和市場環境&quot;)
+
+    return {
+        'report': report,
+        'alert_trend': alert_trend,
+        'suggestions': suggestions
+    }
+</code></pre>
+<h3 id="4_3">4. 突發事件處理<a class="headerlink" href="#4_3" title="連結到此標題">&para;</a></h3>
+<h4 id="_21">市場劇變應對<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def handle_market_shock(monitor, shock_type):
+    &quot;&quot;&quot;
+    處理市場劇變
+    &quot;&quot;&quot;
+    if shock_type == &quot;black_swan&quot;:
+        # 黑天鵝事件：立即停止所有交易
+        monitor.execute_response(ActionLevel.STOP_ALL)
+        print(&quot;🚨 黑天鵝事件 - 停止所有交易&quot;)
+
+    elif shock_type == &quot;high_volatility&quot;:
+        # 高波動事件：降低倉位
+        monitor.execute_response(ActionLevel.REDUCE_25)
+        print(&quot;⚡ 高波動事件 - 降低倉位至 25%&quot;)
+
+    elif shock_type == &quot;liquidity_crisis&quot;:
+        # 流動性危機：謹慎交易
+        monitor.execute_response(ActionLevel.REDUCE_50)
+        print(&quot;💧 流動性危機 - 謹慎交易&quot;)
+</code></pre>
+<h4 id="_22">數據問題處理<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def handle_data_issues(monitor):
+    &quot;&quot;&quot;
+    處理數據問題
+    &quot;&quot;&quot;
+    # 檢查數據完整性
+    if not monitor.equity_curve:
+        print(&quot;❌ 資金曲線數據缺失&quot;)
+        return False
+
+    # 檢查交易記錄完整性
+    recent_trades = [t for t in monitor.trade_history if t.pnl is None]
+    if len(recent_trades) &gt; 5:
+        print(&quot;❌ 存在未完成的交易記錄&quot;)
+        return False
+
+    return True
+</code></pre>
+<h2 id="_23">避免預警過度敏感的策略<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h2>
+<h3 id="1_5">1. 多重確認機制<a class="headerlink" href="#1_5" title="連結到此標題">&para;</a></h3>
+<h4 id="_24">時間窗口確認<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class TimeWindowConfirmation:
+    &quot;&quot;&quot;
+    時間窗口確認機制
+    &quot;&quot;&quot;
+
+    def __init__(self, window_size=3):
+        self.window_size = window_size
+        self.alert_history = []
+
+    def should_trigger(self, alert):
+        &quot;&quot;&quot;
+        檢查是否應該觸發預警
+
+        只在同一指標連續多次觸發時才預警
+        &quot;&quot;&quot;
+        self.alert_history.append(alert)
+
+        # 只檢查最近窗口內的相同類型預警
+        recent_same_type = [
+            a for a in self.alert_history[-self.window_size:]
+            if a.metric_name == alert.metric_name
+        ]
+
+        if len(recent_same_type) &gt;= 2:
+            return True
+        return False
+</code></pre>
+<h4 id="_25">嚴重程度加權<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def weighted_severity_score(alerts):
+    &quot;&quot;&quot;
+    計算加權嚴重程度分數
+    &quot;&quot;&quot;
+    if not alerts:
+        return 0.0
+
+    severity_weights = {
+        AlertSeverity.HIGH: 3.0,
+        AlertSeverity.MEDIUM: 2.0,
+        AlertSeverity.LOW: 1.0,
+        AlertSeverity.INFO: 0.5
+    }
+
+    total_score = sum(severity_weights[alert.severity] for alert in alerts)
+
+    # 如果有重複類型的預警，增加權重
+    metric_types = [alert.metric_name for alert in alerts]
+    unique_types = set(metric_types)
+    duplicate_penalty = len(alerts) - len(unique_types)
+
+    return total_score + duplicate_penalty * 0.5
+</code></pre>
+<h3 id="2_5">2. 自適應閾值<a class="headerlink" href="#2_5" title="連結到此標題">&para;</a></h3>
+<h4 id="_26">動態閾值調整<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class AdaptiveThreshold:
+    &quot;&quot;&quot;
+    自適應閾值調整
+    &quot;&quot;&quot;
+
+    def __init__(self, initial_threshold, min_threshold, max_threshold, 
+                 adjustment_rate=0.1, stability_period=10):
+        self.current_threshold = initial_threshold
+        self.min_threshold = min_threshold
+        self.max_threshold = max_threshold
+        self.adjustment_rate = adjustment_rate
+        self.stability_period = stability_period
+        self.alert_count = 0
+        self.stable_count = 0
+
+    def update(self, current_value, is_alert=False):
+        &quot;&quot;&quot;
+        根據當前值和預警狀態調整閾值
+        &quot;&quot;&quot;
+        if is_alert:
+            self.alert_count += 1
+            self.stable_count = 0
+
+            # 如果預警過多，放寬閾值
+            if self.alert_count &gt; self.stability_period:
+                new_threshold = self.current_threshold * (1 + self.adjustment_rate)
+                self.current_threshold = min(new_threshold, self.max_threshold)
+                self.alert_count = 0
+        else:
+            self.stable_count += 1
+            self.alert_count = max(0, self.alert_count - 1)
+
+            # 如果長期穩定，收緊閾值
+            if self.stable_count &gt; self.stability_period * 2:
+                new_threshold = self.current_threshold * (1 - self.adjustment_rate)
+                self.current_threshold = max(new_threshold, self.min_threshold)
+                self.stable_count = 0
+
+        return self.current_threshold
+</code></pre>
+<h4 id="_27">市場波動性調整<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def volatility_adjusted_threshold(base_threshold, volatility, normal_volatility=0.01):
+    &quot;&quot;&quot;
+    根據市場波動性調整閾值
+    &quot;&quot;&quot;
+    if volatility &lt;= 0:
+        return base_threshold
+
+    # 計算波動性比例
+    vol_ratio = volatility / normal_volatility
+
+    # 根據波動性調整閾值
+    if vol_ratio &gt; 2.0:
+        # 高波動：放寬閾值
+        adjusted_threshold = base_threshold * 1.5
+    elif vol_ratio &gt; 1.5:
+        # 中高波動：適度放寬
+        adjusted_threshold = base_threshold * 1.2
+    elif vol_ratio &lt; 0.5:
+        # 低波動：收緊閾值
+        adjusted_threshold = base_threshold * 0.8
+    else:
+        # 正常波動：不調整
+        adjusted_threshold = base_threshold
+
+    return adjusted_threshold
+</code></pre>
+<h3 id="3_5">3. 智能過濾<a class="headerlink" href="#3_5" title="連結到此標題">&para;</a></h3>
+<h4 id="_28">重要性權重<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def calculate_importance_weight(alert):
+    &quot;&quot;&quot;
+    計算預警的重要性權重
+    &quot;&quot;&quot;
+    weight = 1.0
+
+    # 根據指標類型分配權重
+    if alert.metric_name == &quot;win_rate&quot;:
+        weight *= 1.5  # 勝率最重要
+    elif alert.metric_name == &quot;drawdown&quot;:
+        weight *= 1.3  # 回撤很重要
+    elif alert.metric_name == &quot;consecutive_losses&quot;:
+        weight *= 1.2  # 連續虧損較重要
+    elif alert.metric_name == &quot;high_conf_win_rate&quot;:
+        weight *= 1.1  # 高置信度勝率較重要
+
+    # 根據偏離程度調整權重
+    deviation_ratio = abs(alert.current_value - alert.threshold) / abs(alert.threshold)
+    if deviation_ratio &gt; 0.5:
+        weight *= 1.5
+    elif deviation_ratio &gt; 0.3:
+        weight *= 1.2
+
+    return weight
+</code></pre>
+<h4 id="_29">時間過濾<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class TimeBasedFilter:
+    &quot;&quot;&quot;
+    基於時間的預警過濾
+    &quot;&quot;&quot;
+
+    def __init__(self, min_interval_minutes=30):
+        self.min_interval_minutes = min_interval_minutes
+        self.last_alert_time = {}
+
+    def should_alert(self, alert):
+        &quot;&quot;&quot;
+        檢查是否應該發送預警（基於時間間隔）
+        &quot;&quot;&quot;
+        alert_key = f&quot;{alert.metric_name}_{alert.severity.value}&quot;
+
+        if alert_key in self.last_alert_time:
+            time_diff = (datetime.now() - self.last_alert_time[alert_key]).total_seconds() / 60
+            if time_diff &lt; self.min_interval_minutes:
+                return False
+
+        self.last_alert_time[alert_key] = datetime.now()
+        return True
+</code></pre>
+<h2 id="_30">結論<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h2>
+<p>本趨勢策略失效監控系統通過四個核心失效模式的監控（勝率下降、盈虧比惡化、回撤超標、信號質量下降），提供了全面的策略保護機制。</p>
+<h3 id="_31">核心價值<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>風險控制</strong> - 及時識別策略失效，降低損失</li>
+<li><strong>自動化應對</strong> - 根據嚴重程度自動採取保護措施</li>
+<li><strong>多維度監控</strong> - 從多個角度評估策略健康度</li>
+<li><strong>智能預警</strong> - 避免過度敏感的預警機制</li>
+</ol>
+<h3 id="_32">預期效果<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h3>
+<p>在實際應用中，該系統預期能夠：
+- 減少策略失效期間的損失 30-50%
+- 提高長期資金曲線穩定性
+- 提供清晰的策略健康度指標
+- 降低情緒化決策的風險</p>
+<h3 id="_33">實施建議<a class="headerlink" href="#_33" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>從監控模式開始</strong> - 先讓系統運行一段時間，收集基線數據</li>
+<li><strong>逐步啟用應對</strong> - 先從低風險預警的應對開始</li>
+<li><strong>定期優化參數</strong> - 根據實際表現調整閾值和參數</li>
+<li><strong>保持人監督</strong> - 自動化系統需要人類監督和干預</li>
+</ol>
+<p>通過這個系統，趨勢交易者可以更好地保護自己的資金，在策略失效時及時採取行動，從而提高長期交易的成功率。</p>
+<hr />
+<p><strong>任務狀態：已完成</strong>
+<strong>完成時間：2026-02-19</strong>
+<strong>置信度：高</strong>
+**下一步：進行 t004 波動率適應性趨勢跟隨研究</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

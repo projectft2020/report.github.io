@@ -405,6 +405,36 @@ def convert_new_reports():
             'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/trend-trading-20260219/t001-strength-score.md',
             'title': '趨勢強度評分系統',
             'description': '綜合 ADX、MACD、趨勢線分析算法與智能信號過濾'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/risk-management-20260219/s001-distribution-metrics.md',
+            'title': '收益分佈作為策略評估指標研究',
+            'description': '三維度評估框架（偏度 + 峰度 + 肥尾指數）- 替代 Sharpe Ratio 的風險度量方法'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/risk-management-20260219/s002-fat-tail-risks.md',
+            'title': '肥尾市場下傳統風險指標失效研究',
+            'description': 'VaR/CVaR/標準差失效分析與替代風險度量方法'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/risk-management-20260219/s003-dynamic-risk-control.md',
+            'title': '非傳統止損策略研究',
+            'description': '動態風控系統（年化淨收益 +11.1%）- 漸進式降風險 vs 傳統止損'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/adaptive-hedge-20260219/h001-risk-state-assessment.md',
+            'title': '風險狀態評估系統',
+            'description': '四級風險狀態機（低/中/高/極高）- 提前 12 天預警 2008 危機'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/adaptive-hedge-20260219/h002-dynamic-hedge-decision.md',
+            'title': '動態對沖決策機制',
+            'description': '智能對沖系統 - 漸進式對沖比例調整與四種對沖方式整合'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m001-momentum-distribution.md',
+            'title': '動能策略收益分佈分析',
+            'description': '動能策略偏度、峰度、肥尾指數計算與風險評估'
         }
     ]
     

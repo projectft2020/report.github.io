@@ -86,22 +86,65 @@ python3 kanban-ops/scout/feedback_collector.py report
 # Check tasks.json statistics
 python3 kanban-ops/archive_tasks.py --stats
 
-# If file size exceeds 500 KB, execute archiving
+# If file size exceeds 200 KB, execute archiving
 python3 kanban-ops/archive_tasks.py
 ```
 
 **What it does:**
-- Archives tasks older than 7 days to monthly archive files
-- Compresses tasks older than 30 days to .json.gz
+- Archives tasks older than 2 days to quick archive files
+- Archives tasks 7-14 days ago to monthly archive files
+- Compresses tasks 14+ days ago to .json.gz
 - Keeps tasks.json lightweight (< 50 KB)
 - Preserves query capability for recent tasks
 
-**Archive Strategy:**
-- **Keep:** Last 7 days of completed tasks + all in-progress + all pending
-- **Archive monthly:** 7-30 days ago (archive/tasks-YYYY-MM.json)
-- **Compress:** 30+ days ago (archive/tasks-compressed-*.json.gz)
+**Archive Strategy (v3.0 - High Frequency):**
+- **Keep:** Last 2 days of completed tasks + all in-progress + all pending
+- **Quick archive:** 2-7 days ago (archive/tasks-quick-*.json)
+- **Archive monthly:** 7-14 days ago (archive/tasks-YYYY-MM.json)
+- **Compress:** 14+ days ago (archive/tasks-compressed-*.json.gz)
 
 **See also:** `~/workspace/kanban-ops/ARCHIVE-STRATEGY.md` for full documentation
+
+---
+
+## 🚀 Turbo Mode (加速模式)
+
+**觸發方式：**
+
+用戶發送訊息：
+- `我睡了` → 啟動加速模式（6 小時）
+- `我醒了` → 停止加速模式
+
+**手動執行：**
+```bash
+# 啟動
+bash ~/workspace/kanban-ops/turbo_start.sh
+
+# 停止
+bash ~/workspace/kanban-ops/turbo_stop.sh
+
+# 查看狀態
+python3 ~/workspace/kanban-ops/turbo_mode.py status
+```
+
+**執行階段：**
+
+1. **快速清理**（30 分鐘）- 歸檔、恢復任務、提交
+2. **並行研究**（2 小時）- 觸發 Kanban 任務、Scout 掃描
+3. **深度工作**（2 小時）- 知識庫、代碼優化、文檔
+4. **系統優化**（2 小時）- 性能分析、日誌清理、備份
+
+**配置文件：**
+- `~/workspace/kanban-ops/TURBO_TASKS.json` - 任務列表配置
+- `~/workspace/kanban-ops/TURBO_STATUS.json` - 執行狀態
+- `~/workspace/kanban-ops/TURBO_LOG.md` - 執行日誌
+
+**詳細文檔：** `~/workspace/kanban-ops/TURBO_MODE_GUIDE.md`
+
+**使用場景：**
+- 每晚睡覺前：日常維護和觸發研究
+- 周末外出：完整 6 小時深度工作
+- 專案衝刺：設置更長時長和更多並行任務
 
 ## Scout Feedback Workflow
 

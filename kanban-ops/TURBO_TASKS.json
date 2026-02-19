@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-02-20T03:10:00+08:00",
+  "turbo_config": {
+    "duration_hours": 6,
+    "max_concurrent_tasks": 3,
+    "stagger_seconds": 30,
+    "auto_stop_on_wake": true
+  },
+  "phases": [
+    {
+      "id": "phase1_cleanup",
+      "name": "快速清理",
+      "description": "清理歸檔、恢復過期任務、提交更改",
+      "duration_minutes": 30,
+      "priority": 1,
+      "tasks": [
+        {
+          "id": "archive_check",
+          "action": "archive_check",
+          "description": "檢查並執行歸檔",
+          "command": "python3 ~/workspace/kanban-ops/archive_tasks.py --stats",
+          "enabled": true
+        },
+        {
+          "id": "stale_recovery",
+          "action": "stale_recovery",
+          "description": "檢查並恢復過期任務",
+          "command": "bash ~/workspace-automation/scripts/check-work-tasks.sh",
+          "enabled": true
+        },
+        {
+          "id": "git_commit",
+          "action": "git_commit",
+          "description": "提交所有待提交的更改",
+          "command": "cd ~/workspace && git status --short",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "phase2_parallel",
+      "name": "並行研究",
+      "description": "觸發優先級最高的 Kanban 任務",
+      "duration_minutes": 120,
+      "priority": 2,
+      "parallel": true,
+      "max_concurrent": 3,
+      "tasks": [
+        {
+          "id": "spawn_kanban_highest",
+          "action": "spawn_kanban_tasks",
+          "description": "觸發最高優先級任務（3個）",
+          "priority_filter": ["highest", "high"],
+          "limit": 3,
+          "enabled": true
+        },
+        {
+          "id": "scout_deep_scan",
+          "action": "scout_scan",
+          "description": "執行 Scout 深度掃描",
+          "deep_scan": true,
+          "enabled": false
+        }
+      ]
+    },
+    {
+      "id": "phase3_deep_work",
+      "name": "深度工作",
+      "description": "知識庫整理、代碼優化、大規模回測",
+      "duration_minutes": 120,
+      "priority": 3,
+      "tasks": [
+        {
+          "id": "knowledge_base",
+          "action": "organize_knowledge",
+          "description": "整理知識庫和文檔",
+          "enabled": true
+        },
+        {
+          "id": "code_optimization",
+          "action": "optimize_code",
+          "description": "檢查並優化常用腳本",
+          "enabled": true
+        },
+        {
+          "id": "documentation",
+          "action": "update_docs",
+          "description": "更新過時的文檔",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "phase4_system",
+      "name": "系統優化",
+      "description": "性能分析、日誌清理、備份",
+      "duration_minutes": 120,
+      "priority": 4,
+      "tasks": [
+        {
+          "id": "performance_analysis",
+          "action": "analyze_performance",
+          "description": "分析系統性能瓶頸",
+          "enabled": true
+        },
+        {
+          "id": "log_cleanup",
+          "action": "cleanup_logs",
+          "description": "清理過期日誌文件",
+          "enabled": true
+        },
+        {
+          "id": "backup",
+          "action": "backup_data",
+          "description": "備份重要數據",
+          "enabled": false
+        }
+      ]
+    }
+  ],
+  "task_templates": {
+    "spawn_kanban_tasks": {
+      "description": "觸發 Kanban 任務",
+      "parameters": {
+        "priority_filter": ["highest", "high", "medium"],
+        "limit": 3,
+        "dependencies_check": true
+      }
+    },
+    "scout_scan": {
+      "description": "執行 Scout 掃描",
+      "parameters": {
+        "deep_scan": false,
+        "max_topics": 50,
+        "min_score": 7.0
+      }
+    }
+  }
+}

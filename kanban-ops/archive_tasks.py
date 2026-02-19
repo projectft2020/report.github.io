@@ -2,20 +2,21 @@
 """
 Kanban 任務歸檔腳本
 
-歸檔策略：
-- 保留：最近 7 天的已完成任務 + 所有 In Progress + 所有 Pending + 最近 7 天的 Failed
-- 歸檔：7-30 天前的已完成任務（月度歸檔）
-- 壓縮：30 天前的已完成任務（.json.gz）
+歸檔策略（高頻版本）：
+- 保留：最近 2 天的已完成任務 + 所有 In Progress + 所有 Pending
+- 快速歸檔：2-7 天前的已完成任務（archive/tasks-quick-YYYY-MM-DD.json）
+- 月度歸檔：7-14 天前的已完成任務（archive/tasks-YYYY-MM.json）
+- 壓縮歸檔：14+ 天前的已完成任務（archive/tasks-compressed-YYYY-MM-DD.json.gz）
 
 使用方式：
     python3 archive_tasks.py              # 正常歸檔
     python3 archive_tasks.py --dry-run    # 試運行（不實際修改）
-    python3 archive_tasks.py --force      # 強制歸檔（用於測試）
     python3 archive_tasks.py --stats      # 顯示統計信息
+    python3 archive_tasks.py --force      # 強制歸檔（用於測試）
 
-集成建議：
-    - 每月執行一次：0 0 1 * * python3 archive_tasks.py
-    - 集成到 heartbeat：每月第一個週日執行
+自動觸發：
+    - 檔案大小超過 200 KB 時自動執行
+    - 重開機時自動檢查並執行
 """
 
 import json
@@ -29,13 +30,14 @@ import argparse
 TASKS_JSON = '/Users/charlie/.openclaw/workspace-automation/kanban/tasks.json'
 ARCHIVE_DIR = '/Users/charlie/.openclaw/workspace-automation/kanban/archive'
 
-# 歸檔時間閾值
-RETAIN_DAYS = 7  # 保留最近 7 天
-ARCHIVE_DAYS = 30  # 7-30 天前歸檔
-COMPRESS_DAYS = 90  # 30 天前壓縮
+# 歸檔時間閾值（高頻版本）
+RETAIN_DAYS = 2           # 保留最近 2 天
+QUICK_ARCHIVE_DAYS = 7     # 2-7 天前歸檔
+MONTHLY_ARCHIVE_DAYS = 14   # 7-14 天前歸檔
+COMPRESS_DAYS = 14         # 14+ 天前壓縮
 
 # 文件大小閾值（自動觸發歸檔）
-MAX_FILE_SIZE_KB = 500  # 當 tasks.json 超過 500KB 時自動歸檔
+MAX_FILE_SIZE_KB = 200  # 當 tasks.json 超過 200KB 時自動歸檔
 
 
 def load_tasks():
@@ -120,7 +122,8 @@ def show_stats():
     if file_size / 1024 > MAX_FILE_SIZE_KB:
         print(f"   ⚠️  文件大小超過 {MAX_FILE_SIZE_KB} KB，建議執行歸檔")
     else:
-        print(f"   ✅ 文件大小正常，暫時不需要歸檔")
+        remaining = MAX_FILE_SIZE_KB - (file_size / 1024)
+        print(f"   ✅ 文件大小正常，還有 {remaining:.2f} KB 空間")
 
     # 檢查歸檔目錄
     if os.path.exists(ARCHIVE_DIR):
@@ -166,33 +169,34 @@ def archive_tasks(force=False, dry_run=False):
 
     # 分類任務
     to_keep = []
-    to_archive_monthly = []
+    to_quick_archive = []
+    to_monthly_archive = []
     to_compress = []
 
     now = datetime.now(timezone.utc)
-    retain_threshold = 1 if force else RETAIN_DAYS
-    archive_threshold = 2 if force else ARCHIVE_DAYS
 
     for task in tasks:
         status = task['status']
         age = get_task_age(task)
         created_month = task.get('created_at', '')[:7] if task.get('created_at') else 'unknown'
 
-        # 保留規則
+        # 保留規則（高頻版本）
         if status == 'in_progress':
             to_keep.append(task)
         elif status == 'pending':
             to_keep.append(task)
-        elif status == 'failed' and age < retain_threshold:
+        elif status == 'failed' and age < RETAIN_DAYS:
             to_keep.append(task)
-        elif status == 'completed' and age < retain_threshold:
+        elif status == 'completed' and age < RETAIN_DAYS:
             to_keep.append(task)
-        elif status == 'completed' and age >= retain_threshold and age < archive_threshold:
-            to_archive_monthly.append(task)
-        elif status == 'completed' and age >= archive_threshold:
+        elif status == 'completed' and age >= RETAIN_DAYS and age < QUICK_ARCHIVE_DAYS:
+            to_quick_archive.append(task)
+        elif status == 'completed' and age >= QUICK_ARCHIVE_DAYS and age < MONTHLY_ARCHIVE_DAYS:
+            to_monthly_archive.append(task)
+        elif status == 'completed' and age >= COMPRESS_DAYS:
             to_compress.append(task)
         else:
-            # 其他情況（超過 retain_threshold 的 failed）
+            # 其他情況（超過 RETAIN_DAYS 的 failed）
             to_compress.append(task)
 
     # 統計
@@ -200,10 +204,13 @@ def archive_tasks(force=False, dry_run=False):
     print(f"   保留：{len(to_keep)} 個任務")
     if to_keep:
         print(f"      IDs: {[t['id'] for t in to_keep[:5]]}{'...' if len(to_keep) > 5 else ''}")
-    print(f"   歸檔（月度）：{len(to_archive_monthly)} 個任務")
-    if to_archive_monthly:
-        print(f"      IDs: {[t['id'] for t in to_archive_monthly[:5]]}{'...' if len(to_archive_monthly) > 5 else ''}")
-    print(f"   壓縮：{len(to_compress)} 個任務")
+    print(f"   快速歸檔（2-7天）：{len(to_quick_archive)} 個任務")
+    if to_quick_archive:
+        print(f"      IDs: {[t['id'] for t in to_quick_archive[:5]]}{'...' if len(to_quick_archive) > 5 else ''}")
+    print(f"   月度歸檔（7-14天）：{len(to_monthly_archive)} 個任務")
+    if to_monthly_archive:
+        print(f"      IDs: {[t['id'] for t in to_monthly_archive[:5]]}{'...' if len(to_monthly_archive) > 5 else ''}")
+    print(f"   壓縮歸檔（14+天）：{len(to_compress)} 個任務")
     if to_compress:
         print(f"      IDs: {[t['id'] for t in to_compress[:5]]}{'...' if len(to_compress) > 5 else ''}")
 
@@ -213,18 +220,26 @@ def archive_tasks(force=False, dry_run=False):
         data['last_archived'] = now.isoformat()
         data['stats'] = {
             'total_kept': len(to_keep),
-            'total_archived': len(to_archive_monthly),
+            'total_quick_archived': len(to_quick_archive),
+            'total_monthly_archived': len(to_monthly_archive),
             'total_compressed': len(to_compress)
         }
         save_tasks(data)
     else:
         print("\n🔍 試運行模式：不實際修改文件")
 
+    # 保存快速歸檔
+    if to_quick_archive:
+        filename = f'tasks-quick-{now.strftime("%Y-%m-%d")}.json'
+        filepath = save_archive(to_quick_archive, filename)
+        file_size = os.path.getsize(filepath)
+        print(f"\n✅ 快速歸檔完成：{filename} ({len(to_quick_archive)} 個任務, {file_size / 1024:.2f} KB)")
+
     # 保存月度歸檔
-    if to_archive_monthly:
+    if to_monthly_archive:
         # 按月份分組
         monthly_archives = {}
-        for task in to_archive_monthly:
+        for task in to_monthly_archive:
             month = task.get('created_at', '')[:7]
             if month not in monthly_archives:
                 monthly_archives[month] = []
@@ -235,7 +250,7 @@ def archive_tasks(force=False, dry_run=False):
             filename = f'tasks-{month}.json'
             filepath = save_archive(tasks_in_month, filename)
             file_size = os.path.getsize(filepath)
-            print(f"\n✅ 歸檔完成：{filename} ({len(tasks_in_month)} 個任務, {file_size / 1024:.2f} KB)")
+            print(f"\n✅ 月度歸檔完成：{filename} ({len(tasks_in_month)} 個任務, {file_size / 1024:.2f} KB)")
 
     # 壓縮舊任務
     if to_compress:
@@ -257,7 +272,7 @@ def archive_tasks(force=False, dry_run=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Kanban 任務歸檔腳本',
+        description='Kanban 任務歸檔腳本（高頻版本）',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 範例：
@@ -266,9 +281,15 @@ if __name__ == '__main__':
   python3 archive_tasks.py --force      # 強制歸檔（用於測試）
   python3 archive_tasks.py --stats      # 顯示統計信息
 
-集成建議：
-  - 每月執行一次：0 0 1 * * python3 archive_tasks.py
-  - 集成到 heartbeat：每月第一個週日執行
+歸檔策略（高頻版本）：
+  • 保留：最近 2 天的已完成任務 + In Progress + Pending
+  • 快速歸檔：2-7 天前的已完成任務（tasks-quick-*.json）
+  • 月度歸檔：7-14 天前的已完成任務（tasks-YYYY-MM.json）
+  • 壓縮歸檔：14+ 天前的已完成任務（tasks-compressed-*.json.gz）
+
+自動觸發：
+  • 檔案大小超過 200 KB 時自動執行
+  • 建議在重開機時自動檢查並執行
         """
     )
     parser.add_argument('--force', action='store_true', help='強制歸檔（忽略時間閾值）')

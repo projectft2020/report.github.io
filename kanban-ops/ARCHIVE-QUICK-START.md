@@ -12,7 +12,7 @@ python3 archive_tasks.py --stats
 ### 2. 執行歸檔
 
 ```bash
-# 正常歸檔（當文件大小 > 500 KB 時）
+# 正常歸檔（當文件大小 > 200 KB 時）
 python3 archive_tasks.py
 
 # 試運行（不實際修改文件）
@@ -22,6 +22,16 @@ python3 archive_tasks.py --dry-run
 python3 archive_tasks.py --force
 ```
 
+### 3. 自動歸檔（推薦）
+
+```bash
+# 手動執行啟動歸檔（模擬重開機）
+bash ~/workspace/kanban-ops/archive_on_startup.sh
+
+# 查看日誌
+tail -20 ~/workspace/kanban-ops/archive_startup.log
+```
+
 ---
 
 ## 📊 當前狀態
@@ -29,7 +39,7 @@ python3 archive_tasks.py --force
 | 項目 | 數值 |
 |------|------|
 | 任務總數 | 79 個 |
-| 檔案大小 | 77.10 KB |
+| 檔案大小 | 77.15 KB |
 | 歸檔狀態 | ✅ 正常（不需要歸檔）|
 
 ---
@@ -38,35 +48,91 @@ python3 archive_tasks.py --force
 
 - **完整策略：** `ARCHIVE-STRATEGY.md`
 - **腳本說明：** `archive_tasks.py --help`
-- **集成指南：** `ARCHIVE-STRATEGY.md#-集成建議`
+- **集成指南：** `ARCHIVE-STRATEGY.md#-自動歸檔配置`
 
 ---
 
-## 🔗 集成選項
+## 🔗 自動歸檔配置
 
-### 選項 1：Cron（每月 1 日）
+### 推薦方案：啟動腳本
 
 ```bash
-0 0 1 * * python3 ~/workspace/kanban-ops/archive_tasks.py >> ~/workspace/kanban-ops/archive.log 2>&1
+# 測試啟動腸本
+bash ~/workspace/kanban-ops/archive_on_startup.sh
+
+# 查看日誌
+tail -20 ~/workspace/kanban-ops/archive_startup.log
 ```
 
-### 選項 2：Heartbeat（每月第一個週日）
+**優勢：**
+- ✅ 重開機時自動檢查並執行
+- ✅ 只在文件過大時才歸檔
+- ✅ 無需手動維護
 
-已自動集成到 `~/workspace/HEARTBEAT.md`
+### 可選方案：集成到 Heartbeat
 
-### 選項 3：事件驅動（文件大小 > 500 KB）
+已在 `HEARTBEAT.md` 中添加每日歸檔檢查。
 
-已添加到 `monitor_and_refill.py`（需要手動整合）
+---
+
+## 📊 歸檔策略（高頻版本 v3.0）
+
+```
+今天 ← 2天 ← 7天 ← 14天
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 保留    快速歸檔    月度歸檔    壓縮歸檔
+```
+
+- **保留**：最近 2 天的已完成任務
+- **快速歸檔**：2-7 天前（快速查詢）
+- **月度歸檔**：7-14 天前（月度查詢）
+- **壓縮歸檔**：14+ 天前（長期存檔）
 
 ---
 
 ## ⚠️ 重要提示
 
-- ✅ **當前不需要歸檔**（77 KB < 500 KB 閾值）
-- 📅 **建議每月檢查一次**
+- ✅ **當前不需要歸檔**（77 KB < 200 KB 閾值）
+- 📅 **建議每日檢查一次**
+- 🔄 **重開機時自動檢查**（推薦）
 - 📂 **歸檔文件位置：** `~/workspace-automation/kanban/archive/`
 
 ---
 
+## 🔧 故障排除
+
+### 歸檔腳本未執行
+
+```bash
+# 檢查腳本權限
+ls -l ~/workspace/kanban-ops/archive_tasks.py
+
+# 賦予執行權限
+chmod +x ~/workspace/kanban-ops/archive_tasks.py
+```
+
+### 啟動腳本未執行
+
+```bash
+# 手動測試
+bash ~/workspace/kanban-ops/archive_on_startup.sh
+
+# 查看日誌
+cat ~/workspace/kanban-ops/archive_startup.log
+```
+
+### 歸檔文件未創建
+
+```bash
+# 檢查歸檔目錄
+ls -l ~/workspace-automation/kanban/archive/
+
+# 檢查磁盤空間
+df -h
+```
+
+---
+
 **創建時間：** 2026-02-20
+**更新時間：** 2026-02-20（v3.0 - 高頻版本）
 **狀態：** ✅ 就緒

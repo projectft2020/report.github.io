@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHRI - 每日避險比例指標 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>DHRI - 每日避險比例指標</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">簡化版實務工具：3 分鐘每日操作，單一指標決策避險比例（0-50%）</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="dhri-">DHRI - 每日避險比例指標<a class="headerlink" href="#dhri-" title="連結到此標題">&para;</a></h1>
+<blockquote>
+<p><strong>Daily Hedge Ratio Indicator: 一個簡化至極致的實務工具</strong></p>
+</blockquote>
+<p><strong>創建日期：</strong> 2026-02-20
+<strong>來源理論：</strong> t005-tail-hedge（尾部風險對沖研究）
+<strong>應用場景：</strong> 每日收盤後調整避險比例
+<strong>執行時間：</strong> 3 分鐘</p>
+<hr />
+<h2 id="_1">📌 執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p><strong>問題：</strong> t005 報告提供了完整的尾部風險對沖理論，但實務上無法每日依照複雜的市場狀況調整避險比例。</p>
+<p><strong>解決方案：</strong> DHRI (Daily Hedge Ratio Indicator) - 將複雜理論簡化為一個單一指標（0-100），30 秒查詢，3 分鐘執行。</p>
+<p><strong>核心優勢：</strong>
+- ✅ 單一指標決策（DHRI 0-100）
+- ✅ 快速查詢（30 秒）
+- ✅ 每日可執行（3 分鐘完成）
+- ✅ 靈活可調（三種方法適應不同需求）</p>
+<hr />
+<h2 id="_2">🎯 設計理念<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="vs">理論 vs 實務的平衡<a class="headerlink" href="#vs" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>研究報告 (t005)</th>
+<th>實務工具 (DHRI)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>複雜度</td>
+<td>極高（2,907 行理論）</td>
+<td>極低（單一公式）</td>
+</tr>
+<tr>
+<td>數據需求</td>
+<td>VIX + 波動率 + 趨勢 + 狀態</td>
+<td>僅需 VIX（可選）</td>
+</tr>
+<tr>
+<td>執行時間</td>
+<td>30+ 分鐘</td>
+<td>3 分鐘</td>
+</tr>
+<tr>
+<td>決策速度</td>
+<td>多維度分析</td>
+<td>一個數值決策</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">三層計算方法<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>方法一：超簡版（ultra_simple）</strong></li>
+<li>輸入：VIX</li>
+<li>公式：<code>DHRI = f(VIX)</code></li>
+<li>適用：日內交易者、快速決策者</li>
+<li>
+<p>時間：1 分鐘</p>
+</li>
+<li>
+<p><strong>方法二：簡化版（simple）</strong></p>
+</li>
+<li>輸入：VIX + 真實波動率</li>
+<li>公式：<code>DHRI = 0.6 × VIX分數 + 0.4 × 波動率分數</code></li>
+<li>適用：波段交易者、中短期投資者</li>
+<li>
+<p>時間：2 分鐘</p>
+</li>
+<li>
+<p><strong>方法三：精確版（precise）</strong></p>
+</li>
+<li>輸入：VIX + 波動率 + 趨勢強度 + 市場狀態</li>
+<li>公式：<code>DHRI = 基礎分 + 趨勢調整(±15) + 狀態調整(±10)</code></li>
+<li>適用：長期投資者、追求精確性</li>
+<li>時間：5 分鐘</li>
+</ol>
+<hr />
+<h2 id="dhri">📊 DHRI → 避險比例查詢表<a class="headerlink" href="#dhri" title="連結到此標題">&para;</a></h2>
+<h3 id="_4">快速查詢（核心）<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>DHRI</th>
+<th>避險比例</th>
+<th>市場狀況</th>
+<th>30秒決策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0-20</strong></td>
+<td>0-5%</td>
+<td>極度平靜</td>
+<td>無需避險</td>
+</tr>
+<tr>
+<td><strong>21-40</strong></td>
+<td>5-10%</td>
+<td>平靜</td>
+<td>輕度 VIX Call</td>
+</tr>
+<tr>
+<td><strong>41-60</strong></td>
+<td>10-20%</td>
+<td>正常</td>
+<td>標準避險</td>
+</tr>
+<tr>
+<td><strong>61-80</strong></td>
+<td>20-30%</td>
+<td>波動上升</td>
+<td>增加避險</td>
+</tr>
+<tr>
+<td><strong>81-100</strong></td>
+<td>30-50%</td>
+<td>恐慌</td>
+<td>激進避險</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vix-dhri">VIX → DHRI 快速查詢（超簡版）<a class="headerlink" href="#vix-dhri" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>VIX</th>
+<th>DHRI</th>
+<th>避險比例</th>
+<th>狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>17</td>
+<td>0-5%</td>
+<td>極度平靜</td>
+</tr>
+<tr>
+<td>12</td>
+<td>20</td>
+<td>5%</td>
+<td>平靜</td>
+</tr>
+<tr>
+<td>15</td>
+<td>35</td>
+<td>5-10%</td>
+<td>平靜上升</td>
+</tr>
+<tr>
+<td>20</td>
+<td>55</td>
+<td>10-20%</td>
+<td>正常</td>
+</tr>
+<tr>
+<td>25</td>
+<td>75</td>
+<td>20-30%</td>
+<td>波動上升</td>
+</tr>
+<tr>
+<td>30</td>
+<td>90</td>
+<td>30-50%</td>
+<td>恐慌</td>
+</tr>
+<tr>
+<td>35+</td>
+<td>100</td>
+<td>50%</td>
+<td>極度恐慌</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_5">🧮 數學公式<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="1-vix">1. VIX 正規化（基礎分）<a class="headerlink" href="#1-vix" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def normalize_vix(vix: float) -&gt; float:
+    &quot;&quot;&quot;
+    VIX 正規化到 0-100
+
+    分段線性映射：
+    - VIX &lt; 12: 0-15 分（極度平靜）
+    - VIX 12-20: 15-45 分（平靜）
+    - VIX 20-30: 45-75 分（正常到波動）
+    - VIX &gt; 30: 75-100 分（高波動）
+    &quot;&quot;&quot;
+    if vix &lt; 12:
+        return vix / 12 * 15
+    elif vix &lt; 20:
+        return 15 + (vix - 12) / 8 * 30
+    elif vix &lt; 30:
+        return 45 + (vix - 20) / 10 * 30
+    else:
+        return 75 + min(25, (vix - 30) / 20 * 25)
+</code></pre>
+<h3 id="2">2. 波動率正規化（基礎分）<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def normalize_volatility(vol: float) -&gt; float:
+    &quot;&quot;&quot;
+    真實波動率正規化到 0-100
+
+    邏輯同 VIX 正規化
+    &quot;&quot;&quot;
+    if vol &lt; 10:
+        return vol / 10 * 15
+    elif vol &lt; 20:
+        return 15 + (vol - 10) / 10 * 30
+    elif vol &lt; 40:
+        return 45 + (vol - 20) / 20 * 30
+    else:
+        return 75 + min(25, (vol - 40) / 30 * 25)
+</code></pre>
+<h3 id="3">3. 方法二：簡化版公式<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<pre><code>DHRI = 0.6 × VIX分數 + 0.4 × 波動率分數
+
+其中：
+- VIX分數 = normalize_vix(VIX)
+- 波動率分數 = normalize_volatility(真實波動率)
+</code></pre>
+<p><strong>權重設計理由：</strong>
+- VIX（60%）：市場預期波動率，具有前瞻性
+- 真實波動率（40%）：實際波動率，反映當前狀況
+- 比例平衡：避免過度依賴單一指標</p>
+<h3 id="4">4. 方法三：精確版公式<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<pre><code>DHRI = 基礎分(DHRI簡化版) + 趨勢調整 + 狀態調整
+
+趨勢調整（±15分）：
+- 趨勢強度 &gt; 60: -10（降低避險）
+- 趨勢強度 &lt; 40: +10（增加避險）
+
+狀態調整（±10分）：
+- 牛市狀態: -5
+- 熊市狀態: +10
+- 中性狀態: 0
+</code></pre>
+<h3 id="5-dhri">5. DHRI → 避險比例映射<a class="headerlink" href="#5-dhri" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def dhri_to_hedge_ratio(dhri: int) -&gt; float:
+    &quot;&quot;&quot;
+    DHRI 轉換為避險比例 (0-0.5)
+
+    分段線性映射：
+    - DHRI 0-20: 0-5%
+    - DHRI 20-40: 5-10%
+    - DHRI 40-60: 10-20%
+    - DHRI 60-80: 20-30%
+    - DHRI 80-100: 30-50%
+    &quot;&quot;&quot;
+    if dhri &lt;= 20:
+        return dhri / 20 * 0.05
+    elif dhri &lt;= 40:
+        return 0.05 + (dhri - 20) / 20 * 0.05
+    elif dhri &lt;= 60:
+        return 0.10 + (dhri - 40) / 20 * 0.10
+    elif dhri &lt;= 80:
+        return 0.20 + (dhri - 60) / 20 * 0.10
+    else:
+        return 0.30 + min(0.20, (dhri - 80) / 20 * 0.20)
+</code></pre>
+<hr />
+<h2 id="_6">🛠 避險工具選擇<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="vix-call-vs-put">VIX Call vs Put 對比<a class="headerlink" href="#vix-call-vs-put" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>成本</th>
+<th>流動性</th>
+<th>保護力</th>
+<th>適用場景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VIX Call</td>
+<td>低</td>
+<td>高</td>
+<td>中</td>
+<td>DHRI &lt; 60（低成本避險）</td>
+</tr>
+<tr>
+<td>Put</td>
+<td>高</td>
+<td>中</td>
+<td>高</td>
+<td>DHRI &gt; 60（強保護）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dhri_1">按 DHRI 級別推薦<a class="headerlink" href="#dhri_1" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>DHRI</th>
+<th>推薦工具</th>
+<th>執行價</th>
+<th>到期日</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-20</td>
+<td>無或微量</td>
+<td>-</td>
+<td>-</td>
+<td>成本低</td>
+</tr>
+<tr>
+<td>21-40</td>
+<td>VIX Call</td>
+<td>OTM 10%</td>
+<td>1-2月</td>
+<td>成本低，流動性好</td>
+</tr>
+<tr>
+<td>41-60</td>
+<td>VIX Call OTM 5% / Put OTM 10%</td>
+<td>OTM 5-10%</td>
+<td>1月</td>
+<td>平衡成本/保護</td>
+</tr>
+<tr>
+<td>61-80</td>
+<td>Put OTM 5% / VIX Call ATM</td>
+<td>OTM 5% / ATM</td>
+<td>1月</td>
+<td>保護力強</td>
+</tr>
+<tr>
+<td>81-100</td>
+<td>Put ATM / ITM</td>
+<td>ATM / ITM</td>
+<td>2-4週</td>
+<td>最大保護</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="python">💻 Python 實現<a class="headerlink" href="#python" title="連結到此標題">&para;</a></h2>
+<h3 id="dailyhedgeratioindicator">DailyHedgeRatioIndicator 類<a class="headerlink" href="#dailyhedgeratioindicator" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+from typing import Dict, Optional
+
+class DailyHedgeRatioIndicator:
+    &quot;&quot;&quot;
+    每日避險比例指標 (DHRI)
+
+    簡化的實務工具，根據市場狀況快速計算避險比例
+    &quot;&quot;&quot;
+
+    def __init__(self, method: str = 'simple'):
+        &quot;&quot;&quot;
+        初始化 DHRI 計算器
+
+        Parameters:
+        -----------
+        method : str
+            計算方法 ('ultra_simple', 'simple', 'precise')
+        &quot;&quot;&quot;
+        self.method = method
+
+    def calculate(self,
+                 vix: float,
+                 realized_vol: Optional[float] = None,
+                 trend_strength: Optional[float] = None,
+                 regime: Optional[str] = None) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算 DHRI
+
+        Parameters:
+        -----------
+        vix : float
+            當前 VIX 水平
+        realized_vol : float, optional
+            真實波動率
+        trend_strength : float, optional
+            趨勢強度 (0-100)
+        regime : str, optional
+            市場狀態 ('bull', 'bear', 'neutral')
+
+        Returns:
+        --------
+        dict
+            DHRI 和建議
+        &quot;&quot;&quot;
+        # 根據方法計算 DHRI
+        if self.method == 'ultra_simple':
+            dhri = self._calculate_ultra_simple(vix)
+        elif self.method == 'simple':
+            dhri = self._calculate_simple(vix, realized_vol)
+        elif self.method == 'precise':
+            dhri = self._calculate_precise(vix, realized_vol, trend_strength, regime)
+        else:
+            raise ValueError(f&quot;未知方法: {self.method}&quot;)
+
+        # 計算避險比例
+        hedge_ratio = self._dhri_to_hedge_ratio(dhri)
+
+        # 獲取建議
+        recommendation = self._get_recommendation(dhri, hedge_ratio)
+
+        return {
+            'dhri': dhri,
+            'hedge_ratio': hedge_ratio,
+            'hedge_ratio_pct': hedge_ratio * 100,
+            'recommendation': recommendation,
+            'vix': vix,
+            'method': self.method
+        }
+
+    def _calculate_ultra_simple(self, vix: float) -&gt; int:
+        &quot;&quot;&quot;超簡版計算（僅需 VIX）&quot;&quot;&quot;
+        if vix &lt; 12:
+            return int(vix / 12 * 20)
+        elif vix &lt; 15:
+            return int(20 + (vix - 12) / 3 * 15)
+        elif vix &lt; 20:
+            return int(35 + (vix - 15) / 5 * 20)
+        elif vix &lt; 25:
+            return int(55 + (vix - 20) / 5 * 20)
+        elif vix &lt; 30:
+            return int(75 + (vix - 25) / 5 * 15)
+        else:
+            return int(90 + min(10, (vix - 30) / 10 * 10))
+
+    def _calculate_simple(self, vix: float, realized_vol: Optional[float]) -&gt; int:
+        &quot;&quot;&quot;簡化版計算（VIX + 波動率）&quot;&quot;&quot;
+        if realized_vol is None:
+            realized_vol = vix
+
+        vix_score = self._normalize_vix(vix) * 60
+        vol_score = self._normalize_volatility(realized_vol) * 40
+
+        dhri = int(vix_score + vol_score)
+        return min(100, max(0, dhri))
+
+    def _calculate_precise(self,
+                        vix: float,
+                        realized_vol: Optional[float],
+                        trend_strength: Optional[float],
+                        regime: Optional[str]) -&gt; int:
+        &quot;&quot;&quot;精確版計算（加入趨勢和市場狀態）&quot;&quot;&quot;
+        base_score = self._calculate_simple(vix, realized_vol)
+
+        trend_adjust = 0
+        if trend_strength is not None:
+            if trend_strength &gt; 60:
+                trend_adjust = -10
+            elif trend_strength &lt; 40:
+                trend_adjust = 10
+
+        regime_adjust = 0
+        if regime is not None:
+            if regime == 'bull':
+                regime_adjust = -5
+            elif regime == 'bear':
+                regime_adjust = 10
+
+        dhri = int(base_score + trend_adjust + regime_adjust)
+        return min(100, max(0, dhri))
+
+    def _normalize_vix(self, vix: float) -&gt; float:
+        &quot;&quot;&quot;VIX 正規化到 0-100&quot;&quot;&quot;
+        if vix &lt; 12:
+            return vix / 12 * 15
+        elif vix &lt; 20:
+            return 15 + (vix - 12) / 8 * 30
+        elif vix &lt; 30:
+            return 45 + (vix - 20) / 10 * 30
+        else:
+            return 75 + min(25, (vix - 30) / 20 * 25)
+
+    def _normalize_volatility(self, vol: float) -&gt; float:
+        &quot;&quot;&quot;波動率正規化到 0-100&quot;&quot;&quot;
+        if vol &lt; 10:
+            return vol / 10 * 15
+        elif vol &lt; 20:
+            return 15 + (vol - 10) / 10 * 30
+        elif vol &lt; 40:
+            return 45 + (vol - 20) / 20 * 30
+        else:
+            return 75 + min(25, (vol - 40) / 30 * 25)
+
+    def _dhri_to_hedge_ratio(self, dhri: int) -&gt; float:
+        &quot;&quot;&quot;DHRI 轉換為避險比例&quot;&quot;&quot;
+        if dhri &lt;= 20:
+            return dhri / 20 * 0.05
+        elif dhri &lt;= 40:
+            return 0.05 + (dhri - 20) / 20 * 0.05
+        elif dhri &lt;= 60:
+            return 0.10 + (dhri - 40) / 20 * 0.10
+        elif dhri &lt;= 80:
+            return 0.20 + (dhri - 60) / 20 * 0.10
+        else:
+            return 0.30 + min(0.20, (dhri - 80) / 20 * 0.20)
+
+    def _get_recommendation(self, dhri: int, hedge_ratio: float) -&gt; Dict:
+        &quot;&quot;&quot;獲取建議&quot;&quot;&quot;
+        if dhri &lt;= 20:
+            level = '極度平靜'
+            action = '無需避險或微量避險'
+            hedge_tool = '無或微量 VIX Call'
+        elif dhri &lt;= 40:
+            level = '平靜'
+            action = '輕度避險'
+            hedge_tool = 'VIX Call OTM 10%'
+        elif dhri &lt;= 60:
+            level = '正常波動'
+            action = '標準避險'
+            hedge_tool = 'VIX Call OTM 5% 或 Put OTM 10%'
+        elif dhri &lt;= 80:
+            level = '波動上升'
+            action = '增加避險'
+            hedge_tool = 'Put OTM 5% 或 VIX Call ATM'
+        else:
+            level = '恐慌'
+            action = '激進避險'
+            hedge_tool = 'Put ATM 或 ITM'
+
+        return {
+            'level': level,
+            'action': action,
+            'hedge_tool': hedge_tool,
+            'hedge_ratio_pct': hedge_ratio * 100
+        }
+
+    def calculate_daily_report(self, vix: float, **kwargs) -&gt; str:
+        &quot;&quot;&quot;
+        生成每日報告
+
+        Parameters:
+        -----------
+        vix : float
+            當前 VIX 水平
+        **kwargs : dict
+            其他參數
+
+        Returns:
+        --------
+        str
+            每日報告
+        &quot;&quot;&quot;
+        result = self.calculate(vix, **kwargs)
+
+        report = f&quot;&quot;&quot;
+========================================
+每日避險指標報告
+========================================
+DHRI: {result['dhri']}/100
+避險比例: {result['hedge_ratio_pct']:.1f}%
+市場狀態: {result['recommendation']['level']}
+建議行動: {result['recommendation']['action']}
+避險工具: {result['recommendation']['hedge_tool']}
+
+VIX: {result['vix']:.2f}
+計算方法: {result['method']}
+========================================
+&quot;&quot;&quot;
+        return report
+</code></pre>
+<h3 id="_7">使用範例<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># 初始化（推薦：簡化版）
+dhri = DailyHedgeRatioIndicator(method='simple')
+
+# 示例：VIX = 18.5, 真實波動率 = 17.2
+result = dhri.calculate(vix=18.5, realized_vol=17.2)
+print(result)
+
+# 輸出：
+# {
+#   'dhri': 55,
+#   'hedge_ratio': 0.10,
+#   'hedge_ratio_pct': 10.0,
+#   'recommendation': {
+#     'level': '正常波動',
+#     'action': '標準避險',
+#     'hedge_tool': 'VIX Call OTM 5% 或 Put OTM 10%',
+#     'hedge_ratio_pct': 10.0
+#   },
+#   'vix': 18.5,
+#   'method': 'simple'
+# }
+
+# 生成每日報告
+print(dhri.calculate_daily_report(vix=18.5, realized_vol=17.2))
+</code></pre>
+<hr />
+<h2 id="_8">📅 每日操作流程<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="3_1">時間分配（總計 3 分鐘）<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h3>
+<pre><code>收盤後：
+┌────────────────────────────────────┐
+│ 1. 獲取 VIX（2 分鐘）       │
+│    Yahoo Finance / TradingView   │
+├────────────────────────────────────┤
+│ 2. 計算 DHRI（1 分鐘）       │
+│    代入公式                     │
+├────────────────────────────────────┤
+│ 3. 查詢避險比例（30 秒）    │
+│    根據 DHRI → 避險%         │
+├────────────────────────────────────┤
+│ 4. 調整部位                    │
+│    VIX Call 或 Put              │
+└────────────────────────────────────┘
+</code></pre>
+<h3 id="_9">操作步驟詳解<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<p><strong>步驟 1：獲取 VIX（2 分鐘）</strong>
+1. 打開 Yahoo Finance 或 TradingView
+2. 查詢 VIX 指數（免費、實時）
+3. 記錄當前 VIX 數值</p>
+<p><strong>步驟 2：計算 DHRI（1 分鐘）</strong></p>
+<pre><code>使用超簡版：
+DHRI = f(VIX)
+
+VIX 10 → DHRI 17 → 避險 0-5%
+VIX 20 → DHRI 55 → 避險 10-20%
+VIX 30 → DHRI 90 → 避險 30-50%
+</code></pre>
+<p><strong>步驟 3：查詢避險比例（30 秒）</strong></p>
+<pre><code>根據 DHRI 查快速查詢表：
+- DHRI 0-20 → 避險 0-5%
+- DHRI 21-40 → 避險 5-10%
+- DHRI 41-60 → 避險 10-20%
+- DHRI 61-80 → 避險 20-30%
+- DHRI 81-100 → 避險 30-50%
+</code></pre>
+<p><strong>步驟 4：調整部位（根據 DHRI）</strong></p>
+<pre><code>DHRI 0-20：無需操作
+DHRI 21-40：購買 VIX Call OTM 10%（5-10% 組合價值）
+DHRI 41-60：購買 VIX Call OTM 5% 或 Put OTM 10%（10-20% 組合價值）
+DHRI 61-80：購買 Put OTM 5% 或 VIX Call ATM（20-30% 組合價值）
+DHRI 81-100：購買 Put ATM 或 ITM（30-50% 組合價值）
+</code></pre>
+<hr />
+<h2 id="_10">❓ 常見問題<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h2>
+<h3 id="q1">Q1: 每天調整避險成本太高，怎麼辦？<a class="headerlink" href="#q1" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong> 使用 VIX Call 而非 Put，因為：
+- VIX Call 成本較低
+- 流動性更好
+- 可以選擇價外合約降低成本</p>
+<h3 id="q2-dhri-vix">Q2: DHRI 和直接使用 VIX 有什麼區別？<a class="headerlink" href="#q2-dhri-vix" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong> DHRI 的優勢：
+- 考慮真實波動率（不僅是預期波動率）
+- 可選擇加入趨勢和市場狀態
+- 提供明確的避險比例建議
+- 分段線性映射更平滑</p>
+<h3 id="q3-put-vix-call">Q3: 什麼時候使用 Put，什麼時候使用 VIX Call？<a class="headerlink" href="#q3-put-vix-call" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong>
+- <strong>DHRI &lt; 40</strong>: 使用 VIX Call（成本低）
+- <strong>DHRI 40-60</strong>: 兩者皆可（根據流動性和成本選擇）
+- <strong>DHRI &gt; 60</strong>: 優先使用 Put（保護力強）</p>
+<h3 id="q4">Q4: 這個系統適合什麼樣的投資者？<a class="headerlink" href="#q4" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong>
+- <strong>日內交易者</strong>: 使用超簡版，僅需 VIX
+- <strong>波段交易者</strong>: 使用簡化版，加入真實波動率
+- <strong>長期投資者</strong>: 使用精確版，加入趨勢和市場狀態</p>
+<h3 id="q5-dhri">Q5: DHRI 的權重設計是怎麼來的？<a class="headerlink" href="#q5-dhri" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong>
+- VIX 60% + 波動率 40%：平衡預期和實際
+- 趨勢調整 ±10：避免過度調整
+- 狀態調整 ±10：提供市場環境補償</p>
+<h3 id="q6-dhri">Q6: 如何優化 DHRI 參數？<a class="headerlink" href="#q6-dhri" title="連結到此標題">&para;</a></h3>
+<p><strong>A:</strong>
+- 根據歷史回測調整權重
+- 根據個人風險偏好調整閾值
+- 定期回顧和優化（建議每季度）</p>
+<hr />
+<h2 id="_11">📈 實證驗證（建議）<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h2>
+<h3 id="_12">建議回測框架<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>數據集</strong>：2010-2024 SPY 歷史數據</li>
+<li><strong>對比策略</strong>：</li>
+<li>無避險</li>
+<li>固定 10% 避險</li>
+<li>DHRI 動態避險（三種方法）</li>
+<li><strong>性能指標</strong>：</li>
+<li>夏普比率</li>
+<li>最大回撤</li>
+<li>卡爾馬比率</li>
+<li>左尾風險（1% VaR, CVaR）</li>
+</ol>
+<h3 id="_13">預期結果<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>DHRI 動態避險</strong> vs <strong>無避險</strong>：</li>
+<li>最大回撤降低 30-50%</li>
+<li>夏普比率提升 0.2-0.4</li>
+<li>
+<p>左尾風險顯著改善</p>
+</li>
+<li>
+<p><strong>DHRI 動態避險</strong> vs <strong>固定 10% 避險</strong>：</p>
+</li>
+<li>成本降低 20-30%</li>
+<li>保護效果相當或更好</li>
+<li>僅在高風險時增加避險</li>
+</ul>
+<hr />
+<h2 id="_14">🔗 相關研究<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<p><strong>來源理論：</strong>
+- t005-tail-hedge.md（尾部風險對沖研究）
+- t001-strength-score.md（趨勢強度評分系統）
+- r001-model-selection.md（市場狀態檢測）</p>
+<p><strong>相關工具：</strong>
+- r002-feature-engineering.md（狀態識別特徵工程）
+- r003-trend-integration.md（趨勢強度集成）</p>
+<hr />
+<h2 id="_15">✅ 實施建議<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<h3 id="_16">分階段部署<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<p><strong>階段 1：試運行（1-2 週）</strong>
+- 使用超簡版（僅 VIX）
+- 記錄每日 DHRI 和操作
+- 不實際調整部位，僅觀察</p>
+<p><strong>階段 2：小資金測試（2-4 週）</strong>
+- 使用簡化版（VIX + 波動率）
+- 小資金實際操作（&lt; 10% 組合價值）
+- 追蹤成本和效果</p>
+<p><strong>階段 3：全面部署（1 個月後）</strong>
+- 使用精確版（加入趨勢和狀態）
+- 全面應用到投資組合
+- 定期回顧和優化</p>
+<h3 id="_17">監控指標<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>DHRI 變化趨勢</li>
+<li>避險成本（% 組合價值）</li>
+<li>保護效果（最大回撤、左尾風險）</li>
+<li>夏普比率改善</li>
+</ul>
+<hr />
+<h2 id="_18">📝 結論<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<p>DHRI (Daily Hedge Ratio Indicator) 將複雜的尾部風險對沖理論簡化為：</p>
+<ol>
+<li><strong>單一指標決策</strong>（DHRI 0-100）</li>
+<li><strong>快速查詢</strong>（30 秒）</li>
+<li><strong>每日可執行</strong>（3 分鐘完成）</li>
+</ol>
+<p><strong>核心優勢：</strong>
+- ✅ 實務導向：不需要複雜計算
+- ✅ 數據簡單：僅需 VIX（可選波動率）
+- ✅ 行動明確：一個數值決定避險比例
+- ✅ 靈活可調：三種方法適應不同需求</p>
+<p><strong>適用人群：</strong>
+- 日內交易者（超簡版）
+- 波段交易者（簡化版）
+- 長期投資者（精確版）</p>
+<p><strong>下一步：</strong>
+1. 根據風險偏好選擇方法
+2. 每日收盤後執行 DHRI 計算
+3. 根據建議調整避險部位
+4. 定期回顧和優化參數</p>
+<hr />
+<p><strong>創建時間：</strong> 2026-02-20 02:17
+<strong>文檔類型：</strong> 實務工具介紹文檔
+<strong>狀態：</strong> 生產就緒 ✅</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

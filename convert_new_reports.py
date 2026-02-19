@@ -455,6 +455,11 @@ def convert_new_reports():
             'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m004-new-risk-metric.md',
             'title': '新型風險指標設計',
             'description': '替代傳統 Sharpe Ratio 的綜合風險度量指標開發'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/dhri-tool-20260220/dhri-introduction.md',
+            'title': 'DHRI - 每日避險比例指標',
+            'description': '簡化版實務工具：3 分鐘每日操作，單一指標決策避險比例（0-50%）'
         }
     ]
     

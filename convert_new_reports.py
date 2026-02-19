@@ -435,6 +435,26 @@ def convert_new_reports():
             'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m001-momentum-distribution.md',
             'title': '動能策略收益分佈分析',
             'description': '動能策略偏度、峰度、肥尾指數計算與風險評估'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m002-risk-assessment.md',
+            'title': '動能策略風險評估系統',
+            'description': '基於收益分佈的動能策略綜合風險評估框架'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m002-risk-left-tail-analysis.md',
+            'title': '動能策略左尾風險分析',
+            'description': '動能策略下行風險與左尾肥尾效應深度分析'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m003-benchmark-comparison.md',
+            'title': '動能策略基準比較分析',
+            'description': '與傳統風險指標和基準策略的綜合比較研究'
+        },
+        {
+            'filepath': '/Users/charlie/.openclaw/workspace-automation/kanban/projects/momentum-dist-risk-20260219/m004-new-risk-metric.md',
+            'title': '新型風險指標設計',
+            'description': '替代傳統 Sharpe Ratio 的綜合風險度量指標開發'
         }
     ]
     

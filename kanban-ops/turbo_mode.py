@@ -175,7 +175,8 @@ class TurboMode:
         max_concurrent = config.get('max_concurrent', 1)
         max_tasks_per_check = config.get('max_tasks_per_check', 2)
 
-        total_checks = duration_hours * 60 // check_interval_minutes
+        # 確保 total_checks 是整數
+        total_checks = int(duration_hours * 60 // check_interval_minutes)
 
         print(f"\n📊 快速循環模式")
         print(f"⏰ 運行時間：{duration_hours} 小時")
@@ -235,8 +236,9 @@ class TurboMode:
             scout_script = Path.home() / ".openclaw" / "workspace-scout" / "scout_agent.py"
 
             if not scout_script.exists():
-                self.log("WARNING", "Scout 腳本不存在，跳過預熱")
-                return False
+                self.log("INFO", "Scout 腳本不存在，跳過預熱")
+                print(f"ℹ️  Scout 腳本不存在，跳過預熱")
+                return True  # 返回 True 繼續執行
 
             print(f"🔍 觸發 Scout 掃描（預熱模式）...")
 
@@ -255,7 +257,7 @@ class TurboMode:
             else:
                 print(f"⚠️  Scout 掃描失敗: {result.stderr}")
                 self.log("WARNING", f"Scout 掃描失敗: {result.stderr}")
-                return False
+                return True  # 返回 True 繼續執行
 
         except Exception as e:
             print(f"⚠️  Scout 預熱掃描失敗: {e}")

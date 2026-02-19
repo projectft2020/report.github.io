@@ -113,10 +113,18 @@ class TurboMode:
         self.log("INFO", "加速模式已啟動")
         self.log("INFO", f"總任務數：{total_tasks}")
         self.log("INFO", f"預計運行時間：{self.config['turbo_config']['duration_hours']} 小時")
+        self.log("INFO", f"模式：{self.config['turbo_config']['mode']}")
 
-        # 執行所有階段
+        # 根據模式選擇執行方式
+        mode = self.config['turbo_config'].get('mode', 'phases')
+
         try:
-            self.run_all_phases()
+            if mode == 'loop':
+                # 快速循環模式（方案 3）
+                self.run_loop_mode()
+            else:
+                # 原有分階段模式
+                self.run_all_phases()
         except KeyboardInterrupt:
             self.log("WARNING", "用戶中斷加速模式")
             self.stop()
@@ -158,6 +166,234 @@ class TurboMode:
             return False
 
         return True
+
+    def run_loop_mode(self):
+        """快速循環模式（方案 3）"""
+        config = self.config['turbo_config']
+        duration_hours = config.get('duration_hours', 6)
+        check_interval_minutes = config.get('check_interval_minutes', 10)
+        max_concurrent = config.get('max_concurrent', 1)
+        max_tasks_per_check = config.get('max_tasks_per_check', 2)
+
+        total_checks = duration_hours * 60 // check_interval_minutes
+
+        print(f"\n📊 快速循環模式")
+        print(f"⏰ 運行時間：{duration_hours} 小時")
+        print(f"🔁 檢查間隔：{check_interval_minutes} 分鐘")
+        print(f"⚡ 並行上限：{max_concurrent} 個")
+        print(f"📋 每次最多觸發：{max_tasks_per_check} 個任務")
+        print(f"🔢 預計檢查次數：{total_checks} 次")
+        print("=" * 60)
+
+        # 1. Scout 預熱（啟動時）
+        print(f"\n🔍 Scout 預熱掃描...")
+        self.scout_prewarm(force=True)
+
+        # 2. 快速循環檢查
+        for i in range(total_checks):
+            if not self.should_continue():
+                self.log("INFO", "達到停止條件，結束循環")
+                break
+
+            elapsed = self.get_elapsed_time()
+            print(f"\n{'=' * 60}")
+            print(f"🔁 循環檢查 {i + 1}/{total_checks}")
+            print(f"⏱️  已運行：{elapsed:.1f} 小時")
+            print(f"{'=' * 60}\n")
+
+            # 檢查並觸發任務
+            ready_tasks = self.get_ready_tasks(limit=max_tasks_per_check)
+
+            if ready_tasks:
+                print(f"📋 找到 {len(ready_tasks)} 個待觸發任務")
+
+                for task in ready_tasks:
+                    if not self.should_continue():
+                        break
+
+                    self.spawn_task(task)
+
+                # 等待並行任務完成（如果有）
+                if max_concurrent > 0:
+                    self.wait_for_concurrent_tasks(max_concurrent)
+            else:
+                print(f"📋 沒有待觸發任務")
+
+            # 等待下次檢查
+            if i < total_checks - 1:
+                print(f"\n⏳ 等待 {check_interval_minutes} 分鐘後下次檢查...")
+                time.sleep(check_interval_minutes * 60)
+
+        # 完成
+        if self.status["enabled"]:
+            self.log("SUCCESS", "快速循環模式執行完成")
+            self.stop("執行完成")
+
+    def scout_prewarm(self, force=False):
+        """Scout 預熱掃描"""
+        try:
+            scout_script = Path.home() / ".openclaw" / "workspace-scout" / "scout_agent.py"
+
+            if not scout_script.exists():
+                self.log("WARNING", "Scout 腳本不存在，跳過預熱")
+                return False
+
+            print(f"🔍 觸發 Scout 掃描（預熱模式）...")
+
+            result = subprocess.run(
+                ['python3', str(scout_script), 'scan'],
+                cwd=str(scout_script.parent),
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 分鐘超時
+            )
+
+            if result.returncode == 0:
+                print(f"✅ Scout 預熱掃描完成")
+                self.log("SUCCESS", "Scout 預熱掃描完成")
+                return True
+            else:
+                print(f"⚠️  Scout 掃描失敗: {result.stderr}")
+                self.log("WARNING", f"Scout 掃描失敗: {result.stderr}")
+                return False
+
+        except Exception as e:
+            print(f"⚠️  Scout 預熱掃描失敗: {e}")
+            self.log("WARNING", f"Scout 預熱掃描失敗: {e}")
+            return False
+
+    def get_ready_tasks(self, limit=2):
+        """獲取準備觸發的任務"""
+        try:
+            with open(TASKS_JSON, 'r', encoding='utf-8') as f:
+                tasks = json.load(f)
+
+            ready = []
+
+            for task_id, task in tasks.items():
+                if task.get('status') == 'pending':
+                    # 檢查依賴
+                    depends_on = task.get('depends_on', [])
+                    all_dependencies_completed = True
+
+                    for dep_id in depends_on:
+                        dep_task = tasks.get(dep_id)
+                        if not dep_task or dep_task.get('status') != 'completed':
+                            all_dependencies_completed = False
+                            break
+
+                    if all_dependencies_completed:
+                        ready.append((task_id, task))
+                        if len(ready) >= limit:
+                            break
+
+            return ready
+
+        except Exception as e:
+            self.log("ERROR", f"獲取待觸發任務失敗: {e}")
+            return []
+
+    def spawn_task(self, task_info):
+        """觸發單個任務"""
+        task_id, task = task_info
+
+        try:
+            # 決定使用哪個代理
+            agent_type = task.get('agent_type', 'analyst')
+            agent_id_map = {
+                'research': 'research',
+                'analyst': 'analyst',
+                'creative': 'creative',
+                'automation': 'automation'
+            }
+
+            agent_id = agent_id_map.get(agent_type, 'analyst')
+
+            # 決定使用哪個模型
+            model = None
+            if agent_type in ['analyst', 'creative']:
+                model = "zai/glm-4.7"  # 高品質輸出使用 GLM-4.7
+
+            # 構建任務消息
+            task_message = self.build_task_message(task_id, task)
+
+            print(f"\n🚀 觸發任務：{task_id}")
+            print(f"   代理：{agent_id}")
+            print(f"   模型：{model or '默認'}")
+            print(f"   描述：{task.get('description', 'N/A')}")
+
+            # 記錄到日誌
+            self.log("INFO", f"觸發任務：{task_id} (代理: {agent_id})")
+
+            # TODO: 實際調用 sessions_spawn
+            # 這裡需要集成 OpenClaw 的 sessions_spawn 工具
+            # 目前先記錄到日誌，等待集成
+
+            self.log("INFO", f"任務 {task_id} 已加入隊列（待實現 sessions_spawn 集成）")
+
+            return True
+
+        except Exception as e:
+            self.log("ERROR", f"觸發任務失敗 {task_id}: {e}")
+            return False
+
+    def build_task_message(self, task_id, task):
+        """構建任務消息"""
+        message = f"""TASK: {task.get('description', 'N/A')}
+
+CONTEXT:
+- 任務 ID: {task_id}
+- 項目: {task.get('project', 'N/A')}
+- 優先級: {task.get('priority', 'N/A')}
+
+INPUT FILES:
+{self.get_input_paths(task)}
+
+OUTPUT PATH: {self.get_output_path(task_id, task)}
+
+REQUIREMENTS:
+- 完整實現代碼
+- 詳細文檔說明
+- 實證驗證（如適用）
+- 實用工具（如適用）
+"""
+
+        return message
+
+    def get_input_paths(self, task):
+        """獲取輸入文件路徑"""
+        input_paths = task.get('input_paths', [])
+        if not input_paths:
+            return "無"
+
+        paths_str = "\n".join(f"- {p}" for p in input_paths)
+        return paths_str
+
+    def get_output_path(self, task_id, task):
+        """獲取輸出文件路徑"""
+        project = task.get('project', 'default')
+        timestamp = datetime.now().strftime("%Y%m%d")
+
+        output_dir = f"/Users/charlie/.openclaw/workspace/kanban/projects/{project}"
+        output_file = f"{task_id}-{task.get('agent_type', 'task')}.md"
+
+        return f"{output_dir}/{output_file}"
+
+    def wait_for_concurrent_tasks(self, max_concurrent):
+        """等待並行任務完成"""
+        # TODO: 實現並行任務管理
+        # 這裡需要追蹤正在運行的任務，等待它們完成
+        # 目前先暫時實現一個簡單的等待
+        pass
+
+    def get_elapsed_time(self):
+        """獲取已運行時間（小時）"""
+        if not self.status.get("start_time"):
+            return 0
+
+        start_time = datetime.fromisoformat(self.status["start_time"])
+        elapsed = (datetime.now(timezone.utc) - start_time).total_seconds() / 3600
+        return elapsed
 
     def run_all_phases(self):
         """執行所有階段"""

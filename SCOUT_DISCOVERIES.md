@@ -1,0 +1,1 @@
+/Users/charlie/.openclaw/workspace-scout/DISCOVERIES.md

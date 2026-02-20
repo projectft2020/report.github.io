@@ -85,6 +85,74 @@ reports = [
         'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/black-monday-1987-20260220/pj001-black-monday-analysis.md',
         'title': 'Black Monday 事件研究',
         'description': '1987 年股市崩盤深度分析，歷史事件研究與啟示'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/black-monday-1987-20260220/pj002-market-stress-indicators.md',
+        'title': '市場壓力指標系統設計',
+        'description': '基於 Black Monday 分析的四維度市場壓力監控系統，包含 15 個核心指標'
+    },
+
+    # Statistical Arbitrage Renaissance
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/statistical-arb-renaissance-20260220/st001-cointegration.md',
+        'title': '協整關係檢測與應用',
+        'description': '統計套利核心：協整關係檢測與交易對構建'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/statistical-arb-renaissance-20260220/st002-pairs-trading.md',
+        'title': '配對交易策略實作',
+        'description': '配對交易策略完整實現與回測驗證'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/statistical-arb-renaissance-20260220/st003-portfolio.md',
+        'title': '統計套利組合管理',
+        'description': '多配對交易組合構建與風險管理'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/statistical-arb-renaissance-20260220/st04-backtest-validation.md',
+        'title': '統計套利回測驗證',
+        'description': '統計套利策略完整回測與驗證結果'
+    },
+
+    # Druckenmiller Macro Trend
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/druckenmiller-macro-trend-20260220/d001-philosophy.md',
+        'title': 'Druckenmiller 投資哲學',
+        'description': 'Stanley Druckenmiller 的宏觀趨勢投資哲學與原則'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/druckenmiller-macro-trend-20260220/d002-trend-indicators.md',
+        'title': '趨勢指標系統',
+        'description': '宏觀趨勢識別與指標系統設計'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/druckenmiller-macro-trend-20260220/d003-position-sizing.md',
+        'title': '倉位管理策略',
+        'description': '基於趨勢強度的動態倉位管理'
+    },
+
+    # Factor Crowding
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/factor-crowding-20260220/f001-crowding-metrics.md',
+        'title': '因子擁擠指標',
+        'description': '因子擁擠度量的指標體系與監控'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/factor-crowding-20260220/f002-monitoring-system.md',
+        'title': '因子擁擠監控系統',
+        'description': '實時因子擁擠監控與預警系統'
+    },
+
+    # DHRI Tool
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/dhri-tool-20260220/dhri-introduction.md',
+        'title': 'DHRI - 每日避險比例指標',
+        'description': '簡化版實務工具：3 分鐘每日操作，單一指標決策避險比例'
+    },
+    {
+        'filepath': '/Users/charlie/.openclaw/workspace/kanban/projects/dhri-tool-20260220/dhri-publish.md',
+        'title': 'DHRI 發布說明',
+        'description': 'DHRI 工具的技術架構與使用說明'
     }
 ]
 

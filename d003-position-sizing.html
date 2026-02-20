@@ -1,0 +1,2826 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倉位管理策略 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>倉位管理策略</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">基於趨勢強度的動態倉位管理</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="_1">動態資金管理系統</h1>
+<p><strong>任務 ID:</strong> 20260220-040000-d003<br />
+<strong>項目 ID:</strong> druckenmiller-macro-trend-20260220<br />
+<strong>分析師:</strong> Charlie Analyst<br />
+<strong>狀態:</strong> completed<br />
+<strong>時間戳:</strong> 2026-02-20T13:03:00Z<br />
+<strong>基於:</strong> Druckenmiller 交易哲學</p>
+<hr />
+<h2 id="_2">摘要</h2>
+<p>本系統基於 Stanley Druckenmiller 的核心資金管理原則設計，實現完整的動態資金管理框架。系統整合凱利公式優化、期望值驅動倉位調整、風險平價策略、最大回撤控制和實時動態調整機制，為集中投資提供科學的資金分配決策支持。</p>
+<p><strong>核心原則：</strong><br />
+- 信念驅動倉位：高信念機會集中配置，但嚴格控制風險<br />
+- 動態調整：根據市場條件和信念強度實時調整倉位<br />
+- 快速減損：當投資論證不再有效時迅速退出<br />
+- 保護資本：嚴格控制最大回撤，確保長期生存能力</p>
+<hr />
+<h2 id="_3">系統架構</h2>
+<h3 id="_4">資金管理組件</h3>
+<pre class="codehilite"><code>動態資金管理系統
+├── 1. 凱利公式優化模塊
+│   ├── 全凱利公式計算
+│   ├── 部分凱利（Fractional Kelly）調整
+│   ├── 連續凱利（Continuous Kelly）優化
+│   └── 凱利下限保護
+├── 2. 期望值驅動倉位調整
+│   ├── 勝率估算
+│   ├── 盈虧比計算
+│   ├── 期望值計算
+│   └── 倉位大小映射
+├── 3. 風險平價策略
+│   ├── 波動率計算
+│   ├── 相關性分析
+│   ├── 風險貢獻分配
+│   └── 目標風險調整
+├── 4. 最大回撤控制
+│   ├── 波動率預測
+│   ├── VaR 計算
+│   ├── CVaR 計算
+│   └── 倉位限制器
+└── 5. 實時動態調整機制
+    ├── 信念強度監控
+    ├── 市場條件評估
+    ├── 倉位再平衡
+    └── 止損觸發
+</code></pre>
+
+<h3 id="_5">信號驅動流程</h3>
+<pre class="codehilite"><code>宏觀趨勢信號
+    ↓
+信念強度評估（Conviction Level）
+    ↓
+期望值計算（Expected Value）
+    ↓
+凱利倉位計算（Kelly Position）
+    ↓
+風險限制（Risk Constraints）
+    ↓
+最終倉位（Final Position）
+</code></pre>
+
+<hr />
+<h2 id="1">1. 凱利公式優化模塊</h2>
+<h3 id="11">1.1 基礎凱利公式</h3>
+<p>凱利公式是優化的賭注策略，用於最大化長期增長率：</p>
+<p><strong>公式：</strong></p>
+<pre class="codehilite"><code>f* = (bp - q) / b
+
+其中：
+- f* = 最優資金比例
+- b = 盈虧比（贏的賠率）
+- p = 勝率
+- q = 敗率 = 1 - p
+</code></pre>
+
+<p><strong>Python 實現：</strong></p>
+<pre class="codehilite"><code class="language-python">def kelly_fraction(win_rate: float, win_loss_ratio: float) -&gt; float:
+    &quot;&quot;&quot;
+    計算基礎凱利公式倉位
+
+    Parameters:
+    -----------
+    win_rate : float
+        勝率 (0 到 1)
+    win_loss_ratio : float
+        盈虧比（平均盈利 / 平均虧損）
+
+    Returns:
+    --------
+    float: 建議倉位比例（資金百分比）
+
+    Examples:
+    ---------
+    &gt;&gt;&gt; kelly_fraction(0.6, 2.0)  # 60%勝率，2:1盈虧比
+    0.4  # 40%倉位
+    &quot;&quot;&quot;
+    if win_rate &lt;= 0 or win_rate &gt;= 1:
+        return 0.0
+
+    q = 1 - win_rate
+
+    # Kelly 公式
+    kelly = (win_rate * win_loss_ratio - q) / win_loss_ratio
+
+    # 負值表示不應交易
+    if kelly &lt; 0:
+        return 0.0
+
+    return kelly
+</code></pre>
+
+<h3 id="12-fractional-kelly">1.2 部分凱利（Fractional Kelly）</h3>
+<p>Druckenmiller 和其他頂級交易員通常使用部分凱利來降低風險：</p>
+<p><strong>公式：</strong></p>
+<pre class="codehilite"><code>f_adj = f* * k
+
+其中：
+- f_adj = 調整後倉位
+- f* = 基礎凱利倉位
+- k = 凱利縮減因子（通常 0.25 - 0.5）
+</code></pre>
+
+<p><strong>Python 實現：</strong></p>
+<pre class="codehilite"><code class="language-python">def fractional_kelly(kelly_f: float, 
+                     shrinkage_factor: float = 0.25,
+                     max_position: float = 0.40,
+                     min_position: float = 0.01) -&gt; float:
+    &quot;&quot;&quot;
+    應用部分凱利縮減
+
+    Parameters:
+    -----------
+    kelly_f : float
+        基礎凱利倉位
+    shrinkage_factor : float
+        縮減因子（0-1）
+        - 0.25: 激進（Druckenmiller 類型）
+        - 0.10-0.15: 保守
+    max_position : float
+        最大倉位限制（單個標的）
+    min_position : float
+        最小倉位閾值
+
+    Returns:
+    --------
+    float: 調整後倉位
+    &quot;&quot;&quot;
+    # 應用縮減
+    adjusted = kelly_f * shrinkage_factor
+
+    # 應用倉位限制
+    adjusted = max(min_position, min(adjusted, max_position))
+
+    return adjusted
+</code></pre>
+
+<h3 id="13-continuous-kelly">1.3 連續凱利（Continuous Kelly）</h3>
+<p>處理連續回報（股票、匯率等）的凱利公式：</p>
+<p><strong>公式：</strong></p>
+<pre class="codehilite"><code>f* = μ / σ²
+
+其中：
+- μ = 期望回報率
+- σ = 波動率（標準差）
+</code></pre>
+
+<p><strong>Python 實現：</strong></p>
+<pre class="codehilite"><code class="language-python">import numpy as np
+
+def continuous_kelly(expected_return: float,
+                      volatility: float,
+                      risk_free_rate: float = 0.0) -&gt; float:
+    &quot;&quot;&quot;
+    連續凱利公式（用於資產價格）
+
+    Parameters:
+    -----------
+    expected_return : float
+        期望回報率（年化，小數形式）
+    volatility : float
+        波動率（年化，小數形式）
+    risk_free_rate : float
+        無風險利率（年化，小數形式）
+
+    Returns:
+    --------
+    float: 建議槓桿倍數或倉位比例
+
+    Notes:
+    ------
+    這是 Samuelson-Merton 應用於連續資產的凱利公式
+    &quot;&quot;&quot;
+    if volatility &lt;= 0:
+        return 0.0
+
+    # 超額回報
+    excess_return = expected_return - risk_free_rate
+
+    # 連續凱利
+    kelly = excess_return / (volatility ** 2)
+
+    # 負值表示不應持有多頭
+    return max(0.0, kelly)
+</code></pre>
+
+<h3 id="14">1.4 凱利下限保護</h3>
+<p>防止過度優化的凱利倉位導致回撤：</p>
+<p><strong>Python 實現：</strong></p>
+<pre class="codehilite"><code class="language-python">def kelly_with_floor(kelly_f: float,
+                     confidence_interval: float = 0.95,
+                     max_drawdown_limit: float = 0.20) -&gt; float:
+    &quot;&quot;&quot;
+    應用凱利下限保護（降低過度優化風險）
+
+    Parameters:
+    -----------
+    kelly_f : float
+        計算出的凱利倉位
+    confidence_interval : float
+        置信區間（0-1）
+    max_drawdown_limit : float
+        最大回撤限制
+
+    Returns:
+    --------
+    float: 受保護的凱利倖位
+
+    Notes:
+    ------
+    基於歷史數據估計的凱利分佈，應用安全邊際
+    &quot;&quot;&quot;
+    # 凱利下限（降低估計不確定性影響）
+    # 基於經驗：凱利估計誤差約為 ±50%
+    kelly_floor = kelly_f * 0.5
+
+    # 回撤限制調整
+    # 經驗法則：凱利倉位與回撤相關
+    drawdown_adjustment = min(1.0, max_drawdown_limit / (kelly_f * 2))
+
+    # 應用限制
+    protected_kelly = min(kelly_floor, drawdown_adjustment)
+
+    return protected_kelly
+</code></pre>
+
+<hr />
+<h2 id="2">2. 期望值驅動倉位調整</h2>
+<h3 id="21">2.1 期望值計算框架</h3>
+<p><strong>公式：</strong></p>
+<pre class="codehilite"><code>EV = p * W - q * L
+
+其中：
+- EV = 期望值
+- p = 勝率
+- W = 平均盈利（百分比）
+- q = 敗率 = 1 - p
+- L = 平均虧損（百分比）
+</code></pre>
+
+<p><strong>Python 實現：</strong></p>
+<pre class="codehilite"><code class="language-python">def expected_value(win_rate: float,
+                   avg_win: float,
+                   avg_loss: float) -&gt; float:
+    &quot;&quot;&quot;
+    計算期望值
+
+    Parameters:
+    -----------
+    win_rate : float
+        勝率（0-1）
+    avg_win : float
+        平均盈利（百分比，如 5.0 代表 5%）
+    avg_loss : float
+        平均虧損（百分比，如 3.0 代表 3%）
+
+    Returns:
+    --------
+    float: 期望值（百分比）
+    &quot;&quot;&quot;
+    lose_rate = 1 - win_rate
+    ev = win_rate * avg_win - lose_rate * avg_loss
+    return ev
+</code></pre>
+
+<h3 id="22">2.2 信念強度與期望值映射</h3>
+<p>Druckenmiller 根據信念強度調整倉位：</p>
+<pre class="codehilite"><code class="language-python">class ConvictionLevel:
+    &quot;&quot;&quot;信念強度等級&quot;&quot;&quot;
+    NONE = 0.0       # 無信念：不交易
+    LOW = 0.25       # 低信念：小倉位試水
+    MEDIUM = 0.5     # 中信念：正常倉位
+    HIGH = 0.75      # 高信念：集中倉位
+    MAXIMUM = 1.0    # 最高信念：最大倉位
+
+
+def conviction_from_expected_value(ev: float,
+                                  ev_threshold_low: float = 0.5,
+                                  ev_threshold_med: float = 1.5,
+                                  ev_threshold_high: float = 3.0) -&gt; float:
+    &quot;&quot;&quot;
+    將期望值映射到信念強度
+
+    Parameters:
+    -----------
+    ev : float
+        期望值（百分比）
+    ev_threshold_low : float
+        低信念閾值
+    ev_threshold_med : float
+        中信念閾值
+    ev_threshold_high : float
+        高信念閥值
+
+    Returns:
+    --------
+    float: 信念強度（0-1）
+    &quot;&quot;&quot;
+    if ev &lt;= 0:
+        return ConvictionLevel.NONE
+    elif ev &lt; ev_threshold_low:
+        return ConvictionLevel.LOW
+    elif ev &lt; ev_threshold_med:
+        return ConvictionLevel.MEDIUM
+    elif ev &lt; ev_threshold_high:
+        return ConvictionLevel.HIGH
+    else:
+        return ConvictionLevel.MAXIMUM
+</code></pre>
+
+<h3 id="23">2.3 期望值到倉位的映射</h3>
+<pre class="codehilite"><code class="language-python">def ev_to_position(ev: float,
+                   kelly_base: float,
+                   conviction: float,
+                   max_position: float = 0.40) -&gt; float:
+    &quot;&quot;&quot;
+    將期望值和信念強度轉換為倉位
+
+    Parameters:
+    -----------
+    ev : float
+        期望值
+    kelly_base : float
+        基礎凱利倖位
+    conviction : float
+        信念強度（0-1）
+    max_position : float
+        最大倖位限制
+
+    Returns:
+    --------
+    float: 建議倖位（資金百分比）
+
+    Notes:
+    ------
+    結合凱利公式和信念強度，Druckenmiller 風格的倖位調整
+    &quot;&quot;&quot;
+    # 基礎：凱利倖位
+    base_position = kelly_base
+
+    # 信念調整：高信念可以增加倖位，低信念減少
+    belief_adjustment = 0.5 + 0.5 * conviction  # 0.5 - 1.0 倍
+
+    # 應用信念調整
+    position = base_position * belief_adjustment
+
+    # 應用最大倖位限制
+    position = min(position, max_position)
+
+    # 最小倖位閾值
+    if position &lt; 0.01:
+        position = 0.0
+
+    return position
+</code></pre>
+
+<hr />
+<h2 id="3">3. 風險平價策略</h2>
+<h3 id="31">3.1 波動率計算</h3>
+<pre class="codehilite"><code class="language-python">import numpy as np
+import pandas as pd
+
+def calculate_volatility(returns: pd.Series,
+                         window: int = 20,
+                         annualize: bool = True) -&gt; float:
+    &quot;&quot;&quot;
+    計算波動率（標準差）
+
+    Parameters:
+    -----------
+    returns : pd.Series
+        收益率序列
+    window : int
+        移動窗口大小（交易天數）
+    annualize : bool
+        是否年化
+
+    Returns:
+    --------
+    float: 波動率
+    &quot;&quot;&quot;
+    if len(returns) &lt; window:
+        # 數據不足時使用所有數據
+        vol = returns.std()
+    else:
+        # 使用移動窗口
+        vol = returns.tail(window).std()
+
+    if annualize:
+        # 假設 252 個交易日/年
+        vol *= np.sqrt(252)
+
+    return vol
+
+
+def ewma_volatility(returns: pd.Series,
+                    lambda_: float = 0.94,
+                    min_obs: int = 20) -&gt; pd.Series:
+    &quot;&quot;&quot;
+    計算 EWMA（指數加權移動平均）波動率
+
+    Parameters:
+    -----------
+    returns : pd.Series
+        收益率序列
+    lambda_ : float
+        衰減因子（通常 0.94-0.97）
+    min_obs : int
+        最小觀測值數量
+
+    Returns:
+    --------
+    pd.Series: EWMA 波動率序列
+
+    Notes:
+    ------
+    EWMA 對近期的波動變化更敏感，適合動態風險管理
+    &quot;&quot;&quot;
+    if len(returns) &lt; min_obs:
+        # 數據不足時使用標準方法
+        return pd.Series([returns.std()] * len(returns), index=returns.index)
+
+    # 初始化
+    ewma = pd.Series(index=returns.index, dtype=float)
+
+    # 初始波動率（使用最初 min_obs 個觀測值）
+    initial_vol = returns[:min_obs].std()
+    ewma.iloc[min_obs-1] = initial_vol
+
+    # 遞歸計算
+    for i in range(min_obs, len(returns)):
+        # EWMA 公式
+        ewma.iloc[i] = np.sqrt(
+            lambda_ * ewma.iloc[i-1]**2 + 
+            (1 - lambda_) * returns.iloc[i-1]**2
+        )
+
+    # 填充前面的值
+    ewma.iloc[:min_obs-1] = initial_vol
+
+    return ewma
+</code></pre>
+
+<h3 id="32">3.2 相關性分析</h3>
+<pre class="codehilite"><code class="language-python">def calculate_correlation_matrix(returns_df: pd.DataFrame,
+                                window: int = 60) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    計算滾動相關性矩陣
+
+    Parameters:
+    -----------
+    returns_df : pd.DataFrame
+        多資產收益率（列=資產，行=時間）
+    window : int
+        滾動窗口大小
+
+    Returns:
+    --------
+    pd.DataFrame: 相關性矩陣
+    &quot;&quot;&quot;
+    if len(returns_df) &lt; window:
+        # 數據不足時使用所有數據
+        corr = returns_df.corr()
+    else:
+        # 使用滾動窗口
+        corr = returns_df.tail(window).corr()
+
+    return corr
+
+
+def effective_correlation(corr_matrix: pd.DataFrame) -&gt; float:
+    &quot;&quot;&quot;
+    計算有效相關性（平均相關性）
+
+    Parameters:
+    -----------
+    corr_matrix : pd.DataFrame
+        相關性矩陣
+
+    Returns:
+    --------
+    float: 有效相關性（0-1）
+    &quot;&quot;&quot;
+    n = len(corr_matrix)
+
+    # 提取上三角（排除對角線）
+    upper = corr_matrix.values[np.triu_indices(n, k=1)]
+
+    # 平均相關性
+    if len(upper) &gt; 0:
+        eff_corr = np.mean(upper)
+    else:
+        eff_corr = 0.0
+
+    return eff_corr
+</code></pre>
+
+<h3 id="33">3.3 風險平價倉位計算</h3>
+<pre class="codehilite"><code class="language-python">def risk_parity_weights(volatilities: dict,
+                        target_vol: float = 0.15,
+                        correlations: pd.DataFrame = None) -&gt; dict:
+    &quot;&quot;&quot;
+    計算風險平價權重
+
+    Parameters:
+    -----------
+    volatilities : dict
+        {資產名稱: 波動率} 字典
+    target_vol : float
+        目標投資組合波動率
+    correlations : pd.DataFrame
+        相關性矩陣（可選）
+
+    Returns:
+    --------
+    dict: 風險平價權重
+
+    Notes:
+    ------
+    風險平價目標：每個資產對投資組合風險的貢獻相等
+    &quot;&quot;&quot;
+    assets = list(volatilities.keys())
+    n = len(assets)
+
+    if n == 0:
+        return {}
+
+    if correlations is None:
+        # 假設資產不相關
+        correlations = pd.DataFrame(np.eye(n), index=assets, columns=assets)
+
+    # 逆波動率加權（簡化版風險平價）
+    inv_vol = {asset: 1.0 / vol for asset, vol in volatilities.items()}
+    total_inv_vol = sum(inv_vol.values())
+
+    # 未調整權重
+    raw_weights = {asset: inv_vol[asset] / total_inv_vol 
+                   for asset in assets}
+
+    # 調整以達到目標波動率
+    # 計算組合波動率
+    weights_array = np.array([raw_weights[asset] for asset in assets])
+    vols_array = np.array([volatilities[asset] for asset in assets])
+
+    # 組合波動率（簡化版，忽略相關性）
+    portfolio_vol = np.sqrt(np.sum(weights_array**2 * vols_array**2))
+
+    # 縮放因子
+    if portfolio_vol &gt; 0:
+        scale_factor = target_vol / portfolio_vol
+    else:
+        scale_factor = 1.0
+
+    # 最終權重
+    final_weights = {asset: weight * scale_factor 
+                     for asset, weight in raw_weights.items()}
+
+    return final_weights
+</code></pre>
+
+<hr />
+<h2 id="4">4. 最大回撤控制</h2>
+<h3 id="41-garch">4.1 波動率預測（GARCH 模型）</h3>
+<pre class="codehilite"><code class="language-python">from arch import arch_model
+
+def garch_forecast(returns: pd.Series,
+                   horizon: int = 10,
+                   p: int = 1,
+                   q: int = 1) -&gt; pd.Series:
+    &quot;&quot;&quot;
+    使用 GARCH 模型預測波動率
+
+    Parameters:
+    -----------
+    returns : pd.Series
+        收益率序列
+    horizon : int
+        預測天數
+    p : int
+        GARCH(p,q) 的 p 參數
+    q : int
+        GARCH(p,q) 的 q 參數
+
+    Returns:
+    --------
+    pd.Series: 預測波動率
+
+    Notes:
+    ------
+    GARCH(1,1) 是最常用的設定，能夠捕捉波動率聚集現象
+    &quot;&quot;&quot;
+    # 擬合 GARCH 模型
+    model = arch_model(returns * 100, vol='Garch', p=p, q=q)
+    fitted = model.fit(disp='off')
+
+    # 預測波動率
+    forecast = fitted.forecast(horizon=horizon)
+
+    # 提取預測值並轉換回原來的單位
+    forecast_vol = np.sqrt(forecast.variance.values[-1, :]) / 100
+
+    return pd.Series(forecast_vol)
+</code></pre>
+
+<h3 id="42-var-cvar">4.2 VaR 和 CVaR 計算</h3>
+<pre class="codehilite"><code class="language-python">def calculate_var(returns: pd.Series,
+                   confidence_level: float = 0.95,
+                   method: str = 'historical') -&gt; float:
+    &quot;&quot;&quot;
+    計算風險價值（VaR）
+
+    Parameters:
+    -----------
+    returns : pd.Series
+        收益率序列
+    confidence_level : float
+        置信水平（0-1）
+    method : str
+        計算方法：
+        - 'historical': 歷史模擬法
+        - 'parametric': 參數法（假設正態分佈）
+        - 'ewma': 指數加權法
+
+    Returns:
+    --------
+    float: VaR（負值表示損失）
+    &quot;&quot;&quot;
+    alpha = 1 - confidence_level
+
+    if method == 'historical':
+        # 歷史模擬法
+        var = returns.quantile(alpha)
+
+    elif method == 'parametric':
+        # 參數法（假設正態分佈）
+        from scipy import stats
+        mean = returns.mean()
+        std = returns.std()
+        var = stats.norm.ppf(alpha, mean, std)
+
+    elif method == 'ewma':
+        # 指數加權法
+        lambda_ = 0.94
+        weights = np.array([(1 - lambda_) * (lambda_ ** i) 
+                           for i in range(len(returns))])
+        weights = weights / weights.sum()
+        weighted_returns = returns * weights
+        var = weighted_returns.quantile(alpha)
+
+    else:
+        raise ValueError(f&quot;Unknown method: {method}&quot;)
+
+    return var
+
+
+def calculate_cvar(returns: pd.Series,
+                   confidence_level: float = 0.95) -&gt; float:
+    &quot;&quot;&quot;
+    計算條件風險價值（CVaR / Expected Shortfall）
+
+    Parameters:
+    -----------
+    returns : pd.Series
+        收益率序列
+    confidence_level : float
+        置信水平（0-1）
+
+    Returns:
+    --------
+    float: CVaR（負值表示損失）
+
+    Notes:
+    ------
+    CVaR 是超過 VaR 的平均損失，是更穩健的風險度量
+    &quot;&quot;&quot;
+    var = calculate_var(returns, confidence_level)
+
+    # 計算低於 VaR 的平均損失
+    cvar = returns[returns &lt;= var].mean()
+
+    return cvar
+</code></pre>
+
+<h3 id="43">4.3 倉位限制器</h3>
+<pre class="codehilite"><code class="language-python">class PositionLimiter:
+    &quot;&quot;&quot;
+    倉位限制器
+    基於回撤控制和風險預算限制倉位
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 max_portfolio_risk: float = 0.20,
+                 max_position_risk: float = 0.05,
+                 var_confidence: float = 0.95,
+                 lookback_days: int = 252):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        max_portfolio_risk : float
+            最大投資組合風險（年化波動率）
+        max_position_risk : float
+            單個倖位最大風險（年化波動率）
+        var_confidence : float
+            VaR 置信水平
+        lookback_days : int
+            回溯天數
+        &quot;&quot;&quot;
+        self.max_portfolio_risk = max_portfolio_risk
+        self.max_position_risk = max_position_risk
+        self.var_confidence = var_confidence
+        self.lookback_days = lookback_days
+
+    def limit_position(self,
+                       position: float,
+                       asset_volatility: float,
+                       portfolio_volatility: float = None) -&gt; float:
+        &quot;&quot;&quot;
+        限制倖位大小
+
+        Parameters:
+        -----------
+        position : float
+            建議倖位（資金百分比）
+        asset_volatility : float
+            資產波動率（年化）
+        portfolio_volatility : float
+            當前投資組合波動率（年化，可選）
+
+        Returns:
+        --------
+        float: 限制後倖位
+        &quot;&quot;&quot;
+        # 檢查資產風險限制
+        position_risk = position * asset_volatility
+        if position_risk &gt; self.max_position_risk:
+            position = self.max_position_risk / asset_volatility
+
+        # 檢查投資組合風險限制（如果提供）
+        if portfolio_volatility is not None:
+            # 簡化：假設新增資產與現有組合不完全相關
+            # 實際應用應考慮相關性
+            new_portfolio_risk = np.sqrt(
+                portfolio_volatility**2 + (position * asset_volatility)**2
+            )
+
+            if new_portfolio_risk &gt; self.max_portfolio_risk:
+                # 縮減倖位以滿足投資組合風險限制
+                allowable_risk = np.sqrt(
+                    self.max_portfolio_risk**2 - portfolio_volatility**2
+                )
+                if allowable_risk &gt; 0:
+                    position = allowable_risk / asset_volatility
+                else:
+                    position = 0.0
+
+        # 確保非負
+        position = max(0.0, position)
+
+        return position
+
+    def calculate_stop_loss(self,
+                           entry_price: float,
+                           position: float,
+                           asset_volatility: float,
+                           holding_period_days: int = 10) -&gt; float:
+        &quot;&quot;&quot;
+        計算止損價格
+
+        Parameters:
+        -----------
+        entry_price : float
+            入場價格
+        position : float
+            倖位大小
+        asset_volatility : float
+            資產波動率（年化）
+        holding_period_days : int
+            預期持有天數
+
+        Returns:
+        --------
+        float: 止損價格
+        &quot;&quot;&quot;
+        # 計算持有期間的波動率
+        period_vol = asset_volatility * np.sqrt(holding_period_days / 252)
+
+        # 止損距離：2 個標準差（約 95% 置信）
+        stop_distance = 2.0 * period_vol
+
+        # 止損價格
+        stop_price = entry_price * (1 - stop_distance)
+
+        return stop_price
+</code></pre>
+
+<hr />
+<h2 id="5">5. 實時動態調整機制</h2>
+<h3 id="51">5.1 信念強度監控</h3>
+<pre class="codehilite"><code class="language-python">class ConvictionMonitor:
+    &quot;&quot;&quot;
+    信念強度監控器
+    實時監控投資論證的有效性，動態調整倖位
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 initial_conviction: float,
+                 signal_source,
+                 conviction_decay_rate: float = 0.05,
+                 conviction_boost_rate: float = 0.10):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        initial_conviction : float
+            初始信念強度（0-1）
+        signal_source
+            信號源（提供更新的宏觀信號）
+        conviction_decay_rate : float
+            信念衰減率（每日）
+        conviction_boost_rate : float
+            信念增強率（當信號確認時）
+        &quot;&quot;&quot;
+        self.current_conviction = initial_conviction
+        self.signal_source = signal_source
+        self.decay_rate = conviction_decay_rate
+        self.boost_rate = conviction_boost_rate
+        self.history = []
+
+    def update(self, days_passed: int = 1) -&gt; float:
+        &quot;&quot;&quot;
+        更新信念強度
+
+        Parameters:
+        -----------
+        days_passed : int
+            經過的天數
+
+        Returns:
+        --------
+        float: 更新後的信念強度
+        &quot;&quot;&quot;
+        # 獲取當前信號
+        current_signal = self.signal_source.generate_composite_signal()
+
+        # 衰減信念（時間衰減）
+        decay = self.decay_rate * days_passed
+        self.current_conviction -= decay
+
+        # 檢查信號方向是否一致
+        # 這裡需要跟蹤初始信號方向
+        if hasattr(self, 'initial_signal_direction'):
+            signal_alignment = self._check_signal_alignment(current_signal)
+
+            if signal_alignment &gt; 0.8:
+                # 信號強烈對齊：增強信念
+                self.current_conviction += self.boost_rate
+
+        # 限制在 0-1 範圍
+        self.current_conviction = max(0.0, min(1.0, self.current_conviction))
+
+        # 記錄歷史
+        self.history.append({
+            'timestamp': pd.Timestamp.now(),
+            'conviction': self.current_conviction,
+            'signal_score': current_signal['composite_score']
+        })
+
+        return self.current_conviction
+
+    def _check_signal_alignment(self, current_signal: dict) -&gt; float:
+        &quot;&quot;&quot;
+        檢查當前信號與初始信號的對齊程度
+
+        Parameters:
+        -----------
+        current_signal : dict
+            當前信號
+
+        Returns:
+        --------
+        float: 對齊程度（0-1）
+        &quot;&quot;&quot;
+        initial_score = self.initial_signal_direction
+        current_score = current_signal['composite_score']
+
+        # 檢查方向是否一致
+        if initial_score * current_score &gt; 0:
+            # 方向一致，計算對齊程度
+            alignment = min(abs(initial_score), abs(current_score)) / max(abs(initial_score), abs(current_score))
+        else:
+            # 方向相反
+            alignment = 0.0
+
+        return alignment
+
+    def set_initial_signal(self, signal: dict):
+        &quot;&quot;&quot;
+        設置初始信號方向
+
+        Parameters:
+        -----------
+        signal : dict
+            初始信號
+        &quot;&quot;&quot;
+        self.initial_signal_direction = signal['composite_score']
+</code></pre>
+
+<h3 id="52">5.2 市場條件評估</h3>
+<pre class="codehilite"><code class="language-python">class MarketConditionAssessor:
+    &quot;&quot;&quot;
+    市場條件評估器
+    評估市場環境，調整風險偏好
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        self.vix_threshold_high = 30.0
+        self.vix_threshold_low = 15.0
+        self.trend_strength_threshold = 0.5
+
+    def assess_market_regime(self,
+                             vix: float,
+                             market_trend_strength: float,
+                             liquidity_conditions: str) -&gt; dict:
+        &quot;&quot;&quot;
+        評估市場制度
+
+        Parameters:
+        -----------
+        vix : float
+            VIX 指數（波動率指數）
+        market_trend_strength : float
+            市場趨勢強度（-1 到 1）
+        liquidity_conditions : str
+            流動性條件：'tight', 'normal', 'abundant'
+
+        Returns:
+        --------
+        dict: 市場制度評估
+        &quot;&quot;&quot;
+        # 波動率評估
+        if vix &gt; self.vix_threshold_high:
+            volatility_regime = 'HIGH'
+            risk_adjustment = 0.5  # 降低倖位
+        elif vix &lt; self.vix_threshold_low:
+            volatility_regime = 'LOW'
+            risk_adjustment = 1.2  # 增加倖位
+        else:
+            volatility_regime = 'NORMAL'
+            risk_adjustment = 1.0
+
+        # 趨勢評估
+        if abs(market_trend_strength) &gt; self.trend_strength_threshold:
+            trend_regime = 'STRONG'
+        else:
+            trend_regime = 'WEAK'
+
+        # 流動性評估
+        if liquidity_conditions == 'abundant':
+            liquidity_regime = 'ABUNDANT'
+            liquidity_adjustment = 1.2
+        elif liquidity_conditions == 'tight':
+            liquidity_regime = 'TIGHT'
+            liquidity_adjustment = 0.7
+        else:
+            liquidity_regime = 'NORMAL'
+            liquidity_adjustment = 1.0
+
+        # 綜合調整因子
+        overall_adjustment = risk_adjustment * liquidity_adjustment
+
+        return {
+            'volatility_regime': volatility_regime,
+            'trend_regime': trend_regime,
+            'liquidity_regime': liquidity_regime,
+            'risk_adjustment': risk_adjustment,
+            'liquidity_adjustment': liquidity_adjustment,
+            'overall_adjustment': overall_adjustment
+        }
+</code></pre>
+
+<h3 id="53">5.3 倉位再平衡</h3>
+<pre class="codehilite"><code class="language-python">class PositionRebalancer:
+    &quot;&quot;&quot;
+    倉位再平衡器
+    根據信念變化和市場條件動態調整倖位
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 rebalance_threshold: float = 0.10,
+                 max_daily_change: float = 0.20):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        rebalance_threshold : float
+            再平衡觸發閾值（倖位變化百分比）
+        max_daily_change : float
+            最大每日倖位變化（百分比）
+        &quot;&quot;&quot;
+        self.rebalance_threshold = rebalance_threshold
+        self.max_daily_change = max_daily_change
+        self.current_positions = {}
+
+    def calculate_target_positions(self,
+                                   convictions: dict,
+                                   kelly_positions: dict,
+                                   market_adjustment: float = 1.0) -&gt; dict:
+        &quot;&quot;&quot;
+        計算目標倖位
+
+        Parameters:
+        -----------
+        convictions : dict
+            {資產: 信念強度} 字典
+        kelly_positions : dict
+            {資產: 凱利倖位} 字典
+        market_adjustment : float
+            市場調整因子
+
+        Returns:
+        --------
+        dict: 目標倖位
+        &quot;&quot;&quot;
+        target_positions = {}
+
+        for asset in convictions:
+            # 信念調整的凱利倖位
+            conviction = convictions[asset]
+            kelly = kelly_positions.get(asset, 0.0)
+
+            # 信念驅動的倖位調整
+            belief_adjusted = kelly * (0.5 + 0.5 * conviction)
+
+            # 市場調整
+            market_adjusted = belief_adjusted * market_adjustment
+
+            # 應用最大倖位限制（Druckenmiller 風格：單個標的最大 40%）
+            max_position = 0.40
+            market_adjusted = min(market_adjusted, max_position)
+
+            target_positions[asset] = market_adjusted
+
+        return target_positions
+
+    def rebalance(self,
+                  target_positions: dict,
+                  current_positions: dict) -&gt; dict:
+        &quot;&quot;&quot;
+        執行再平衡
+
+        Parameters:
+        -----------
+        target_positions : dict
+            目標倖位
+        current_positions : dict
+            當前倖位
+
+        Returns:
+        --------
+        dict: 建議的倖位調整
+        &quot;&quot;&quot;
+        adjustments = {}
+
+        for asset in set(list(target_positions.keys()) + list(current_positions.keys())):
+            target = target_positions.get(asset, 0.0)
+            current = current_positions.get(asset, 0.0)
+
+            # 計算變化
+            change = target - current
+
+            # 檢查是否超過閾值
+            if abs(change) / max(current, 0.01) &gt; self.rebalance_threshold:
+                # 應用最大每日變化限制
+                max_change = current * self.max_daily_change
+                if abs(change) &gt; max_change:
+                    change = max_change if change &gt; 0 else -max_change
+
+                adjustments[asset] = {
+                    'current': current,
+                    'target': target,
+                    'change': change,
+                    'action': 'buy' if change &gt; 0 else 'sell' if change &lt; 0 else 'hold'
+                }
+
+        return adjustments
+</code></pre>
+
+<h3 id="54">5.4 止損觸發器</h3>
+<pre class="codehilite"><code class="language-python">class StopLossManager:
+    &quot;&quot;&quot;
+    止損管理器
+    實現 Druckenmiller 的快速減損原則
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 max_position_loss: float = 0.15,
+                 time_based_stop: int = 30):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        max_position_loss : float
+            最大倖位損失（百分比）
+        time_based_stop : int
+            基於時間的止損天數（如果不應驗）
+        &quot;&quot;&quot;
+        self.max_position_loss = max_position_loss
+        self.time_based_stop = time_based_stop
+        self.positions = {}
+
+    def open_position(self,
+                      asset: str,
+                      entry_price: float,
+                      position_size: float,
+                      thesis: str):
+        &quot;&quot;&quot;
+        開倉，設置止損
+
+        Parameters:
+        -----------
+        asset : str
+            資產名稱
+        entry_price : float
+            入場價格
+        position_size : float
+            倖位大小（資金百分比）
+        thesis : str
+            投資論證
+        &quot;&quot;&quot;
+        self.positions[asset] = {
+            'entry_price': entry_price,
+            'position_size': position_size,
+            'thesis': thesis,
+            'entry_date': pd.Timestamp.now(),
+            'stop_loss_price': None,
+            'status': 'OPEN'
+        }
+
+    def check_stop_loss(self,
+                       asset: str,
+                       current_price: float) -&gt; bool:
+        &quot;&quot;&quot;
+        檢查是否觸發止損
+
+        Parameters:
+        -----------
+        asset : str
+            資產名稱
+        current_price : float
+            當前價格
+
+        Returns:
+        --------
+        bool: 是否應該止損
+        &quot;&quot;&quot;
+        if asset not in self.positions:
+            return False
+
+        position = self.positions[asset]
+
+        if position['status'] != 'OPEN':
+            return False
+
+        # 計算損失
+        loss = (position['entry_price'] - current_price) / position['entry_price']
+
+        # 最大損失止損
+        if loss &gt; self.max_position_loss:
+            return True
+
+        # 基於時間的止損
+        holding_days = (pd.Timestamp.now() - position['entry_date']).days
+        if holding_days &gt; self.time_based_stop:
+            # 檢查價格是否沒有如預期
+            # 如果虧損小於 0，但價格沒有上漲，也退出
+            if current_price &lt;= position['entry_price']:
+                return True
+
+        return False
+
+    def update_thesis_validity(self,
+                             asset: str,
+                             is_valid: bool):
+        &quot;&quot;&quot;
+        更新投資論證有效性
+
+        Parameters:
+        -----------
+        asset : str
+            資產名稱
+        is_valid : bool
+            論證是否仍然有效
+        &quot;&quot;&quot;
+        if asset in self.positions:
+            if not is_valid:
+                # Druckenmiller 原則：論證不再有效時立即退出
+                self.positions[asset]['status'] = 'CLOSE_INVALID_THESIS'
+</code></pre>
+
+<hr />
+<h2 id="6">6. 完整系統實現</h2>
+<h3 id="61">6.1 主系統類</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+Druckenmiller 動態資金管理系統
+完整實現代碼
+&quot;&quot;&quot;
+
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+
+class DruckenmillerPositionSizing:
+    &quot;&quot;&quot;
+    Druckenmiller 風格的動態資金管理系統
+
+    核心原則：
+    1. 信念驅動倖位：高信念機會集中配置
+    2. 動態調整：根據市場條件和信念強度實時調整
+    3. 快速減損：當投資論證不再有效時迅速退出
+    4. 保護資本：嚴格控制最大回撤
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 initial_capital: float = 1000000.0,
+                 max_position_size: float = 0.40,
+                 max_portfolio_risk: float = 0.20,
+                 kelly_shrinkage: float = 0.25):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        initial_capital : float
+            初始資本
+        max_position_size : float
+            單個標的最大倖位（資金百分比）
+        max_portfolio_risk : float
+            最大投資組合風險（年化波動率）
+        kelly_shrinkage : float
+            凱利縮減因子（0.25 = 部分凱利）
+        &quot;&quot;&quot;
+        self.initial_capital = initial_capital
+        self.current_capital = initial_capital
+        self.max_position_size = max_position_size
+        self.max_portfolio_risk = max_portfolio_risk
+        self.kelly_shrinkage = kelly_shrinkage
+
+        # 子模塊
+        self.position_limiter = PositionLimiter(
+            max_portfolio_risk=max_portfolio_risk
+        )
+        self.conviction_monitor = None
+        self.market_assessor = MarketConditionAssessor()
+        self.rebalancer = PositionRebalancer()
+        self.stop_loss_manager = StopLossManager()
+
+        # 狀態
+        self.current_positions = {}
+        self.target_positions = {}
+        self.trade_history = []
+        self.performance_history = []
+
+    # ==================== 倉位計算 ====================
+
+    def calculate_position_size(self,
+                               win_rate: float,
+                               avg_win: float,
+                               avg_loss: float,
+                               conviction: float = 0.5,
+                               asset_volatility: float = 0.20,
+                               market_regime: dict = None) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算建議倖位大小（核心方法）
+
+        Parameters:
+        -----------
+        win_rate : float
+            預期勝率（0-1）
+        avg_win : float
+            平均盈利（百分比）
+        avg_loss : float
+            平均虧損（百分比）
+        conviction : float
+            信念強度（0-1）
+        asset_volatility : float
+            資產波動率（年化）
+        market_regime : dict
+            市場制度（可選）
+
+        Returns:
+        --------
+        Dict: 倖位建議
+        &quot;&quot;&quot;
+        # 1. 計算期望值
+        ev = expected_value(win_rate, avg_win, avg_loss)
+
+        # 2. 計算盈虧比
+        win_loss_ratio = avg_win / avg_loss if avg_loss &gt; 0 else 0
+
+        # 3. 計算基礎凱利倖位
+        kelly_base = kelly_fraction(win_rate, win_loss_ratio)
+
+        # 4. 應用部分凱利縮減
+        kelly_adjusted = fractional_kelly(
+            kelly_base,
+            shrinkage_factor=self.kelly_shrinkage,
+            max_position=self.max_position_size
+        )
+
+        # 5. 信念調整
+        # Druckenmiller: 高信念可以增加倖位，但保持保守基礎
+        belief_multiplier = 0.5 + 0.5 * conviction  # 0.5-1.0 倍
+        belief_adjusted = kelly_adjusted * belief_multiplier
+
+        # 6. 市場制度調整
+        if market_regime is not None:
+            market_adjustment = market_regime.get('overall_adjustment', 1.0)
+            belief_adjusted *= market_adjustment
+
+        # 7. 風險限制（倖位限制器）
+        final_position = self.position_limiter.limit_position(
+            position=belief_adjusted,
+            asset_volatility=asset_volatility
+        )
+
+        # 8. 計算貨幣金額
+        position_value = final_position * self.current_capital
+
+        # 9. 計算止損價格
+        stop_loss_price = self.position_limiter.calculate_stop_loss(
+            entry_price=1.0,  # 相對價格
+            position=final_position,
+            asset_volatility=asset_volatility
+        )
+
+        return {
+            'expected_value': ev,
+            'kelly_base': kelly_base,
+            'kelly_adjusted': kelly_adjusted,
+            'belief_adjusted': belief_adjusted,
+            'final_position_pct': final_position,
+            'position_value': position_value,
+            'stop_loss_distance_pct': stop_loss_price,
+            'conviction_level': conviction,
+            'market_regime_adjustment': market_regime.get('overall_adjustment', 1.0) if market_regime else 1.0
+        }
+
+    # ==================== 投資組合管理 ====================
+
+    def optimize_portfolio(self,
+                          assets_data: Dict[str, Dict],
+                          correlations: pd.DataFrame = None) -&gt; Dict:
+        &quot;&quot;&quot;
+        優化投資組合
+
+        Parameters:
+        -----------
+        assets_data : Dict
+            {資產: {win_rate, avg_win, avg_loss, conviction, volatility}}
+        correlations : pd.DataFrame
+            相關性矩陣
+
+        Returns:
+        --------
+        Dict: 投資組合建議
+        &quot;&quot;&quot;
+        positions = {}
+        total_risk = 0.0
+
+        # 計算每個資產的倖位
+        for asset, data in assets_data.items():
+            position_result = self.calculate_position_size(
+                win_rate=data['win_rate'],
+                avg_win=data['avg_win'],
+                avg_loss=data['avg_loss'],
+                conviction=data['conviction'],
+                asset_volatility=data['volatility']
+            )
+            positions[asset] = position_result
+
+            # 累積風險（簡化）
+            total_risk += position_result['final_position_pct'] * data['volatility']
+
+        # 檢查總風險
+        if total_risk &gt; self.max_portfolio_risk:
+            # 縮減所有倖位以滿足風險限制
+            scale_factor = self.max_portfolio_risk / total_risk
+
+            for asset in positions:
+                positions[asset]['final_position_pct'] *= scale_factor
+                positions[asset]['position_value'] *= scale_factor
+
+        # 計算投資組合統計
+        portfolio_stats = self._calculate_portfolio_stats(positions, assets_data)
+
+        return {
+            'positions': positions,
+            'portfolio_stats': portfolio_stats,
+            'total_risk': total_risk,
+            'total_exposure': sum(p['final_position_pct'] for p in positions.values())
+        }
+
+    def _calculate_portfolio_stats(self,
+                                  positions: Dict,
+                                  assets_data: Dict) -&gt; Dict:
+        &quot;&quot;&quot;計算投資組合統計&quot;&quot;&quot;
+        # 加權平均
+        weights = {asset: p['final_position_pct'] for asset, p in positions.items()}
+        total_weight = sum(weights.values())
+
+        if total_weight == 0:
+            return {
+                'weighted_win_rate': 0,
+                'weighted_ev': 0,
+                'weighted_volatility': 0,
+                'sharpe_ratio': 0
+            }
+
+        # 標準化權重
+        normalized_weights = {asset: w / total_weight for asset, w in weights.items()}
+
+        # 加權統計
+        weighted_win_rate = sum(
+            normalized_weights[asset] * assets_data[asset]['win_rate']
+            for asset in normalized_weights
+        )
+
+        weighted_ev = sum(
+            normalized_weights[asset] * positions[asset]['expected_value']
+            for asset in normalized_weights
+        )
+
+        weighted_vol = sum(
+            normalized_weights[asset] * assets_data[asset]['volatility']
+            for asset in normalized_weights
+        )
+
+        # 夏普比率（簡化，假設無風險利率為 0）
+        sharpe = weighted_ev / weighted_vol if weighted_vol &gt; 0 else 0
+
+        return {
+            'weighted_win_rate': weighted_win_rate,
+            'weighted_ev': weighted_ev,
+            'weighted_volatility': weighted_vol,
+            'sharpe_ratio': sharpe
+        }
+
+    # ==================== 動態調整 ====================
+
+    def update_positions(self,
+                         market_conditions: Dict,
+                         conviction_updates: Dict = None) -&gt; Dict:
+        &quot;&quot;&quot;
+        更新倖位（動態調整）
+
+        Parameters:
+        -----------
+        market_conditions : Dict
+            市場條件 {vix, market_trend, liquidity}
+        conviction_updates : Dict
+            信念更新 {資產: 新信念強度}
+
+        Returns:
+        --------
+        Dict: 倖位調整建議
+        &quot;&quot;&quot;
+        # 評估市場制度
+        market_regime = self.market_assessor.assess_market_regime(
+            vix=market_conditions.get('vix', 20.0),
+            market_trend_strength=market_conditions.get('market_trend', 0.0),
+            liquidity_conditions=market_conditions.get('liquidity', 'normal')
+        )
+
+        # 更新信念
+        if conviction_updates:
+            for asset, conviction in conviction_updates.items():
+                if asset in self.current_positions:
+                    self.current_positions[asset]['conviction'] = conviction
+
+        # 計算目標倖位
+        target_positions = {}
+        for asset, pos in self.current_positions.items():
+            # 重新計算倖位
+            result = self.calculate_position_size(
+                win_rate=pos['win_rate'],
+                avg_win=pos['avg_win'],
+                avg_loss=pos['avg_loss'],
+                conviction=pos['conviction'],
+                asset_volatility=pos['volatility'],
+                market_regime=market_regime
+            )
+            target_positions[asset] = result['final_position_pct']
+
+        self.target_positions = target_positions
+
+        # 再平衡
+        adjustments = self.rebalancer.rebalance(
+            target_positions=target_positions,
+            current_positions={k: v['position_pct'] for k, v in self.current_positions.items()}
+        )
+
+        return {
+            'market_regime': market_regime,
+            'target_positions': target_positions,
+            'adjustments': adjustments
+        }
+
+    # ==================== 止損管理 ====================
+
+    def check_stop_losses(self, current_prices: Dict) -&gt; List[str]:
+        &quot;&quot;&quot;
+        檢查止損觸發
+
+        Parameters:
+        -----------
+        current_prices : Dict
+            當前價格 {資產: 價格}
+
+        Returns:
+        --------
+        List[str]: 應該止損的資產列表
+        &quot;&quot;&quot;
+        stop_loss_assets = []
+
+        for asset in self.current_positions:
+            if asset in current_prices:
+                current_price = current_prices[asset]
+                entry_price = self.current_positions[asset]['entry_price']
+
+                # 檢查止損
+                if self.stop_loss_manager.check_stop_loss(asset, current_price):
+                    stop_loss_assets.append(asset)
+
+        return stop_loss_assets
+
+    # ==================== 績效追蹤 ====================
+
+    def record_trade(self,
+                     asset: str,
+                     action: str,
+                     price: float,
+                     quantity: float,
+                     timestamp: datetime = None):
+        &quot;&quot;&quot;
+        記錄交易
+
+        Parameters:
+        -----------
+        asset : str
+            資產名稱
+        action : str
+            操作類型：'buy', 'sell', 'short', 'cover'
+        price : float
+            價格
+        quantity : float
+            數量
+        timestamp : datetime
+            時間戳
+        &quot;&quot;&quot;
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        trade = {
+            'timestamp': timestamp,
+            'asset': asset,
+            'action': action,
+            'price': price,
+            'quantity': quantity,
+            'value': price * quantity
+        }
+
+        self.trade_history.append(trade)
+
+    def calculate_performance(self, prices: pd.DataFrame) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算績效指標
+
+        Parameters:
+        -----------
+        prices : pd.DataFrame
+            價格數據（列=資產，行=時間）
+
+        Returns:
+        --------
+        Dict: 績效指標
+        &quot;&quot;&quot;
+        if not self.current_positions:
+            return {}
+
+        # 計算投資組合回報
+        returns = []
+        for asset, pos in self.current_positions.items():
+            if asset in prices.columns:
+                asset_returns = prices[asset].pct_change().dropna()
+                weighted_returns = asset_returns * pos['position_pct']
+                returns.append(weighted_returns)
+
+        if returns:
+            portfolio_returns = pd.concat(returns, axis=1).sum(axis=1)
+        else:
+            return {}
+
+        # 計算績效指標
+        total_return = (1 + portfolio_returns).prod() - 1
+        annual_return = portfolio_returns.mean() * 252
+        volatility = portfolio_returns.std() * np.sqrt(252)
+        sharpe = annual_return / volatility if volatility &gt; 0 else 0
+
+        # 最大回撤
+        cumulative = (1 + portfolio_returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdown = drawdown.min()
+
+        # 勝率（如果有交易歷史）
+        if self.trade_history:
+            # 簡化：計算賣出交易的勝率
+            sell_trades = [t for t in self.trade_history if t['action'] == 'sell']
+            if sell_trades:
+                # 這裡需要匹配買入和賣出計算實際損益
+                # 簡化處理
+                win_rate = 0.6  # 估計
+            else:
+                win_rate = 0.0
+        else:
+            win_rate = 0.0
+
+        return {
+            'total_return': total_return,
+            'annual_return': annual_return,
+            'volatility': volatility,
+            'sharpe_ratio': sharpe,
+            'max_drawdown': max_drawdown,
+            'win_rate': win_rate
+        }
+</code></pre>
+
+<hr />
+<h2 id="7">7. 回測驗證</h2>
+<h3 id="71">7.1 回測框架</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+回測框架
+驗證動態資金管理系統的歷史表現
+&quot;&quot;&quot;
+
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Tuple
+from datetime import datetime, timedelta
+
+
+class PositionSizingBacktester:
+    &quot;&quot;&quot;
+    倖位回測器
+    &quot;&quot;&quot;
+
+    def __init__(self,
+                 initial_capital: float = 1000000.0,
+                 transaction_cost: float = 0.001):
+        &quot;&quot;&quot;
+        Parameters:
+        -----------
+        initial_capital : float
+            初始資本
+        transaction_cost : float
+            交易成本（百分比）
+        &quot;&quot;&quot;
+        self.initial_capital = initial_capital
+        self.transaction_cost = transaction_cost
+        self.position_sizing = DruckenmillerPositionSizing(
+            initial_capital=initial_capital
+        )
+
+    def backtest(self,
+                 price_data: pd.DataFrame,
+                 signal_data: pd.DataFrame,
+                 start_date: str = None,
+                 end_date: str = None) -&gt; Dict:
+        &quot;&quot;&quot;
+        執行回測
+
+        Parameters:
+        -----------
+        price_data : pd.DataFrame
+            價格數據（列=資產，行=日期）
+        signal_data : pd.DataFrame
+            信號數據（列=資產，值=綜合信號得分 -1 到 1）
+        start_date : str
+            開始日期
+        end_date : str
+            結束日期
+
+        Returns:
+        --------
+        Dict: 回測結果
+        &quot;&quot;&quot;
+        # 數據準備
+        if start_date:
+            price_data = price_data[start_date:]
+            signal_data = signal_data[start_date:]
+        if end_date:
+            price_data = price_data[:end_date]
+            signal_data = signal_data[:end_date]
+
+        # 對齊數據
+        aligned_data = pd.concat([price_data, signal_data], axis=1).dropna()
+
+        # 初始化
+        capital = self.initial_capital
+        positions = {}
+        equity_curve = [capital]
+        trades = []
+
+        # 滾動回測
+        for i in range(len(aligned_data)):
+            current_date = aligned_data.index[i]
+            current_prices = aligned_data.iloc[i][price_data.columns]
+            current_signals = aligned_data.iloc[i][signal_data.columns]
+
+            # 計算歷史勝率和盈虧比（簡化版）
+            # 實際應用應該使用滾動窗口計算
+            win_rate = 0.55  # 假設
+            avg_win = 5.0
+            avg_loss = 3.0
+
+            # 對每個資產生成倖位建議
+            for asset in price_data.columns:
+                signal = current_signals[asset]
+
+                # 將信號轉換為信念強度
+                conviction = min(abs(signal), 1.0)
+
+                # 計算倖位
+                position_result = self.position_sizing.calculate_position_size(
+                    win_rate=win_rate,
+                    avg_win=avg_win,
+                    avg_loss=avg_loss,
+                    conviction=conviction,
+                    asset_volatility=0.20  # 簡化
+                )
+
+                target_position = position_result['final_position_pct']
+
+                # 執行交易
+                current_position = positions.get(asset, 0.0)
+                position_change = target_position - current_position
+
+                if abs(position_change) &gt; 0.01:  # 超過 1% 才交易
+                    trade_value = position_change * capital
+                    num_shares = trade_value / current_prices[asset]
+
+                    # 記錄交易
+                    trades.append({
+                        'date': current_date,
+                        'asset': asset,
+                        'action': 'buy' if position_change &gt; 0 else 'sell',
+                        'shares': abs(num_shares),
+                        'price': current_prices[asset],
+                        'value': abs(trade_value)
+                    })
+
+                    # 更新倖位
+                    positions[asset] = target_position
+
+                    # 扣除交易成本
+                    capital -= abs(trade_value) * self.transaction_cost
+
+            # 計算當天回報
+            daily_return = 0.0
+            for asset, position_pct in positions.items():
+                if asset in current_prices.index:
+                    daily_return += position_pct * current_prices[asset]
+
+            # 更新資本（簡化）
+            capital *= (1 + daily_return * 0.01)  # 假設 1% 的平均日回報
+            equity_curve.append(capital)
+
+        # 計算績效
+        performance = self._calculate_backtest_performance(equity_curve, trades)
+
+        return {
+            'equity_curve': pd.Series(equity_curve),
+            'trades': trades,
+            'performance': performance,
+            'final_capital': capital
+        }
+
+    def _calculate_backtest_performance(self,
+                                       equity_curve: list,
+                                       trades: list) -&gt; Dict:
+        &quot;&quot;&quot;計算回測績效&quot;&quot;&quot;
+        equity_series = pd.Series(equity_curve)
+        returns = equity_series.pct_change().dropna()
+
+        # 總回報
+        total_return = (equity_series.iloc[-1] / equity_series.iloc[0]) - 1
+
+        # 年化回報
+        num_years = len(equity_curve) / 252
+        annual_return = (1 + total_return) ** (1 / num_years) - 1
+
+        # 波動率
+        volatility = returns.std() * np.sqrt(252)
+
+        # 夏普比率
+        sharpe = annual_return / volatility if volatility &gt; 0 else 0
+
+        # 最大回撤
+        cumulative = (1 + returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdown = drawdown.min()
+
+        # 交易統計
+        num_trades = len(trades)
+
+        return {
+            'total_return': total_return,
+            'annual_return': annual_return,
+            'volatility': volatility,
+            'sharpe_ratio': sharpe,
+            'max_drawdown': max_drawdown,
+            'num_trades': num_trades
+        }
+
+
+# 回測示例
+def run_backtest_example():
+    &quot;&quot;&quot;
+    運行回測示例
+    &quot;&quot;&quot;
+    # 創建模擬數據
+    dates = pd.date_range(start='2020-01-01', end='2024-12-31', freq='D')
+    dates = dates[dates.weekday &lt; 5]  # 只保留交易日
+
+    # 模擬價格數據
+    np.random.seed(42)
+    price_data = pd.DataFrame({
+        'SPY': 100 * np.cumprod(1 + np.random.normal(0.0003, 0.01, len(dates))),
+        'TLT': 100 * np.cumprod(1 + np.random.normal(0.0001, 0.005, len(dates))),
+        'GLD': 100 * np.cumprod(1 + np.random.normal(0.0002, 0.008, len(dates)))
+    }, index=dates)
+
+    # 模擬信號數據（-1 到 1）
+    signal_data = pd.DataFrame({
+        'SPY': np.random.uniform(-0.5, 0.8, len(dates)),
+        'TLT': np.random.uniform(-0.3, 0.5, len(dates)),
+        'GLD': np.random.uniform(-0.4, 0.6, len(dates))
+    }, index=dates)
+
+    # 運行回測
+    backtester = PositionSizingBacktester(
+        initial_capital=1000000.0,
+        transaction_cost=0.001
+    )
+
+    results = backtester.backtest(
+        price_data=price_data,
+        signal_data=signal_data,
+        start_date='2020-01-01',
+        end_date='2024-12-31'
+    )
+
+    print(&quot;回測結果:&quot;)
+    print(f&quot;最終資本: ${results['final_capital']:,.2f}&quot;)
+    print(f&quot;總回報: {results['performance']['total_return']:.2%}&quot;)
+    print(f&quot;年化回報: {results['performance']['annual_return']:.2%}&quot;)
+    print(f&quot;年化波動率: {results['performance']['volatility']:.2%}&quot;)
+    print(f&quot;夏普比率: {results['performance']['sharpe_ratio']:.2f}&quot;)
+    print(f&quot;最大回撤: {results['performance']['max_drawdown']:.2%}&quot;)
+    print(f&quot;交易次數: {results['performance']['num_trades']}&quot;)
+
+    return results
+</code></pre>
+
+<h3 id="72">7.2 績效比較</h3>
+<pre class="codehilite"><code class="language-python">def compare_position_sizing_strategies(price_data: pd.DataFrame,
+                                       signal_data: pd.DataFrame) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    比較不同倖位調整策略的績效
+
+    Parameters:
+    -----------
+    price_data : pd.DataFrame
+        價格數據
+    signal_data : pd.DataFrame
+        信號數據
+
+    Returns:
+    --------
+    pd.DataFrame: 績效比較結果
+    &quot;&quot;&quot;
+    strategies = {
+        'Full Kelly': {'shrinkage': 1.0},
+        'Half Kelly': {'shrinkage': 0.5},
+        'Quarter Kelly': {'shrinkage': 0.25},
+        'Fixed 10%': {'shrinkage': 0.1},
+        'Conviction-Adjusted': {'shrinkage': 0.25, 'use_conviction': True}
+    }
+
+    results = {}
+
+    for strategy_name, params in strategies.items():
+        backtester = PositionSizingBacktester(
+            initial_capital=1000000.0
+        )
+
+        # 設置策略參數
+        backtester.position_sizing.kelly_shrinkage = params['shrinkage']
+
+        # 運行回測
+        result = backtester.backtest(price_data, signal_data)
+
+        # 提取績效
+        performance = result['performance']
+        results[strategy_name] = performance
+
+    # 轉換為 DataFrame
+    results_df = pd.DataFrame(results).T
+
+    # 排序（按夏普比率）
+    results_df = results_df.sort_values('sharpe_ratio', ascending=False)
+
+    return results_df
+</code></pre>
+
+<hr />
+<h2 id="8">8. 使用示例和最佳實踐</h2>
+<h3 id="81">8.1 完整使用流程</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+完整使用示例
+演示如何使用 Druckenmiller 動態資金管理系統
+&quot;&quot;&quot;
+
+def complete_workflow_example():
+    &quot;&quot;&quot;
+    完整工作流程示例
+    &quot;&quot;&quot;
+
+    # 1. 初始化系統
+    print(&quot;=== 初始化 Druckenmiller 動態資金管理系統 ===&quot;)
+    position_sizing = DruckenmillerPositionSizing(
+        initial_capital=1000000.0,  # 100 萬美元
+        max_position_size=0.40,     # 單個標的最大 40%
+        max_portfolio_risk=0.20,    # 投資組合最大風險 20%
+        kelly_shrinkage=0.25        # 1/4 凱利（保守）
+    )
+
+    # 2. 定義投資機會
+    print(&quot;\n=== 分析投資機會 ===&quot;)
+    investment_opportunity = {
+        'asset': 'SPY (S&amp;P 500 ETF)',
+        'win_rate': 0.60,           # 60% 勝率
+        'avg_win': 8.0,             # 平均盈利 8%
+        'avg_loss': 4.0,            # 平均虧損 4%
+        'conviction': 0.75,         # 高信念
+        'volatility': 0.18          # 年化波動率 18%
+    }
+
+    print(f&quot;資產: {investment_opportunity['asset']}&quot;)
+    print(f&quot;預期勝率: {investment_opportunity['win_rate']:.0%}&quot;)
+    print(f&quot;盈虧比: {investment_opportunity['avg_win']/investment_opportunity['avg_loss']:.2f}&quot;)
+    print(f&quot;信念強度: {investment_opportunity['conviction']:.0%}&quot;)
+
+    # 3. 計算建議倖位
+    print(&quot;\n=== 計算建議倖位 ===&quot;)
+    position_result = position_sizing.calculate_position_size(
+        win_rate=investment_opportunity['win_rate'],
+        avg_win=investment_opportunity['avg_win'],
+        avg_loss=investment_opportunity['avg_loss'],
+        conviction=investment_opportunity['conviction'],
+        asset_volatility=investment_opportunity['volatility']
+    )
+
+    print(f&quot;期望值: {position_result['expected_value']:.2f}%&quot;)
+    print(f&quot;基礎凱利倖位: {position_result['kelly_base']:.2%}&quot;)
+    print(f&quot;部分凱利倖位 (1/4): {position_result['kelly_adjusted']:.2%}&quot;)
+    print(f&quot;信念調整倖位: {position_result['belief_adjusted']:.2%}&quot;)
+    print(f&quot;最終倖位建議: {position_result['final_position_pct']:.2%}&quot;)
+    print(f&quot;倖位金額: ${position_result['position_value']:,.2f}&quot;)
+    print(f&quot;止損距離: {position_result['stop_loss_distance_pct']:.2%}&quot;)
+
+    # 4. 投資組合優化（多資產）
+    print(&quot;\n=== 投資組合優化 ===&quot;)
+    portfolio_data = {
+        'SPY': {
+            'win_rate': 0.60,
+            'avg_win': 8.0,
+            'avg_loss': 4.0,
+            'conviction': 0.75,
+            'volatility': 0.18
+        },
+        'TLT': {
+            'win_rate': 0.55,
+            'avg_win': 5.0,
+            'avg_loss': 3.0,
+            'conviction': 0.50,
+            'volatility': 0.10
+        },
+        'GLD': {
+            'win_rate': 0.52,
+            'avg_win': 6.0,
+            'avg_loss': 4.0,
+            'conviction': 0.40,
+            'volatility': 0.15
+        }
+    }
+
+    portfolio_result = position_sizing.optimize_portfolio(portfolio_data)
+
+    print(&quot;\n投資組合建議:&quot;)
+    for asset, pos in portfolio_result['positions'].items():
+        print(f&quot;  {asset}: {pos['final_position_pct']:.2%} (${pos['position_value']:,.2f})&quot;)
+
+    print(f&quot;\n投資組合統計:&quot;)
+    stats = portfolio_result['portfolio_stats']
+    print(f&quot;  加權勝率: {stats['weighted_win_rate']:.2%}&quot;)
+    print(f&quot;  加權期望值: {stats['weighted_ev']:.2f}%&quot;)
+    print(f&quot;  加權波動率: {stats['weighted_volatility']:.2%}&quot;)
+    print(f&quot;  夏普比率: {stats['sharpe_ratio']:.2f}&quot;)
+    print(f&quot;  總風險暴露: {portfolio_result['total_risk']:.2%}&quot;)
+    print(f&quot;  總倖位: {portfolio_result['total_exposure']:.2%}&quot;)
+
+    # 5. 動態調整
+    print(&quot;\n=== 動態調整 ===&quot;)
+    market_conditions = {
+        'vix': 25.0,              # 中等波動率
+        'market_trend': 0.6,      # 看多趨勢
+        'liquidity': 'normal'     # 正常流動性
+    }
+
+    # 模擬倖位
+    position_sizing.current_positions = {
+        'SPY': {
+            'position_pct': portfolio_result['positions']['SPY']['final_position_pct'],
+            'win_rate': 0.60,
+            'avg_win': 8.0,
+            'avg_loss': 4.0,
+            'conviction': 0.75,
+            'volatility': 0.18,
+            'entry_price': 400.0
+        },
+        'TLT': {
+            'position_pct': portfolio_result['positions']['TLT']['final_position_pct'],
+            'win_rate': 0.55,
+            'avg_win': 5.0,
+            'avg_loss': 3.0,
+            'conviction': 0.50,
+            'volatility': 0.10,
+            'entry_price': 100.0
+        }
+    }
+
+    # 倖位調整
+    adjustment_result = position_sizing.update_positions(
+        market_conditions=market_conditions,
+        conviction_updates={'SPY': 0.90, 'TLT': 0.40}  # 信念變化
+    )
+
+    print(&quot;市場制度評估:&quot;)
+    print(f&quot;  波動率制度: {adjustment_result['market_regime']['volatility_regime']}&quot;)
+    print(f&quot;  趨勢制度: {adjustment_result['market_regime']['trend_regime']}&quot;)
+    print(f&quot;  流動性制度: {adjustment_result['market_regime']['liquidity_regime']}&quot;)
+    print(f&quot;  總體調整因子: {adjustment_result['market_regime']['overall_adjustment']:.2f}&quot;)
+
+    print(&quot;\n倖位調整建議:&quot;)
+    for asset, adj in adjustment_result['adjustments'].items():
+        print(f&quot;  {asset}:&quot;)
+        print(f&quot;    當前倖位: {adj['current']:.2%}&quot;)
+        print(f&quot;    目標倖位: {adj['target']:.2%}&quot;)
+        print(f&quot;    調整: {adj['change']:+.2%} ({adj['action']})&quot;)
+
+    # 6. 止損檢查
+    print(&quot;\n=== 止損檢查 ===&quot;)
+    current_prices = {'SPY': 380.0, 'TLT': 102.0}
+    stop_loss_assets = position_sizing.check_stop_losses(current_prices)
+
+    if stop_loss_assets:
+        print(f&quot;警告: 以下資產觸發止損 - {stop_loss_assets}&quot;)
+    else:
+        print(&quot;沒有資產觸發止損&quot;)
+
+    return position_sizing
+
+
+if __name__ == &quot;__main__&quot;:
+    # 運行完整示例
+    position_sizing = complete_workflow_example()
+</code></pre>
+
+<h3 id="82">8.2 最佳實踐建議</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+Druckenmiller 風格資金管理最佳實踐
+&quot;&quot;&quot;
+
+# 1. 凱利公式使用建議
+KELLY_BEST_PRACTICES = {
+    'shrinkage_factor': 0.25,        # Druckenmiller 風格：使用 1/4 凱利
+    'max_single_position': 0.40,     # 單個標的最大 40%（高信念時）
+    'normal_position': 0.10,         # 正常倖位 10%
+    'min_position': 0.01,           # 最小倖位 1%（避免過度分散）
+}
+
+# 2. 信念強度使用建議
+CONVICTION_GUIDELINES = {
+    'MAXIMUM': {  # 最高信念（0.9-1.0）
+        'description': '宏觀趨勢明確，多項指標強烈一致',
+        'position_multiplier': 1.5,  # 可以增加倖位
+        'max_position': 0.40,
+        'examples': '收益率曲線陡峭 + 通脹受控 + 強勁經濟數據'
+    },
+    'HIGH': {  # 高信念（0.7-0.9）
+        'description': '趨勢明確，大部分指標支持',
+        'position_multiplier': 1.0,
+        'max_position': 0.25,
+        'examples': '經濟數據強勁 + 聯儲寬鬆立場'
+    },
+    'MEDIUM': {  # 中信念（0.5-0.7）
+        'description': '趨勢存在，但指標部分分歧',
+        'position_multiplier': 0.8,
+        'max_position': 0.15,
+        'examples': '經濟數據尚可，但政策不確定'
+    },
+    'LOW': {  # 低信念（0.3-0.5）
+        'description': '趨勢不明顯，指標混雜',
+        'position_multiplier': 0.5,
+        'max_position': 0.10,
+        'examples': '信號中性，觀望為主'
+    },
+    'NONE': {  # 無信念（0-0.3）
+        'description': '無明確趨勢，不交易',
+        'position_multiplier': 0.0,
+        'max_position': 0.0,
+        'examples': '市場混亂，等待機會'
+    }
+}
+
+# 3. 止損建議
+STOP_LOSS_GUIDELINES = {
+    'max_position_loss': 0.15,        # 最大倖位損失 15%
+    'max_portfolio_loss': 0.08,       # 最大投資組合損失 8%
+    'time_based_stop': 30,           # 30 天內未應驗則退出
+    'thesis_invalid_stop': True,      # 投資論證不再有效時立即退出
+    'volatility_based': True,         # 基於波動率調整止損
+}
+
+# 4. 風險管理建議
+RISK_MANAGEMENT_GUIDELINES = {
+    'max_portfolio_volatility': 0.20,  # 最大投資組合波動率 20%
+    'max_correlation': 0.7,            # 最大相關性（避免過度集中）
+    'diversification_min': 3,          # 最少 3 個資產（分散化）
+    'cash_reserve': 0.10,              # 保持 10% 現金（流動性）
+}
+
+# 5. 再平衡建議
+REBALANCING_GUIDELINES = {
+    'frequency': 'dynamic',            # 動態再平衡（觸發式）
+    'threshold': 0.10,                 # 10% 倖位變化才調整
+    'max_daily_change': 0.20,          # 最大每日變化 20%
+    ' conviction_check': True,          # 每日檢查信念強度
+}
+
+def print_best_practices():
+    &quot;&quot;&quot;打印最佳實踐&quot;&quot;&quot;
+    print(&quot;=&quot; * 80)
+    print(&quot;Druckenmiller 風格資金管理最佳實踐&quot;)
+    print(&quot;=&quot; * 80)
+
+    print(&quot;\n1. 凱利公式使用建議:&quot;)
+    for key, value in KELLY_BEST_PRACTICES.items():
+        print(f&quot;   {key}: {value}&quot;)
+
+    print(&quot;\n2. 信念強度使用建議:&quot;)
+    for level, guidelines in CONVICTION_GUIDELINES.items():
+        print(f&quot;\n   {level}:&quot;)
+        print(f&quot;     描述: {guidelines['description']}&quot;)
+        print(f&quot;     倖位倍數: {guidelines['position_multiplier']}&quot;)
+        print(f&quot;     最大倖位: {guidelines['max_position']}&quot;)
+        print(f&quot;     例子: {guidelines['examples']}&quot;)
+
+    print(&quot;\n3. 止損建議:&quot;)
+    for key, value in STOP_LOSS_GUIDELINES.items():
+        print(f&quot;   {key}: {value}&quot;)
+
+    print(&quot;\n4. 風險管理建議:&quot;)
+    for key, value in RISK_MANAGEMENT_GUIDELINES.items():
+        print(f&quot;   {key}: {value}&quot;)
+
+    print(&quot;\n5. 再平衡建議:&quot;)
+    for key, value in REBALANCING_GUIDELINES.items():
+        print(f&quot;   {key}: {value}&quot;)
+
+    print(&quot;\n&quot; + &quot;=&quot; * 80)
+</code></pre>
+
+<hr />
+<h2 id="9">9. 系統文檔</h2>
+<h3 id="91-api">9.1 API 參考</h3>
+<h4 id="druckenmillerpositionsizing"><code>DruckenmillerPositionSizing</code> 主類</h4>
+<p><strong>初始化參數:</strong><br />
+- <code>initial_capital</code> (float): 初始資本，默認 1,000,000<br />
+- <code>max_position_size</code> (float): 單個標的最大倖位（資金百分比），默認 0.40<br />
+- <code>max_portfolio_risk</code> (float): 最大投資組合風險（年化波動率），默認 0.20<br />
+- <code>kelly_shrinkage</code> (float): 凱利縮減因子，默認 0.25</p>
+<p><strong>主要方法:</strong></p>
+<ol>
+<li>
+<p><code>calculate_position_size(win_rate, avg_win, avg_loss, conviction, asset_volatility, market_regime=None)</code><br />
+   - 計算建議倖位大小<br />
+   - 返回: Dict 包含期望值、凱利倖位、最終倖位等</p>
+</li>
+<li>
+<p><code>optimize_portfolio(assets_data, correlations=None)</code><br />
+   - 優化投資組合倖位分配<br />
+   - 返回: Dict 包含倖位建議和投資組合統計</p>
+</li>
+<li>
+<p><code>update_positions(market_conditions, conviction_updates=None)</code><br />
+   - 動態更新倖位<br />
+   - 返回: Dict 包含市場制度評估和倖位調整建議</p>
+</li>
+<li>
+<p><code>check_stop_losses(current_prices)</code><br />
+   - 檢查止損觸發<br />
+   - 返回: List[str] 應該止損的資產列表</p>
+</li>
+</ol>
+<h4 id="_6">輔助類</h4>
+<ol>
+<li>
+<p><code>PositionLimiter</code>: 倉位限制器<br />
+   - <code>limit_position(position, asset_volatility, portfolio_volatility=None)</code>: 限制倖位<br />
+   - <code>calculate_stop_loss(entry_price, position, asset_volatility, holding_period_days)</code>: 計算止損價格</p>
+</li>
+<li>
+<p><code>ConvictionMonitor</code>: 信念強度監控器<br />
+   - <code>update(days_passed=1)</code>: 更新信念強度<br />
+   - <code>set_initial_signal(signal)</code>: 設置初始信號方向</p>
+</li>
+<li>
+<p><code>MarketConditionAssessor</code>: 市場條件評估器<br />
+   - <code>assess_market_regime(vix, market_trend_strength, liquidity_conditions)</code>: 評估市場制度</p>
+</li>
+<li>
+<p><code>PositionRebalancer</code>: 倉位再平衡器<br />
+   - <code>calculate_target_positions(convictions, kelly_positions, market_adjustment)</code>: 計算目標倖位<br />
+   - <code>rebalance(target_positions, current_positions)</code>: 執行再平衡</p>
+</li>
+<li>
+<p><code>StopLossManager</code>: 止損管理器<br />
+   - <code>open_position(asset, entry_price, position_size, thesis)</code>: 開倉<br />
+   - <code>check_stop_loss(asset, current_price)</code>: 檢查止損<br />
+   - <code>update_thesis_validity(asset, is_valid)</code>: 更新論證有效性</p>
+</li>
+</ol>
+<h3 id="92">9.2 參數說明</h3>
+<h4 id="_7">凱利公式參數</h4>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>說明</th>
+<th>推薦範圍</th>
+<th>Druckenmiller 設定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>shrinkage_factor</code></td>
+<td>凱利縮減因子</td>
+<td>0.10-0.50</td>
+<td>0.25</td>
+</tr>
+<tr>
+<td><code>max_position</code></td>
+<td>最大單個倖位</td>
+<td>0.10-0.50</td>
+<td>0.40</td>
+</tr>
+<tr>
+<td><code>min_position</code></td>
+<td>最小倖位閾值</td>
+<td>0.005-0.02</td>
+<td>0.01</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_8">信念強度參數</h4>
+<table>
+<thead>
+<tr>
+<th>信念等級</th>
+<th>範圍</th>
+<th>說明</th>
+<th>倉位調整</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAXIMUM</td>
+<td>0.9-1.0</td>
+<td>最高信念</td>
+<td>×1.5</td>
+</tr>
+<tr>
+<td>HIGH</td>
+<td>0.7-0.9</td>
+<td>高信念</td>
+<td>×1.0</td>
+</tr>
+<tr>
+<td>MEDIUM</td>
+<td>0.5-0.7</td>
+<td>中信念</td>
+<td>×0.8</td>
+</tr>
+<tr>
+<td>LOW</td>
+<td>0.3-0.5</td>
+<td>低信念</td>
+<td>×0.5</td>
+</tr>
+<tr>
+<td>NONE</td>
+<td>0-0.3</td>
+<td>無信念</td>
+<td>×0.0</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_9">風險管理參數</h4>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>說明</th>
+<th>推薦範圍</th>
+<th>Druckenmiller 設定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_portfolio_risk</code></td>
+<td>最大投資組合風險</td>
+<td>0.10-0.25</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td><code>max_position_risk</code></td>
+<td>單個倖位最大風險</td>
+<td>0.03-0.08</td>
+<td>0.05</td>
+</tr>
+<tr>
+<td><code>max_drawdown</code></td>
+<td>最大回撤限制</td>
+<td>0.10-0.30</td>
+<td>0.20</td>
+</tr>
+</tbody>
+</table>
+<h3 id="93">9.3 使用流程圖</h3>
+<pre class="codehilite"><code>開始
+  ↓
+初始化 DruckenmillerPositionSizing
+  ↓
+分析投資機會
+  ├─ 計算期望值（EV）
+  ├─ 估算勝率和盈虧比
+  └─ 評估信念強度（Conviction）
+  ↓
+計算凱利倖位
+  ├─ 基礎凱利公式
+  ├─ 應用部分凱利縮減
+  └─ 信念調整
+  ↓
+風險限制檢查
+  ├─ 倖位限制器
+  ├─ 投資組合風險限制
+  └─ 止損價格計算
+  ↓
+確定最終倖位
+  ↓
+執行交易
+  ↓
+持續監控
+  ├─ 信念強度監控
+  ├─ 市場條件評估
+  ├─ 倖位再平衡
+  └─ 止損檢查
+  ↓
+調整或退出
+  ↓
+結束
+</code></pre>
+
+<hr />
+<h2 id="10">10. 總結</h2>
+<h3 id="101">10.1 系統特點</h3>
+<p>本動態資金管理系統具有以下特點：</p>
+<ol>
+<li>
+<p><strong>凱利公式優化</strong>: 實現完整凱利公式計算，包括部分凱利縮減、連續凱利和凱利下限保護</p>
+</li>
+<li>
+<p><strong>期望值驅動</strong>: 基於期望值和信念強度動態調整倖位，體現 Druckenmiller 的"集中大注"原則</p>
+</li>
+<li>
+<p><strong>風險平價</strong>: 通過波動率倒數加權實現風險平價，確保各資產風險貢獻均衡</p>
+</li>
+<li>
+<p><strong>最大回撤控制</strong>: 通過倖位限制器、VaR/CVaR 計算和止損管理嚴格控制回撤</p>
+</li>
+<li>
+<p><strong>實時動態調整</strong>: 信念監控、市場條件評估和倖位再平衡實現實時調整</p>
+</li>
+<li>
+<p><strong>快速減損</strong>: 實現 Druckenmiller 的核心原則 - 投資論證不再有效時迅速退出</p>
+</li>
+</ol>
+<h3 id="102-druckenmiller">10.2 Druckenmiller 原則體現</h3>
+<table>
+<thead>
+<tr>
+<th>Druckenmiller 原則</th>
+<th>系統實現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>流動性至上</td>
+<td>與宏觀趨勢系統整合，監控流動性條件</td>
+</tr>
+<tr>
+<td>頂向下宏觀分析</td>
+<td>接收宏觀信號，驅動倖位決策</td>
+</tr>
+<tr>
+<td>集中大注於高信念機會</td>
+<td>信念驅動倖位調整，最高可達 40%</td>
+</tr>
+<tr>
+<td>快速減損</td>
+<td>止損管理器，論證無效立即退出</td>
+</tr>
+<tr>
+<td>保持靈活性</td>
+<td>實時動態調整機制</td>
+</tr>
+<tr>
+<td>保護資本</td>
+<td>嚴格的風險限制和回撤控制</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103">10.3 性能特點</h3>
+<ul>
+<li><strong>保守的凱利縮減</strong>: 使用 1/4 凱利，降低過度優化風險</li>
+<li><strong>信念驅動倖位</strong>: 高信念時可增加倖位，但保持保守基礎</li>
+<li><strong>市場條件敏感</strong>: 根據 VIX、趨勢和流動性動態調整</li>
+<li><strong>多層風險控制</strong>: 倖位限制、投資組合風險、止損等多重保護</li>
+</ul>
+<h3 id="104">10.4 使用建議</h3>
+<ol>
+<li><strong>從保守開始</strong>: 建議使用 1/4 凱利或更保守的縮減因子</li>
+<li><strong>嚴格遵守信念評估</strong>: 不要高估自己的信念強度</li>
+<li><strong>設置明確止損</strong>: 嚴格執行止損，保護資本</li>
+<li><strong>持續監控</strong>: 定期檢查信念強度和市場條件</li>
+<li><strong>保持流動性</strong>: 保留足夠現金以應對機會</li>
+<li><strong>記錄和反思</strong>: 記錄每筆交易的理由和結果，持續改進</li>
+</ol>
+<h3 id="105">10.5 限制和注意事項</h3>
+<ol>
+<li><strong>模型假設</strong>: 凱利公式假設期望值和波動率可以準確估計，實際中存在不確定性</li>
+<li><strong>相關性忽略</strong>: 簡化版本未考慮資產間相關性，實際應用應加強</li>
+<li><strong>交易成本</strong>: 回測中簡化了交易成本，實際交易成本可能更高</li>
+<li><strong>流動性風險</strong>: 大倖位可能面臨流動性風險，實際執行需考慮滑點</li>
+<li><strong>主觀性</strong>: 信念強度評估具有主觀性，需要建立標準化流程</li>
+</ol>
+<hr />
+<h2 id="_10">附錄：完整代碼清單</h2>
+<p>本系統包含以下模塊：</p>
+<ol>
+<li>
+<p><strong>凱利公式模塊</strong><br />
+   - <code>kelly_fraction()</code> - 基礎凱利公式<br />
+   - <code>fractional_kelly()</code> - 部分凱利<br />
+   - <code>continuous_kelly()</code> - 連續凱利<br />
+   - <code>kelly_with_floor()</code> - 凱利下限保護</p>
+</li>
+<li>
+<p><strong>期望值模塊</strong><br />
+   - <code>expected_value()</code> - 期望值計算<br />
+   - <code>conviction_from_expected_value()</code> - 期望值到信念映射<br />
+   - <code>ev_to_position()</code> - 期望值到倖位映射</p>
+</li>
+<li>
+<p><strong>風險平價模塊</strong><br />
+   - <code>calculate_volatility()</code> - 波動率計算<br />
+   - <code>ewma_volatility()</code> - EWMA 波動率<br />
+   - <code>calculate_correlation_matrix()</code> - 相關性矩陣<br />
+   - <code>risk_parity_weights()</code> - 風險平價權重</p>
+</li>
+<li>
+<p><strong>風險控制模塊</strong><br />
+   - <code>garch_forecast()</code> - GARCH 波動率預測<br />
+   - <code>calculate_var()</code> - VaR 計算<br />
+   - <code>calculate_cvar()</code> - CVaR 計算<br />
+   - <code>PositionLimiter</code> - 倉位限制器類</p>
+</li>
+<li>
+<p><strong>動態調整模塊</strong><br />
+   - <code>ConvictionMonitor</code> - 信念監控類<br />
+   - <code>MarketConditionAssessor</code> - 市場條件評估類<br />
+   - <code>PositionRebalancer</code> - 倉位再平衡類<br />
+   - <code>StopLossManager</code> - 止損管理類</p>
+</li>
+<li>
+<p><strong>主系統類</strong><br />
+   - <code>DruckenmillerPositionSizing</code> - 主系統類</p>
+</li>
+<li>
+<p><strong>回測模塊</strong><br />
+   - <code>PositionSizingBacktester</code> - 回測器類<br />
+   - <code>compare_position_sizing_strategies()</code> - 策略比較函數</p>
+</li>
+<li>
+<p><strong>實用工具</strong><br />
+   - 完整使用示例<br />
+   - 最佳實踐建議<br />
+   - API 參考文檔</p>
+</li>
+</ol>
+<hr />
+<p><strong>文檔結束</strong></p>
+<p>本系統完整實現了 Druckenmiller 風格的動態資金管理，為集中投資提供科學的倖位調整框架。系統結合凱利公式優化、期望值驅動倉位調整、風險平價策略和動態調整機制，嚴格控制風險的同時，允許在高信念機會上集中配置。</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

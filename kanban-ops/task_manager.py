@@ -244,6 +244,12 @@ class TaskManager:
         """檢查超時任務"""
         print(self.timeout_handler.generate_timeout_report())
 
+    def auto_recover(self):
+        """自動恢復假失敗任務"""
+        import auto_recovery_extension
+        report = auto_recovery_extension.generate_recovery_report(self.timeout_handler)
+        print(report)
+
 
 def print_usage():
     """打印使用說明"""
@@ -258,6 +264,7 @@ def print_usage():
     add <task_id>           為任務添加時間預估
     decompose <task_id>     分析任務並提供分解建議
     timeout                 檢查超時任務
+    recover                 自動恢復假失敗任務
     stats                   顯示統計報告
 
 範例：
@@ -265,6 +272,7 @@ def print_usage():
     python3 task_manager.py add p001
     python3 task_manager.py decompose p001
     python3 task_manager.py timeout
+    python3 task_manager.py recover
     python3 task_manager.py stats
 
 說明：
@@ -272,6 +280,7 @@ def print_usage():
     • add：將複雜度評估和時間預估添加到任務的 time_tracking 字段
     • decompose：分析任務是否需要分解，並提供分解方案
     • timeout：檢查超時任務並提供處理建議
+    recover                 自動恢復假失敗任務
     • stats：顯示所有任務的時間統計報告
     """)
 
@@ -299,7 +308,8 @@ def main():
         task_id = sys.argv[2]
         manager.decompose_task(task_id)
 
-    elif command == 'timeout':
+    elif command == "recover":
+        manager.auto_recover()
         manager.check_timeouts()
 
     elif command == 'stats':

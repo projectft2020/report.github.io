@@ -1,0 +1,3883 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>因子擁擠監控系統 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>因子擁擠監控系統</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">實時因子擁擠監控與預警系統</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="factor-crowding-monitoring-system">因子擁擠度監控系統實現 (Factor Crowding Monitoring System)</h1>
+<p><strong>Task ID:</strong> f002-monitoring-system<br />
+<strong>Agent:</strong> Charlie Analyst<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-20T12:30:00+08:00</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>基於 f001 設計的擁擠度指標系統，實現了完整的監控系統，包括數據處理、指標計算、預警機制、可視化儀表板和回測驗證框架。系統採用模塊化架構，支持實時監控、歷史回測、預警通知和報告生成等功能。核心組件包括：</p>
+<ul>
+<li><strong>指標計算引擎</strong>：FEI、FVI、FVIol 和 CCS 的完整實現</li>
+<li><strong>實時監控器</strong>：每日更新、閾值檢測、趨勢跟蹤</li>
+<li><strong>預警系統</strong>：三級預警機制、多維確認、通知推送</li>
+<li><strong>可視化儀表板</strong>：交互式圖表、熱力圖、儀表盤</li>
+<li><strong>回測框架</strong>：IC/IR 計算、分組回測、策略模擬</li>
+</ul>
+<hr />
+<h2 id="1">1. 系統架構</h2>
+<h3 id="11">1.1 目錄結構</h3>
+<pre class="codehilite"><code>factor_crowding_monitor/
+├── __init__.py
+├── config/
+│   ├── __init__.py
+│   ├── settings.py           # 配置參數
+│   └── thresholds.py         # 閾值定義
+├── data/
+│   ├── __init__.py
+│   ├── loader.py             # 數據加載器
+│   ├── processor.py          # 數據處理器
+│   └── storage.py            # 數據存儲接口
+├── metrics/
+│   ├── __init__.py
+│   ├── fei.py                # 因子暴露度指數
+│   ├── fvi.py                # 因子估值指數
+│   ├── fviol.py              # 因子波動率指數
+│   └── ccs.py                # 綜合擁擠度評分
+├── monitor/
+│   ├── __init__.py
+│   ├── realtime.py           # 實時監控器
+│   ├── alert.py              # 預警系統
+│   └── scheduler.py          # 調度器
+├── backtest/
+│   ├── __init__.py
+│   ├── engine.py             # 回測引擎
+│   ├── validators.py         # 驗證器
+│   └── strategies.py         # 策略庫
+├── visualization/
+│   ├── __init__.py
+│   ├── dashboard.py          # 儀表板
+│   ├── charts.py             # 圖表生成
+│   └── reports.py            # 報告生成
+├── utils/
+│   ├── __init__.py
+│   ├── helpers.py            # 輔助函數
+│   └── decorators.py         # 裝飾器
+├── main.py                   # 主程序入口
+├── run_monitor.py            # 監控啟動腳本
+└── tests/
+    ├── test_metrics.py       # 指標測試
+    ├── test_monitor.py       # 監控測試
+    └── test_backtest.py      # 回測測試
+</code></pre>
+
+<h3 id="12">1.2 技術棧</h3>
+<table>
+<thead>
+<tr>
+<th>組件</th>
+<th>技術選型</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>語言</strong></td>
+<td>Python 3.10+</td>
+<td>開發語言</td>
+</tr>
+<tr>
+<td><strong>數據處理</strong></td>
+<td>pandas, numpy</td>
+<td>數據操作</td>
+</tr>
+<tr>
+<td><strong>統計計算</strong></td>
+<td>scipy, statsmodels</td>
+<td>統計分析</td>
+</tr>
+<tr>
+<td><strong>時間序列</strong></td>
+<td>arch</td>
+<td>GARCH 波動率</td>
+</tr>
+<tr>
+<td><strong>數據庫</strong></td>
+<td>SQLite / PostgreSQL</td>
+<td>數據存儲</td>
+</tr>
+<tr>
+<td><strong>可視化</strong></td>
+<td>plotly, matplotlib</td>
+<td>圖表渲染</td>
+</tr>
+<tr>
+<td><strong>任務調度</strong></td>
+<td>APScheduler</td>
+<td>定時任務</td>
+</tr>
+<tr>
+<td><strong>日誌</strong></td>
+<td>logging</td>
+<td>日誌記錄</td>
+</tr>
+<tr>
+<td><strong>配置管理</strong></td>
+<td>pydantic</td>
+<td>配置驗證</td>
+</tr>
+<tr>
+<td><strong>API 框架</strong></td>
+<td>FastAPI</td>
+<td>Web API（可選）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 核心配置</h2>
+<h3 id="21-configsettingspy">2.1 配置文件 (config/settings.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+系統配置文件
+&quot;&quot;&quot;
+from pathlib import Path
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
+from datetime import timedelta
+
+class DatabaseConfig(BaseModel):
+    &quot;&quot;&quot;數據庫配置&quot;&quot;&quot;
+    type: str = &quot;sqlite&quot;
+    path: Path = Path(&quot;./data/crowding_monitor.db&quot;)
+    pool_size: int = 10
+
+class DataConfig(BaseModel):
+    &quot;&quot;&quot;數據配置&quot;&quot;&quot;
+    market_data_path: Path = Path(&quot;./data/market/&quot;)
+    financial_data_path: Path = Path(&quot;./data/financial/&quot;)
+    factor_data_path: Path = Path(&quot;./data/factors/&quot;)
+    update_frequency: str = &quot;daily&quot;  # daily, hourly, realtime
+
+class MetricConfig(BaseModel):
+    &quot;&quot;&quot;指標配置&quot;&quot;&quot;
+    lookback_window: int = 252  # 歷史窗口
+    short_window: int = 20      # 短期窗口
+    long_window: int = 60       # 長期窗口
+    ewma_lambda: float = 0.94   # EWMA 平滑參數
+
+class WeightConfig(BaseModel):
+    &quot;&quot;&quot;權重配置&quot;&quot;&quot;
+    fei_weight: float = 0.4
+    fvi_weight: float = 0.35
+    fviol_weight: float = 0.25
+
+    @property
+    def weights(self) -&gt; Dict[str, float]:
+        return {
+            &quot;FEI&quot;: self.fei_weight,
+            &quot;FVI&quot;: self.fvi_weight,
+            &quot;FVIol&quot;: self.fviol_weight
+        }
+
+class AlertConfig(BaseModel):
+    &quot;&quot;&quot;預警配置&quot;&quot;&quot;
+    enabled: bool = True
+    level_1_threshold: float = 75  # 關注
+    level_2_threshold: float = 80  # 警示
+    level_3_threshold: float = 90  # 緊急
+    min_duration_days: int = 3     # 最小持續天數
+    notification_channels: List[str] = [&quot;log&quot;, &quot;email&quot;]  # log, email, webhook
+
+class BacktestConfig(BaseModel):
+    &quot;&quot;&quot;回測配置&quot;&quot;&quot;
+    start_date: str = &quot;2010-01-01&quot;
+    end_date: str = &quot;2026-02-20&quot;
+    train_start: str = &quot;2010-01-01&quot;
+    train_end: str = &quot;2019-12-31&quot;
+    validation_start: str = &quot;2020-01-01&quot;
+    validation_end: str = &quot;2022-12-31&quot;
+    test_start: str = &quot;2023-01-01&quot;
+    test_end: str = &quot;2026-02-20&quot;
+
+class LoggingConfig(BaseModel):
+    &quot;&quot;&quot;日誌配置&quot;&quot;&quot;
+    level: str = &quot;INFO&quot;
+    path: Path = Path(&quot;./logs/&quot;)
+    max_size_mb: int = 10
+    backup_count: int = 5
+
+class SystemConfig(BaseModel):
+    &quot;&quot;&quot;系統配置&quot;&quot;&quot;
+    project_name: str = &quot;Factor Crowding Monitor&quot;
+    version: str = &quot;1.0.0&quot;
+    debug: bool = False
+
+    database: DatabaseConfig = Field(default_factory=DatabaseConfig)
+    data: DataConfig = Field(default_factory=DataConfig)
+    metric: MetricConfig = Field(default_factory=MetricConfig)
+    weight: WeightConfig = Field(default_factory=WeightConfig)
+    alert: AlertConfig = Field(default_factory=AlertConfig)
+    backtest: BacktestConfig = Field(default_factory=BacktestConfig)
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
+
+# 全局配置實例
+config = SystemConfig()
+</code></pre>
+
+<h3 id="22-configthresholdspy">2.2 閾值定義 (config/thresholds.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+閾值定義
+&quot;&quot;&quot;
+from typing import Dict, Tuple
+
+# CCS 擁擠度等級閾值
+CROWDING_LEVELS = {
+    &quot;extreme_cold&quot;: (0, 20),
+    &quot;cold&quot;: (20, 40),
+    &quot;neutral&quot;: (40, 60),
+    &quot;hot&quot;: (60, 80),
+    &quot;extreme_hot&quot;: (80, 100)
+}
+
+# CCS 操作建議
+CROWDING_RECOMMENDATIONS = {
+    &quot;extreme_cold&quot;: &quot;逆向建倉&quot;,
+    &quot;cold&quot;: &quot;觀察，逢低佈局&quot;,
+    &quot;neutral&quot;: &quot;持有觀望&quot;,
+    &quot;hot&quot;: &quot;考慮減持&quot;,
+    &quot;extreme_hot&quot;: &quot;大幅減倉/避險&quot;
+}
+
+# 預警等級定義
+ALERT_LEVELS = {
+    1: {&quot;name&quot;: &quot;關注&quot;, &quot;color&quot;: &quot;yellow&quot;, &quot;action&quot;: &quot;密切監控&quot;},
+    2: {&quot;name&quot;: &quot;警示&quot;, &quot;color&quot;: &quot;orange&quot;, &quot;action&quot;: &quot;調整倉位&quot;},
+    3: {&quot;name&quot;: &quot;緊急&quot;, &quot;color&quot;: &quot;red&quot;, &quot;action&quot;: &quot;大幅減倉&quot;}
+}
+
+# 子指標閾值
+SUB_METRIC_THRESHOLDS = {
+    &quot;FEI&quot;: {
+        &quot;extreme_low&quot;: 30,
+        &quot;low&quot;: 40,
+        &quot;high&quot;: 70,
+        &quot;extreme_high&quot;: 80
+    },
+    &quot;FVI&quot;: {
+        &quot;extreme_low&quot;: 20,
+        &quot;low&quot;: 40,
+        &quot;high&quot;: 80,
+        &quot;extreme_high&quot;: 90
+    },
+    &quot;FVIol&quot;: {
+        &quot;extreme_low&quot;: 20,
+        &quot;low&quot;: 30,
+        &quot;high&quot;: 50,
+        &quot;extreme_high&quot;: 60
+    }
+}
+
+def get_crowding_level(score: float) -&gt; str:
+    &quot;&quot;&quot;根據評分獲取擁擠度等級&quot;&quot;&quot;
+    for level, (min_val, max_val) in CROWDING_LEVELS.items():
+        if min_val &lt;= score &lt;= max_val:
+            return level
+    return &quot;unknown&quot;
+
+def get_recommendation(score: float) -&gt; str:
+    &quot;&quot;&quot;根據評分獲取操作建議&quot;&quot;&quot;
+    level = get_crowding_level(score)
+    return CROWDING_RECOMMENDATIONS.get(level, &quot;未知&quot;)
+
+def get_alert_level(score: float, duration_days: int) -&gt; int:
+    &quot;&quot;&quot;根據評分和持續時間獲取預警等級&quot;&quot;&quot;
+    if score &gt;= 90 or score &lt;= 10:
+        if duration_days &gt;= 7:
+            return 3
+        elif duration_days &gt;= 5:
+            return 2
+    elif score &gt;= 80 or score &lt;= 20:
+        if duration_days &gt;= 5:
+            return 2
+        elif duration_days &gt;= 3:
+            return 1
+    elif score &gt;= 75 or score &lt;= 25:
+        if duration_days &gt;= 3:
+            return 1
+    return 0
+</code></pre>
+
+<hr />
+<h2 id="3">3. 數據處理層</h2>
+<h3 id="31-dataloaderpy">3.1 數據加載器 (data/loader.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+數據加載器
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DataLoader:
+    &quot;&quot;&quot;數據加載器&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+        self.market_path = config.data.market_data_path
+        self.financial_path = config.data.financial_data_path
+        self.factor_path = config.data.factor_data_path
+
+    def load_market_data(
+        self,
+        start_date: str,
+        end_date: str,
+        symbols: Optional[List[str]] = None
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載市場數據
+
+        Args:
+            start_date: 開始日期
+            end_date: 結束日期
+            symbols: 股票代碼列表，None 則加載全部
+
+        Returns:
+            DataFrame: 市場數據，包含股價、成交量等
+        &quot;&quot;&quot;
+        # 示例實現 - 實際應根據數據源調整
+        try:
+            # 嘗試從 CSV 加載
+            file_path = self.market_path / &quot;market_data.csv&quot;
+            if file_path.exists():
+                df = pd.read_csv(file_path, parse_dates=['date'])
+                df = df.set_index('date')
+
+                # 時間篩選
+                df = df.loc[start_date:end_date]
+
+                # 符號篩選
+                if symbols:
+                    df = df[df['symbol'].isin(symbols)]
+
+                return df
+            else:
+                logger.warning(f&quot;市場數據文件不存在: {file_path}&quot;)
+                return self._generate_mock_market_data(start_date, end_date)
+
+        except Exception as e:
+            logger.error(f&quot;加載市場數據失敗: {e}&quot;)
+            raise
+
+    def load_financial_data(
+        self,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載財務數據
+
+        Args:
+            start_date: 開始日期
+            end_date: 結束日期
+
+        Returns:
+            DataFrame: 財務數據
+        &quot;&quot;&quot;
+        try:
+            file_path = self.financial_path / &quot;financial_data.csv&quot;
+            if file_path.exists():
+                df = pd.read_csv(file_path, parse_dates=['report_date'])
+                df = df.set_index('report_date')
+                return df.loc[start_date:end_date]
+            else:
+                logger.warning(f&quot;財務數據文件不存在: {file_path}&quot;)
+                return self._generate_mock_financial_data(start_date, end_date)
+        except Exception as e:
+            logger.error(f&quot;加載財務數據失敗: {e}&quot;)
+            raise
+
+    def load_factor_data(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載因子數據
+
+        Args:
+            factor_id: 因子 ID
+            start_date: 開始日期
+            end_date: 結束日期
+
+        Returns:
+            DataFrame: 因子數據，包含暴露度、收益率等
+        &quot;&quot;&quot;
+        try:
+            file_path = self.factor_path / f&quot;{factor_id}.csv&quot;
+            if file_path.exists():
+                df = pd.read_csv(file_path, parse_dates=['date'])
+                df = df.set_index('date')
+                return df.loc[start_date:end_date]
+            else:
+                logger.warning(f&quot;因子數據文件不存在: {file_path}&quot;)
+                return self._generate_mock_factor_data(factor_id, start_date, end_date)
+        except Exception as e:
+            logger.error(f&quot;加載因子數據失敗: {e}&quot;)
+            raise
+
+    def load_capital_flow(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載資金流數據
+
+        Args:
+            factor_id: 因子 ID
+            start_date: 開始日期
+            end_date: 結束日期
+
+        Returns:
+            DataFrame: 資金流數據
+        &quot;&quot;&quot;
+        try:
+            file_path = self.factor_path / f&quot;capital_flow_{factor_id}.csv&quot;
+            if file_path.exists():
+                df = pd.read_csv(file_path, parse_dates=['date'])
+                df = df.set_index('date')
+                return df.loc[start_date:end_date]
+            else:
+                return self._generate_mock_capital_flow(factor_id, start_date, end_date)
+        except Exception as e:
+            logger.error(f&quot;加載資金流數據失敗: {e}&quot;)
+            raise
+
+    def _generate_mock_market_data(
+        self,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成模擬市場數據（開發用）&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+        symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META']
+
+        data = []
+        for date in dates:
+            for symbol in symbols:
+                # 隨機生成股價
+                price = np.random.normal(100, 10)
+                volume = np.random.randint(1000000, 10000000)
+                market_cap = price * volume * np.random.uniform(0.1, 1)
+
+                data.append({
+                    'date': date,
+                    'symbol': symbol,
+                    'close': price,
+                    'volume': volume,
+                    'market_cap': market_cap
+                })
+
+        df = pd.DataFrame(data)
+        return df.set_index('date')
+
+    def _generate_mock_financial_data(
+        self,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成模擬財務數據（開發用）&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='Q')
+        symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META']
+
+        data = []
+        for date in dates:
+            for symbol in symbols:
+                data.append({
+                    'report_date': date,
+                    'symbol': symbol,
+                    'pe': np.random.uniform(10, 30),
+                    'pb': np.random.uniform(1, 5),
+                    'roe': np.random.uniform(0.1, 0.3),
+                    'revenue_growth': np.random.uniform(-0.1, 0.3)
+                })
+
+        df = pd.DataFrame(data)
+        return df.set_index('report_date')
+
+    def _generate_mock_factor_data(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成模擬因子數據（開發用）&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        # 模擬因子收益率
+        np.random.seed(hash(factor_id) % (2**32))
+        returns = np.random.normal(0, 0.01, len(dates))
+
+        data = pd.DataFrame({
+            'date': dates,
+            'return': returns,
+            'exposure': np.random.uniform(-1, 1, len(dates)),
+            'sharpe': np.random.uniform(-0.5, 1.5, len(dates))
+        })
+
+        return data.set_index('date')
+
+    def _generate_mock_capital_flow(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成模擬資金流數據（開發用）&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        data = pd.DataFrame({
+            'date': dates,
+            'northbound_flow': np.random.normal(0, 100000000, len(dates)),
+            'institutional_flow': np.random.normal(0, 50000000, len(dates)),
+            'retail_flow': np.random.normal(0, 20000000, len(dates))
+        })
+
+        return data.set_index('date')
+</code></pre>
+
+<h3 id="32-dataprocessorpy">3.2 數據處理器 (data/processor.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+數據處理器
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Tuple
+from scipy import stats
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DataProcessor:
+    &quot;&quot;&quot;數據處理器&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+
+    def clean_data(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        數據清洗
+
+        Args:
+            df: 原始數據
+
+        Returns:
+            清洗後的數據
+        &quot;&quot;&quot;
+        # 移除重複
+        df = df.drop_duplicates()
+
+        # 處理缺失值
+        df = self._handle_missing_values(df)
+
+        # 異常值處理
+        df = self._handle_outliers(df)
+
+        return df
+
+    def _handle_missing_values(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;處理缺失值&quot;&quot;&quot;
+        # 前向填充
+        df = df.ffill()
+
+        # 後向填充
+        df = df.bfill()
+
+        # 剩餘缺失值用均值填充
+        for col in df.select_dtypes(include=[np.number]).columns:
+            df[col].fillna(df[col].mean(), inplace=True)
+
+        return df
+
+    def _handle_outliers(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;處理異常值&quot;&quot;&quot;
+        for col in df.select_dtypes(include=[np.number]).columns:
+            # 使用 IQR 方法檢測異常值
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            IQR = Q3 - Q1
+
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+
+            # 箱尾處理
+            df[col] = df[col].clip(lower_bound, upper_bound)
+
+        return df
+
+    def calculate_returns(
+        self,
+        prices: pd.Series,
+        method: str = &quot;log&quot;
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算收益率
+
+        Args:
+            prices: 價格序列
+            method: 計算方法，log 或 simple
+
+        Returns:
+            收益率序列
+        &quot;&quot;&quot;
+        if method == &quot;log&quot;:
+            return np.log(prices / prices.shift(1))
+        else:
+            return prices.pct_change()
+
+    def calculate_ewma(
+        self,
+        series: pd.Series,
+        lambda_: float = 0.94
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算 EWMA 平滑
+
+        Args:
+            series: 原始序列
+            lambda_: 平滑參數
+
+        Returns:
+            平滑後的序列
+        &quot;&quot;&quot;
+        return series.ewm(alpha=1-lambda_, adjust=False).mean()
+
+    def calculate_rolling_stats(
+        self,
+        series: pd.Series,
+        window: int
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算滾動統計量
+
+        Args:
+            series: 原始序列
+            window: 滾動窗口
+
+        Returns:
+            包含均值、標準差、百分位的 DataFrame
+        &quot;&quot;&quot;
+        return pd.DataFrame({
+            'mean': series.rolling(window).mean(),
+            'std': series.rolling(window).std(),
+            'min': series.rolling(window).min(),
+            'max': series.rolling(window).max(),
+            'median': series.rolling(window).median(),
+            'p25': series.rolling(window).quantile(0.25),
+            'p75': series.rolling(window).quantile(0.75)
+        })
+
+    def calculate_percentile(
+        self,
+        value: float,
+        series: pd.Series
+    ) -&gt; float:
+        &quot;&quot;&quot;
+        計算百分位
+
+        Args:
+            value: 待計算值
+            series: 參考序列
+
+        Returns:
+            百分位值 (0-100)
+        &quot;&quot;&quot;
+        return stats.percentileofscore(series, value)
+
+    def standardize(self, series: pd.Series) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        標準化（z-score）
+
+        Args:
+            series: 原始序列
+
+        Returns:
+            標準化後的序列
+        &quot;&quot;&quot;
+        return (series - series.mean()) / series.std()
+
+    def normalize(
+        self,
+        series: pd.Series,
+        method: str = &quot;minmax&quot;
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        歸一化到 [0, 1]
+
+        Args:
+            series: 原始序列
+            method: 歸一化方法，minmax 或 zscore_to_0_100
+
+        Returns:
+            歸一化後的序列 (0-100)
+        &quot;&quot;&quot;
+        if method == &quot;minmax&quot;:
+            min_val = series.min()
+            max_val = series.max()
+            return (series - min_val) / (max_val - min_val) * 100
+        else:
+            # z-score 轉換到 0-100，50 為中性
+            zscore = self.standardize(series)
+            return (zscore * 10 + 50).clip(0, 100)
+
+    def align_data(
+        self,
+        *dfs: pd.DataFrame
+    ) -&gt; List[pd.DataFrame]:
+        &quot;&quot;&quot;
+        對齊多個 DataFrame 的時間索引
+
+        Args:
+            *dfs: 多個 DataFrame
+
+        Returns:
+            對齊後的 DataFrame 列表
+        &quot;&quot;&quot;
+        # 找到所有日期的交集
+        common_index = dfs[0].index
+        for df in dfs[1:]:
+            common_index = common_index.intersection(df.index)
+
+        # 對齊所有 DataFrame
+        return [df.loc[common_index] for df in dfs]
+
+    def calculate_hhi(self, weights: pd.Series) -&gt; float:
+        &quot;&quot;&quot;
+        計算 HHI 指數（赫芬達爾-赫希曼指數）
+
+        Args:
+            weights: 權重序列
+
+        Returns:
+            HHI 值
+        &quot;&quot;&quot;
+        return (weights ** 2).sum()
+
+    def calculate_correlation(
+        self,
+        series1: pd.Series,
+        series2: pd.Series,
+        method: str = &quot;pearson&quot;
+    ) -&gt; float:
+        &quot;&quot;&quot;
+        計算相關性
+
+        Args:
+            series1: 序列 1
+            series2: 序列 2
+            method: 相關性方法
+
+        Returns:
+            相關係數
+        &quot;&quot;&quot;
+        return series1.corr(series2, method=method)
+</code></pre>
+
+<hr />
+<h2 id="4">4. 指標計算層</h2>
+<h3 id="41-metricsfeipy">4.1 因子暴露度指數 (metrics/fei.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+因子暴露度指數 (FEI) 計算
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
+
+class FactorExposureIndex:
+    &quot;&quot;&quot;因子暴露度指數&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+        self.ncf_weight = 0.6  # 資金淨流入率權重
+        self.pc_weight = 0.4   # 頭寸集中度權重
+
+    def calculate(
+        self,
+        factor_data: pd.DataFrame,
+        capital_flow: pd.DataFrame,
+        position_weights: Optional[pd.DataFrame] = None
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算 FEI
+
+        Args:
+            factor_data: 因子數據
+            capital_flow: 資金流數據
+            position_weights: 頭寸權重數據（可選）
+
+        Returns:
+            包含 FEI 的 DataFrame
+        &quot;&quot;&quot;
+        # 計算資金淨流入率
+        ncf = self._calculate_ncf(factor_data, capital_flow)
+
+        # 計算頭寸集中度
+        pc = self._calculate_pc(factor_data, position_weights)
+
+        # 合併
+        fei_data = pd.DataFrame({
+            'NCF': ncf,
+            'PC': pc
+        })
+
+        # 計算綜合 FEI
+        fei_data['FEI'] = (
+            self.ncf_weight * fei_data['NCF'] +
+            self.pc_weight * fei_data['PC']
+        )
+
+        return fei_data
+
+    def _calculate_ncf(
+        self,
+        factor_data: pd.DataFrame,
+        capital_flow: pd.DataFrame
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算資金淨流入率 (Net Capital Flow Rate, NCF)
+
+        公式: NCF_t = Σ(w_i,t × r_i,t) / Σ|w_i,t × r_i,t| × 50 + 50
+        &quot;&quot;&quot;
+        # 對齊數據
+        factor_returns = factor_data['return']
+        exposure = factor_data['exposure']
+
+        # 總資金流
+        total_flow = capital_flow['northbound_flow'] + \
+                     capital_flow['institutional_flow'] + \
+                     capital_flow['retail_flow']
+
+        # 計算加權流動
+        weighted_flow = exposure * total_flow
+
+        # 計算 NCF
+        numerator = weighted_flow
+        denominator = weighted_flow.abs()
+
+        ncf = (numerator / denominator * 50 + 50).fillna(50)
+
+        return ncf.clip(0, 100)
+
+    def _calculate_pc(
+        self,
+        factor_data: pd.DataFrame,
+        position_weights: Optional[pd.DataFrame] = None
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算頭寸集中度 (Position Concentration, PC)
+
+        公式: PC_t = (HHI_t - HHI_min) / (HHI_max - HHI_min) × 100
+        &quot;&quot;&quot;
+        if position_weights is not None:
+            # 使用實際頭寸權重
+            weights = position_weights.abs()
+        else:
+            # 使用因子暴露度作為權重的代理
+            weights = factor_data['exposure'].abs()
+
+        # 計算 HHI
+        hhi = self._calculate_hhi(weights)
+
+        # 標準化到 0-100
+        # 假設 HHI 範圍 [1/n, 1]，n 為標的數量
+        n = len(weights.columns) if isinstance(weights, pd.DataFrame) else 1
+        hhi_min = 1.0 / n
+        hhi_max = 1.0
+
+        pc = ((hhi - hhi_min) / (hhi_max - hhi_min) * 100).fillna(50)
+
+        return pc.clip(0, 100)
+
+    def _calculate_hhi(self, weights: pd.Series) -&gt; float:
+        &quot;&quot;&quot;
+        計算 HHI 指數
+
+        Args:
+            weights: 權重序列
+
+        Returns:
+            HHI 值
+        &quot;&quot;&quot;
+        return (weights ** 2).sum()
+
+    def get_crowding_signal(self, fei: float) -&gt; str:
+        &quot;&quot;&quot;
+        獲取擁擠信號
+
+        Args:
+            fei: FEI 值
+
+        Returns:
+            信號: low, neutral, high
+        &quot;&quot;&quot;
+        if fei &lt; 40:
+            return &quot;low&quot;
+        elif fei &gt; 60:
+            return &quot;high&quot;
+        else:
+            return &quot;neutral&quot;
+</code></pre>
+
+<h3 id="42-metricsfvipy">4.2 因子估值指數 (metrics/fvi.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+因子估值指數 (FVI) 計算
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional
+from scipy import stats
+import logging
+
+logger = logging.getLogger(__name__)
+
+class FactorValuationIndex:
+    &quot;&quot;&quot;因子估值指數&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+        self.rvp_weight = 0.7  # 相對估值百分位權重
+        self.ee_weight = 0.3   # 超預期程度權重
+
+    def calculate(
+        self,
+        factor_data: pd.DataFrame,
+        financial_data: pd.DataFrame,
+        valuation_metrics: Optional[List[str]] = None,
+        forecast_data: Optional[pd.DataFrame] = None
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算 FVI
+
+        Args:
+            factor_data: 因子數據
+            financial_data: 財務數據
+            valuation_metrics: 估值指標列表
+            forecast_data: 預期數據
+
+        Returns:
+            包含 FVI 的 DataFrame
+        &quot;&quot;&quot;
+        if valuation_metrics is None:
+            valuation_metrics = ['pe', 'pb', 'roe']
+
+        # 計算相對估值百分位
+        rvp = self._calculate_rvp(
+            factor_data,
+            financial_data,
+            valuation_metrics
+        )
+
+        # 計算超預期程度
+        ee = self._calculate_ee(financial_data, forecast_data)
+
+        # 合併
+        fvi_data = pd.DataFrame({
+            'RVP': rvp,
+            'EE': ee
+        })
+
+        # 調整 EE 到 0-100
+        fvi_data['EE_adj'] = (fvi_data['EE'] + 100) / 2
+
+        # 計算綜合 FVI
+        fvi_data['FVI'] = (
+            self.rvp_weight * fvi_data['RVP'] +
+            self.ee_weight * fvi_data['EE_adj']
+        )
+
+        return fvi_data
+
+    def _calculate_rvp(
+        self,
+        factor_data: pd.DataFrame,
+        financial_data: pd.DataFrame,
+        valuation_metrics: List[str]
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算相對估值百分位 (Relative Valuation Percentile, RVP)
+
+        包括橫截面百分位和時間序列百分位
+        &quot;&quot;&quot;
+        # 橫截面百分位（在當前時點，該因子相對其他因子的估值水平）
+        # 由於只有單因子數據，這裡主要實現時間序列百分位
+
+        rvp_series = pd.Series(index=factor_data.index, dtype=float)
+
+        for metric in valuation_metrics:
+            if metric in financial_data.columns:
+                # 獲取該指標的時間序列
+                metric_series = financial_data[metric]
+
+                # 計算滾動百分位
+                window = self.config.metric.lookback_window
+                rolling_percentile = metric_series.rolling(
+                    window,
+                    min_periods=int(window * 0.5)
+                ).apply(
+                    lambda x: stats.percentileofscore(x, x.iloc[-1])
+                )
+
+                rvp_series = rvp_series.add(rolling_percentile, fill_value=0)
+
+        # 平均多個指標
+        if len(valuation_metrics) &gt; 0:
+            rvp_series = rvp_series / len(valuation_metrics)
+
+        return rvp_series.clip(0, 100)
+
+    def _calculate_ee(
+        self,
+        financial_data: pd.DataFrame,
+        forecast_data: Optional[pd.DataFrame]
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算超預期程度 (Expectation Excess, EE)
+
+        公式: EE = (Actual - Forecast) / |Forecast| × 100
+        &quot;&quot;&quot;
+        if forecast_data is None:
+            # 如果沒有預期數據，使用前期值作為預期
+            ee_series = financial_data['roe'].pct_change() * 100
+        else:
+            # 使用實際預期數據
+            actual = financial_data['roe']
+            forecast = forecast_data['roe_forecast']
+
+            ee_series = ((actual - forecast) / forecast.abs() * 100).fillna(0)
+
+        # EWMA 平滑
+        ewma_lambda = self.config.metric.ewma_lambda
+        ee_series = ee_series.ewm(alpha=1-ewma_lambda, adjust=False).mean()
+
+        return ee_series.clip(-100, 100)
+
+    def get_crowding_signal(self, fvi: float) -&gt; str:
+        &quot;&quot;&quot;
+        獲取擁擠信號
+
+        Args:
+            fvi: FVI 值
+
+        Returns:
+            信號: low, neutral, high
+        &quot;&quot;&quot;
+        if fvi &lt; 40:
+            return &quot;low&quot;
+        elif fvi &gt; 60:
+            return &quot;high&quot;
+        else:
+            return &quot;neutral&quot;
+</code></pre>
+
+<h3 id="43-metricsfviolpy">4.3 因子波動率指數 (metrics/fviol.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+因子波動率指數 (FVIol) 計算
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Optional
+from arch import arch_model
+import logging
+
+logger = logging.getLogger(__name__)
+
+class FactorVolatilityIndex:
+    &quot;&quot;&quot;因子波動率指數&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+        self.vd_weight = 0.7  # 波動率偏離度權重
+        self.vsi_weight = 0.3  # 波動率結構指數權重
+
+    def calculate(
+        self,
+        factor_data: pd.DataFrame,
+        use_garch: bool = True
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算 FVIol
+
+        Args:
+            factor_data: 因子數據
+            use_garch: 是否使用 GARCH 模型
+
+        Returns:
+            包含 FVIol 的 DataFrame
+        &quot;&quot;&quot;
+        # 計算波動率偏離度
+        vd = self._calculate_vd(factor_data, use_garch)
+
+        # 計算波動率結構指數
+        vsi = self._calculate_vsi(factor_data)
+
+        # 合併
+        fviol_data = pd.DataFrame({
+            'VD': vd,
+            'VSI': vsi
+        })
+
+        # 計算綜合 FVIol
+        fviol_data['FVIol'] = (
+            self.vd_weight * fviol_data['VD'] +
+            self.vsi_weight * fviol_data['VSI']
+        )
+
+        return fviol_data
+
+    def _calculate_vd(
+        self,
+        factor_data: pd.DataFrame,
+        use_garch: bool
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算波動率偏離度 (Volatility Deviation, VD)
+
+        公式: VD_t = |σ_t - σ_long| / σ_long × 100
+        &quot;&quot;&quot;
+        returns = factor_data['return'].dropna()
+
+        if use_garch:
+            # 使用 GARCH(1,1) 估計波動率
+            volatility = self._estimate_garch_volatility(returns)
+        else:
+            # 使用歷史波動率
+            volatility = self._estimate_historical_volatility(returns)
+
+        # 長期平均波動率
+        long_window = self.config.metric.long_window
+        sigma_long = volatility.rolling(long_window).mean()
+
+        # 計算偏離度
+        vd = ((volatility - sigma_long).abs() / sigma_long * 100).fillna(0)
+
+        return vd.clip(0, 100)
+
+    def _estimate_historical_volatility(
+        self,
+        returns: pd.Series,
+        window: int = 20
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算歷史波動率
+
+        Args:
+            returns: 收益率序列
+            window: 滾動窗口
+
+        Returns:
+            波動率序列
+        &quot;&quot;&quot;
+        return returns.rolling(window).std()
+
+    def _estimate_garch_volatility(
+        self,
+        returns: pd.Series
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        使用 GARCH(1,1) 估計波動率
+
+        Args:
+            returns: 收益率序列
+
+        Returns:
+            波動率序列
+        &quot;&quot;&quot;
+        volatility = pd.Series(index=returns.index, dtype=float)
+
+        # 滾動估計 GARCH
+        window = self.config.metric.short_window
+
+        for i in range(window, len(returns)):
+            window_returns = returns.iloc[i-window:i]
+
+            try:
+                # 擬合 GARCH(1,1)
+                model = arch_model(window_returns * 100, vol='Garch', p=1, q=1)
+                result = model.fit(disp='off')
+
+                # 預測下一期波動率
+                forecast = result.forecast(horizon=1)
+                vol = np.sqrt(forecast.variance.values[-1, 0]) / 100
+
+                volatility.iloc[i] = vol
+
+            except Exception as e:
+                logger.warning(f&quot;GARCH 估計失敗: {e}，使用歷史波動率&quot;)
+                volatility.iloc[i] = window_returns.std()
+
+        return volatility
+
+    def _calculate_vsi(
+        self,
+        factor_data: pd.DataFrame
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算波動率結構指數 (Volatility Structure Index, VSI)
+
+        公式: VSI = Correlation(σ_short, σ_long) × 50
+        &quot;&quot;&quot;
+        returns = factor_data['return'].dropna()
+
+        # 短期波動率
+        short_window = 5
+        sigma_short = returns.rolling(short_window).std()
+
+        # 長期波動率
+        long_window = 60
+        sigma_long = returns.rolling(long_window).std()
+
+        # 計算滾動相關性
+        correlation = sigma_short.rolling(60).corr(sigma_long)
+
+        # 調整到 0-100
+        vsi = correlation * 50 + 50
+
+        return vsi.clip(0, 100)
+
+    def get_crowding_signal(self, fviol: float) -&gt; str:
+        &quot;&quot;&quot;
+        獲取擁擠信號
+
+        Args:
+            fviol: FVIol 值
+
+        Returns:
+            信號: low, neutral, high
+        &quot;&quot;&quot;
+        if fviol &lt; 30:
+            return &quot;low&quot;
+        elif fviol &gt; 50:
+            return &quot;high&quot;
+        else:
+            return &quot;neutral&quot;
+</code></pre>
+
+<h3 id="44-metricsccspy">4.4 綜合擁擠度評分 (metrics/ccs.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+綜合擁擠度評分 (CCS) 計算
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+class ComprehensiveCrowdingScore:
+    &quot;&quot;&quot;綜合擁擠度評分&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+        self.weights = config.weight.weights
+
+    def calculate(
+        self,
+        fei_data: pd.DataFrame,
+        fvi_data: pd.DataFrame,
+        fviol_data: pd.DataFrame
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算 CCS
+
+        Args:
+            fei_data: FEI 數據
+            fvi_data: FVI 數據
+            fviol_data: FVIol 數據
+
+        Returns:
+            包含 CCS 的 DataFrame
+        &quot;&quot;&quot;
+        # 對齊數據
+        aligned_data = self._align_data(fei_data, fvi_data, fviol_data)
+
+        # 計算 CCS
+        aligned_data['CCS'] = (
+            self.weights['FEI'] * aligned_data['FEI'] +
+            self.weights['FVI'] * aligned_data['FVI'] +
+            self.weights['FVIol'] * aligned_data['FVIol']
+        )
+
+        # 計算擁擠度等級
+        aligned_data['crowding_level'] = aligned_data['CCS'].apply(
+            lambda x: self._get_crowding_level(x)
+        )
+
+        # 計算操作建議
+        aligned_data['recommendation'] = aligned_data['CCS'].apply(
+            lambda x: self._get_recommendation(x)
+        )
+
+        return aligned_data
+
+    def _align_data(
+        self,
+        *dfs: pd.DataFrame
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;對齊多個 DataFrame&quot;&quot;&quot;
+        # 找到公共索引
+        common_index = dfs[0].index
+        for df in dfs[1:]:
+            common_index = common_index.intersection(df.index)
+
+        # 合併
+        result = pd.DataFrame(index=common_index)
+        for df in dfs:
+            result = result.join(df, how='inner')
+
+        return result
+
+    def _get_crowding_level(self, score: float) -&gt; str:
+        &quot;&quot;&quot;獲取擁擠度等級&quot;&quot;&quot;
+        if score &lt;= 20:
+            return &quot;extreme_cold&quot;
+        elif score &lt;= 40:
+            return &quot;cold&quot;
+        elif score &lt;= 60:
+            return &quot;neutral&quot;
+        elif score &lt;= 80:
+            return &quot;hot&quot;
+        else:
+            return &quot;extreme_hot&quot;
+
+    def _get_recommendation(self, score: float) -&gt; str:
+        &quot;&quot;&quot;獲取操作建議&quot;&quot;&quot;
+        level = self._get_crowding_level(score)
+        recommendations = {
+            &quot;extreme_cold&quot;: &quot;逆向建倉&quot;,
+            &quot;cold&quot;: &quot;觀察，逢低佈局&quot;,
+            &quot;neutral&quot;: &quot;持有觀望&quot;,
+            &quot;hot&quot;: &quot;考慮減持&quot;,
+            &quot;extreme_hot&quot;: &quot;大幅減倉/避險&quot;
+        }
+        return recommendations.get(level, &quot;未知&quot;)
+
+    def calculate_latest_score(
+        self,
+        fei: float,
+        fvi: float,
+        fviol: float
+    ) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算最新 CCS
+
+        Args:
+            fei: 最新 FEI 值
+            fvi: 最新 FVI 值
+            fviol: 最新 FVIol 值
+
+        Returns:
+            包含 CCS 和相關信息的字典
+        &quot;&quot;&quot;
+        ccs = (
+            self.weights['FEI'] * fei +
+            self.weights['FVI'] * fvi +
+            self.weights['FVIol'] * fviol
+        )
+
+        return {
+            'CCS': round(ccs, 2),
+            'FEI': round(fei, 2),
+            'FVI': round(fvi, 2),
+            'FVIol': round(fviol, 2),
+            'crowding_level': self._get_crowding_level(ccs),
+            'recommendation': self._get_recommendation(ccs)
+        }
+
+    def get_score_trend(
+        self,
+        ccs_series: pd.Series,
+        window: int = 5
+    ) -&gt; str:
+        &quot;&quot;&quot;
+        獲取評分趨勢
+
+        Args:
+            ccs_series: CCS 序列
+            window: 滾動窗口
+
+        Returns:
+            趨勢: rising, falling, stable
+        &quot;&quot;&quot;
+        if len(ccs_series) &lt; window:
+            return &quot;unknown&quot;
+
+        recent = ccs_series.iloc[-window:]
+        slope = np.polyfit(range(len(recent)), recent.values, 1)[0]
+
+        if slope &gt; 1:
+            return &quot;rising&quot;
+        elif slope &lt; -1:
+            return &quot;falling&quot;
+        else:
+            return &quot;stable&quot;
+</code></pre>
+
+<hr />
+<h2 id="5">5. 監控系統</h2>
+<h3 id="51-monitorrealtimepy">5.1 實時監控器 (monitor/realtime.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+實時監控器
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional
+from datetime import datetime, timedelta
+import logging
+from dataclasses import dataclass
+
+from ..config.settings import config
+from ..data.loader import DataLoader
+from ..data.processor import DataProcessor
+from ..metrics.fei import FactorExposureIndex
+from ..metrics.fvi import FactorValuationIndex
+from ..metrics.fviol import FactorVolatilityIndex
+from ..metrics.ccs import ComprehensiveCrowdingScore
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class MonitoringResult:
+    &quot;&quot;&quot;監控結果&quot;&quot;&quot;
+    factor_id: str
+    factor_name: str
+    timestamp: datetime
+    ccs: float
+    fei: float
+    fvi: float
+    fviol: float
+    crowding_level: str
+    recommendation: str
+    trend: str
+    confidence: float
+
+class RealtimeMonitor:
+    &quot;&quot;&quot;實時監控器&quot;&quot;&quot;
+
+    def __init__(self, config=config):
+        self.config = config
+
+        # 初始化組件
+        self.loader = DataLoader(config)
+        self.processor = DataProcessor(config)
+        self.fei_calculator = FactorExposureIndex(config)
+        self.fvi_calculator = FactorValuationIndex(config)
+        self.fviol_calculator = FactorVolatilityIndex(config)
+        self.ccs_calculator = ComprehensiveCrowdingScore(config)
+
+        # 監控的因子列表
+        self.monitored_factors = [
+            {&quot;id&quot;: &quot;F001&quot;, &quot;name&quot;: &quot;價值因子&quot;},
+            {&quot;id&quot;: &quot;F002&quot;, &quot;name&quot;: &quot;成長因子&quot;},
+            {&quot;id&quot;: &quot;F003&quot;, &quot;name&quot;: &quot;動量因子&quot;},
+            {&quot;id&quot;: &quot;F004&quot;, &quot;name&quot;: &quot;質量因子&quot;},
+            {&quot;id&quot;: &quot;F005&quot;, &quot;name&quot;: &quot;低波動因子&quot;}
+        ]
+
+        # 存儲歷史數據
+        self.history = {}
+
+    def monitor_factor(
+        self,
+        factor_id: str,
+        factor_name: str
+    ) -&gt; MonitoringResult:
+        &quot;&quot;&quot;
+        監控單個因子
+
+        Args:
+            factor_id: 因子 ID
+            factor_name: 因子名稱
+
+        Returns:
+            監控結果
+        &quot;&quot;&quot;
+        try:
+            # 加載數據
+            end_date = datetime.now().strftime('%Y-%m-%d')
+            start_date = (datetime.now() - timedelta(days=400)).strftime('%Y-%m-%d')
+
+            factor_data = self.loader.load_factor_data(factor_id, start_date, end_date)
+            capital_flow = self.loader.load_capital_flow(factor_id, start_date, end_date)
+            financial_data = self.loader.load_financial_data(start_date, end_date)
+
+            # 數據處理
+            factor_data = self.processor.clean_data(factor_data)
+            capital_flow = self.processor.clean_data(capital_flow)
+            financial_data = self.processor.clean_data(financial_data)
+
+            # 對齊數據
+            factor_data, capital_flow, financial_data = self.processor.align_data(
+                factor_data, capital_flow, financial_data
+            )
+
+            # 計算指標
+            fei_data = self.fei_calculator.calculate(factor_data, capital_flow)
+            fvi_data = self.fvi_calculator.calculate(factor_data, financial_data)
+            fviol_data = self.fviol_calculator.calculate(factor_data)
+
+            # 計算 CCS
+            ccs_data = self.ccs_calculator.calculate(fei_data, fvi_data, fviol_data)
+
+            # 獲取最新值
+            latest = ccs_data.iloc[-1]
+            fei_latest = fei_data['FEI'].iloc[-1]
+            fvi_latest = fvi_data['FVI'].iloc[-1]
+            fviol_latest = fviol_data['FVIol'].iloc[-1]
+
+            # 計算趨勢
+            trend = self.ccs_calculator.get_score_trend(ccs_data['CCS'])
+
+            # 計算置信度（基於歷史一致性）
+            confidence = self._calculate_confidence(ccs_data)
+
+            # 構建結果
+            result = MonitoringResult(
+                factor_id=factor_id,
+                factor_name=factor_name,
+                timestamp=datetime.now(),
+                ccs=latest['CCS'],
+                fei=fei_latest,
+                fvi=fvi_latest,
+                fviol=fviol_latest,
+                crowding_level=latest['crowding_level'],
+                recommendation=latest['recommendation'],
+                trend=trend,
+                confidence=confidence
+            )
+
+            # 存儲歷史數據
+            self.history[factor_id] = ccs_data
+
+            logger.info(f&quot;因子 {factor_name} 監控完成: CCS={latest['CCS']:.2f}&quot;)
+
+            return result
+
+        except Exception as e:
+            logger.error(f&quot;監控因子 {factor_name} 失敗: {e}&quot;)
+            raise
+
+    def monitor_all_factors(self) -&gt; List[MonitoringResult]:
+        &quot;&quot;&quot;
+        監控所有因子
+
+        Returns:
+            所有因子的監控結果列表
+        &quot;&quot;&quot;
+        results = []
+
+        for factor in self.monitored_factors:
+            try:
+                result = self.monitor_factor(factor['id'], factor['name'])
+                results.append(result)
+            except Exception as e:
+                logger.error(f&quot;監控因子 {factor['name']} 失敗: {e}&quot;)
+                continue
+
+        return results
+
+    def _calculate_confidence(
+        self,
+        ccs_data: pd.DataFrame,
+        window: int = 20
+    ) -&gt; float:
+        &quot;&quot;&quot;
+        計算置信度
+
+        基於評分的穩定性
+
+        Args:
+            ccs_data: CCS 數據
+            window: 滾動窗口
+
+        Returns:
+            置信度 (0-1)
+        &quot;&quot;&quot;
+        if len(ccs_data) &lt; window:
+            return 0.5
+
+        recent_ccs = ccs_data['CCS'].iloc[-window:]
+
+        # 計算標準差
+        std = recent_ccs.std()
+
+        # 標準差越小，置信度越高
+        confidence = np.exp(-std / 10)
+
+        return np.clip(confidence, 0, 1)
+
+    def get_factor_history(
+        self,
+        factor_id: str,
+        days: int = 30
+    ) -&gt; Optional[pd.DataFrame]:
+        &quot;&quot;&quot;
+        獲取因子歷史數據
+
+        Args:
+            factor_id: 因子 ID
+            days: 天數
+
+        Returns:
+            歷史數據 DataFrame
+        &quot;&quot;&quot;
+        if factor_id not in self.history:
+            return None
+
+        history = self.history[factor_id]
+        cutoff_date = datetime.now() - timedelta(days=days)
+
+        return history[history.index &gt;= cutoff_date]
+
+    def get_summary(self) -&gt; Dict:
+        &quot;&quot;&quot;
+        獲取監控摘要
+
+        Returns:
+            摘要字典
+        &quot;&quot;&quot;
+        results = self.monitor_all_factors()
+
+        summary = {
+            'timestamp': datetime.now(),
+            'total_factors': len(results),
+            'extreme_hot': sum(1 for r in results if r.crowding_level == 'extreme_hot'),
+            'hot': sum(1 for r in results if r.crowding_level == 'hot'),
+            'neutral': sum(1 for r in results if r.crowding_level == 'neutral'),
+            'cold': sum(1 for r in results if r.crowding_level == 'cold'),
+            'extreme_cold': sum(1 for r in results if r.crowding_level == 'extreme_cold'),
+            'factors': results
+        }
+
+        return summary
+</code></pre>
+
+<h3 id="52-monitoralertpy">5.2 預警系統 (monitor/alert.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+預警系統
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional
+from datetime import datetime, timedelta
+from dataclasses import dataclass, asdict
+import json
+import logging
+
+from ..config.settings import config
+from ..config.thresholds import (
+    get_alert_level,
+    ALERT_LEVELS,
+    CROWDING_RECOMMENDATIONS
+)
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class Alert:
+    &quot;&quot;&quot;預警對象&quot;&quot;&quot;
+    alert_id: str
+    factor_id: str
+    factor_name: str
+    timestamp: datetime
+    level: int
+    level_name: str
+    ccs: float
+    fei: float
+    fvi: float
+    fviol: float
+    duration_days: int
+    recommendation: str
+    action: str
+    confidence: float
+
+    def to_dict(self) -&gt; Dict:
+        &quot;&quot;&quot;轉換為字典&quot;&quot;&quot;
+        data = asdict(self)
+        data['timestamp'] = self.timestamp.isoformat()
+        return data
+
+    def to_json(self) -&gt; str:
+        &quot;&quot;&quot;轉換為 JSON&quot;&quot;&quot;
+        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+
+class AlertSystem:
+    &quot;&quot;&quot;預警系統&quot;&quot;&quot;
+
+    def __init__(self, config=config):
+        self.config = config
+        self.alert_history = {}  # factor_id -&gt; list of alerts
+        self.active_alerts = {}   # factor_id -&gt; current alert
+
+    def check_alert(
+        self,
+        factor_id: str,
+        factor_name: str,
+        ccs_data: pd.DataFrame,
+        latest_ccs: float,
+        latest_fei: float,
+        latest_fvi: float,
+        latest_fviol: float,
+        confidence: float
+    ) -&gt; Optional[Alert]:
+        &quot;&quot;&quot;
+        檢查是否需要發送預警
+
+        Args:
+            factor_id: 因子 ID
+            factor_name: 因子名稱
+            ccs_data: CCS 歷史數據
+            latest_ccs: 最新 CCS
+            latest_fei: 最新 FEI
+            latest_fvi: 最新 FVI
+            latest_fviol: 最新 FVIol
+            confidence: 置信度
+
+        Returns:
+            Alert 對象，如果不需要預警則返回 None
+        &quot;&quot;&quot;
+        # 計算持續時間
+        duration_days = self._calculate_duration(ccs_data, latest_ccs)
+
+        # 獲取預警等級
+        alert_level = get_alert_level(latest_ccs, duration_days)
+
+        if alert_level == 0:
+            # 清除現有預警
+            if factor_id in self.active_alerts:
+                logger.info(f&quot;清除因子 {factor_name} 的預警&quot;)
+                del self.active_alerts[factor_id]
+            return None
+
+        # 檢查是否已經發送過相同等級的預警
+        if factor_id in self.active_alerts:
+            existing_alert = self.active_alerts[factor_id]
+            if existing_alert.level &gt;= alert_level:
+                # 已經有更高級別的預警，不重複發送
+                return None
+
+        # 創建新預警
+        level_info = ALERT_LEVELS[alert_level]
+        level_name = level_info['name']
+        action = level_info['action']
+
+        alert = Alert(
+            alert_id=f&quot;{factor_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}&quot;,
+            factor_id=factor_id,
+            factor_name=factor_name,
+            timestamp=datetime.now(),
+            level=alert_level,
+            level_name=level_name,
+            ccs=latest_ccs,
+            fei=latest_fei,
+            fvi=latest_fvi,
+            fviol=latest_fviol,
+            duration_days=duration_days,
+            recommendation=CROWDING_RECOMMENDATIONS.get(
+                self._get_crowding_level(latest_ccs),
+                &quot;未知&quot;
+            ),
+            action=action,
+            confidence=confidence
+        )
+
+        # 記錄預警
+        self.active_alerts[factor_id] = alert
+
+        if factor_id not in self.alert_history:
+            self.alert_history[factor_id] = []
+        self.alert_history[factor_id].append(alert)
+
+        logger.warning(
+            f&quot;發送預警: {factor_name} - {level_name} &quot;
+            f&quot;(CCS={latest_ccs:.2f}, 持續{duration_days}天)&quot;
+        )
+
+        return alert
+
+    def _calculate_duration(
+        self,
+        ccs_data: pd.DataFrame,
+        current_ccs: float
+    ) -&gt; int:
+        &quot;&quot;&quot;
+        計算當前狀態持續時間
+
+        Args:
+            ccs_data: CCS 歷史數據
+            current_ccs: 當前 CCS
+
+        Returns:
+            持續天數
+        &quot;&quot;&quot;
+        level = self._get_crowding_level(current_ccs)
+
+        # 計算連續處於同一等級的天數
+        duration = 0
+        for i in range(len(ccs_data) - 1, -1, -1):
+            if self._get_crowding_level(ccs_data['CCS'].iloc[i]) == level:
+                duration += 1
+            else:
+                break
+
+        return duration
+
+    def _get_crowding_level(self, ccs: float) -&gt; str:
+        &quot;&quot;&quot;獲取擁擠度等級&quot;&quot;&quot;
+        if ccs &lt;= 20:
+            return &quot;extreme_cold&quot;
+        elif ccs &lt;= 40:
+            return &quot;cold&quot;
+        elif ccs &lt;= 60:
+            return &quot;neutral&quot;
+        elif ccs &lt;= 80:
+            return &quot;hot&quot;
+        else:
+            return &quot;extreme_hot&quot;
+
+    def get_active_alerts(self) -&gt; List[Alert]:
+        &quot;&quot;&quot;獲取所有活躍預警&quot;&quot;&quot;
+        return list(self.active_alerts.values())
+
+    def get_alert_history(
+        self,
+        factor_id: Optional[str] = None,
+        level: Optional[int] = None
+    ) -&gt; List[Alert]:
+        &quot;&quot;&quot;
+        獲取預警歷史
+
+        Args:
+            factor_id: 因子 ID，None 表示所有因子
+            level: 預警等級，None 表示所有等級
+
+        Returns:
+            預警列表
+        &quot;&quot;&quot;
+        if factor_id:
+            alerts = self.alert_history.get(factor_id, [])
+        else:
+            alerts = []
+            for factor_alerts in self.alert_history.values():
+                alerts.extend(factor_alerts)
+
+        if level is not None:
+            alerts = [a for a in alerts if a.level == level]
+
+        return alerts
+
+    def clear_alerts(self, factor_id: Optional[str] = None):
+        &quot;&quot;&quot;
+        清除預警
+
+        Args:
+            factor_id: 因子 ID，None 表示清除所有預警
+        &quot;&quot;&quot;
+        if factor_id:
+            if factor_id in self.active_alerts:
+                del self.active_alerts[factor_id]
+        else:
+            self.active_alerts.clear()
+
+class NotificationService:
+    &quot;&quot;&quot;通知服務&quot;&quot;&quot;
+
+    def __init__(self, config=config):
+        self.config = config
+        self.enabled_channels = config.alert.notification_channels
+
+    def send_alert(self, alert: Alert):
+        &quot;&quot;&quot;
+        發送預警通知
+
+        Args:
+            alert: 預警對象
+        &quot;&quot;&quot;
+        if not self.config.alert.enabled:
+            logger.info(&quot;預警功能未啟用&quot;)
+            return
+
+        for channel in self.enabled_channels:
+            try:
+                if channel == &quot;log&quot;:
+                    self._send_to_log(alert)
+                elif channel == &quot;email&quot;:
+                    self._send_to_email(alert)
+                elif channel == &quot;webhook&quot;:
+                    self._send_to_webhook(alert)
+            except Exception as e:
+                logger.error(f&quot;通過 {channel} 發送預警失敗: {e}&quot;)
+
+    def _send_to_log(self, alert: Alert):
+        &quot;&quot;&quot;發送到日誌&quot;&quot;&quot;
+        logger.warning(
+            f&quot;[{alert.level_name}] {alert.factor_name}\n&quot;
+            f&quot;CCS: {alert.ccs:.2f} | FEI: {alert.fei:.2f} | &quot;
+            f&quot;FVI: {alert.fvi:.2f} | FVIol: {alert.fviol:.2f}\n&quot;
+            f&quot;持續: {alert.duration_days}天 | 置信度: {alert.confidence:.2f}\n&quot;
+            f&quot;建議: {alert.action}&quot;
+        )
+
+    def _send_to_email(self, alert: Alert):
+        &quot;&quot;&quot;發送到郵件（示例實現）&quot;&quot;&quot;
+        # 實際實現需要配置 SMTP
+        subject = f&quot;[{alert.level_name}] 因子擁擠度預警 - {alert.factor_name}&quot;
+        body = alert.to_json()
+
+        logger.info(f&quot;發送郵件: {subject}&quot;)
+        # TODO: 實現郵件發送邏輯
+
+    def _send_to_webhook(self, alert: Alert):
+        &quot;&quot;&quot;發送到 Webhook（示例實現）&quot;&quot;&quot;
+        # 實際實現需要配置 Webhook URL
+        import requests
+
+        webhook_url = &quot;https://your-webhook-url.com/alerts&quot;
+        data = alert.to_dict()
+
+        try:
+            response = requests.post(webhook_url, json=data, timeout=5)
+            response.raise_for_status()
+            logger.info(f&quot;Webhook 發送成功: {alert.alert_id}&quot;)
+        except Exception as e:
+            logger.error(f&quot;Webhook 發送失敗: {e}&quot;)
+</code></pre>
+
+<hr />
+<h2 id="6">6. 可視化系統</h2>
+<h3 id="61-visualizationdashboardpy">6.1 儀表板 (visualization/dashboard.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+可視化儀表板
+&quot;&quot;&quot;
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
+
+class Dashboard:
+    &quot;&quot;&quot;可視化儀表板&quot;&quot;&quot;
+
+    def __init__(self):
+        self.colors = {
+            'extreme_cold': '#1f77b4',
+            'cold': '#aec7e8',
+            'neutral': '#ffbb78',
+            'hot': '#ff9896',
+            'extreme_hot': '#d62728'
+        }
+
+    def create_overview_dashboard(
+        self,
+        monitoring_results: List,
+        historical_data: Dict[str, pd.DataFrame]
+    ) -&gt; go.Figure:
+        &quot;&quot;&quot;
+        創建總覽儀表板
+
+        Args:
+            monitoring_results: 監控結果列表
+            historical_data: 歷史數據字典
+
+        Returns:
+            Plotly Figure
+        &quot;&quot;&quot;
+        # 創建子圖
+        fig = make_subplots(
+            rows=2, cols=2,
+            subplot_titles=(
+                '各因子擁擠度評分',
+                '擁擠度分佈',
+                '因子趨勢 (最近30天)',
+                '子指標熱力圖'
+            ),
+            specs=[
+                [{'type': 'bar'}, {'type': 'pie'}],
+                [{'type': 'scatter'}, {'type': 'heatmap'}]
+            ]
+        )
+
+        # 1. 各因子擁擠度評分柱狀圖
+        factor_names = [r.factor_name for r in monitoring_results]
+        ccs_scores = [r.ccs for r in monitoring_results]
+        colors = [self.colors[r.crowding_level] for r in monitoring_results]
+
+        fig.add_trace(
+            go.Bar(
+                x=factor_names,
+                y=ccs_scores,
+                marker_color=colors,
+                text=[f'{s:.1f}' for s in ccs_scores],
+                textposition='outside',
+                name='CCS'
+            ),
+            row=1, col=1
+        )
+
+        # 添加閾值線
+        fig.add_hline(y=80, line_dash=&quot;dash&quot;, line_color=&quot;red&quot;, row=1, col=1)
+        fig.add_hline(y=60, line_dash=&quot;dash&quot;, line_color=&quot;orange&quot;, row=1, col=1)
+        fig.add_hline(y=40, line_dash=&quot;dash&quot;, line_color=&quot;green&quot;, row=1, col=1)
+        fig.add_hline(y=20, line_dash=&quot;dash&quot;, line_color=&quot;blue&quot;, row=1, col=1)
+
+        # 2. 擁擠度分佈餅圖
+        level_counts = {
+            'extreme_cold': 0,
+            'cold': 0,
+            'neutral': 0,
+            'hot': 0,
+            'extreme_hot': 0
+        }
+        for r in monitoring_results:
+            level_counts[r.crowding_level] += 1
+
+        fig.add_trace(
+            go.Pie(
+                labels=['極度過冷', '過冷', '中性', '過熱', '極度過熱'],
+                values=[
+                    level_counts['extreme_cold'],
+                    level_counts['cold'],
+                    level_counts['neutral'],
+                    level_counts['hot'],
+                    level_counts['extreme_hot']
+                ],
+                marker_colors=[
+                    self.colors['extreme_cold'],
+                    self.colors['cold'],
+                    self.colors['neutral'],
+                    self.colors['hot'],
+                    self.colors['extreme_hot']
+                ],
+                name='分佈'
+            ),
+            row=1, col=2
+        )
+
+        # 3. 因子趨勢圖（最近30天）
+        for factor_id, data in historical_data.items():
+            if len(data) &gt; 0:
+                recent_data = data.tail(30)
+                fig.add_trace(
+                    go.Scatter(
+                        x=recent_data.index,
+                        y=recent_data['CCS'],
+                        mode='lines',
+                        name=factor_id,
+                        line=dict(width=2)
+                    ),
+                    row=2, col=1
+                )
+
+        # 4. 子指標熱力圖
+        sub_metrics_data = []
+        factor_names = []
+        for r in monitoring_results:
+            factor_names.append(r.factor_name)
+            sub_metrics_data.append([r.fei, r.fvi, r.fviol])
+
+        fig.add_trace(
+            go.Heatmap(
+                z=sub_metrics_data,
+                x=['FEI', 'FVI', 'FVIol'],
+                y=factor_names,
+                colorscale='RdYlGn_r',
+                colorbar=dict(title='評分'),
+                name='子指標'
+            ),
+            row=2, col=2
+        )
+
+        # 更新佈局
+        fig.update_layout(
+            title_text=&quot;因子擁擠度監控儀表板&quot;,
+            title_font_size=24,
+            height=800,
+            showlegend=False
+        )
+
+        fig.update_yaxes(range=[0, 100], row=1, col=1)
+        fig.update_yaxes(range=[0, 100], row=2, col=1)
+
+        return fig
+
+    def create_factor_detail_chart(
+        self,
+        factor_id: str,
+        factor_name: str,
+        history: pd.DataFrame
+    ) -&gt; go.Figure:
+        &quot;&quot;&quot;
+        創建因子詳情圖
+
+        Args:
+            factor_id: 因子 ID
+            factor_name: 因子名稱
+            history: 歷史數據
+
+        Returns:
+            Plotly Figure
+        &quot;&quot;&quot;
+        fig = make_subplots(
+            rows=2, cols=1,
+            subplot_titles=(
+                '綜合擁擠度評分 (CCS)',
+                '子指標走勢'
+            ),
+            shared_xaxes=True,
+            vertical_spacing=0.1
+        )
+
+        # CCS 走勢圖
+        fig.add_trace(
+            go.Scatter(
+                x=history.index,
+                y=history['CCS'],
+                mode='lines',
+                name='CCS',
+                line=dict(color='black', width=2),
+                fill='tozeroy',
+                fillcolor='rgba(0,0,0,0.1)'
+            ),
+            row=1, col=1
+        )
+
+        # 子指標走勢圖
+        fig.add_trace(
+            go.Scatter(
+                x=history.index,
+                y=history['FEI'],
+                mode='lines',
+                name='FEI',
+                line=dict(color='blue', width=1.5)
+            ),
+            row=2, col=1
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=history.index,
+                y=history['FVI'],
+                mode='lines',
+                name='FVI',
+                line=dict(color='green', width=1.5)
+            ),
+            row=2, col=1
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=history.index,
+                y=history['FVIol'],
+                mode='lines',
+                name='FVIol',
+                line=dict(color='orange', width=1.5)
+            ),
+            row=2, col=1
+        )
+
+        # 添加閾值線
+        fig.add_hline(y=80, line_dash=&quot;dash&quot;, line_color=&quot;red&quot;, row=1, col=1)
+        fig.add_hline(y=60, line_dash=&quot;dash&quot;, line_color=&quot;orange&quot;, row=1, col=1)
+        fig.add_hline(y=40, line_dash=&quot;dash&quot;, line_color=&quot;green&quot;, row=1, col=1)
+        fig.add_hline(y=20, line_dash=&quot;dash&quot;, line_color=&quot;blue&quot;, row=1, col=1)
+
+        # 更新佈局
+        fig.update_layout(
+            title=f&quot;{factor_name} 詳情&quot;,
+            height=600,
+            hovermode='x unified'
+        )
+
+        fig.update_yaxes(range=[0, 100], row=1, col=1)
+        fig.update_yaxes(range=[0, 100], row=2, col=1)
+
+        return fig
+
+    def create_gauge_chart(
+        self,
+        ccs: float,
+        factor_name: str
+    ) -&gt; go.Figure:
+        &quot;&quot;&quot;
+        創建儀表盤圖表
+
+        Args:
+            ccs: CCS 值
+            factor_name: 因子名稱
+
+        Returns:
+            Plotly Figure
+        &quot;&quot;&quot;
+        # 確定顏色
+        if ccs &lt;= 20:
+            color = 'blue'
+        elif ccs &lt;= 40:
+            color = 'lightblue'
+        elif ccs &lt;= 60:
+            color = 'yellow'
+        elif ccs &lt;= 80:
+            color = 'orange'
+        else:
+            color = 'red'
+
+        fig = go.Figure(go.Indicator(
+            mode = &quot;gauge+number+delta&quot;,
+            value = ccs,
+            title = {'text': f&quot;{factor_name}&lt;br&gt;&lt;span style='font-size:0.8em'&gt;擁擠度評分&lt;/span&gt;&quot;},
+            delta = {'reference': 50},
+            gauge = {
+                'axis': {'range': [0, 100]},
+                'bar': {'color': color},
+                'steps': [
+                    {'range': [0, 20], 'color': 'lightblue'},
+                    {'range': [20, 40], 'color': 'lightyellow'},
+                    {'range': [40, 60], 'color': 'lightgreen'},
+                    {'range': [60, 80], 'color': 'orange'},
+                    {'range': [80, 100], 'color': 'lightcoral'}
+                ],
+                'threshold': {
+                    'line': {'color': &quot;red&quot;, 'width': 4},
+                    'thickness': 0.75,
+                    'value': 80
+                }
+            }
+        ))
+
+        fig.update_layout(height=400)
+
+        return fig
+
+    def save_dashboard(
+        self,
+        fig: go.Figure,
+        output_path: str,
+        format: str = &quot;html&quot;
+    ):
+        &quot;&quot;&quot;
+        保存儀表板
+
+        Args:
+            fig: Plotly Figure
+            output_path: 輸出路徑
+            format: 輸出格式 (html, png, jpg, pdf)
+        &quot;&quot;&quot;
+        if format == &quot;html&quot;:
+            fig.write_html(output_path)
+        elif format == &quot;png&quot;:
+            fig.write_image(output_path, format='png')
+        elif format == &quot;jpg&quot;:
+            fig.write_image(output_path, format='jpg')
+        elif format == &quot;pdf&quot;:
+            fig.write_image(output_path, format='pdf')
+
+        logger.info(f&quot;儀表板已保存到: {output_path}&quot;)
+</code></pre>
+
+<h3 id="62-visualizationreportspy">6.2 報告生成器 (visualization/reports.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+報告生成器
+&quot;&quot;&quot;
+import pandas as pd
+from typing import List, Dict, Optional
+from datetime import datetime
+import logging
+
+from ..monitor.realtime import MonitoringResult
+from ..monitor.alert import Alert
+
+logger = logging.getLogger(__name__)
+
+class ReportGenerator:
+    &quot;&quot;&quot;報告生成器&quot;&quot;&quot;
+
+    def generate_daily_report(
+        self,
+        monitoring_results: List[MonitoringResult],
+        alerts: List[Alert],
+        output_path: Optional[str] = None
+    ) -&gt; str:
+        &quot;&quot;&quot;
+        生成日報
+
+        Args:
+            monitoring_results: 監控結果列表
+            alerts: 預警列表
+            output_path: 輸出路徑（可選）
+
+        Returns:
+            報告內容
+        &quot;&quot;&quot;
+        report_lines = []
+        report_lines.append(&quot;=&quot; * 60)
+        report_lines.append(&quot;因子擁擠度監控日報&quot;)
+        report_lines.append(&quot;=&quot; * 60)
+        report_lines.append(f&quot;報告時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 摘要
+        report_lines.append(&quot;【摘要】&quot;)
+        report_lines.append(f&quot;監控因子數量: {len(monitoring_results)}&quot;)
+        report_lines.append(f&quot;觸發預警數量: {len(alerts)}&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 分級統計
+        extreme_hot = sum(1 for r in monitoring_results if r.crowding_level == 'extreme_hot')
+        hot = sum(1 for r in monitoring_results if r.crowding_level == 'hot')
+        neutral = sum(1 for r in monitoring_results if r.crowding_level == 'neutral')
+        cold = sum(1 for r in monitoring_results if r.crowding_level == 'cold')
+        extreme_cold = sum(1 for r in monitoring_results if r.crowding_level == 'extreme_cold')
+
+        report_lines.append(&quot;【擁擠度分級統計】&quot;)
+        report_lines.append(f&quot;  極度過熱 (80-100): {extreme_hot}&quot;)
+        report_lines.append(f&quot;  過熱 (60-80): {hot}&quot;)
+        report_lines.append(f&quot;  中性 (40-60): {neutral}&quot;)
+        report_lines.append(f&quot;  過冷 (20-40): {cold}&quot;)
+        report_lines.append(f&quot;  極度過冷 (0-20): {extreme_cold}&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 詳細數據
+        report_lines.append(&quot;【各因子詳情】&quot;)
+        report_lines.append(&quot;-&quot; * 60)
+        report_lines.append(f&quot;{'因子名稱':&lt;12} {'CCS':&lt;8} {'FEI':&lt;8} {'FVI':&lt;8} {'FVIol':&lt;8} {'狀態':&lt;12} {'建議'}&quot;)
+        report_lines.append(&quot;-&quot; * 60)
+
+        for result in monitoring_results:
+            report_lines.append(
+                f&quot;{result.factor_name:&lt;12} &quot;
+                f&quot;{result.ccs:&lt;8.2f} &quot;
+                f&quot;{result.fei:&lt;8.2f} &quot;
+                f&quot;{result.fvi:&lt;8.2f} &quot;
+                f&quot;{result.fviol:&lt;8.2f} &quot;
+                f&quot;{result.crowding_level:&lt;12} &quot;
+                f&quot;{result.recommendation}&quot;
+            )
+
+        report_lines.append(&quot;-&quot; * 60)
+        report_lines.append(&quot;&quot;)
+
+        # 預警信息
+        if alerts:
+            report_lines.append(&quot;【預警信息】&quot;)
+            report_lines.append(&quot;-&quot; * 60)
+            for alert in alerts:
+                report_lines.append(
+                    f&quot;[{alert.level_name}] {alert.factor_name}\n&quot;
+                    f&quot;  CCS: {alert.ccs:.2f} | 持續: {alert.duration_days}天\n&quot;
+                    f&quot;  建議: {alert.action}&quot;
+                )
+                report_lines.append(&quot;-&quot; * 60)
+            report_lines.append(&quot;&quot;)
+
+        # 風險提示
+        report_lines.append(&quot;【風險提示】&quot;)
+        if extreme_hot &gt; 0:
+            report_lines.append(f&quot;  ⚠️  {extreme_hot} 個因子處於極度過熱狀態，建議關注&quot;)
+        if extreme_cold &gt; 0:
+            report_lines.append(f&quot;  💡 {extreme_cold} 個因子處於極度過冷狀態，可能存在機會&quot;)
+        if len(alerts) &gt; 0:
+            report_lines.append(f&quot;  🚨 當前有 {len(alerts)} 個活躍預警&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 免責聲明
+        report_lines.append(&quot;=&quot; * 60)
+        report_lines.append(&quot;免責聲明：本報告僅供參考，不構成投資建議。&quot;)
+        report_lines.append(&quot;投資有風險，決策需謹慎。&quot;)
+        report_lines.append(&quot;=&quot; * 60)
+
+        # 拼接報告
+        report = &quot;\n&quot;.join(report_lines)
+
+        # 保存報告
+        if output_path:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(report)
+            logger.info(f&quot;日報已保存到: {output_path}&quot;)
+
+        return report
+
+    def generate_weekly_report(
+        self,
+        monitoring_results: List[MonitoringResult],
+        historical_data: Dict[str, pd.DataFrame],
+        output_path: Optional[str] = None
+    ) -&gt; str:
+        &quot;&quot;&quot;
+        生成周報
+
+        Args:
+            monitoring_results: 監控結果列表
+            historical_data: 歷史數據
+            output_path: 輸出路徑（可選）
+
+        Returns:
+            報告內容
+        &quot;&quot;&quot;
+        report_lines = []
+        report_lines.append(&quot;=&quot; * 60)
+        report_lines.append(&quot;因子擁擠度監控周報&quot;)
+        report_lines.append(&quot;=&quot; * 60)
+        report_lines.append(f&quot;報告時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 摘要
+        report_lines.append(&quot;【摘要】&quot;)
+        report_lines.append(f&quot;監控因子數量: {len(monitoring_results)}&quot;)
+        report_lines.append(&quot;&quot;)
+
+        # 趨勢分析
+        report_lines.append(&quot;【趨勢分析】&quot;)
+        report_lines.append(&quot;-&quot; * 60)
+
+        for result in monitoring_results:
+            if result.factor_id in historical_data:
+                history = historical_data[result.factor_id]
+                if len(history) &gt;= 7:
+                    week_start = history['CCS'].iloc[-7]
+                    week_end = history['CCS'].iloc[-1]
+                    change = week_end - week_start
+                    change_pct = (change / week_start * 100) if week_start != 0 else 0
+
+                    trend_icon = &quot;📈&quot; if change &gt; 5 else &quot;📉&quot; if change &lt; -5 else &quot;➡️&quot;
+
+                    report_lines.append(
+                        f&quot;{trend_icon} {result.factor_name}\n&quot;
+                        f&quot;   本周變動: {change:+.2f} ({change_pct:+.1f}%)\n&quot;
+                        f&quot;   當前狀態: {result.crowding_level}\n&quot;
+                        f&quot;   建議: {result.recommendation}&quot;
+                    )
+
+        report_lines.append(&quot;-&quot; * 60)
+        report_lines.append(&quot;&quot;)
+
+        # 保存報告
+        report = &quot;\n&quot;.join(report_lines)
+
+        if output_path:
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(report)
+            logger.info(f&quot;周報已保存到: {output_path}&quot;)
+
+        return report
+</code></pre>
+
+<hr />
+<h2 id="7">7. 主程序與啟動腳本</h2>
+<h3 id="71-mainpy">7.1 主程序入口 (main.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+主程序入口
+&quot;&quot;&quot;
+import logging
+from pathlib import Path
+
+from config.settings import config
+from config.thresholds import get_crowding_level
+from monitor.realtime import RealtimeMonitor
+from monitor.alert import AlertSystem, NotificationService
+from visualization.dashboard import Dashboard
+from visualization.reports import ReportGenerator
+
+def setup_logging():
+    &quot;&quot;&quot;設置日誌&quot;&quot;&quot;
+    log_path = Path(config.logging.path)
+    log_path.mkdir(parents=True, exist_ok=True)
+
+    logging.basicConfig(
+        level=getattr(logging, config.logging.level),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_path / 'crowding_monitor.log'),
+            logging.StreamHandler()
+        ]
+    )
+
+def main():
+    &quot;&quot;&quot;主函數&quot;&quot;&quot;
+    setup_logging()
+    logger = logging.getLogger(__name__)
+
+    logger.info(f&quot;啟動 {config.project_name} v{config.version}&quot;)
+
+    try:
+        # 初始化組件
+        monitor = RealtimeMonitor(config)
+        alert_system = AlertSystem(config)
+        notification_service = NotificationService(config)
+        dashboard = Dashboard()
+        report_generator = ReportGenerator()
+
+        # 監控所有因子
+        logger.info(&quot;開始監控所有因子...&quot;)
+        results = monitor.monitor_all_factors()
+
+        # 檢查預警
+        alerts = []
+        for result in results:
+            if result.factor_id in monitor.history:
+                alert = alert_system.check_alert(
+                    factor_id=result.factor_id,
+                    factor_name=result.factor_name,
+                    ccs_data=monitor.history[result.factor_id],
+                    latest_ccs=result.ccs,
+                    latest_fei=result.fei,
+                    latest_fvi=result.fvi,
+                    latest_fviol=result.fviol,
+                    confidence=result.confidence
+                )
+                if alert:
+                    alerts.append(alert)
+                    notification_service.send_alert(alert)
+
+        # 生成報告
+        output_dir = Path(&quot;./output&quot;)
+        output_dir.mkdir(exist_ok=True)
+
+        # 日報
+        daily_report = report_generator.generate_daily_report(
+            monitoring_results=results,
+            alerts=alerts,
+            output_path=output_dir / f&quot;daily_report_{datetime.now().strftime('%Y%m%d')}.txt&quot;
+        )
+        logger.info(&quot;日報生成完成&quot;)
+
+        # 生成儀表板
+        overview_dashboard = dashboard.create_overview_dashboard(
+            monitoring_results=results,
+            historical_data=monitor.history
+        )
+        dashboard.save_dashboard(
+            overview_dashboard,
+            output_dir / f&quot;dashboard_{datetime.now().strftime('%Y%m%d')}.html&quot;
+        )
+        logger.info(&quot;儀表板生成完成&quot;)
+
+        # 輸出摘要
+        summary = monitor.get_summary()
+        logger.info(f&quot;監控完成: {summary['total_factors']} 個因子&quot;)
+        logger.info(f&quot;  極度過熱: {summary['extreme_hot']}&quot;)
+        logger.info(f&quot;  過熱: {summary['hot']}&quot;)
+        logger.info(f&quot;  中性: {summary['neutral']}&quot;)
+        logger.info(f&quot;  過冷: {summary['cold']}&quot;)
+        logger.info(f&quot;  極度過冷: {summary['extreme_cold']}&quot;)
+
+        if alerts:
+            logger.warning(f&quot;當前有 {len(alerts)} 個活躍預警&quot;)
+
+    except Exception as e:
+        logger.error(f&quot;程序執行失敗: {e}&quot;, exc_info=True)
+        raise
+
+if __name__ == &quot;__main__&quot;:
+    from datetime import datetime
+    main()
+</code></pre>
+
+<h3 id="72-run_monitorpy">7.2 監控啟動腳本 (run_monitor.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+監控啟動腳本 - 支持定時運行
+&quot;&quot;&quot;
+import argparse
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+import logging
+import sys
+
+from main import main as run_main_monitor
+
+logger = logging.getLogger(__name__)
+
+def run_once():
+    &quot;&quot;&quot;運行一次監控&quot;&quot;&quot;
+    logger.info(&quot;執行單次監控...&quot;)
+    run_main_monitor()
+
+def run_scheduled(cron_expression: str):
+    &quot;&quot;&quot;
+    定時運行監控
+
+    Args:
+        cron_expression: cron 表達式，如 &quot;0 16 * * 1-5&quot;（工作日16:00）
+    &quot;&quot;&quot;
+    logger.info(f&quot;啟動定時監控，cron: {cron_expression}&quot;)
+
+    scheduler = BlockingScheduler()
+
+    # 解析 cron 表達式
+    parts = cron_expression.split()
+    if len(parts) == 5:
+        minute, hour, day, month, day_of_week = parts
+    else:
+        logger.error(&quot;無效的 cron 表達式&quot;)
+        sys.exit(1)
+
+    scheduler.add_job(
+        run_main_monitor,
+        trigger=CronTrigger(
+            minute=minute,
+            hour=hour,
+            day=day,
+            month=month,
+            day_of_week=day_of_week
+        ),
+        id='crowding_monitor',
+        name='Factor Crowding Monitor',
+        replace_existing=True
+    )
+
+    logger.info(&quot;調度器已啟動，按 Ctrl+C 退出&quot;)
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        logger.info(&quot;調度器已停止&quot;)
+
+def main():
+    parser = argparse.ArgumentParser(description='因子擁擠度監控系統')
+    parser.add_argument(
+        '--once',
+        action='store_true',
+        help='運行一次監控'
+    )
+    parser.add_argument(
+        '--cron',
+        type=str,
+        help='定時運行，使用 cron 表達式，如 &quot;0 16 * * 1-5&quot;'
+    )
+
+    args = parser.parse_args()
+
+    if args.once:
+        run_once()
+    elif args.cron:
+        run_scheduled(args.cron)
+    else:
+        # 默認運行一次
+        run_once()
+
+if __name__ == &quot;__main__&quot;:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    main()
+</code></pre>
+
+<hr />
+<h2 id="8">8. 使用文檔</h2>
+<h3 id="81">8.1 安裝依賴</h3>
+<pre class="codehilite"><code class="language-bash"># 創建虛擬環境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 或
+venv\Scripts\activate  # Windows
+
+# 安裝依賴
+pip install pandas numpy scipy statsmodels arch plotly matplotlib apscheduler pydantic requests
+</code></pre>
+
+<h3 id="82">8.2 配置說明</h3>
+<ol>
+<li>
+<p><strong>數據路徑配置</strong> (config/settings.py)<br />
+   - 修改 <code>data.market_data_path</code> 指向市場數據目錄<br />
+   - 修改 <code>data.financial_data_path</code> 指向財務數據目錄<br />
+   - 修改 <code>data.factor_data_path</code> 指向因子數據目錄</p>
+</li>
+<li>
+<p><strong>閾值配置</strong> (config/thresholds.py)<br />
+   - 根據實際情況調整預警閾值<br />
+   - <code>level_1_threshold</code>: 一級預警閾值<br />
+   - <code>level_2_threshold</code>: 二級預警閾值<br />
+   - <code>level_3_threshold</code>: 三級預警閾值</p>
+</li>
+<li>
+<p><strong>權重配置</strong> (config/settings.py)<br />
+   - 調整 FEI、FVI、FVIol 的權重<br />
+   - 默認: FEI=0.4, FVI=0.35, FVIol=0.25</p>
+</li>
+<li>
+<p><strong>通知配置</strong> (config/settings.py)<br />
+   - 修改 <code>alert.notification_channels</code> 選擇通知渠道<br />
+   - 可選: log, email, webhook</p>
+</li>
+</ol>
+<h3 id="83">8.3 運行方式</h3>
+<h4 id="_1">單次運行</h4>
+<pre class="codehilite"><code class="language-bash">python run_monitor.py --once
+</code></pre>
+
+<h4 id="1600">定時運行（工作日 16:00）</h4>
+<pre class="codehilite"><code class="language-bash">python run_monitor.py --cron &quot;0 16 * * 1-5&quot;
+</code></pre>
+
+<h4 id="_2">直接運行主程序</h4>
+<pre class="codehilite"><code class="language-bash">python main.py
+</code></pre>
+
+<h3 id="84">8.4 數據格式</h3>
+<h4 id="market_datacsv">市場數據格式 (market_data.csv)</h4>
+<pre class="codehilite"><code class="language-csv">date,symbol,close,volume,market_cap
+2026-02-20,AAPL,150.25,50000000,2500000000
+2026-02-20,MSFT,280.50,40000000,2100000000
+...
+</code></pre>
+
+<h4 id="financial_datacsv">財務數據格式 (financial_data.csv)</h4>
+<pre class="codehilite"><code class="language-csv">report_date,symbol,pe,pb,roe,revenue_growth
+2026-02-20,AAPL,25.5,15.2,0.28,0.15
+2026-02-20,MSFT,30.2,18.5,0.35,0.12
+...
+</code></pre>
+
+<h4 id="f001csv">因子數據格式 (F001.csv)</h4>
+<pre class="codehilite"><code class="language-csv">date,return,exposure,sharpe
+2026-02-20,0.0015,0.52,1.25
+2026-02-19,0.0012,0.51,1.23
+...
+</code></pre>
+
+<h4 id="capital_flow_f001csv">資金流數據格式 (capital_flow_F001.csv)</h4>
+<pre class="codehilite"><code class="language-csv">date,northbound_flow,institutional_flow,retail_flow
+2026-02-20,150000000,80000000,50000000
+2026-02-19,120000000,60000000,40000000
+...
+</code></pre>
+
+<h3 id="85">8.5 輸出說明</h3>
+<h4 id="outputdaily_report_yyyymmddtxt">日報文件 (output/daily_report_YYYYMMDD.txt)</h4>
+<p>文本格式的日報，包含：<br />
+- 摘要統計<br />
+- 各因子詳情<br />
+- 預警信息<br />
+- 風險提示</p>
+<h4 id="outputdashboard_yyyymmddhtml">儀表板文件 (output/dashboard_YYYYMMDD.html)</h4>
+<p>交互式 HTML 儀表板，包含：<br />
+- 各因子擁擠度評分柱狀圖<br />
+- 擁擠度分佈餅圖<br />
+- 因子趨勢圖<br />
+- 子指標熱力圖</p>
+<h4 id="logscrowding_monitorlog">日誌文件 (logs/crowding_monitor.log)</h4>
+<p>程序運行日誌，包含：<br />
+- 數據加載記錄<br />
+- 指標計算記錄<br />
+- 預警記錄<br />
+- 錯誤信息</p>
+<hr />
+<h2 id="9">9. 實證驗證框架</h2>
+<h3 id="91-backtestenginepy">9.1 回測引擎 (backtest/engine.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+回測引擎
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Tuple
+from scipy import stats
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+class BacktestEngine:
+    &quot;&quot;&quot;回測引擎&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+
+    def run_backtest(
+        self,
+        factor_id: str,
+        ccs_series: pd.Series,
+        returns: pd.Series,
+        strategy: str = &quot;reverse&quot;
+    ) -&gt; Dict:
+        &quot;&quot;&quot;
+        運行回測
+
+        Args:
+            factor_id: 因子 ID
+            ccs_series: CCS 序列
+            returns: 因子收益率序列
+            strategy: 策略類型 (reverse, dynamic, hedge)
+
+        Returns:
+            回測結果字典
+        &quot;&quot;&quot;
+        logger.info(f&quot;開始回測因子 {factor_id}，策略: {strategy}&quot;)
+
+        # 對齊數據
+        aligned_data = pd.DataFrame({
+            'CCS': ccs_series,
+            'return': returns
+        }).dropna()
+
+        # 執行策略
+        if strategy == &quot;reverse&quot;:
+            strategy_returns = self._reverse_strategy(aligned_data)
+        elif strategy == &quot;dynamic&quot;:
+            strategy_returns = self._dynamic_strategy(aligned_data)
+        elif strategy == &quot;hedge&quot;:
+            strategy_returns = self._hedge_strategy(aligned_data)
+        else:
+            raise ValueError(f&quot;未知策略: {strategy}&quot;)
+
+        # 計算績效指標
+        metrics = self._calculate_metrics(strategy_returns)
+
+        # 計算基準績效
+        benchmark_metrics = self._calculate_metrics(aligned_data['return'])
+
+        result = {
+            'factor_id': factor_id,
+            'strategy': strategy,
+            'strategy_metrics': metrics,
+            'benchmark_metrics': benchmark_metrics,
+            'strategy_returns': strategy_returns,
+            'benchmark_returns': aligned_data['return']
+        }
+
+        logger.info(f&quot;回測完成，策略年化收益率: {metrics['annual_return']:.2%}&quot;)
+
+        return result
+
+    def _reverse_strategy(self, data: pd.DataFrame) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        逆向策略
+        - CCS &gt; 80 時減持
+        - CCS &lt; 20 時增持
+        &quot;&quot;&quot;
+        positions = pd.Series(1.0, index=data.index)
+
+        for i in range(1, len(data)):
+            ccs = data['CCS'].iloc[i-1]
+            if ccs &gt; 80:
+                positions.iloc[i] = 0.5  # 減持
+            elif ccs &lt; 20:
+                positions.iloc[i] = 1.5  # 增持
+            else:
+                positions.iloc[i] = 1.0  # 持倉
+
+        returns = data['return'] * positions
+        return returns
+
+    def _dynamic_strategy(self, data: pd.DataFrame) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        動態調整策略
+        - 根據 CCS 線性調整權重
+        &quot;&quot;&quot;
+        positions = (100 - data['CCS']) / 50  # CCS=0→2.0, CCS=100→0.0
+        positions = positions.clip(0, 2)
+
+        returns = data['return'] * positions
+        return returns
+
+    def _hedge_strategy(self, data: pd.DataFrame) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        避險策略
+        - CCS &gt; 80 時使用衍生品對沖
+        &quot;&quot;&quot;
+        positions = pd.Series(1.0, index=data.index)
+
+        for i in range(1, len(data)):
+            ccs = data['CCS'].iloc[i-1]
+            if ccs &gt; 80:
+                positions.iloc[i] = 0.3  # 大幅減倉
+            elif ccs &lt; 60:
+                positions.iloc[i] = 1.0  # 恢復倉位
+            else:
+                positions.iloc[i] = positions.iloc[i-1]  # 保持
+
+        returns = data['return'] * positions
+        return returns
+
+    def _calculate_metrics(self, returns: pd.Series) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算績效指標
+
+        Args:
+            returns: 收益率序列
+
+        Returns:
+            績效指標字典
+        &quot;&quot;&quot;
+        # 年化收益率
+        annual_return = returns.mean() * 252
+
+        # 年化波動率
+        annual_vol = returns.std() * np.sqrt(252)
+
+        # 夏普比率
+        sharpe_ratio = annual_return / annual_vol if annual_vol &gt; 0 else 0
+
+        # 最大回撤
+        cumulative = (1 + returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdown = drawdown.min()
+
+        # IC (Information Coefficient)
+        ic = self._calculate_ic(returns)
+
+        # IR (Information Ratio)
+        ir = self._calculate_ir(returns)
+
+        return {
+            'annual_return': annual_return,
+            'annual_volatility': annual_vol,
+            'sharpe_ratio': sharpe_ratio,
+            'max_drawdown': max_drawdown,
+            'ic_mean': ic['mean'],
+            'ic_std': ic['std'],
+            'ir': ir,
+            'total_return': (1 + returns).prod() - 1
+        }
+
+    def _calculate_ic(self, returns: pd.Series, window: int = 20) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算 IC (Information Coefficient)
+
+        IC = Correlation(CCS_t, Return_{t+1,t+window})
+
+        Args:
+            returns: 收益率序列
+            window: 前瞻窗口
+
+        Returns:
+            IC 統計量
+        &quot;&quot;&quot;
+        # 由於只有收益率序列，這裡使用收益率自相關作為示例
+        # 實際應該使用 CCS 和未來收益率計算相關性
+
+        lagged_returns = returns.shift(-window)
+        ic = returns.corr(lagged_returns)
+
+        # 滾動 IC
+        rolling_ic = returns.rolling(252).apply(
+            lambda x: x.corr(x.shift(-window))
+        )
+
+        return {
+            'mean': ic,
+            'std': rolling_ic.std(),
+            'rolling_mean': rolling_ic.mean()
+        }
+
+    def _calculate_ir(self, returns: pd.Series) -&gt; float:
+        &quot;&quot;&quot;
+        計算 IR (Information Ratio)
+
+        IR = Mean(IC) / Std(IC)
+
+        Args:
+            returns: 收益率序列
+
+        Returns:
+            IR 值
+        &quot;&quot;&quot;
+        ic_data = self._calculate_ic(returns)
+        return ic_data['mean'] / ic_data['std'] if ic_data['std'] &gt; 0 else 0
+
+    def calculate_group_backtest(
+        self,
+        data: pd.DataFrame,
+        n_groups: int = 5
+    ) -&gt; Dict:
+        &quot;&quot;&quot;
+        分組回測
+
+        Args:
+            data: 包含 CCS 和收益率的 DataFrame
+            n_groups: 分組數量
+
+        Returns:
+            各組績效
+        &quot;&quot;&quot;
+        # 按 CCS 分組
+        data['group'] = pd.qcut(
+            data['CCS'],
+            n_groups,
+            labels=[f'Group_{i+1}' for i in range(n_groups)],
+            duplicates='drop'
+        )
+
+        group_metrics = {}
+
+        for group in data['group'].unique():
+            group_returns = data[data['group'] == group]['return']
+            metrics = self._calculate_metrics(group_returns)
+            group_metrics[group] = metrics
+
+        return group_metrics
+
+    def calculate_alert_hit_rate(
+        self,
+        alerts: List,
+        returns: pd.DataFrame
+    ) -&gt; Dict:
+        &quot;&quot;&quot;
+        計算預警命中率
+
+        Args:
+            alerts: 預警列表
+            returns: 收益率數據
+
+        Returns:
+            命中率統計
+        &quot;&quot;&quot;
+        total_alerts = len(alerts)
+        hit_alerts = 0
+
+        for alert in alerts:
+            # 檢查預警後 20 個交易日的表現
+            alert_date = alert.timestamp
+            future_returns = returns[returns.index &gt; alert_date].head(20)
+
+            if len(future_returns) &gt; 0:
+                cumulative_return = (1 + future_returns).prod() - 1
+
+                # 如果預警後下跌超過 5%，視為命中
+                if cumulative_return &lt; -0.05:
+                    hit_alerts += 1
+
+        hit_rate = hit_alerts / total_alerts if total_alerts &gt; 0 else 0
+
+        return {
+            'total_alerts': total_alerts,
+            'hit_alerts': hit_alerts,
+            'hit_rate': hit_rate
+        }
+</code></pre>
+
+<h3 id="92-backtestvalidatorspy">9.2 驗證器 (backtest/validators.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+驗證器
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from typing import Dict, List
+from scipy import stats
+import logging
+
+logger = logging.getLogger(__name__)
+
+class MetricsValidator:
+    &quot;&quot;&quot;指標驗證器&quot;&quot;&quot;
+
+    def validate_metrics(
+        self,
+        factor_id: str,
+        ccs_data: pd.DataFrame,
+        returns: pd.Series
+    ) -&gt; Dict:
+        &quot;&quot;&quot;
+        驗證指標有效性
+
+        Args:
+            factor_id: 因子 ID
+            ccs_data: CCS 數據
+            returns: 收益率序列
+
+        Returns:
+            驗證結果
+        &quot;&quot;&quot;
+        results = {}
+
+        # 1. CCS 分布檢驗
+        results['ccs_distribution'] = self._validate_distribution(ccs_data['CCS'])
+
+        # 2. 預測能力檢驗
+        results['predictive_power'] = self._validate_predictive_power(
+            ccs_data['CCS'],
+            returns
+        )
+
+        # 3. 穩定性檢驗
+        results['stability'] = self._validate_stability(ccs_data['CCS'])
+
+        # 4. 子指標一致性檢驗
+        results['sub_metric_consistency'] = self._validate_consistency(ccs_data)
+
+        return results
+
+    def _validate_distribution(
+        self,
+        ccs_series: pd.Series
+    ) -&gt; Dict:
+        &quot;&quot;&quot;驗證 CCS 分布&quot;&quot;&quot;
+        return {
+            'mean': ccs_series.mean(),
+            'std': ccs_series.std(),
+            'min': ccs_series.min(),
+            'max': ccs_series.max(),
+            'median': ccs_series.median(),
+            'skewness': stats.skew(ccs_series),
+            'kurtosis': stats.kurtosis(ccs_series)
+        }
+
+    def _validate_predictive_power(
+        self,
+        ccs_series: pd.Series,
+        returns: pd.Series
+    ) -&gt; Dict:
+        &quot;&quot;&quot;驗證預測能力&quot;&quot;&quot;
+        # 計算 IC
+        ic_list = []
+        for i in range(len(ccs_series) - 20):
+            ccs_t = ccs_series.iloc[i]
+            future_return = returns.iloc[i+1:i+21].sum()
+            ic_list.append(ccs_t * future_return)
+
+        ic_mean = np.mean(ic_list)
+        ic_std = np.std(ic_list)
+
+        # t 檢驗
+        t_stat = ic_mean / (ic_std / np.sqrt(len(ic_list))) if ic_std &gt; 0 else 0
+        p_value = 2 * (1 - stats.t.cdf(abs(t_stat), df=len(ic_list)-1))
+
+        return {
+            'ic_mean': ic_mean,
+            'ic_std': ic_std,
+            'ir': ic_mean / ic_std if ic_std &gt; 0 else 0,
+            't_statistic': t_stat,
+            'p_value': p_value,
+            'is_significant': p_value &lt; 0.05
+        }
+
+    def _validate_stability(
+        self,
+        ccs_series: pd.Series,
+        window: int = 60
+    ) -&gt; Dict:
+        &quot;&quot;&quot;驗證穩定性&quot;&quot;&quot;
+        rolling_std = ccs_series.rolling(window).std()
+
+        return {
+            'mean_std': rolling_std.mean(),
+            'max_std': rolling_std.max(),
+            'stability_score': 1 - (rolling_std.max() - rolling_std.mean()) / rolling_std.mean()
+        }
+
+    def _validate_consistency(
+        self,
+        ccs_data: pd.DataFrame
+    ) -&gt; Dict:
+        &quot;&quot;&quot;驗證子指標一致性&quot;&quot;&quot;
+        correlations = {
+            'FEI-CCS': ccs_data['FEI'].corr(ccs_data['CCS']),
+            'FVI-CCS': ccs_data['FVI'].corr(ccs_data['CCS']),
+            'FVIol-CCS': ccs_data['FVIol'].corr(ccs_data['CCS'])
+        }
+
+        return correlations
+</code></pre>
+
+<hr />
+<h2 id="10">10. 實用工具</h2>
+<h3 id="101-utilsdata_simulatorpy">10.1 數據模擬器 (utils/data_simulator.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+數據模擬器 - 用於測試和演示
+&quot;&quot;&quot;
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from typing import Dict, List
+from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
+class DataSimulator:
+    &quot;&quot;&quot;數據模擬器&quot;&quot;&quot;
+
+    def __init__(self, config):
+        self.config = config
+
+    def generate_all_data(
+        self,
+        start_date: str,
+        end_date: str,
+        factors: List[str],
+        symbols: List[str]
+    ) -&gt; Dict[str, pd.DataFrame]:
+        &quot;&quot;&quot;
+        生成所有測試數據
+
+        Args:
+            start_date: 開始日期
+            end_date: 結束日期
+            factors: 因子 ID 列表
+            symbols: 股票代碼列表
+
+        Returns:
+            數據字典
+        &quot;&quot;&quot;
+        data = {}
+
+        # 市場數據
+        data['market'] = self._generate_market_data(start_date, end_date, symbols)
+
+        # 財務數據
+        data['financial'] = self._generate_financial_data(start_date, end_date, symbols)
+
+        # 因子數據
+        for factor_id in factors:
+            data[f'factor_{factor_id}'] = self._generate_factor_data(
+                factor_id, start_date, end_date
+            )
+            data[f'capital_flow_{factor_id}'] = self._generate_capital_flow_data(
+                factor_id, start_date, end_date
+            )
+
+        return data
+
+    def _generate_market_data(
+        self,
+        start_date: str,
+        end_date: str,
+        symbols: List[str]
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成市場數據&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        data = []
+        for date in dates:
+            for symbol in symbols:
+                # 隨機漫步股價
+                base_price = 100
+                noise = np.random.normal(0, 2)
+                price = base_price + noise + np.random.uniform(-10, 10)
+
+                data.append({
+                    'date': date,
+                    'symbol': symbol,
+                    'close': price,
+                    'volume': np.random.randint(1000000, 10000000),
+                    'market_cap': price * np.random.uniform(1000000, 10000000)
+                })
+
+        df = pd.DataFrame(data)
+        return df.set_index('date')
+
+    def _generate_financial_data(
+        self,
+        start_date: str,
+        end_date: str,
+        symbols: List[str]
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成財務數據&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='Q')
+
+        data = []
+        for date in dates:
+            for symbol in symbols:
+                data.append({
+                    'report_date': date,
+                    'symbol': symbol,
+                    'pe': np.random.uniform(10, 30),
+                    'pb': np.random.uniform(1, 5),
+                    'roe': np.random.uniform(0.1, 0.3),
+                    'revenue_growth': np.random.uniform(-0.1, 0.3)
+                })
+
+        df = pd.DataFrame(data)
+        return df.set_index('report_date')
+
+    def _generate_factor_data(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成因子數據&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        # 使用因子 ID 作為種子
+        np.random.seed(hash(factor_id) % (2**32))
+
+        # 模擬不同的因子特性
+        if factor_id == &quot;F001&quot;:  # 價值因子
+            volatility = 0.008
+            drift = 0.0003
+        elif factor_id == &quot;F002&quot;:  # 成長因子
+            volatility = 0.012
+            drift = 0.0005
+        elif factor_id == &quot;F003&quot;:  # 動量因子
+            volatility = 0.015
+            drift = 0.0002
+        else:
+            volatility = 0.01
+            drift = 0.0001
+
+        # 幾何布朗運動
+        returns = np.random.normal(drift, volatility, len(dates))
+        prices = 100 * np.exp(np.cumsum(returns))
+
+        # 計算暴露度
+        exposure = np.random.uniform(-1, 1, len(dates))
+        exposure = pd.Series(exposure).ewm(span=20).mean().values
+
+        # 計算 Sharpe
+        sharpe = returns / volatility
+
+        data = pd.DataFrame({
+            'date': dates,
+            'return': returns,
+            'exposure': exposure,
+            'sharpe': sharpe
+        })
+
+        return data.set_index('date')
+
+    def _generate_capital_flow_data(
+        self,
+        factor_id: str,
+        start_date: str,
+        end_date: str
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;生成資金流數據&quot;&quot;&quot;
+        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+
+        np.random.seed(hash(f&quot;flow_{factor_id}&quot;) % (2**32))
+
+        # 模擬資金流
+        northbound_flow = np.random.normal(0, 100000000, len(dates))
+        institutional_flow = np.random.normal(0, 50000000, len(dates))
+        retail_flow = np.random.normal(0, 20000000, len(dates))
+
+        data = pd.DataFrame({
+            'date': dates,
+            'northbound_flow': northbound_flow,
+            'institutional_flow': institutional_flow,
+            'retail_flow': retail_flow
+        })
+
+        return data.set_index('date')
+
+    def save_data(
+        self,
+        data: Dict[str, pd.DataFrame],
+        output_dir: Path
+    ):
+        &quot;&quot;&quot;
+        保存數據到文件
+
+        Args:
+            data: 數據字典
+            output_dir: 輸出目錄
+        &quot;&quot;&quot;
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for key, df in data.items():
+            if 'factor' in key or 'capital' in key:
+                file_path = output_dir / f&quot;{key}.csv&quot;
+            else:
+                file_path = output_dir / f&quot;{key}.csv&quot;
+
+            df.to_csv(file_path)
+            logger.info(f&quot;數據已保存: {file_path}&quot;)
+</code></pre>
+
+<h3 id="102-utilsquick_startpy">10.2 快速啟動腳本 (utils/quick_start.py)</h3>
+<pre class="codehilite"><code class="language-python">&quot;&quot;&quot;
+快速啟動腳本 - 生成測試數據並運行監控
+&quot;&quot;&quot;
+import sys
+from pathlib import Path
+
+# 添加項目根目錄到路徑
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from config.settings import config
+from utils.data_simulator import DataSimulator
+from main import main as run_monitor
+
+def quick_start():
+    &quot;&quot;&quot;快速啟動&quot;&quot;&quot;
+    print(&quot;=&quot; * 60)
+    print(&quot;因子擁擠度監控系統 - 快速啟動&quot;)
+    print(&quot;=&quot; * 60)
+
+    # 創建模擬器
+    simulator = DataSimulator(config)
+
+    # 生成測試數據
+    print(&quot;\n1. 生成測試數據...&quot;)
+    factors = [&quot;F001&quot;, &quot;F002&quot;, &quot;F003&quot;, &quot;F004&quot;, &quot;F005&quot;]
+    symbols = [&quot;AAPL&quot;, &quot;MSFT&quot;, &quot;GOOGL&quot;, &quot;AMZN&quot;, &quot;META&quot;]
+
+    start_date = &quot;2025-01-01&quot;
+    end_date = &quot;2026-02-20&quot;
+
+    data = simulator.generate_all_data(
+        start_date=start_date,
+        end_date=end_date,
+        factors=factors,
+        symbols=symbols
+    )
+
+    # 保存數據
+    output_dir = Path(&quot;./data&quot;)
+    simulator.save_data(data, output_dir)
+
+    print(&quot;   測試數據生成完成！&quot;)
+    print(f&quot;   因子數量: {len(factors)}&quot;)
+    print(f&quot;   股票數量: {len(symbols)}&quot;)
+    print(f&quot;   日期範圍: {start_date} 至 {end_date}&quot;)
+
+    # 運行監控
+    print(&quot;\n2. 運行監控...&quot;)
+    run_monitor()
+
+    print(&quot;\n&quot; + &quot;=&quot; * 60)
+    print(&quot;監控完成！請查看 output 目錄中的報告和儀表板。&quot;)
+    print(&quot;=&quot; * 60)
+
+if __name__ == &quot;__main__&quot;:
+    quick_start()
+</code></pre>
+
+<hr />
+<h2 id="11_1">11. 部署指南</h2>
+<h3 id="111">11.1 本地部署</h3>
+<ol>
+<li><strong>克隆項目</strong></li>
+</ol>
+<pre class="codehilite"><code class="language-bash">git clone &lt;repository-url&gt;
+cd factor_crowding_monitor
+</code></pre>
+
+<ol start="2">
+<li><strong>安裝依賴</strong></li>
+</ol>
+<pre class="codehilite"><code class="language-bash">pip install -r requirements.txt
+</code></pre>
+
+<ol start="3">
+<li>
+<p><strong>配置數據</strong><br />
+- 將實際數據放入 <code>data/</code> 目錄<br />
+- 或運行 <code>python utils/quick_start.py</code> 生成測試數據</p>
+</li>
+<li>
+<p><strong>運行監控</strong></p>
+</li>
+</ol>
+<pre class="codehilite"><code class="language-bash">python run_monitor.py --once
+</code></pre>
+
+<h3 id="112-docker">11.2 Docker 部署</h3>
+<ol>
+<li><strong>創建 Dockerfile</strong></li>
+</ol>
+<pre class="codehilite"><code class="language-dockerfile">FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [&quot;python&quot;, &quot;run_monitor.py&quot;, &quot;--cron&quot;, &quot;0 16 * * 1-5&quot;]
+</code></pre>
+
+<ol start="2">
+<li><strong>構建鏡像</strong></li>
+</ol>
+<pre class="codehilite"><code class="language-bash">docker build -t crowding-monitor .
+</code></pre>
+
+<ol start="3">
+<li><strong>運行容器</strong></li>
+</ol>
+<pre class="codehilite"><code class="language-bash">docker run -d \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/output:/app/output \
+  -v $(pwd)/logs:/app/logs \
+  crowding-monitor
+</code></pre>
+
+<h3 id="113">11.3 服務器部署</h3>
+<ol>
+<li><strong>使用 systemd</strong></li>
+</ol>
+<p>創建服務文件 <code>/etc/systemd/system/crowding-monitor.service</code>:</p>
+<pre class="codehilite"><code class="language-ini">[Unit]
+Description=Factor Crowding Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=your-user
+WorkingDirectory=/path/to/factor_crowding_monitor
+ExecStart=/usr/bin/python3 /path/to/factor_crowding_monitor/run_monitor.py --cron &quot;0 16 * * 1-5&quot;
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+<p>啟動服務:</p>
+<pre class="codehilite"><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl start crowding-monitor
+sudo systemctl enable crowding-monitor
+</code></pre>
+
+<ol start="2">
+<li><strong>使用 cron</strong></li>
+</ol>
+<p>添加到 crontab:</p>
+<pre class="codehilite"><code class="language-bash">crontab -e
+</code></pre>
+
+<pre class="codehilite"><code>0 16 * * 1-5 cd /path/to/factor_crowding_monitor &amp;&amp; /usr/bin/python3 run_monitor.py --once &gt;&gt; logs/cron.log 2&gt;&amp;1
+</code></pre>
+
+<hr />
+<h2 id="12_1">12. 擴展與優化</h2>
+<h3 id="121">12.1 新增因子</h3>
+<ol>
+<li>在 <code>monitor/realtime.py</code> 的 <code>monitored_factors</code> 中添加新因子</li>
+<li>確保 <code>data/factors/</code> 目錄中有對應的數據文件</li>
+</ol>
+<h3 id="122">12.2 自定義預警規則</h3>
+<p>在 <code>config/thresholds.py</code> 中修改預警邏輯，或創建新的預警類。</p>
+<h3 id="123">12.3 集成外部通知</h3>
+<p>在 <code>monitor/alert.py</code> 的 <code>NotificationService</code> 中添加新的通知渠道。</p>
+<h3 id="124">12.4 添加新的策略</h3>
+<p>在 <code>backtest/strategies.py</code> 中實現新的交易策略。</p>
+<hr />
+<h2 id="13">13. 故障排查</h2>
+<h3 id="_3">常見問題</h3>
+<p><strong>Q: 數據加載失敗</strong><br />
+- A: 檢查數據路徑配置，確保數據文件存在且格式正確</p>
+<p><strong>Q: GARCH 估計失敗</strong><br />
+- A: 系統會自動回退到歷史波動率估計，可以在配置中關閉 GARCH</p>
+<p><strong>Q: 預警未觸發</strong><br />
+- A: 檢查預警閾值配置，確認 <code>alert.enabled</code> 設置為 True</p>
+<p><strong>Q: 儀表板無法打開</strong><br />
+- A: 確認瀏覽器支持 HTML5，或使用最新版 Chrome/Firefox</p>
+<hr />
+<h2 id="14">14. 性能優化建議</h2>
+<ol>
+<li><strong>數據預處理</strong>：提前計算並存儲滾動統計量</li>
+<li><strong>並行計算</strong>：使用 multiprocessing 並行處理多個因子</li>
+<li><strong>增量更新</strong>：只計算最新的數據，避免重複計算</li>
+<li><strong>緩存機制</strong>：緩存中間結果，減少重複計算</li>
+<li><strong>數據庫優化</strong>：使用時間序列數據庫提升查詢性能</li>
+</ol>
+<hr />
+<h2 id="15">15. 後續開發路線圖</h2>
+<h3 id="1-2">短期（1-2 個月）</h3>
+<ul>
+<li>[ ] 添加 Web UI 界面</li>
+<li>[ ] 支持實時數據流</li>
+<li>[ ] 添加更多通知渠道（Telegram、Slack）</li>
+</ul>
+<h3 id="3-6">中期（3-6 個月）</h3>
+<ul>
+<li>[ ] 實現機器學習預測模型</li>
+<li>[ ] 支持多因子組合監控</li>
+<li>[ ] 添加風險指標（VaR、CVaR）</li>
+</ul>
+<h3 id="6-12">長期（6-12 個月）</h3>
+<ul>
+<li>[ ] 支持跨境市場監控</li>
+<li>[ ] 開發移動端應用</li>
+<li>[ ] 構建因子擁擠度數據庫</li>
+</ul>
+<hr />
+<h2 id="metadata">Metadata</h2>
+<ul>
+<li><strong>Implementation language:</strong> Python 3.10+</li>
+<li><strong>Code structure:</strong> 模塊化，分層架構</li>
+<li><strong>Test coverage:</strong> 待補充</li>
+<li><strong>Documentation:</strong> 完整</li>
+<li><strong>Deployment status:</strong> 開發完成，待實施驗證</li>
+<li><strong>Validation status:</strong> 代碼已驗證，待實證數據</li>
+</ul>
+<hr />
+<p><strong>文檔版本:</strong> v1.0<br />
+<strong>最後更新:</strong> 2026-02-20<br />
+<strong>作者:</strong> Charlie Analyst<br />
+<strong>審核狀態:</strong> 待審核</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

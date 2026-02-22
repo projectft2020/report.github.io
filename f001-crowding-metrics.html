@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>因子擁擠指標 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>因子擁擠指標</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">因子擁擠度量的指標體系與監控</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="factor-crowding-metrics-system">因子擁擠度指標系統設計 (Factor Crowding Metrics System)</h1>
+<p><strong>Task ID:</strong> f001-crowding-metrics<br />
+<strong>Agent:</strong> Charlie Analyst<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-20T04:02:00+08:00</p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>設計了一套完整的因子擁擠度指標系統，整合資金流動、估值水平和波動率三個核心維度，建立 0-100 分的擁擠度評分模型。系統包含早期預警機制（擁擠度 &gt; 80 或 &lt; 20 時觸發）和歷史回測框架，為組合管理提供過熱/過冷因子的識別能力。</p>
+<p><strong>核心指標：</strong><br />
+- 因子暴露度指數 (Factor Exposure Index, FEI)<br />
+- 因子估值指數 (Factor Valuation Index, FVI)<br />
+- 因子波動率指數 (Factor Volatility Index, FVIol)<br />
+- 綜合擁擠度評分 (Comprehensive Crowding Score, CCS)</p>
+<hr />
+<h2 id="1">1. 系統架構概覽</h2>
+<h3 id="11">1.1 三維評估框架</h3>
+<pre class="codehilite"><code>                    ┌─────────────────────────────────────┐
+                    │      綜合擁擠度評分 (CCS)            │
+                    │         (0-100)                     │
+                    └─────────────────────────────────────┘
+                                       │
+            ┌──────────────────────────┼──────────────────────────┐
+            ▼                          ▼                          ▼
+  ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+  │  因子暴露度指數 │      │  因子估值指數   │      │ 因子波動率指數  │
+  │   (FEI: 0-100)  │      │   (FVI: 0-100)  │      │ (FVIol: 0-100)  │
+  └─────────────────┘      └─────────────────┘      └─────────────────┘
+</code></pre>
+
+<h3 id="12">1.2 指標分類</h3>
+<table>
+<thead>
+<tr>
+<th>指標類別</th>
+<th>指標名稱</th>
+<th>分數範圍</th>
+<th>解讀方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>資金流</strong></td>
+<td>資金淨流入率</td>
+<td>0-100</td>
+<td>高分 = 過熱（過度擁擠）</td>
+</tr>
+<tr>
+<td><strong>資金流</strong></td>
+<td>頭寸集中度</td>
+<td>0-100</td>
+<td>高分 = 集中風險高</td>
+</tr>
+<tr>
+<td><strong>估值</strong></td>
+<td>相對估值百分位</td>
+<td>0-100</td>
+<td>高分 = 高估風險</td>
+</tr>
+<tr>
+<td><strong>估值</strong></td>
+<td>超預期程度</td>
+<td>0-100</td>
+<td>高分 = 超預期壓力</td>
+</tr>
+<tr>
+<td><strong>波動</strong></td>
+<td>波動率偏離度</td>
+<td>0-100</td>
+<td>高分 = 異常波動</td>
+</tr>
+<tr>
+<td><strong>波動</strong></td>
+<td>GARCH 波動率指數</td>
+<td>0-100</td>
+<td>高分 = 波動放風險</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-factor-exposure-index-fei">2. 因子暴露度指數 (Factor Exposure Index, FEI)</h2>
+<h3 id="21-net-capital-flow-rate-ncf">2.1 資金淨流入率 (Net Capital Flow Rate, NCF)</h3>
+<p><strong>計算公式：</strong></p>
+<pre class="codehilite"><code>NCF_t = Σ(w_i,t × r_i,t) / Σ|w_i,t × r_i,t| × 50 + 50
+</code></pre>
+
+<p>其中：<br />
+- <code>w_i,t</code> = 因子 i 在時期 t 的暴露度權重<br />
+- <code>r_i,t</code> = 因子 i 在時期 t 的收益率<br />
+- 調整至 0-100 範圍（50 = 中性）</p>
+<p><strong>數據源：</strong><br />
+- 每日資金流數據（北向/南向、機構資金、主力資金）<br />
+- 因子暴露度矩陣</p>
+<p><strong>解讀：</strong><br />
+- <strong>NCF &gt; 70:</strong> 資金過度流入，過熱風險<br />
+- <strong>NCF &lt; 30:</strong> 資金大幅流出，過冷風險<br />
+- <strong>NCF 40-60:</strong> 資金流動平衡</p>
+<h3 id="22-position-concentration-pc">2.2 頭寸集中度 (Position Concentration, PC)</h3>
+<p><strong>計算公式：</strong></p>
+<pre class="codehilite"><code>PC_t = (HHI_t - HHI_min) / (HHI_max - HHI_min) × 100
+</code></pre>
+
+<p>其中 HHI (Herfindahl-Hirschman Index)：</p>
+<pre class="codehilite"><code>HHI_t = Σ(w_i,t)²
+</code></pre>
+
+<ul>
+<li><code>w_i,t</code> = 標的在因子 i 上的權重</li>
+</ul>
+<p><strong>解讀：</strong><br />
+- <strong>PC &gt; 70:</strong> 高度集中，擁擠風險極高<br />
+- <strong>PC &lt; 30:</strong> 分散度高，擁擠風險低<br />
+- <strong>PC 40-60:</strong> 中等集中度</p>
+<h3 id="23-fei">2.3 FEI 綜合計算</h3>
+<pre class="codehilite"><code>FEI = α × NCF + β × PC
+</code></pre>
+
+<p>其中 <code>α = 0.6</code>, <code>β = 0.4</code>（可調整）</p>
+<hr />
+<h2 id="3-factor-valuation-index-fvi">3. 因子估值指數 (Factor Valuation Index, FVI)</h2>
+<h3 id="31-relative-valuation-percentile-rvp">3.1 相對估值百分位 (Relative Valuation Percentile, RVP)</h3>
+<p><strong>計算方法：</strong></p>
+<ol>
+<li>
+<p><strong>橫截面百分位（Cross-sectional）：</strong><br />
+<code>RVP_cross(i,t) = percentile(rank(Val_i,t), Val_all,t)</code><br />
+   - 將因子 i 的估值水平在所有因子中排序</p>
+</li>
+<li>
+<p><strong>時間序列百分位（Time-series）：</strong><br />
+<code>RVP_time(i,t) = percentile(rank(Val_i,t), Val_i,1:T)</code><br />
+   - 將因子 i 的當前估值在歷史窗口中排序</p>
+</li>
+<li>
+<p><strong>綜合估值百分位：</strong><br />
+<code>RVP = 0.5 × RVP_cross + 0.5 × RVP_time</code></p>
+</li>
+</ol>
+<p><strong>估值指標選擇：</strong><br />
+- <strong>價值因子：</strong> P/E, P/B, P/CF, EV/EBITDA<br />
+- <strong>成長因子：</strong> PEG, P/S<br />
+- <strong>盈利因子：</strong> ROE, ROA, 淨利率<br />
+- <strong>動量因子：</strong> RSI, MACD</p>
+<p><strong>解讀：</strong><br />
+- <strong>RVP &gt; 80:</strong> 高估值區，過熱風險高<br />
+- <strong>RVP &lt; 20:</strong> 低估值區，過冷機會<br />
+- <strong>RVP 40-60:</strong> 估值合理</p>
+<h3 id="32-expectation-excess-ee">3.2 超預期程度 (Expectation Excess, EE)</h3>
+<p><strong>計算公式：</strong></p>
+<pre class="codehilite"><code>EE = (Actual - Forecast) / |Forecast| × 100
+</code></pre>
+
+<p>應用於：<br />
+- <strong>盈利預期：</strong> 實際 EPS vs 分析師預測<br />
+- <strong>成長預期：</strong> 實際營收增長 vs 市場預期<br />
+- <strong>政策預期：</strong> 實際政策力度 vs 預期</p>
+<p><strong>平滑處理：</strong></p>
+<pre class="codehilite"><code>EE_smooth = EWMA(EE, λ = 0.94)
+</code></pre>
+
+<p><strong>解讀：</strong><br />
+- <strong>EE &gt; 20:</strong> 顯著超預期，過熱<br />
+- <strong>EE &lt; -20:</strong> 顯著低於預期，過冷<br />
+- <strong>EE -10~10:</strong> 符合預期</p>
+<h3 id="33-fvi">3.3 FVI 綜合計算</h3>
+<pre class="codehilite"><code>FVI = γ × RVP + δ × EE_adj
+</code></pre>
+
+<p>其中：<br />
+- <code>γ = 0.7</code>, <code>δ = 0.3</code><br />
+- <code>EE_adj = (EE + 100) / 2</code>（調整至 0-100）</p>
+<hr />
+<h2 id="4-factor-volatility-index-fviol">4. 因子波動率指數 (Factor Volatility Index, FVIol)</h2>
+<h3 id="41-volatility-deviation-vd">4.1 波動率偏離度 (Volatility Deviation, VD)</h3>
+<p><strong>計算公式：</strong></p>
+<pre class="codehilite"><code>VD_t = |σ_t - σ_long| / σ_long × 100
+</code></pre>
+
+<p>其中：<br />
+- <code>σ_t</code> = 當前波動率（20日滾動）<br />
+- <code>σ_long</code> = 長期平均波動率（252日）</p>
+<p><strong>波動率估計方法：</strong></p>
+<ol>
+<li>
+<p><strong>歷史波動率：</strong><br />
+<code>σ_hist = sqrt((1/(n-1)) × Σ(r_t - μ)²)</code><br />
+   - 使用 20 日窗口<br />
+   - 對數收益率</p>
+</li>
+<li>
+<p><strong>GARCH(1,1) 波動率：</strong><br />
+<code>σ²_t = ω + α × ε²_{t-1} + β × σ²_{t-1}</code><br />
+   - 捕捉波動率集聚效應</p>
+</li>
+</ol>
+<p><strong>解讀：</strong><br />
+- <strong>VD &gt; 60:</strong> 異常高波動，過熱/過冷<br />
+- <strong>VD &lt; 20:</strong> 波動低，穩定<br />
+- <strong>VD 30-50:</strong> 正常波動</p>
+<h3 id="42-volatility-structure-index-vsi">4.2 波動率結構指數 (Volatility Structure Index, VSI)</h3>
+<p><strong>計算公式：</strong></p>
+<pre class="codehilite"><code>VSI = Correlation(σ_short, σ_long) × 50
+</code></pre>
+
+<p>其中：<br />
+- <code>σ_short</code> = 短期波動率（5日）<br />
+- <code>σ_long</code> = 長期波動率（60日）</p>
+<p><strong>解讀：</strong><br />
+- <strong>VSI &gt; 70:</strong> 短期/長期波動相關性高，結構穩定<br />
+- <strong>VSI &lt; 30:</strong> 短期/長期波動分歧大，結構不穩<br />
+- <strong>VSI 40-60:</strong> 正常結構</p>
+<h3 id="43-fviol">4.3 FVIol 綜合計算</h3>
+<pre class="codehilite"><code>FVIol = ε × VD + ζ × VSI
+</code></pre>
+
+<p>其中 <code>ε = 0.7</code>, <code>ζ = 0.3</code></p>
+<hr />
+<h2 id="5-comprehensive-crowding-score-ccs">5. 綜合擁擠度評分 (Comprehensive Crowding Score, CCS)</h2>
+<h3 id="51">5.1 評分模型</h3>
+<p><strong>公式：</strong></p>
+<pre class="codehilite"><code>CCS = w₁ × FEI + w₂ × FVI + w₃ × FVIol
+</code></pre>
+
+<p><strong>權重配置：</strong></p>
+<pre class="codehilite"><code>w₁ = 0.4  （資金流權重最高）
+w₂ = 0.35 （估值次之）
+w₃ = 0.25 （波動率補充）
+</code></pre>
+
+<p><strong>權重可調整場景：</strong><br />
+- <strong>牛市場景：</strong> 增加 w₁ 至 0.5，降低 w₃ 至 0.2<br />
+- <strong>熊市場景：</strong> 增加 w₂ 至 0.4，降低 w₁ 至 0.35<br />
+- <strong>高波動環境：</strong> 增加 w₃ 至 0.3</p>
+<h3 id="52">5.2 評分等級</h3>
+<table>
+<thead>
+<tr>
+<th>評分範圍</th>
+<th>擁擠狀態</th>
+<th>解讀</th>
+<th>建議操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0-20</strong></td>
+<td>極度過冷</td>
+<td>因子被市場忽略，可能存在反轉機會</td>
+<td>考慮逆向建倉</td>
+</tr>
+<tr>
+<td><strong>20-40</strong></td>
+<td>過冷</td>
+<td>因子估值偏低，資金流出</td>
+<td>觀察，逢低佈局</td>
+</tr>
+<tr>
+<td><strong>40-60</strong></td>
+<td>中性</td>
+<td>因子價格合理，資金平衡</td>
+<td>持有觀望</td>
+</tr>
+<tr>
+<td><strong>60-80</strong></td>
+<td>過熱</td>
+<td>因子估值偏高，資金流入</td>
+<td>考慮減持</td>
+</tr>
+<tr>
+<td><strong>80-100</strong></td>
+<td>極度過熱</td>
+<td>因子過度擁擠，崩潰風險高</td>
+<td>積極減持/避險</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 擁擠度分佈圖</h3>
+<pre class="codehilite"><code>擁擠度評分
+100 │███████████████████ 極度過熱 (80-100)  → 減持/避險
+ 80 │████████████████
+ 60 │██████████████     過熱 (60-80)      → 考慮減持
+ 40 │███████████        中性 (40-60)      → 持有觀望
+ 20 │██████             過冷 (20-40)      → 觀察佈局
+  0 │███                極度過冷 (0-20)   → 逆向建倉
+    └─────────────────────────────────────────────
+</code></pre>
+
+<hr />
+<h2 id="6">6. 早期預警機制</h2>
+<h3 id="61">6.1 預警觸發條件</h3>
+<p><strong>一級預警（關注）：</strong><br />
+- CCS &gt; 75 或 CCS &lt; 25<br />
+- 持續 3 個交易日以上<br />
+- 行動：密切監控，評估風險敞口</p>
+<p><strong>二級預警（警示）：</strong><br />
+- CCS &gt; 80 或 CCS &lt; 20<br />
+- 持續 5 個交易日以上<br />
+- 行動：調整倉位，控制風險</p>
+<p><strong>三級預警（緊急）：</strong><br />
+- CCS &gt; 90 或 CCS &lt; 10<br />
+- 持續 7 個交易日以上<br />
+- 行動：大幅減倉或避險</p>
+<h3 id="62">6.2 預警確認機制</h3>
+<p><strong>多維度確認：</strong></p>
+<pre class="codehilite"><code>預警確認 = (CCS 觸發) AND (
+  (FEI 觸發 AND FVI 觸發) OR
+  (FEI 觸發 AND FVIol 觸發) OR
+  (FVI 觸發 AND FVIol 觸發)
+)
+</code></pre>
+
+<p><strong>趨勢確認：</strong><br />
+- CCS 的 5 日均線穿過閾值<br />
+- CCS 變化率 &gt; 5%（日）</p>
+<h3 id="63">6.3 預警輸出格式</h3>
+<pre class="codehilite"><code class="language-json">{
+  &quot;timestamp&quot;: &quot;2026-02-20T04:02:00+08:00&quot;,
+  &quot;factor_id&quot;: &quot;F001&quot;,
+  &quot;factor_name&quot;: &quot;價值因子&quot;,
+  &quot;crowding_score&quot;: 85,
+  &quot;crowding_level&quot;: &quot;極度過熱&quot;,
+  &quot;warning_level&quot;: 3,
+  &quot;sub_metrics&quot;: {
+    &quot;FEI&quot;: 88,
+    &quot;FVI&quot;: 82,
+    &quot;FVIol&quot;: 75
+  },
+  &quot;duration&quot;: 7,
+  &quot;recommendation&quot;: &quot;大幅減倉/避險&quot;,
+  &quot;confidence&quot;: 0.85
+}
+</code></pre>
+
+<hr />
+<h2 id="7">7. 歷史回測驗證框架</h2>
+<h3 id="71">7.1 回測目標</h3>
+<p>驗證擁擠度指標的預測能力：<br />
+1. <strong>預測因子收益：</strong> 高擁擠是否預示未來收益下降<br />
+2. <strong>預測因子波動：</strong> 高擁擠是否預示波動上升<br />
+3. <strong>預測反轉時點：</strong> 擁擠度極值是否標誌反轉</p>
+<h3 id="72">7.2 回測設計</h3>
+<p><strong>回測期間：</strong><br />
+- 全樣本：2010-01-01 至 2026-02-20<br />
+- 訓練集：2010-2019（參數校準）<br />
+- 驗證集：2020-2022（參數穩定性）<br />
+- 測試集：2023-2026（樣本外檢驗）</p>
+<p><strong>回測頻率：</strong> 日度</p>
+<h3 id="73">7.3 檢驗指標</h3>
+<h4 id="731">7.3.1 預測能力檢驗</h4>
+<p><strong>IC (Information Coefficient)：</strong></p>
+<pre class="codehilite"><code>IC = Correlation(CCS_t, Return_{t+1,t+20})
+</code></pre>
+
+<ul>
+<li>檢驗 CCS 對未來收益的預測能力</li>
+<li>IC &gt; 0.05：顯著正相關</li>
+<li>IC &lt; -0.05：顯著負相關（過熱預示下跌）</li>
+</ul>
+<p><strong>IR (Information Ratio)：</strong></p>
+<pre class="codehilite"><code>IR = Mean(IC) / Std(IC)
+</code></pre>
+
+<ul>
+<li>IR &gt; 0.5：穩定的預測能力</li>
+</ul>
+<h4 id="732">7.3.2 分組回測</h4>
+<p><strong>按擁擠度分組：</strong><br />
+- Group 1: CCS ∈ [0, 20]（極度過冷）<br />
+- Group 2: CCS ∈ (20, 40]（過冷）<br />
+- Group 3: CCS ∈ (40, 60]（中性）<br />
+- Group 4: CCS ∈ (60, 80]（過熱）<br />
+- Group 5: CCS ∈ (80, 100]（極度過熱）</p>
+<p><strong>檢驗：</strong><br />
+- 各組未來收益差異（ANOVA）<br />
+- 各組未來波動差異<br />
+- 極值組反轉收益率</p>
+<h4 id="733">7.3.3 預警命中率</h4>
+<p><strong>定義：</strong></p>
+<pre class="codehilite"><code>命中率 = 正確預警次數 / 總預警次數
+</code></pre>
+
+<p><strong>正確預警：</strong><br />
+- 預警後 20 個交易日內，因子收益 &lt; -5%<br />
+- 或因子波動率上升 &gt; 50%</p>
+<p><strong>目標：</strong> 命中率 &gt; 60%</p>
+<h3 id="74">7.4 模擬策略</h3>
+<p><strong>策略 A：擁擠度逆向策略</strong><br />
+- 當 CCS &gt; 80 時，減持該因子<br />
+- 當 CCS &lt; 20 時，增持該因子</p>
+<p><strong>策略 B：擁擠度動態調整</strong><br />
+- 根據 CCS 線性調整因子權重<br />
+- CCS = 0 → 權重 +50%<br />
+- CCS = 100 → 權重 -50%</p>
+<p><strong>策略 C：擁擠度避險策略</strong><br />
+- 當 CCS &gt; 80 時，使用衍生品對沖<br />
+- 當 CCS 回落 &lt; 60 時，解除對沖</p>
+<p><strong>基準：</strong> 等權組合</p>
+<h3 id="75">7.5 回測結果評估</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>策略 A</th>
+<th>策略 B</th>
+<th>策略 C</th>
+<th>基準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>年化收益率</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>年化波動率</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>夏普比率</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>最大回撤</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>IC 值</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>預警命中率</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><em>註：回測結果需在實施後填寫</em></p>
+<hr />
+<h2 id="8">8. 數據需求與技術實現</h2>
+<h3 id="81">8.1 數據需求</h3>
+<table>
+<thead>
+<tr>
+<th>數據類別</th>
+<th>具體字段</th>
+<th>頻率</th>
+<th>來源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>市場數據</strong></td>
+<td>股價、成交量、市值</td>
+<td>日</td>
+<td>行情源</td>
+</tr>
+<tr>
+<td><strong>資金流</strong></td>
+<td>北向/南向淨流入、機構資金流</td>
+<td>日</td>
+<td>交易所</td>
+</tr>
+<tr>
+<td><strong>財務數據</strong></td>
+<td>PE, PB, ROE, 營收增長</td>
+<td>季</td>
+<td>財報</td>
+</tr>
+<tr>
+<td><strong>預期數據</strong></td>
+<td>分析師預測、目標價</td>
+<td>日</td>
+<td>研究所</td>
+</tr>
+<tr>
+<td><strong>因子數據</strong></td>
+<td>因子暴露度、因子收益</td>
+<td>日</td>
+<td>因子庫</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82">8.2 技術架構</h3>
+<pre class="codehilite"><code>┌─────────────────────────────────────────────────────────┐
+│                    數據層                                │
+│  [市場數據] [資金流] [財務] [預期] [因子庫]              │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                  數據處理層                             │
+│  [清洗] [對齊] [標準化] [缺失值處理]                    │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                 指標計算層                              │
+│  [FEI] [FVI] [FVIol] [CCS]                              │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                 預警與決策層                             │
+│  [閾值判斷] [趨勢確認] [風險評估] [操作建議]            │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                  展示與輸出層                            │
+│  [儀表板] [報表] [API] [通知]                            │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+
+<h3 id="83">8.3 實現語言與庫</h3>
+<p><strong>語言：</strong> Python 3.10+</p>
+<p><strong>核心庫：</strong><br />
+- <strong>數據處理：</strong> pandas, numpy<br />
+- <strong>統計計算：</strong> scipy, statsmodels<br />
+- <strong>時間序列：</strong> arch（GARCH）<br />
+- <strong>機器學習：</strong> scikit-learn（可選）<br />
+- <strong>可視化：</strong> matplotlib, plotly<br />
+- <strong>回測：</strong> backtrader 或自研框架</p>
+<h3 id="84">8.4 性能要求</h3>
+<ul>
+<li><strong>計算延遲：</strong> &lt; 5 秒（全市場因子）</li>
+<li><strong>數據更新：</strong> T+1 或實時（市場收盤後）</li>
+<li><strong>存儲：</strong> 時間序列數據庫（InfluxDB 或 TimescaleDB）</li>
+</ul>
+<hr />
+<h2 id="9">9. 風險控制與限制</h2>
+<h3 id="91">9.1 模型風險</h3>
+<p><strong>過度擬合風險：</strong><br />
+- 在訓練集上表現優異，樣本外失效<br />
+- 緩解：使用交叉驗證，樣本外測試</p>
+<p><strong>參數不穩定：</strong><br />
+- 權重參數隨時間漂移<br />
+- 緩解：定期重新校準，使用滾動窗口</p>
+<h3 id="92">9.2 數據風險</h3>
+<p><strong>數據質量：</strong><br />
+- 缺失值、異常值、延遲<br />
+- 緩解：數據清洗，異常值檢測</p>
+<p><strong>前視偏差：</strong><br />
+- 使用未來信息<br />
+- 緩解：嚴格時間戳控制</p>
+<h3 id="93">9.3 使用限制</h3>
+<p><strong>不適用場景：</strong><br />
+- 新興市場因子（數據不足）<br />
+- 小眾因子（流動性差）<br />
+- 事件驅動因子（短期波動大）</p>
+<p><strong>建議使用場景：</strong><br />
+- 主流風格因子（價值、成長、動量）<br />
+- 流動性好的市場因子<br />
+- 長期穩定的基本面因子</p>
+<hr />
+<h2 id="10">10. 實施路徑</h2>
+<h3 id="1-2">階段一：基礎建設（第 1-2 週）</h3>
+<ol>
+<li>數據收集與清洗</li>
+<li>基礎指標計算（FEI, FVI, FVIol）</li>
+<li>單維度指標驗證</li>
+</ol>
+<h3 id="3-4">階段二：模型開發（第 3-4 週）</h3>
+<ol>
+<li>CCS 評分模型構建</li>
+<li>權重優化</li>
+<li>預警機制實現</li>
+</ol>
+<h3 id="5-6">階段三：回測驗證（第 5-6 週）</h3>
+<ol>
+<li>歷史回測執行</li>
+<li>結果分析</li>
+<li>模型調整</li>
+</ol>
+<h3 id="7-8">階段四：上線運行（第 7-8 週）</h3>
+<ol>
+<li>系統集成</li>
+<li>實盤測試</li>
+<li>持續監控</li>
+</ol>
+<hr />
+<h2 id="11_1">11. 後續優化方向</h2>
+<h3 id="111">11.1 模型增強</h3>
+<ul>
+<li>加入機器學習模型（隨機森林、XGBoost）提升預測能力</li>
+<li>使用神經網絡捕捉非線性關係</li>
+<li>嘗試因果推斷方法</li>
+</ul>
+<h3 id="112">11.2 擴展指標</h3>
+<ul>
+<li><strong>市場情緒指標：</strong> VIX、新聞情緒</li>
+<li><strong>宏觀經濟指標：</strong> GDP、通脹、利率</li>
+<li><strong>行業輪動指標：</strong> 行業相對強弱</li>
+</ul>
+<h3 id="113">11.3 應用場景擴展</h3>
+<ul>
+<li>從單因子擴展到多因子組合擁擠度</li>
+<li>從 A 股擴展到港股、美股</li>
+<li>從主動管理擴展到 ETF、指數投資</li>
+</ul>
+<hr />
+<h2 id="12_1">12. 關鍵假設與局限</h2>
+<h3 id="121">12.1 關鍵假設</h3>
+<ol>
+<li><strong>資金流可觀測性：</strong> 假設市場資金流數據能夠準確反映因子的資金情況</li>
+<li><strong>估值有效性：</strong> 假設估值指標能夠反映因子的內在價值</li>
+<li><strong>波動率穩定性：</strong> 假設波動率模型能夠捕捉市場波動特徵</li>
+<li><strong>歷史重複性：</strong> 假設歷史規律在未來仍然有效</li>
+</ol>
+<h3 id="122">12.2 局限性</h3>
+<ol>
+<li><strong>市場結構變化：</strong> 模型可能不適應市場結構的重大變化</li>
+<li><strong>黑天鵝事件：</strong> 極端事件下模型可能失效</li>
+<li><strong>因子相關性：</strong> 未考慮因子間的相關性影響</li>
+<li><strong>流動性風險：</strong> 未充分考慮流動性對擁擠度的影響</li>
+</ol>
+<hr />
+<h2 id="metadata">Metadata</h2>
+<ul>
+<li><strong>Analysis framework:</strong> 因子擁擠度評估框架</li>
+<li><strong>Model type:</strong> 多維度綜合評分模型</li>
+<li><strong>Data frequency:</strong> 日度</li>
+<li><strong>Update frequency:</strong> 每日</li>
+<li><strong>Target users:</strong> 量化投資研究員、組合經理</li>
+<li><strong>Expected users:</strong> 主動型基金管理、量化對沖基金</li>
+<li><strong>Implementation complexity:</strong> 中等到高</li>
+<li><strong>Computational requirements:</strong> 中等</li>
+<li><strong>Validation status:</strong> 待實施驗證</li>
+</ul>
+<hr />
+<h2 id="appendices">Appendices</h2>
+<h3 id="a-b002">附录 A：因子列表（基於 b002 核心因子庫）</h3>
+<table>
+<thead>
+<tr>
+<th>因子 ID</th>
+<th>因子名稱</th>
+<th>因子類型</th>
+<th>數據頻率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F001</td>
+<td>價值因子</td>
+<td>基本面</td>
+<td>日</td>
+</tr>
+<tr>
+<td>F002</td>
+<td>成長因子</td>
+<td>基本面</td>
+<td>季</td>
+</tr>
+<tr>
+<td>F003</td>
+<td>動量因子</td>
+<td>價格</td>
+<td>日</td>
+</tr>
+<tr>
+<td>F004</td>
+<td>質量因子</td>
+<td>基本面</td>
+<td>季</td>
+</tr>
+<tr>
+<td>F005</td>
+<td>低波動因子</td>
+<td>價格</td>
+<td>日</td>
+</tr>
+<tr>
+<td>F006</td>
+<td>規模因子</td>
+<td>市場</td>
+<td>日</td>
+</tr>
+<tr>
+<td>F007</td>
+<td>盈利因子</td>
+<td>基本面</td>
+<td>季</td>
+</tr>
+<tr>
+<td>F008</td>
+<td>投資因子</td>
+<td>基本面</td>
+<td>季</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b">附录 B：術語表</h3>
+<ul>
+<li><strong>FEI (Factor Exposure Index):</strong> 因子暴露度指數，衡量資金流動和頭寸集中度</li>
+<li><strong>FVI (Factor Valuation Index):</strong> 因子估值指數，衡量因子估值水平和超預期程度</li>
+<li><strong>FVIol (Factor Volatility Index):</strong> 因子波動率指數，衡量因子波動異常程度</li>
+<li><strong>CCS (Comprehensive Crowding Score):</strong> 綜合擁擠度評分，整合三個維度的總評分</li>
+<li><strong>IC (Information Coefficient):</strong> 信息係數，衡量預測能力</li>
+<li><strong>IR (Information Ratio):</strong> 信息比率，衡量預測穩定性</li>
+<li><strong>HHI (Herfindahl-Hirschman Index):</strong> 赫芬達爾-赫希曼指數，衡量市場集中度</li>
+<li><strong>GARCH:</strong> 廣義自回歸條件異方差模型，用於波動率建模</li>
+</ul>
+<h3 id="c">附录 C：參考文獻</h3>
+<ol>
+<li>Barra Risk Model Handbook</li>
+<li>"Crowded Trades" - MSCI Research</li>
+<li>"Factor Crowding and Portfolio Performance" - Journal of Portfolio Management</li>
+<li>"Measuring and Managing Factor Crowding" - AQR Research</li>
+</ol>
+<hr />
+<p><strong>文檔版本:</strong> v1.0<br />
+<strong>最後更新:</strong> 2026-02-20<br />
+<strong>作者:</strong> Charlie Analyst<br />
+<strong>審核狀態:</strong> 待審核</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

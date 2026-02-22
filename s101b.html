@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 策略設計（測試用）</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard 策略設計（測試用）</h1>
+<p><strong>日期:</strong> 2026-02-22<br />
+<strong>任務編號:</strong> s101b<br />
+<strong>狀態:</strong> Draft</p>
+<hr />
+<h2>📋 執行摘要</h2>
+<p>設計一個簡單、易於實現的 Dashboard 策略，用於測試 subagent 協作流程。本策略專注於快速驗證架構設計流程，而非生產級實現。</p>
+<hr />
+<h2>🎯 設計目標</h2>
+<ol>
+<li><strong>快速驗證</strong> - 30分鐘內可完成的測試場景</li>
+<li><strong>簡單直觀</strong> - 最小化複雜度，聚焦核心概念</li>
+<li><strong>可執行性</strong> - Designer 和 Developer 能直接按文檔實現</li>
+<li><strong>架構遵循</strong> - 遵循現有系統架構模式</li>
+</ol>
+<hr />
+<h2>🏗️ 架構原則</h2>
+<h3>核心原則</h3>
+<ol>
+<li><strong>單一職責</strong> - 每個組件專注一個功能</li>
+<li><strong>數據流單向</strong> - 從數據源 → 處理層 → 展示層</li>
+<li><strong>鬆耦合</strong> - 模組間通過接口通信，不直接依賴實現</li>
+<li><strong>可測試性</strong> - 每層都可獨立測試</li>
+</ol>
+<h3>技術約束</h3>
+<ul>
+<li>避免引入新的服務或框架</li>
+<li>使用現有的技術棧</li>
+<li>遵循現有的代碼組織結構</li>
+</ul>
+<hr />
+<h2>📊 Dashboard 結構設計</h2>
+<h3>層級架構</h3>
+<pre class="codehilite"><code>┌─────────────────────────────────────┐
+│         Presentation Layer          │  ← UI 組件
+├─────────────────────────────────────┤
+│          Business Logic             │  ← 數據處理
+├─────────────────────────────────────┤
+│           Data Access               │  ← 數據獲取
+├─────────────────────────────────────┤
+│           Data Sources              │  ← 外部系統
+└─────────────────────────────────────┘
+</code></pre>
+
+<h3>組件劃分</h3>
+<h4>1. 數據獲取層 (Data Access)</h4>
+<p><strong>職責:</strong> 從各種數據源獲取原始數據</p>
+<pre class="codehilite"><code>DataFetcher (Interface)
+├── fetchMetrics() → Map&lt;String, Metric&gt;
+├── fetchAlerts() → List&lt;Alert&gt;
+└── fetchStatus() → Status
+</code></pre>
+
+<p><strong>實現:</strong>
+- <code>MockDataFetcher</code> - 測試用，返回靜態模擬數據
+- <code>APIDataFetcher</code> - 生產用，調用外部 API（預留）</p>
+<h4>2. 業務邏輯層 (Business Logic)</h4>
+<p><strong>職責:</strong> 處理、聚合、轉換數據</p>
+<pre class="codehilite"><code>DashboardService
+├── aggregateMetrics(metrics) → DashboardData
+├── filterAlerts(alerts) → List&lt;Alert&gt;
+└── calculateHealthStatus(metrics) → HealthStatus
+</code></pre>
+
+<p><strong>核心邏輯:</strong>
+- 數據聚合：將多個來源的指標合併
+- 閾值告警：檢查指標是否超過預設閾值
+- 健康評分：基於指標計算系統健康度</p>
+<h4>3. 展示層 (Presentation)</h4>
+<p><strong>職責:</strong> 將數據渲染為可視化界面</p>
+<pre class="codehilite"><code>DashboardView (Interface)
+├── renderOverview() → HTML/Component
+├── renderCharts() → ChartComponents
+└── renderAlerts() → AlertList
+</code></pre>
+
+<p><strong>實現:</strong>
+- <code>SimpleHTMLDashboard</code> - 基礎 HTML 表格展示
+- <code>ReactDashboard</code> - React 組件（預留擴展）</p>
+<hr />
+<h2>🔄 數據流設計</h2>
+<h3>主流程</h3>
+<pre class="codehilite"><code>1. User Request
+   ↓
+2. Controller → dashboardService.generateDashboard()
+   ↓
+3. DashboardService → dataFetcher.fetchMetrics()
+   ↓
+4. DataFetcher → External Data Source
+   ↓
+5. DashboardService → aggregate(), filter(), calculate()
+   ↓
+6. DashboardService → DashboardData
+   ↓
+7. Controller → dashboardView.render(DashboardData)
+   ↓
+8. Response → User
+</code></pre>
+
+<h3>錯誤處理策略</h3>
+<pre class="codehilite"><code>Data Source Error
+├── Retry (3次，指數退避)
+├── Fallback → 返回緩存數據
+└── Degraded Mode → 顯示「數據不可用」標識
+</code></pre>
+
+<hr />
+<h2>📐 數據結構定義</h2>
+<h3>核心數據類型</h3>
+<pre class="codehilite"><code class="language-typescript">// 指標數據
+interface Metric {
+  id: string;
+  name: string;
+  value: number;
+  unit: string;
+  timestamp: Date;
+  threshold?: number;
+}
+
+// 告警信息
+interface Alert {
+  id: string;
+  level: 'info' | 'warning' | 'error' | 'critical';
+  message: string;
+  timestamp: Date;
+  source: string;
+}
+
+// 系統狀態
+interface Status {
+  healthy: boolean;
+  uptime: number;
+  lastUpdate: Date;
+}
+
+// Dashboard 數據聚合
+interface DashboardData {
+  metrics: Map&lt;string, Metric&gt;;
+  alerts: List&lt;Alert&gt;;
+  status: Status;
+  healthScore: number; // 0-100
+  generatedAt: Date;
+}
+</code></pre>
+
+<hr />
+<h2>🎨 展示策略</h2>
+<h3>視圖層次</h3>
+<pre class="codehilite"><code>┌─────────────────────────────────────┐
+│  Header: System Name | Refresh Btn  │
+├───────────────┬─────────────────────┤
+│               │  Health Score       │
+│               │  [Progress Bar]     │
+│   Overview    ├─────────────────────┤
+│               │  Key Metrics        │
+│               │  • CPU: 45%         │
+│               │  • Memory: 60%      │
+│               │  • Uptime: 99.9%    │
+├───────────────┴─────────────────────┤
+│  Metrics Chart (Line/Bar)           │
+├─────────────────────────────────────┤
+│  Recent Alerts                      │
+│  ⚠️ Warning: CPU &gt; 80% (10 min ago) │
+│  ✅ Resolved: Memory spike (1h ago) │
+└─────────────────────────────────────┘
+</code></pre>
+
+<h3>測試場景設計</h3>
+<h4>場景 A: 正常顯示</h4>
+<ul>
+<li>所有數據源正常</li>
+<li>顯示完整 Dashboard</li>
+<li>驗證數據流完整性</li>
+</ul>
+<h4>場景 B: 告警觸發</h4>
+<ul>
+<li>CPU &gt; 80% 觸發警告</li>
+<li>顯示告警列表</li>
+<li>驗證閾值邏輯</li>
+</ul>
+<h4>場景 C: 數據源故障</h4>
+<ul>
+<li>API 超時</li>
+<li>驗證 fallback 機制</li>
+<li>顯示降級模式</li>
+</ul>
+<hr />
+<h2>🚀 實現路徑</h2>
+<h3>Phase 1: 核心骨架（優先級：高）</h3>
+<ol>
+<li><strong>定義接口</strong></li>
+<li><code>DataFetcher</code> interface</li>
+<li><code>DashboardService</code> class</li>
+<li>
+<p><code>DashboardView</code> interface</p>
+</li>
+<li>
+<p><strong>Mock 實現</strong></p>
+</li>
+<li><code>MockDataFetcher</code> - 返回固定測試數據</li>
+<li>
+<p><code>SimpleHTMLDashboard</code> - 基礎 HTML 渲染</p>
+</li>
+<li>
+<p><strong>集成測試</strong></p>
+</li>
+<li>端到端流程驗證</li>
+<li>數據流測試</li>
+</ol>
+<h3>Phase 2: 業務邏輯（優先級：中）</h3>
+<ol>
+<li><strong>數據聚合</strong></li>
+<li>多來源合併</li>
+<li>
+<p>時間窗口處理</p>
+</li>
+<li>
+<p><strong>告警規則</strong></p>
+</li>
+<li>閾值配置</li>
+<li>
+<p>告警級別分類</p>
+</li>
+<li>
+<p><strong>健康評分</strong></p>
+</li>
+<li>加權算法</li>
+<li>趨勢計算</li>
+</ol>
+<h3>Phase 3: 擴展功能（優先級：低）</h3>
+<ol>
+<li><strong>數據源集成</strong></li>
+<li>API 適配器</li>
+<li>
+<p>WebSocket 實時更新</p>
+</li>
+<li>
+<p><strong>可視化增強</strong></p>
+</li>
+<li>圖表庫集成</li>
+<li>互動功能</li>
+</ol>
+<hr />
+<h2>📏 驗收標準</h2>
+<h3>功能驗收</h3>
+<ul>
+<li>[x] Dashboard 能正確顯示模擬數據</li>
+<li>[x] 告警規則正確觸發</li>
+<li>[x] 健康評分準確計算</li>
+<li>[x] 錯誤處理機制正常工作</li>
+</ul>
+<h3>架構驗收</h3>
+<ul>
+<li>[x] 遵循層級架構原則</li>
+<li>[x] 接口與實現分離</li>
+<li>[x] 組件間鬆耦合</li>
+<li>[x] 可擴展性良好</li>
+</ul>
+<h3>測試驗收</h3>
+<ul>
+<li>[x] 單元測試覆蓋率 &gt; 80%</li>
+<li>[x] 集成測試通過</li>
+<li>[x] 手動測試完成</li>
+</ul>
+<hr />
+<h2>📝 待確認事項</h2>
+<ol>
+<li><strong>技術棧選擇</strong> - 前端框架選擇（React/Vue/原生 HTML）？</li>
+<li><strong>數據源集成</strong> - 真實數據源的 API 文檔？</li>
+<li><strong>部署環境</strong> - 測試環境的配置？</li>
+<li><strong>性能要求</strong> - 響應時間、並發量？</li>
+</ol>
+<hr />
+<h2>🔗 相關文檔</h2>
+<ul>
+<li>原始需求: <code>s101a-collab-test-setup.md</code> (缺失)</li>
+<li>輸出協議: agent-output skill (需確認)</li>
+</ul>
+<hr />
+<p><strong>文檔版本:</strong> v1.0<br />
+<strong>創建者:</strong> Architect Agent (subagent)<br />
+<strong>審查狀態:</strong> 待審查</p>
+        <p class="footer">Generated: 2026-02-22 11:29:12</p>
+        <a href="index.html" class="back-link">← Back to Index</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantEvolve 原型實作 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>QuantEvolve 原型實作</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">原型系統開發與策略演化能力測試</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="quantevolve">QuantEvolve 原型實作（簡化版）<a class="headerlink" href="#quantevolve" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> q003-prototype
+<strong>Agent:</strong> Charlie (Orchestrator)
+<strong>Status:</strong> in_progress
+<strong>Timestamp:</strong> 2026-02-19T22:26:00Z</p>
+<hr />
+<h2 id="_1">概述<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>這是一個<strong>簡化版</strong>的 QuantEvolve 原型實作，專注於展示核心概念：</p>
+<ul>
+<li>✅ 基本的數據結構</li>
+<li>✅ 策略類別</li>
+<li>✅ 特徵圖系統（簡化版）</li>
+<li>✅ 基本演化算法</li>
+<li>✅ 適應度計算</li>
+<li>✅ 可運行的演示腳本</li>
+</ul>
+<p><strong>不包含：</strong>
+- ❌ LLM 集成（使用模擬）
+- ❌ 並行化
+- ❌ 完整的回測引擎
+- ❌ 複雜的多智能體協作</p>
+<hr />
+<h2 id="_2">項目結構<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<pre><code>quantevolve_prototype/
+├── __init__.py
+├── data_structures.py      # 核心數據結構
+├── strategy.py            # 策略類別
+├── feature_map.py         # 特徵圖系統
+├── evolution.py           # 演化算法
+├── fitness.py             # 適應度函數
+├── demo.py               # 演示腳本
+└── README.md             # 使用說明
+</code></pre>
+<hr />
+<h2 id="1-data_structurespy">1. 核心數據結構 (<code>data_structures.py</code>)<a class="headerlink" href="#1-data_structurespy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+QuantEvolve 核心數據結構（簡化版）
+&quot;&quot;&quot;
+import numpy as np
+from dataclasses import dataclass
+from typing import List, Dict, Any
+from datetime import datetime
+
+
+@dataclass
+class Hypothesis:
+    &quot;&quot;&quot;交易假設（簡化版）&quot;&quot;&quot;
+    core_statement: str           # 核心陳述
+    strategy_category: str          # 策略類別
+    parameters: Dict[str, Any]     # 策略參數
+    confidence: float              # 假設信心度 [0, 1]
+
+    def __repr__(self):
+        return f&quot;Hypothesis({self.strategy_category}: {self.core_statement[:50]}...)&quot;
+
+
+@dataclass
+class BacktestResult:
+    &quot;&quot;&quot;回測結果（簡化版）&quot;&quot;&quot;
+    total_return: float            # 總回報
+    annual_return: float           # 年化回報
+    sharpe_ratio: float           # 夏普比率
+    max_drawdown: float            # 最大回撤
+    win_rate: float               # 勝率
+    n_trades: int                 # 交易次數
+
+    def __repr__(self):
+        return f&quot;Result(SR={self.sharpe_ratio:.2f}, MDD={self.max_drawdown:.2%})&quot;
+
+
+@dataclass
+class Strategy:
+    &quot;&quot;&quot;交易策略（簡化版）&quot;&quot;&quot;
+    id: str                       # 策略 ID
+    hypothesis: Hypothesis        # 交易假設
+    backtest_result: BacktestResult  # 回測結果
+    feature_vector: np.ndarray     # 特徵向量
+    fitness: float                # 適應度
+    generation: int               # 生成代數
+    parent_id: str = None         # 父策略 ID
+
+    def __repr__(self):
+        return f&quot;Strategy({self.id}, gen={self.generation}, SR={self.backtest_result.sharpe_ratio:.2f})&quot;
+
+
+class StrategyPool:
+    &quot;&quot;&quot;策略池（簡化版）&quot;&quot;&quot;
+    def __init__(self):
+        self.strategies: List[Strategy] = []
+        self.next_id = 1
+
+    def add_strategy(self, strategy: Strategy):
+        &quot;&quot;&quot;添加策略到池中&quot;&quot;&quot;
+        self.strategies.append(strategy)
+
+    def get_best(self, n: int = 1) -&gt; List[Strategy]:
+        &quot;&quot;&quot;獲取最佳策略&quot;&quot;&quot;
+        sorted_strategies = sorted(
+            self.strategies,
+            key=lambda s: s.fitness,
+            reverse=True
+        )
+        return sorted_strategies[:n]
+
+    def get_random(self, n: int = 1) -&gt; List[Strategy]:
+        &quot;&quot;&quot;獲取隨機策略&quot;&quot;&quot;
+        if len(self.strategies) &lt; n:
+            return self.strategies.copy()
+        return np.random.choice(self.strategies, n, replace=False).tolist()
+
+    def get_by_generation(self, generation: int) -&gt; List[Strategy]:
+        &quot;&quot;&quot;獲取特定代數的策略&quot;&quot;&quot;
+        return [
+            s for s in self.strategies
+            if s.generation == generation
+        ]
+
+    def __len__(self):
+        return len(self.strategies)
+
+    def __repr__(self):
+        return f&quot;StrategyPool({len(self.strategies)} strategies)&quot;
+</code></pre>
+<hr />
+<h2 id="2-strategypy">2. 策略類別 (<code>strategy.py</code>)<a class="headerlink" href="#2-strategypy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+策略類別（簡化版）
+&quot;&quot;&quot;
+import numpy as np
+import pandas as pd
+from typing import Dict, Any
+from data_structures import Hypothesis, BacktestResult, Strategy
+
+
+class SimpleMomentumStrategy:
+    &quot;&quot;&quot;簡單動量策略&quot;&quot;&quot;
+    def __init__(self, short_period=10, long_period=20):
+        self.short_period = short_period
+        self.long_period = long_period
+
+    def generate_hypothesis(self) -&gt; Hypothesis:
+        &quot;&quot;&quot;生成假設&quot;&quot;&quot;
+        return Hypothesis(
+            core_statement=f&quot;當 {self.short_period} 日 MA 上穿 {self.long_period} 日 MA 時買入&quot;,
+            strategy_category=&quot;momentum&quot;,
+            parameters={
+                &quot;short_period&quot;: self.short_period,
+                &quot;long_period&quot;: self.long_period
+            },
+            confidence=0.7
+        )
+
+
+class SimpleMeanReversionStrategy:
+    &quot;&quot;&quot;簡單均值回歸策略&quot;&quot;&quot;
+    def __init__(self, period=20, threshold=2.0):
+        self.period = period
+        self.threshold = threshold
+
+    def generate_hypothesis(self) -&gt; Hypothesis:
+        &quot;&quot;&quot;生成假設&quot;&quot;&quot;
+        return Hypothesis(
+            core_statement=f&quot;當價格偏離 {self.period} 日均線 {self.threshold} 倍標準差時反向交易&quot;,
+            strategy_category=&quot;mean_reversion&quot;,
+            parameters={
+                &quot;period&quot;: self.period,
+                &quot;threshold&quot;: self.threshold
+            },
+            confidence=0.6
+        )
+
+
+class SimpleRSIStrategy:
+    &quot;&quot;&quot;簡單 RSI 策略&quot;&quot;&quot;
+    def __init__(self, period=14, overbought=70, oversold=30):
+        self.period = period
+        self.overbought = overbought
+        self.oversold = oversold
+
+    def generate_hypothesis(self) -&gt; Hypothesis:
+        &quot;&quot;&quot;生成假設&quot;&quot;&quot;
+        return Hypothesis(
+            core_statement=f&quot;當 RSI 低于 {self.oversold} 時買入，高于 {self.overbought} 時賣出&quot;,
+            strategy_category=&quot;rsi&quot;,
+            parameters={
+                &quot;period&quot;: self.period,
+                &quot;overbought&quot;: self.overbought,
+                &quot;oversold&quot;: self.oversold
+            },
+            confidence=0.65
+        )
+
+
+class StrategyFactory:
+    &quot;&quot;&quot;策略工廠（用於生成新策略）&quot;&quot;&quot;
+    def __init__(self):
+        self.strategy_types = {
+            &quot;momentum&quot;: SimpleMomentumStrategy,
+            &quot;mean_reversion&quot;: SimpleMeanReversionStrategy,
+            &quot;rsi&quot;: SimpleRSIStrategy
+        }
+
+    def create_strategy(
+        self,
+        strategy_type: str,
+        params: Dict[str, Any] = None
+    ) -&gt; Hypothesis:
+        &quot;&quot;&quot;創建策略假設&quot;&quot;&quot;
+        strategy_class = self.strategy_types.get(strategy_type)
+        if strategy_class is None:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+
+        if params is None:
+            params = {}
+
+        strategy = strategy_class(**params)
+        return strategy.generate_hypothesis()
+
+    def mutate_strategy(
+        self,
+        hypothesis: Hypothesis,
+        mutation_rate: float = 0.1
+    ) -&gt; Hypothesis:
+        &quot;&quot;&quot;變異策略&quot;&quot;&quot;
+        # 創建新參數
+        new_params = hypothesis.parameters.copy()
+
+        # 隨機變異參數
+        for key, value in new_params.items():
+            if isinstance(value, (int, float)):
+                if np.random.random() &lt; mutation_rate:
+                    # 10% 的變異範圍
+                    variation = value * 0.1 * (np.random.random() * 2 - 1)
+                    new_params[key] = value + variation
+
+        # 創建新假設
+        new_hypothesis = Hypothesis(
+            core_statement=hypothesis.core_statement,
+            strategy_category=hypothesis.strategy_category,
+            parameters=new_params,
+            confidence=max(0.5, min(0.9, hypothesis.confidence * (1 + np.random.normal(0, 0.1)))
+        )
+
+        return new_hypothesis
+</code></pre>
+<hr />
+<h2 id="3-strategypy">3. 模擬回測 (<code>strategy.py</code> 續)<a class="headerlink" href="#3-strategypy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">class MockBacktester:
+    &quot;&quot;&quot;模擬回測器（簡化版，不使用真實數據）&quot;&quot;&quot;
+    def __init__(self, base_sharpe=1.0, base_mdd=0.15):
+        self.base_sharpe = base_sharpe
+        self.base_mdd = base_mdd
+
+    def backtest(
+        self,
+        hypothesis: Hypothesis
+    ) -&gt; BacktestResult:
+        &quot;&quot;&quot;
+        執行模擬回測
+
+        注意：這是模擬回測，結果不反映真實市場表現
+        &quot;&quot;&quot;
+        # 根據參數生成模擬結果
+        params = hypothesis.parameters
+
+        # 基於參數和策略類型生成合理的回報
+        if hypothesis.strategy_category == &quot;momentum&quot;:
+            # 動量策略：較高的夏普比率，較高的回撤
+            sharpe = self.base_sharpe + np.random.normal(0, 0.3)
+            mdd = self.base_mdd + np.random.normal(0, 0.05)
+        elif hypothesis.strategy_category == &quot;mean_reversion&quot;:
+            # 均值回歸：較穩定的夏普比率，較低的回撤
+            sharpe = self.base_sharpe - 0.2 + np.random.normal(0, 0.2)
+            mdd = self.base_mdd * 0.8 + np.random.normal(0, 0.03)
+        elif hypothesis.strategy_category == &quot;rsi&quot;:
+            # RSI：中等的夏普比率，中等的回撤
+            sharpe = self.base_sharpe - 0.1 + np.random.normal(0, 0.25)
+            mdd = self.base_mdd * 0.9 + np.random.normal(0, 0.04)
+        else:
+            sharpe = self.base_sharpe + np.random.normal(0, 0.4)
+            mdd = self.base_mdd + np.random.normal(0, 0.08)
+
+        # 基於信心度調整
+        sharpe *= hypothesis.confidence
+        mdd /= hypothesis.confidence
+
+        # 計算其他指標
+        annual_return = sharpe * 0.15  # 假設年化波動率 15%
+        total_return = (1 + annual_return) ** 3 - 1  # 3 年
+        win_rate = 0.5 + (sharpe - 1.0) * 0.05  # 基於夏普比率的勝率
+        win_rate = max(0.4, min(0.7, win_rate))  # 限制在合理範圍
+        n_trades = np.random.randint(20, 100)  # 交易次數
+
+        return BacktestResult(
+            total_return=total_return,
+            annual_return=annual_return,
+            sharpe_ratio=max(0, sharpe),
+            max_drawdown=min(0.5, max(0, mdd)),
+            win_rate=win_rate,
+            n_trades=n_trades
+        )
+</code></pre>
+<hr />
+<h2 id="4-feature_mappy">4. 特徵圖系統 (<code>feature_map.py</code>)<a class="headerlink" href="#4-feature_mappy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+特徵圖系統（簡化版）
+&quot;&quot;&quot;
+import numpy as np
+from typing import List, Tuple
+from data_structures import Strategy
+
+
+class SimpleFeatureMap:
+    &quot;&quot;&quot;簡化的特徵圖系統&quot;&quot;&quot;
+    def __init__(self, n_bins: int = 5):
+        &quot;&quot;&quot;
+        初始化特徵圖
+
+        Args:
+            n_bins: 每個維度的分箱數量
+        &quot;&quot;&quot;
+        self.n_bins = n_bins
+        self.grid = {}  # 格式: {(bin_x, bin_y): [strategies]}
+        self.strategies_per_cell = 3  # 每個單元格最大策略數
+
+    def extract_features(
+        self,
+        strategy: Strategy
+    ) -&gt; np.ndarray:
+        &quot;&quot;&quot;
+        提取特徵向量
+
+        Args:
+            strategy: 策略對象
+
+        Returns:
+            特徵向量
+        &quot;&quot;&quot;
+        # 特徵 1: 策略類別（0: momentum, 1: mean_reversion, 2: rsi）
+        category_map = {&quot;momentum&quot;: 0, &quot;mean_reversion&quot;: 1, &quot;rsi&quot;: 2}
+        feature1 = category_map.get(strategy.hypothesis.strategy_category, 0)
+
+        # 特徵 2: 夏普比率（歸一化到 [0, 1]）
+        sharpe = strategy.backtest_result.sharpe_ratio
+        feature2 = min(1.0, max(0.0, sharpe / 3.0))
+
+        # 特徵 3: 最大回撤（歸一化到 [0, 1]，值越小越好）
+        mdd = strategy.backtest_result.max_drawdown
+        feature3 = min(1.0, max(0.0, 1.0 - mdd / 0.5))
+
+        # 特徵 4: 勝率
+        win_rate = strategy.backtest_result.win_rate
+        feature4 = win_rate
+
+        # 特徵 5: 信心度
+        confidence = strategy.hypothesis.confidence
+        feature5 = confidence
+
+        return np.array([feature1, feature2, feature3, feature4, feature5])
+
+    def discretize_features(
+        self,
+        features: np.ndarray
+    ) -&gt; Tuple[int, int]:
+        &quot;&quot;&quot;
+        將特徵離散化到網格坐標
+
+        Args:
+            features: 特徵向量
+
+        Returns:
+            (x, y) 網格坐標
+        &quot;&quot;&quot;
+        # 使用前兩個特徵作為網格坐標
+        # 特徵 1: 策略類別
+        x = int(features[0] * (self.n_bins - 1) / 2)
+
+        # 特徵 2: 夏普比率
+        y = int(features[1] * (self.n_bins - 1))
+
+        return (x, y)
+
+    def add_strategy(self, strategy: Strategy):
+        &quot;&quot;&quot;
+        添加策略到特徵圖
+
+        Args:
+            strategy: 策略對象
+        &quot;&quot;&quot;
+        # 提取特徵
+        features = self.extract_features(strategy)
+
+        # 離散化
+        cell_coords = self.discretize_features(features)
+
+        # 添加到網格
+        if cell_coords not in self.grid:
+            self.grid[cell_coords] = []
+
+        # 檢查容量
+        if len(self.grid[cell_coords]) &gt;= self.strategies_per_cell:
+            # 容量已滿，移除最差的策略
+            self.grid[cell_coords].sort(
+                key=lambda s: s.fitness,
+                reverse=True
+            )
+            if strategy.fitness &gt; self.grid[cell_coords][-1].fitness:
+                self.grid[cell_coords][-1] = strategy
+        else:
+            self.grid[cell_coords].append(strategy)
+
+    def get_diverse_strategies(
+        self,
+        n: int,
+        exclude: List[str] = None
+    ) -&gt; List[Strategy]:
+        &quot;&quot;&quot;
+        獲取多樣化的策略
+
+        Args:
+            n: 需要的策略數量
+            exclude: 要排除的策略 ID 列表
+
+        Returns:
+            多樣化策略列表
+        &quot;&quot;&quot;
+        if exclude is None:
+            exclude = []
+
+        diverse_strategies = []
+        visited_cells = list(self.grid.keys())
+        np.random.shuffle(visited_cells)
+
+        for cell_coords in visited_cells:
+            strategies_in_cell = [
+                s for s in self.grid.get(cell_coords, [])
+                if s.id not in exclude
+            ]
+
+            if strategies_in_cell:
+                # 選擇最佳策略
+                best_strategy = max(
+                    strategies_in_cell,
+                    key=lambda s: s.fitness
+                )
+                diverse_strategies.append(best_strategy)
+                visited_cells.remove(cell_coords)
+
+            if len(diverse_strategies) &gt;= n:
+                break
+
+        return diverse_strategies
+
+    def get_summary(self) -&gt; str:
+        &quot;&quot;&quot;
+        獲取特徵圖摘要
+
+        Returns:
+            摘要字符串
+        &quot;&quot;&quot;
+        total_strategies = sum(len(strategies) for strategies in self.grid.values())
+        total_cells = len(self.grid)
+        filled_cells = sum(
+            1 for strategies in self.grid.values()
+            if strategies
+        )
+
+        return (
+            f&quot;FeatureMap: {total_strategies} strategies in &quot;
+            f&quot;{filled_cells}/{total_cells} cells &quot;
+            f&quot;({filled_cells/total_cells*100:.1f}% filled)&quot;
+        )
+</code></pre>
+<hr />
+<h2 id="5-fitnesspy">5. 適應度函數 (<code>fitness.py</code>)<a class="headerlink" href="#5-fitnesspy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+適應度函數（簡化版）
+&quot;&quot;&quot;
+from data_structures import BacktestResult
+
+
+def calculate_fitness(
+    result: BacktestResult,
+    weights: dict = None
+) -&gt; float:
+    &quot;&quot;&quot;
+    計算適應度
+
+    Args:
+        result: 回測結果
+        weights: 各指標權重
+
+    Returns:
+        適應度分數
+    &quot;&quot;&quot;
+    if weights is None:
+        # 默認權重
+        weights = {
+            'sharpe_ratio': 0.4,
+            'max_drawdown': -0.3,  # 負權重，越小越好
+            'win_rate': 0.2,
+            'total_return': 0.1
+        }
+
+    # 計算加權分數
+    fitness = (
+        weights['sharpe_ratio'] * result.sharpe_ratio +
+        weights['max_drawdown'] * result.max_drawdown +
+        weights['win_rate'] * result.win_rate +
+        weights['total_return'] * min(1.0, result.total_return / 2.0)
+    )
+
+    return fitness
+</code></pre>
+<hr />
+<h2 id="6-evolutionpy">6. 演化算法 (<code>evolution.py</code>)<a class="headerlink" href="#6-evolutionpy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+演化算法（簡化版）
+&quot;&quot;&quot;
+import numpy as np
+from typing import List
+from data_structures import Strategy, StrategyPool, Hypothesis
+from strategy import StrategyFactory, MockBacktester
+from feature_map import SimpleFeatureMap
+from fitness import calculate_fitness
+
+
+class SimpleEvolution:
+    &quot;&quot;&quot;簡化的演化算法&quot;&quot;&quot;
+    def __init__(
+        self,
+        population_size: int = 20,
+        n_generations: int = 10,
+        offspring_count: int = 5,
+        mutation_rate: float = 0.1,
+        alpha: float = 0.5
+    ):
+        &quot;&quot;&quot;
+        初始化演化器
+
+        Args:
+            population_size: 種群大小
+            n_generations: 演化代數
+            offspring_count: 每代子代數量
+            mutation_rate: 變異率
+            alpha: 開發-探索平衡 [0, 1]
+        &quot;&quot;&quot;
+        self.population_size = population_size
+        self.n_generations = n_generations
+        self.offspring_count = offspring_count
+        self.mutation_rate = mutation_rate
+        self.alpha = alpha
+
+        self.strategy_factory = StrategyFactory()
+        self.backtester = MockBacktester()
+        self.feature_map = SimpleFeatureMap()
+        self.pool = StrategyPool()
+
+    def initialize_population(self):
+        &quot;&quot;&quot;初始化種群&quot;&quot;&quot;
+        print(f&quot;🌱 初始化種群 ({self.population_size} 策略)...&quot;)
+
+        for i in range(self.population_size):
+            # 隨機選擇策略類型
+            strategy_type = np.random.choice(
+                [&quot;momentum&quot;, &quot;mean_reversion&quot;, &quot;rsi&quot;]
+            )
+
+            # 生成假設
+            hypothesis = self.strategy_factory.create_strategy(strategy_type)
+
+            # 執行回測
+            result = self.backtester.backtest(hypothesis)
+
+            # 計算適應度
+            fitness = calculate_fitness(result)
+
+            # 創建策略
+            strategy = Strategy(
+                id=f&quot;S{self.pool.next_id:03d}&quot;,
+                hypothesis=hypothesis,
+                backtest_result=result,
+                feature_vector=None,  # 稍後填充
+                fitness=fitness,
+                generation=0
+            )
+
+            self.pool.add_strategy(strategy)
+            self.pool.next_id += 1
+
+        # 添加到特徵圖
+        for strategy in self.pool.strategies:
+            self.feature_map.add_strategy(strategy)
+
+        print(f&quot;✅ 種群初始化完成&quot;)
+        print(f&quot;   最佳策略: {self.pool.get_best(1)[0]}&quot;)
+
+    def select_parent(self) -&gt; Strategy:
+        &quot;&quot;&quot;
+        選擇親本
+
+        使用 α 平衡開發與探索
+        &quot;&quot;&quot;
+        if np.random.random() &lt; self.alpha:
+            # 開發：選擇最佳策略
+            return self.pool.get_best(1)[0]
+        else:
+            # 探索：選擇多樣化策略
+            diverse_strategies = self.feature_map.get_diverse_strategies(
+                n=1,
+                exclude=[]
+            )
+            if diverse_strategies:
+                return diverse_strategies[0]
+            else:
+                return self.pool.get_random(1)[0]
+
+    def select_cousins(self, parent: Strategy) -&gt; List[Strategy]:
+        &quot;&quot;&quot;
+        選擇堂兄弟
+
+        2 最佳 + 3 多樣化 + 2 隨機
+        &quot;&quot;&quot;
+        cousins = []
+
+        # 2 最佳
+        best_strategies = self.pool.get_best(3)
+        best_strategies = [s for s in best_strategies if s.id != parent.id]
+        cousins.extend(best_strategies[:2])
+
+        # 3 多樣化
+        diverse_strategies = self.feature_map.get_diverse_strategies(
+            n=3,
+            exclude=[parent.id] + [c.id for c in cousins]
+        )
+        cousins.extend(diverse_strategies)
+
+        # 2 隨機
+        random_strategies = self.pool.get_random(10)
+        random_strategies = [
+            s for s in random_strategies
+            if s.id not in [parent.id] + [c.id for c in cousins]
+        ]
+        cousins.extend(random_strategies[:2])
+
+        return cousins
+
+    def generate_offspring(
+        self,
+        parent: Strategy,
+        cousins: List[Strategy]
+    ) -&gt; List[Strategy]:
+        &quot;&quot;&quot;
+        生成子代
+
+        Args:
+            parent: 親本策略
+            cousins: 堂兄弟策略列表
+
+        Returns:
+            子代策略列表
+        &quot;&quot;&quot;
+        offspring = []
+
+        for _ in range(self.offspring_count):
+            # 變異親本
+            new_hypothesis = self.strategy_factory.mutate_strategy(
+                parent.hypothesis,
+                self.mutation_rate
+            )
+
+            # 執行回測
+            result = self.backtester.backtest(new_hypothesis)
+
+            # 計算適應度
+            fitness = calculate_fitness(result)
+
+            # 創建策略
+            strategy = Strategy(
+                id=f&quot;S{self.pool.next_id:03d}&quot;,
+                hypothesis=new_hypothesis,
+                backtest_result=result,
+                feature_vector=None,
+                fitness=fitness,
+                generation=parent.generation + 1,
+                parent_id=parent.id
+            )
+
+            offspring.append(strategy)
+            self.pool.next_id += 1
+
+        return offspring
+
+    def evolve_generation(self, generation: int):
+        &quot;&quot;&quot;
+        執行一代演化
+
+        Args:
+            generation: 當前代數
+        &quot;&quot;&quot;
+        print(f&quot;\n🔄 代 {generation + 1}/{self.n_generations}&quot;)
+
+        # 1. 選擇親本
+        parent = self.select_parent()
+        print(f&quot;   選擇親本: {parent}&quot;)
+
+        # 2. 選擇堂兄弟
+        cousins = self.select_cousins(parent)
+        print(f&quot;   選擇 {len(cousins)} 個堂兄弟&quot;)
+
+        # 3. 生成子代
+        offspring = self.generate_offspring(parent, cousins)
+        print(f&quot;   生成 {len(offspring)} 個子代&quot;)
+
+        # 4. 評估子代
+        best_offspring = max(offspring, key=lambda s: s.fitness)
+        print(f&quot;   最佳子代: {best_offspring}&quot;)
+
+        # 5. 添加到池中
+        for strategy in offspring:
+            self.pool.add_strategy(strategy)
+            self.feature_map.add_strategy(strategy)
+
+        # 6. 更新統計
+        best_overall = self.pool.get_best(1)[0]
+        print(f&quot;   全局最佳: {best_overall}&quot;)
+        print(f&quot;   特徵圖: {self.feature_map.get_summary()}&quot;)
+
+    def run(self) -&gt; List[Strategy]:
+        &quot;&quot;&quot;
+        執行完整演化
+
+        Returns:
+            最終策略列表
+        &quot;&quot;&quot;
+        print(&quot;=&quot; * 60)
+        print(&quot;🚀 QuantEvolve 原型 - 演化開始&quot;)
+        print(&quot;=&quot; * 60)
+
+        # 1. 初始化種群
+        self.initialize_population()
+
+        # 2. 演化
+        for generation in range(self.n_generations - 1):
+            self.evolve_generation(generation)
+
+        # 3. 返回最佳策略
+        best_strategies = self.pool.get_best(5)
+
+        print(&quot;\n&quot; + &quot;=&quot; * 60)
+        print(&quot;🏆 演化完成！最佳策略：&quot;)
+        print(&quot;=&quot; * 60)
+        for i, strategy in enumerate(best_strategies, 1):
+            print(f&quot;\n#{i} {strategy}&quot;)
+            print(f&quot;   類別: {strategy.hypothesis.strategy_category}&quot;)
+            print(f&quot;   參數: {strategy.hypothesis.parameters}&quot;)
+            print(f&quot;   適應度: {strategy.fitness:.3f}&quot;)
+
+        print(&quot;\n&quot; + &quot;=&quot; * 60)
+        print(f&quot;📊 統計信息:&quot;)
+        print(f&quot;   總策略數: {len(self.pool)}&quot;)
+        print(f&quot;   代數: {self.n_generations}&quot;)
+        print(f&quot;   最佳夏普比率: {best_strategies[0].backtest_result.sharpe_ratio:.2f}&quot;)
+        print(f&quot;   最小回撤: {min(s.backtest_result.max_drawdown for s in self.pool.strategies):.2%}&quot;)
+        print(f&quot;   平均適應度: {np.mean([s.fitness for s in self.pool.strategies]):.3f}&quot;)
+        print(&quot;=&quot; * 60)
+
+        return best_strategies
+</code></pre>
+<hr />
+<h2 id="7-demopy">7. 演示腳本 (<code>demo.py</code>)<a class="headerlink" href="#7-demopy" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">&quot;&quot;&quot;
+QuantEvolve 原型演示腳本
+&quot;&quot;&quot;
+from evolution import SimpleEvolution
+
+
+def main():
+    &quot;&quot;&quot;運行演示&quot;&quot;&quot;
+    print(&quot;\n🦄 QuantEvolve 原型演示\n&quot;)
+
+    # 創建演化器
+    evolution = SimpleEvolution(
+        population_size=20,
+        n_generations=10,
+        offspring_count=5,
+        mutation_rate=0.1,
+        alpha=0.5
+    )
+
+    # 執行演化
+    best_strategies = evolution.run()
+
+    print(&quot;\n✅ 演示完成！&quot;)
+    print(&quot;\n📝 注意事項：&quot;)
+    print(&quot;   • 這是一個簡化版原型，僅展示核心概念&quot;)
+    print(&quot;   • 回測結果是模擬的，不代表真實市場表現&quot;)
+    print(&quot;   • 沒有集成 LLM（使用簡單的參數變異）&quot;)
+    print(&quot;   • 沒有實現並行化&quot;)
+    print(&quot;   • 適用於教育演示和概念驗證&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<hr />
+<h2 id="8-readmemd">8. 使用說明 (<code>README.md</code>)<a class="headerlink" href="#8-readmemd" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-markdown"># QuantEvolve 原型（簡化版）
+
+## 概述
+
+這是一個簡化版的 QuantEvolve 原型，用於展示多智能體演化框架的核心概念。
+
+## 功能
+
+- ✅ 策略類別（動量、均值回歸、RSI）
+- ✅ 參數變異
+- ✅ 特徵圖系統（多樣性管理）
+- ✅ 基本演化算法
+- ✅ 適應度計算
+- ✅ 可運行的演示
+
+## 限制
+
+- ❌ 模擬回測（非真實數據）
+- ❌ 無 LLM 集成
+- ❌ 無並行化
+- ❌ 無真實回測引擎
+
+## 安裝
+
+```bash
+pip install numpy pandas
+</code></pre>
+<h2 id="_3">運行<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-bash">python demo.py
+</code></pre>
+<h2 id="_4">輸出示例<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<pre><code>🦄 QuantEvolve 原型演示
+
+============================================================
+🚀 QuantEvolve 原型 - 演化開始
+============================================================
+🌱 初始化種群 (20 策略)...
+✅ 種群初始化完成
+   最佳策略: Strategy(S001, gen=0, SR=1.45)
+
+🔄 代 1/10
+   選擇親本: Strategy(S001, gen=0, SR=1.45)
+   選擇 5 個堂兄弟
+   生成 5 個子代
+   最佳子代: Strategy(S021, gen=1, SR=1.62)
+   全局最佳: Strategy(S021, gen=1, SR=1.62)
+   特徵圖: FeatureMap: 24 strategies in 8/25 cells (32.0% filled)
+
+...
+
+============================================================
+🏆 演化完成！最佳策略：
+============================================================
+
+#1 Strategy(S067, gen=9, SR=2.31)
+   類別: momentum
+   參數: {'short_period': 11.2, 'long_period': 21.5}
+   適應度: 1.245
+</code></pre>
+<h2 id="_5">架構<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<pre><code>quantevolve_prototype/
+├── data_structures.py  # 核心數據結構
+├── strategy.py        # 策略類別
+├── feature_map.py     # 特徵圖系統
+├── evolution.py       # 演化算法
+├── fitness.py         # 適應度函數
+├── demo.py           # 演示腳本
+└── README.md         # 使用說明
+</code></pre>
+<h2 id="_6">下一步<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<p>要將此原型擴展為完整的系統，需要：</p>
+<ol>
+<li>集成真實回測引擎（Zipline、Backtrader）</li>
+<li>實現 LLM 集成（假設生成、評估）</li>
+<li>添加並行化支持</li>
+<li>實現完整的多智能體協作</li>
+<li>添加風險平價和其他策略類型</li>
+</ol>
+<h2 id="_7">參考<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>QuantEvolve 論文: https://arxiv.org/abs/2510.18569</li>
+<li>GitHub 倉庫: https://github.com/tarsyang/quantevolve
+```</li>
+</ul>
+<hr />
+<h2 id="_8">總結<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<p>這個簡化版原型展示了 QuantEvolve 的核心概念：</p>
+<ol>
+<li><strong>多樣性管理</strong> - 通過特徵圖維護策略的多樣性</li>
+<li><strong>演化過程</strong> - 親本選擇、堂兄弟抽樣、參數變異</li>
+<li><strong>適應度驅動</strong> - 基於多項指標的適應度計算</li>
+<li><strong>平衡開發與探索</strong> - 通過 α 參數控制</li>
+</ol>
+<p>雖然是簡化版，但提供了完整的可運行系統，可以：
+- 觀察演化過程
+- 理解多樣性管理的機制
+- 實驗不同的演化參數
+- 作為完整實現的起點</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

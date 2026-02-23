@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美股技術面分析（中期） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>美股技術面分析（中期）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">美股技術面分析（中期）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務代號：</strong> q004b<br />
+<strong>分析師：</strong> Charlie Research<br />
+<strong>狀態：</strong> 已完成<br />
+<strong>時間：</strong> 2026-02-21T01:14:00Z  </p>
+<h2 id="_2">研究摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>本次分析涵蓋標普500（SPX）和納斯達克（IXIC）中期（1-3個月）技術面走勢，通過多維度技術指標分析，提供明確的中期趨勢判斷和投資建議。</p>
+<h2 id="_3">主要發現<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>標普500中期技術面呈現中性偏強</strong>，但接近關鍵阻力區，月線和季線顯示持續上漲趨勢 | 來源：Investing.com</li>
+<li><strong>納斯達克中期技術面呈現強勢格局</strong>，MACD指標顯示買入信號，但需注意短期超買風險 | 來源：Investing.com  </li>
+<li><strong>兩大指數均進入中期關鍵價格區間</strong>，技術形態顯示可能出現頭部整理形態 | 來源：多源綜合分析</li>
+<li><strong>中期波動性風險增加</strong>，特別是3月份後可能出現較大幅度修正 | 來源：週期分析</li>
+</ol>
+<h2 id="_4">詳細技術分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="1-500">1. 標普500中期技術分析<a class="headerlink" href="#1-500" title="連結到此標題">&para;</a></h3>
+<h4 id="_5">月線、季線走勢<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>月線趨勢</strong>：強勁上漲（月線技術評級：強力買入）</li>
+<li><strong>季線趨勢</strong>：穩定上行（週線技術評級：強力買入）</li>
+<li><strong>關鍵價位</strong>：</li>
+<li>當前價格：6,882.94點</li>
+<li>52週高點：7,002.28點</li>
+<li>52週低點：4,835.04點</li>
+<li>200日均線：6,916.02點（賣出信號）</li>
+</ul>
+<h4 id="macd">MACD中期信號<a class="headerlink" href="#macd" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MACD(12,26)</strong>：-0.830（賣出信號）</li>
+<li><strong>MACD趨勢</strong>：短期弱化但中期仍處於正向區域</li>
+<li><strong>技術指標綜合評級</strong>：強力買入（買入：6個，賣出：2個）</li>
+</ul>
+<h4 id="_6">中期趨勢判斷<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>趨勢方向</strong>：中性偏強，但接近阻力區</li>
+<li><strong>支撐位</strong>：6,847.17點（S3支撐）</li>
+<li><strong>阻力位</strong>：7,000.00-7,100.00點（關鍵阻力區）</li>
+<li><strong>技術形態</strong>：可能形成頭肩頂形態，需謹慎觀察</li>
+</ul>
+<h3 id="2">2. 納斯達克中期技術分析<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<h4 id="_7">月線、季線走勢<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>月線趨勢</strong>：強勢上漲（月線技術評級：強力買入）</li>
+<li><strong>季線趨勢</strong>：中性（週線技術評級：中性）</li>
+<li><strong>關鍵價位</strong>：</li>
+<li>當前價格：22,819.81點</li>
+<li>52週高點：24,019.99點</li>
+<li>52週低點：14,784.03點</li>
+<li>200日均線：23,251.08點（賣出信號）</li>
+</ul>
+<h4 id="macd_1">MACD中期信號<a class="headerlink" href="#macd_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MACD(12,26)</strong>：7.760（買入信號）</li>
+<li><strong>MACD趨勢</strong>：強勢正向，動能充足</li>
+<li><strong>技術指標綜合評級</strong>：強力買入（買入：8個，賣出：4個）</li>
+</ul>
+<h4 id="_8">中期趨勢判斷<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>趨勢方向</strong>：強勢上漲，但短期超買</li>
+<li><strong>支撐位</strong>：22,676.99點（S3支撐）</li>
+<li><strong>阻力位</strong>：23,035.53點（R3阻力）</li>
+<li><strong>技術形態</strong>：上升楔形可能接近尾聲，需注意修正風險</li>
+</ul>
+<h3 id="3">3. 中期技術形態分析<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<h4 id="_9">頭部/底部形態<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>標普500</strong>：潛在頭肩頂形態形成中，左肩和頭部已確認，等待右肩確認</li>
+<li><strong>納斯達克</strong>：上升楔形形態，可能接近突破或反轉點</li>
+<li><strong>綜合判斷</strong>：兩大指數均顯示可能出現中期頭部形態</li>
+</ul>
+<h4 id="_10">突破/跌破信號<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>向上突破信號</strong>：</li>
+<li>標普500突破7,100點阻力區將確認新多頭趨勢</li>
+<li>納斯達克突破23,000點將確認持續強勢</li>
+<li><strong>向下跌破信號</strong>：</li>
+<li>標普500跌破6,800點支撐將確認中期修正</li>
+<li>納斯達克跌破22,600點將觸發技術性賣盤</li>
+</ul>
+<h4 id="_11">中期支撐阻力區<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<p><strong>標普500關鍵區間</strong>：
+- 主要支撐：6,800-6,850點
+- 次要支撐：6,650-6,700點
+- 主要阻力：7,000-7,100點
+- 次要阻力：7,200-7,250點</p>
+<p><strong>納斯達克關鍵區間</strong>：
+- 主要支撐：22,600-22,700點
+- 次要支撐：22,400-22,500點
+- 主要阻力：23,000-23,100點
+- 次要阻力：23,300-23,400點</p>
+<h3 id="4">4. 中期走勢判斷<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<h4 id="_12">看漲/看跌/中性<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>標普500</strong>：中性偏空（1-2個月）</li>
+<li>理由：接近關鍵阻力，技術指標出現分化，MACD轉弱</li>
+<li>
+<p>預期：可能在6,800-7,100點區間震盪</p>
+</li>
+<li>
+<p><strong>納斯達克</strong>：中性偏多（1-2個月）</p>
+</li>
+<li>理由：MACD強勢，動能充足，但需注意超買修正</li>
+<li>預期：可能挑戰23,000點阻力，但途中會有修正</li>
+</ul>
+<h4 id="_13">中期目標位<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<p><strong>標普500目標位</strong>：
+- 樂觀目標：7,200點（3個月內）
+- 基準目標：7,000點（1-2個月內）
+- 保守目標：6,800點（支撐測試）</p>
+<p><strong>納斯達克目標位</strong>：
+- 樂觀目標：23,500點（3個月內）
+- 基準目標：23,000點（1-2個月內）
+- 保守目標：22,500點（支撐測試）</p>
+<h4 id="_14">關注事件<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>聯準會利率決策</strong>：3月FOMC會議將是關鍵轉折點</li>
+<li><strong>技術形態確認</strong>：頭肩頂和上升楔形是否會完成</li>
+<li><strong>市場情緒指標</strong>：VIX波動率指數變化</li>
+<li><strong>資金流向</strong>：機構資金是否持續流入科技股</li>
+</ol>
+<h2 id="_15">中期投資建議<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<h3 id="500">標普500投資策略<a class="headerlink" href="#500" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>區間操作</strong>：建議在6,800-7,100點區間內高拋低吸</li>
+<li><strong>倉位管理</strong>：保持中等倉位（50-60%），避免過度追高</li>
+<li><strong>進場時機</strong>：回調至6,800點附近可分批佈局</li>
+<li><strong>停損設定</strong>：跌破6,750點應嚴格停損</li>
+</ol>
+<h3 id="_16">納斯達克投資策略<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>趁勢操作</strong>：可適度追高，但需設置移動停損</li>
+<li><strong>倉位管理</strong>：保持較高倉位（60-70%），但注意風險控制</li>
+<li><strong>進場時機</strong>：回調至22,700點附近可考慮加倉</li>
+<li><strong>停損設定</strong>：跌破22,500點應減倉或停損</li>
+</ol>
+<h3 id="_17">綜合風險評估<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>整體風險等級</strong>：中等風險</li>
+<li><strong>主要風險因素</strong>：</li>
+<li>聯準會政策轉變風險</li>
+<li>技術形態反轉風險</li>
+<li>市場波動性增加風險</li>
+<li>季節性修正風險（3月通常較弱）</li>
+</ul>
+<h2 id="_18">數據來源<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>Investing.com 技術分析數據</li>
+<li>TradingView 圖表分析</li>
+<li>週期分析報告（IO Fund）</li>
+<li>機構研究報告綜合</li>
+<li>市場技術指標實時數據</li>
+</ul>
+<h2 id="_19">元數據<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>分析信心度</strong>：高</li>
+<li><strong>研究深度</strong>：中等</li>
+<li><strong>數據新鮮度</strong>：2026年2月20日</li>
+<li><strong>建議</strong>：建議持續關注技術指標變化，特別是MACD和RSI動態</li>
+<li><strong>風險提示</strong>：技術分析僅供參考，實際投資需結合基本面分析</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台股技術面分析（中期） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>台股技術面分析（中期）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">台股技術面分析（中期）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務編號：</strong> q001b-tw-mid-term-technical
+<strong>分析師：</strong> Charlie Research
+<strong>狀態：</strong> completed
+<strong>分析時間：</strong> 2026-02-21T01:04:00Z</p>
+<h2 id="_2">分析摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>本報告針對台灣加權指數（TWII）進行中期（1-3個月）技術面分析，涵蓋中期趨勢、技術指標和關鍵價格區間。基於最新市場數據，指數近期出現顯著修正，跌破季線支撐，技術面呈現中性偏弱格局。</p>
+<h2 id="_3">關鍵發現<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>近期大幅修正</strong> — 加權指數近期大跌991點，收在26,434點，跌幅3.6%，跌破季線關卡 | Source: 市場數據</li>
+<li><strong>技術指標轉弱</strong> — MACD和RSI指標均呈現空頭訊號，中期動能轉弱 | Source: 技術分析</li>
+<li><strong>成交量放大</strong> — 修正時期成交量達5,818億元，顯示賣壓沉重 | Source: 市場數據</li>
+</ol>
+<h2 id="_4">中期趨勢分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="_5">月線走勢<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>當前位置</strong>：指數目前位於26,434點，距離重要月線支撐已經跌破</li>
+<li><strong>月線方向</strong>：月線開始轉向走平，中期上漲動能減弱</li>
+<li><strong>月線支撐</strong>：預計在25,800-26,000區間存在較強月線支撐</li>
+</ul>
+<h3 id="_6">季線走勢<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>季線位置</strong>：約在26,500-26,700區間</li>
+<li><strong>跌破狀況</strong>：指數已跌破季線支撐，技術轉弱</li>
+<li><strong>季線意義</strong>：季線作為中期趨勢分水嶺，跌破後中期趨勢轉為偏空</li>
+</ul>
+<h3 id="_7">中期趨勢方向<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>趨勢判斷</strong>：<strong>橫盤偏弱</strong>（下降趨勢初期）</li>
+<li><strong>趨勢依據</strong>：跌破季線、月線轉平、技術指標轉空</li>
+<li><strong>趨勢持續性</strong>：若無重大利多消息，中期偏弱格局可能持續1-3個月</li>
+</ul>
+<h2 id="_8">技術指標分析<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="macd">MACD中期訊號<a class="headerlink" href="#macd" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>MACD位置</strong>：DIF線向下穿越DEA線，形成死亡交叉</li>
+<li><strong>柱狀體</strong>：MACD柱狀體轉為負值，空頭動能增強</li>
+<li><strong>中期訊號</strong>：<strong>賣出訊號</strong>，建議減少倉位或避險</li>
+</ul>
+<h3 id="rsi">RSI中期走勢<a class="headerlink" href="#rsi" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>RSI數值</strong>：目前RSI約在35-40區間，接近超賣區</li>
+<li><strong>RSI趨勢</strong>：RSI持續走低，顯示中期賣壓仍重</li>
+<li><strong>超賽警示</strong>：雖接近超賣區，但在下降趨勢中可能持續超賣</li>
+</ul>
+<h3 id="60">60日移動平均線<a class="headerlink" href="#60" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>60MA位置</strong>：約在26,600-26,800區間</li>
+<li><strong>指數位置</strong>：指數已跌破60日線，位於均線下方</li>
+<li><strong>壓力測試</strong>：60日線將形成中期反壓，反彈時測試壓力</li>
+</ul>
+<h3 id="_9">成交量中期變化<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>修正成交量</strong>：大跌當日成交量達5,818億元</li>
+<li><strong>成交量特徵</strong>：量能放大配合下跌，顯示機構法人積極出脫</li>
+<li><strong>籌碼面</strong>：三大法人賣超，中期籌碼轉為分散</li>
+</ul>
+<h2 id="_10">關鍵價格區間<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h2>
+<h3 id="_11">中期支撐區<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>第一支撐</strong>：25,800-26,000點（月線支撐區）</li>
+<li><strong>第二支撐</strong>：25,200-25,500點（前波低點支撐）</li>
+<li><strong>重要支撐</strong>：24,800點（心理關卡支撐）</li>
+</ol>
+<h3 id="_12">中期阻力區<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>第一阻力</strong>：26,500-26,700點（季線反壓區）</li>
+<li><strong>第二阻力</strong>：27,000-27,200點（前波高點反壓）</li>
+<li><strong>重要阻力</strong>：27,500點（整數關卡反壓）</li>
+</ol>
+<h3 id="_13">關鍵變盤點<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>多空分界</strong>：26,500點（季線位置為多空分水嶺）</li>
+<li><strong>趨勢轉向點</strong>：收復27,000點才可能轉為中期上升</li>
+<li><strong>破位確認點</strong>：跌破25,800點需警惕更深層修正</li>
+</ul>
+<h2 id="_14">中期走勢判斷<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="_15">看漲/看跌/中性<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>中期判斷</strong>：<strong>中性偏空</strong>（橫盤整理格局）</li>
+<li><strong>信心水準</strong>：中等（需觀察後續成交量變化）</li>
+<li><strong>持續時間</strong>：預期1-3個月維持此格局</li>
+</ul>
+<h3 id="_16">中期目標位<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>保守目標</strong>：25,200-25,500點（前波低點區）</li>
+<li><strong>中性目標</strong>：24,800-25,000點（心理支撐區）</li>
+<li><strong>樂觀目標</strong>：若能有效站回季線，上看27,000點</li>
+</ul>
+<h3 id="_17">關注的事件風險<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>國際市場波動</strong>：美國聯準會利率政策變動</li>
+<li><strong>地緣政治風險</strong>：台海關係發展</li>
+<li><strong>國內經濟數據</strong>：台灣經濟成長率、出口數據</li>
+<li><strong>產業鏈庫存調整</strong>：電子產業庫存去化進度</li>
+<li><strong>外資流向</strong>：外資買賣超趨勢變化</li>
+</ol>
+<h2 id="_18">中期投資建議<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<h3 id="_19">倉位配置建議<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>現金比例</strong>：建議保持30-40%現金</li>
+<li><strong>持股比例</strong>：60-70%持股，以防禦性股票為主</li>
+<li><strong>避險配置</strong>：可考慮部分避險資產配置</li>
+</ul>
+<h3 id="_20">操作策略建議<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>逢高減碼</strong>：反彈至季線附近可減碼部分獲利</li>
+<li><strong>分批承接</strong>：在關鍵支撐區可分批布局優質股票</li>
+<li><strong>設定停損</strong>：跌破重要支撐區需設定停損點</li>
+<li><strong>觀望為主</strong>：在趨勢不明朗時以觀望為主</li>
+</ol>
+<h3 id="_21">關注重點<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>成交量變化</strong>：量縮企穩才可能反轉</li>
+<li><strong>技術指標</strong>：MACD和RSI轉強才可進場</li>
+<li><strong>外資動向</strong>：外資買賣超影響中期走勢</li>
+<li><strong>產業輪動</strong>：關注產業輪動順序</li>
+</ul>
+<h2 id="_22">風險警示<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>本分析僅供參考，不構成投資建議</li>
+<li>股票投資有風險，須自行承擔投資決策責任</li>
+<li>建議搭配基本面分析及風險管理</li>
+<li>市場存在不可預期因素，須隨時調整策略</li>
+</ul>
+<h2 id="_23">後續追蹤建議<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>每週監控技術指標變化</li>
+<li>追蹤外資及法人買賣超趨勢</li>
+<li>注意國際市場重大消息影響</li>
+<li>定期更新關鍵價格支撐阻力位</li>
+</ul>
+<hr />
+<p><strong>分析完成時間：</strong> 2026-02-21T01:04:00Z<br />
+<strong>下次更新建議：</strong> 2026-03-21（一個月後）<br />
+<strong>分析有效期：</strong> 2026-05-21（三個月內）</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,3775 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmer Sub-Agent 統一知識庫 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Programmer Sub-Agent 統一知識庫</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="programmer-sub-agent">Programmer Sub-Agent 統一知識庫<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>知識庫 ID:</strong> KB-UNIFIED-001
+<strong>版本:</strong> 1.0
+<strong>狀態:</strong> Active
+<strong>最後更新:</strong> 2026-02-21
+<strong>適用對象:</strong> Programmer Sub-Agent
+<strong>覆蓋範圍:</strong> 後端架構、前端架構、策略引擎、Git 開發模式</p>
+<hr />
+<h2 id="_1">目錄<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><a href="#1-知識庫概述">知識庫概述</a></li>
+<li><a href="#2-快速開始指南-5-分鐘上手">快速開始指南</a></li>
+<li><a href="#3-後端架構">後端架構</a></li>
+<li><a href="#4-前端架構">前端架構</a></li>
+<li><a href="#5-策略引擎">策略引擎</a></li>
+<li><a href="#6-git-開發模式">Git 開發模式</a></li>
+<li><a href="#7-代碼模式和最佳實踐">代碼模式和最佳實踐</a></li>
+<li><a href="#8-測試和驗證方法">測試和驗證方法</a></li>
+<li><a href="#9-故障排除常見問題">故障排除常見問題</a></li>
+<li><a href="#10-技術棧清單">技術棧清單</a></li>
+</ol>
+<hr />
+<h2 id="1">1. 知識庫概述<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 知識庫目的<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p>本知識庫整合 Dashboard 專案的完整技術知識，為 Programmer Sub-Agent 提供開發所需的：
+- 完整的後端 API 和服務架構
+- 前端 React 組件和狀態管理模式
+- 策略引擎設計和實現指南
+- Git 開發流程和最佳實踐</p>
+<h3 id="12">1.2 架構概覽<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        前端層 (Frontend)                        │
+│  React 19 + Vite + Zustand + React Query + Bootstrap 5        │
+├─────────────────────────────────────────────────────────────────┤
+│                        API 網關層 (API Gateway)                   │
+│  FastAPI Middleware (Auth, CORS, Rate Limit)                   │
+├─────────────────────────────────────────────────────────────────┤
+│                        後端服務層 (Backend Services)             │
+│  策略服務 | 市場數據服務 | 分析服務 | 執行服務                  │
+├─────────────────────────────────────────────────────────────────┤
+│                        策略引擎層 (Strategy Engine)              │
+│  IStrategy 接口 | VectorBT | Backtrader | Signal Adapter      │
+├─────────────────────────────────────────────────────────────────┤
+│                        數據存儲層 (Storage)                      │
+│  PostgreSQL | DuckDB | Redis | File System                    │
+├─────────────────────────────────────────────────────────────────┤
+│                        開發工具層 (DevTools)                    │
+│  Git | GitHub Actions | Docker | pytest | Vitest               │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="13">1.3 核心設計原則<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>分層架構</strong></td>
+<td>前端 → API → 服務 → 倉庫 → 存儲，清晰的關注點分離</td>
+</tr>
+<tr>
+<td><strong>接口驅動</strong></td>
+<td>策略引擎基於 <code>IStrategy</code> 接口，實現策略邏輯與執行分離</td>
+</tr>
+<tr>
+<td><strong>狀態分類</strong></td>
+<td>全局狀態(Zustand) + 服務端狀態(React Query) + 本地狀態(useState)</td>
+</tr>
+<tr>
+<td><strong>API 版本化</strong></td>
+<td>RESTful 設計，統一的請求/響應格式</td>
+</tr>
+<tr>
+<td><strong>測試金字塔</strong></td>
+<td>單元測試 → 集成測試 → E2E 測試</td>
+</tr>
+<tr>
+<td><strong>Git Flow</strong></td>
+<td>feature/fix/hotfix 分支 + Conventional Commits + CI/CD</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-5">2. 快速開始指南（5 分鐘上手）<a class="headerlink" href="#2-5" title="連結到此標題">&para;</a></h2>
+<h3 id="21-2">2.1 環境準備（2 分鐘）<a class="headerlink" href="#21-2" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-bash"># 1. 克隆專案
+git clone &lt;repo-url&gt;
+cd Dashboard
+
+# 2. 設置 Python 環境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+pip install -r backend/requirements.txt
+
+# 3. 設置 Node 環境
+cd frontend
+npm install
+
+# 4. 啟動開發服務器
+# 終端 1: 後端
+cd backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# 終端 2: 前端
+cd frontend
+npm run dev
+</code></pre>
+<h3 id="22-1">2.2 創建第一個策略（1 分鐘）<a class="headerlink" href="#22-1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># backend/strategies/my_strategy.py
+from .base import IStrategy, Signal, ExecutionContext
+from datetime import date
+from typing import List
+
+class MyFirstStrategy(IStrategy):
+    &quot;&quot;&quot;簡單的趨勢跟隨策略&quot;&quot;&quot;
+    name = &quot;my_first_strategy&quot;
+
+    def __init__(self, short_period: int = 5, long_period: int = 20):
+        self.short_period = short_period
+        self.long_period = long_period
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        &quot;&quot;&quot;生成交易信號&quot;&quot;&quot;
+        signals = []
+
+        for symbol in symbols:
+            # 獲取移動平均線數據
+            short_ma = self._get_ma(symbol, context.market_date, self.short_period)
+            long_ma = self._get_ma(symbol, context.market_date, self.long_period)
+
+            # 簡單的交叉策略
+            if short_ma &gt; long_ma:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=&quot;BUY&quot;,
+                    confidence=0.8
+                ))
+
+        return signals
+
+    def _get_ma(self, symbol: str, date: date, period: int) -&gt; float:
+        &quot;&quot;&quot;獲取移動平均線值&quot;&quot;&quot;
+        # 實現略
+        pass
+</code></pre>
+<h3 id="23-1">2.3 創建第一個前端頁面（1 分鐘）<a class="headerlink" href="#23-1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-jsx">// frontend/src/pages/MyPage/index.jsx
+import React, { useState } from 'react';
+import { Skeleton, EmptyStatePresets } from '../../components/shared';
+import { useApiCache } from '../../hooks/useApiCache';
+
+const MyPage = () =&gt; {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 使用 React Query 獲取數據
+  const { data, isLoading, error: apiError } = useApiCache(
+    'my-endpoint',
+    () =&gt; fetch('/api/my-endpoint').then(r =&gt; r.json())
+  );
+
+  // 加載狀態
+  if (isLoading &amp;&amp; !data) {
+    return &lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;;
+  }
+
+  // 錯誤狀態
+  if (error || apiError) {
+    return (
+      &lt;EmptyStatePresets.LoadError
+        message=&quot;Failed to load data&quot;
+        action={&lt;button onClick={() =&gt; window.location.reload()}&gt;Retry&lt;/button&gt;}
+      /&gt;
+    );
+  }
+
+  // 主內容
+  return (
+    &lt;div className=&quot;container-fluid py-4 animate-fade-in&quot;&gt;
+      &lt;h1&gt;My Page&lt;/h1&gt;
+      &lt;div&gt;{/* 頁面內容 */}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default MyPage;
+</code></pre>
+<h3 id="24-1">2.4 提交代碼（1 分鐘）<a class="headerlink" href="#24-1" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-bash"># 1. 創建功能分支
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-first-strategy
+
+# 2. 提交代碼（遵循 Conventional Commits）
+git add .
+git commit -m &quot;feat: add my first strategy implementation&quot;
+
+# 3. 推送到遠端
+git push -u origin feature/my-first-strategy
+
+# 4. 創建 Pull Request
+# 在 GitHub 網頁上創建 PR：develop ← feature/my-first-strategy
+</code></pre>
+<h3 id="25">2.5 快速參考命令<a class="headerlink" href="#25" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>任務</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>啟動後端</td>
+<td><code>cd backend &amp;&amp; uvicorn main:app --reload</code></td>
+</tr>
+<tr>
+<td>啟動前端</td>
+<td><code>cd frontend &amp;&amp; npm run dev</code></td>
+</tr>
+<tr>
+<td>運行後端測試</td>
+<td><code>cd backend &amp;&amp; pytest</code></td>
+</tr>
+<tr>
+<td>運行前端測試</td>
+<td><code>cd frontend &amp;&amp; npm test -- --run</code></td>
+</tr>
+<tr>
+<td>格式化後端代碼</td>
+<td><code>cd backend &amp;&amp; ruff check --fix &amp;&amp; black .</code></td>
+</tr>
+<tr>
+<td>格式化前端代碼</td>
+<td><code>cd frontend &amp;&amp; npm run lint -- --fix</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3">3. 後端架構<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31-api">3.1 API 端點<a class="headerlink" href="#31-api" title="連結到此標題">&para;</a></h3>
+<h4 id="_2">策略管理端點<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies</code></td>
+<td>列出策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies</code></td>
+<td>創建策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>獲取策略詳情</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>更新策略配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>刪除策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/strategies/{strategy_id}/status</code></td>
+<td>切換策略狀態</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>請求示例 - 創建策略：</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies
+{
+  &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+  &quot;description&quot;: &quot;雙均線交叉策略&quot;,
+  &quot;type&quot;: &quot;trend_following&quot;,
+  &quot;parameters&quot;: {
+    &quot;short_period&quot;: 5,
+    &quot;long_period&quot;: 20,
+    &quot;symbol&quot;: &quot;AAPL&quot;
+  },
+  &quot;risk_limits&quot;: {
+    &quot;max_position_size&quot;: 1000,
+    &quot;max_drawdown&quot;: 0.15
+  }
+}
+</code></pre>
+<p><strong>響應格式：</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;id&quot;: &quot;str_123456&quot;,
+    &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+    &quot;type&quot;: &quot;trend_following&quot;,
+    &quot;status&quot;: &quot;active&quot;,
+    &quot;parameters&quot;: { ... },
+    &quot;risk_limits&quot;: { ... },
+    &quot;created_at&quot;: &quot;2026-02-20T15:30:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-02-20T15:30:00Z&quot;
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="_3">回測端點<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest</code></td>
+<td>提交回測任務</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>獲取回測結果</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtests</code></td>
+<td>查詢回測歷史</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>取消/刪除回測</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}/trades</code></td>
+<td>獲取交易記錄</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>請求示例 - 提交回測：</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies/str_123456/backtest
+{
+  &quot;start_date&quot;: &quot;2025-01-01&quot;,
+  &quot;end_date&quot;: &quot;2025-12-31&quot;,
+  &quot;initial_capital&quot;: 100000,
+  &quot;commission&quot;: 0.001,
+  &quot;slippage&quot;: 0.0001,
+  &quot;data_source&quot;: &quot;yahoo_finance&quot;
+}
+</code></pre>
+<h4 id="apiv1analysis">分析端點 (<code>/api/v1/analysis</code>)<a class="headerlink" href="#apiv1analysis" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}</code></td>
+<td>策略績效概覽</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/metrics</code></td>
+<td>詳細績效指標</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}</code></td>
+<td>風險概覽</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/var</code></td>
+<td>VaR 計算</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/analysis/compare</code></td>
+<td>多策略比較</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="apiv1market">市場數據端點 (<code>/api/v1/market</code>)<a class="headerlink" href="#apiv1market" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/symbols</code></td>
+<td>可交易標的列表</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quote/{symbol}</code></td>
+<td>實時報價</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quotes</code></td>
+<td>批量報價</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/historical/{symbol}</code></td>
+<td>歷史數據</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/ohlc/{symbol}</code></td>
+<td>K線數據</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="apiv1system">系統端點 (<code>/api/v1/system</code>)<a class="headerlink" href="#apiv1system" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/health</code></td>
+<td>系統健康狀態</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/metrics</code></td>
+<td>性能指標</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>用戶登錄</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>刷新令牌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32">3.2 服務層<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="_4">核心服務<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<p><strong>StrategyRegistry</strong> - 策略註冊表</p>
+<pre><code class="language-python">class StrategyRegistry:
+    def register(self, strategy_id: str, strategy: IStrategy):
+        &quot;&quot;&quot;註冊策略&quot;&quot;&quot;
+
+    def unregister(self, strategy_id: str):
+        &quot;&quot;&quot;註銷策略&quot;&quot;&quot;
+
+    def get(self, strategy_id: str) -&gt; Optional[IStrategy]:
+        &quot;&quot;&quot;獲取策略實例&quot;&quot;&quot;
+
+    def list_ids(self) -&gt; List[str]:
+        &quot;&quot;&quot;列出所有策略 ID&quot;&quot;&quot;
+</code></pre>
+<p><strong>StrategyAggregator</strong> - 跨策略分析</p>
+<pre><code class="language-python">class StrategyAggregator:
+    def check_symbol_resonance(self, symbol: str, strategy_types: List[str]):
+        &quot;&quot;&quot;檢查標的在多策略間的共振&quot;&quot;&quot;
+
+    def compare_strategies(self, strategy_ids: List[str]):
+        &quot;&quot;&quot;比較多策略績效&quot;&quot;&quot;
+</code></pre>
+<p><strong>TechnicalStrategyService</strong> - 技術指標工廠</p>
+<pre><code class="language-python">class TechnicalStrategyService:
+    def generate_strategy(self, strategy_type: str, universe: str, params: dict):
+        &quot;&quot;&quot;根據策略類型生成策略結果&quot;&quot;&quot;
+
+    def calc_metrics(self, backtest_result: dict) -&gt; dict:
+        &quot;&quot;&quot;計算回測指標&quot;&quot;&quot;
+
+# 支持的策略類型
+SUPPORTED_TYPES = [
+    'RSI', 'MACD', 'Supertrend', 'Bollinger Bands',
+    'Momentum', 'Dual Momentum', 'Sector Rotation',
+    'Extremes', 'RSI Trend'
+]
+</code></pre>
+<h4 id="_5">數據訪問服務<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<p><strong>MarketDataService</strong></p>
+<pre><code class="language-python">class MarketDataService:
+    def get_quote(self, symbol: str) -&gt; dict:
+        &quot;&quot;&quot;獲取實時報價&quot;&quot;&quot;
+
+    def get_historical(self, symbol: str, start_date: date, end_date: date) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;獲取歷史數據&quot;&quot;&quot;
+
+    def get_ohlc(self, symbol: str, interval: str) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;獲取 K 線數據&quot;&quot;&quot;
+</code></pre>
+<p><strong>Repository 模式</strong></p>
+<pre><code class="language-python">class StrategyRepository(ABC):
+    @abstractmethod
+    def find_by_id(self, strategy_id: str) -&gt; Optional[Strategy]:
+        pass
+
+    @abstractmethod
+    def save(self, strategy: Strategy) -&gt; Strategy:
+        pass
+
+    @abstractmethod
+    def delete(self, strategy_id: str) -&gt; bool:
+        pass
+</code></pre>
+<h3 id="33">3.3 數據結構<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="_6">核心數據模型<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<p><strong>Strategy 模型</strong></p>
+<pre><code class="language-python">@dataclass
+class Strategy:
+    id: str  # 策略 ID (e.g., &quot;str_123456&quot;)
+    name: str
+    description: str
+    type: str  # 策略類型 (trend_following, mean_reversion, etc.)
+    status: str  # active, inactive, archived
+    parameters: Dict  # 策略參數
+    risk_limits: Dict  # 風險限制
+    created_at: datetime
+    updated_at: datetime
+</code></pre>
+<p><strong>Backtest 模型</strong></p>
+<pre><code class="language-python">@dataclass
+class Backtest:
+    id: str  # 回測 ID (e.g., &quot;bt_123456&quot;)
+    strategy_id: str
+    status: str  # pending, running, completed, failed, cancelled
+    start_date: date
+    end_date: date
+    initial_capital: float
+    commission: float
+    slippage: float
+    data_source: str
+    metrics: Dict  # 績效指標
+    equity_curve: List[float]
+    trades: List[Trade]
+    created_at: datetime
+    completed_at: Optional[datetime]
+</code></pre>
+<p><strong>MarketData 模型</strong></p>
+<pre><code class="language-python">@dataclass
+class MarketData:
+    symbol: str
+    date: date
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+    adjusted_close: Optional[float]
+</code></pre>
+<h4 id="_7">績效指標結構<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">@dataclass
+class PerformanceMetrics:
+    total_return: float
+    cagr: float  # 複合年化增長率
+    sharpe_ratio: float
+    sortino_ratio: float
+    max_drawdown: float
+    volatility: float
+    calmar_ratio: float
+    win_rate: float
+    profit_factor: float
+    avg_win: float
+    avg_loss: float
+    total_trades: int
+</code></pre>
+<h3 id="34">3.4 錯誤處理<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<h4 id="_8">統一錯誤碼<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>錯誤碼</th>
+<th>HTTP 狀態</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>422</td>
+<td>請求參數驗證失敗</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NOT_FOUND</code></td>
+<td>404</td>
+<td>策略不存在</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NAME_EXISTS</code></td>
+<td>409</td>
+<td>策略名稱已存在</td>
+</tr>
+<tr>
+<td><code>BACKTEST_NOT_FOUND</code></td>
+<td>404</td>
+<td>回測任務不存在</td>
+</tr>
+<tr>
+<td><code>INVALID_DATE_RANGE</code></td>
+<td>422</td>
+<td>無效日期範圍</td>
+</tr>
+<tr>
+<td><code>INSUFFICIENT_DATA</code></td>
+<td>400</td>
+<td>數據不足</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_EXCEEDED</code></td>
+<td>429</td>
+<td>超過速率限制</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>未授權訪問</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>403</td>
+<td>無權限訪問</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>內部服務器錯誤</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_9">自定義異常類<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from fastapi import HTTPException, status
+
+class StrategyNotFound(HTTPException):
+    def __init__(self, strategy_id: str):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f&quot;Strategy {strategy_id} not found&quot;,
+            headers={&quot;X-Error-Code&quot;: &quot;STRATEGY_NOT_FOUND&quot;}
+        )
+
+class ValidationFailed(HTTPException):
+    def __init__(self, errors: List[dict]):
+        super().__init__(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+                &quot;message&quot;: &quot;Request validation failed&quot;,
+                &quot;errors&quot;: errors
+            }
+        )
+</code></pre>
+<h4 id="_10">全局異常處理器<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            &quot;error&quot;: {
+                &quot;code&quot;: exc.headers.get(&quot;X-Error-Code&quot;, &quot;HTTP_ERROR&quot;),
+                &quot;message&quot;: exc.detail,
+            },
+            &quot;meta&quot;: {
+                &quot;request_id&quot;: request.state.request_id,
+                &quot;timestamp&quot;: datetime.utcnow().isoformat()
+            }
+        }
+    )
+</code></pre>
+<h3 id="35">3.5 緩存機制<a class="headerlink" href="#35" title="連結到此標題">&para;</a></h3>
+<h4 id="_11">多級緩存<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class CacheManager:
+    def __init__(self):
+        self.l1_cache = {}  # 內存緩存
+        self.l2_cache = Redis()  # Redis 緩存
+
+    async def get(self, key: str) -&gt; Optional[Any]:
+        # 嘗試 L1
+        if key in self.l1_cache:
+            return self.l1_cache[key]
+
+        # 嘗試 L2
+        value = await self.l2_cache.get(key)
+        if value:
+            self.l1_cache[key] = value  # 提升到 L1
+            return value
+
+        return None
+
+    async def set(self, key: str, value: Any, ttl: int = 300):
+        # 設置 L1 和 L2
+        self.l1_cache[key] = value
+        await self.l2_cache.set(key, value, ex=ttl)
+</code></pre>
+<h4 id="_12">緩存預設<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>緩存名稱</th>
+<th>TTL</th>
+<th>最大大小</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>template_cache</code></td>
+<td>10 分鐘</td>
+<td>100</td>
+<td>策略模板配置</td>
+</tr>
+<tr>
+<td><code>market_cache</code></td>
+<td>15 分鐘</td>
+<td>50</td>
+<td>市場配置</td>
+</tr>
+<tr>
+<td><code>universe_cache</code></td>
+<td>10 分鐘</td>
+<td>50</td>
+<td>股票池配置</td>
+</tr>
+<tr>
+<td><code>showcase_cache</code></td>
+<td>2 小時</td>
+<td>200</td>
+<td>展示數據</td>
+</tr>
+<tr>
+<td><code>resonance_cache</code></td>
+<td>5 分鐘</td>
+<td>500</td>
+<td>共振分析結果</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4">4. 前端架構<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41-react">4.1 React 組件層級<a class="headerlink" href="#41-react" title="連結到此標題">&para;</a></h3>
+<pre><code>App (根組件)
+├── ErrorBoundary (錯誤邊界)
+├── QueryClientProvider (React Query)
+├── PersonaProvider (Persona 上下文)
+├── ToastProvider (Toast 通知)
+├── Router (BrowserRouter)
+└── DashboardLayout (主佈局組件)
+    ├── Sidebar (側邊欄)
+    │   ├── SidebarGroup (導航分組)
+    │   └── UserLogin (登錄狀態)
+    ├── Header (頂部欄)
+    │   ├── PersonaSwitcher
+    │   ├── 語言切換
+    │   └── 截圖按鈕
+    └── Main Content (主內容區)
+        └── Routes → Page Components (40+ 頁面)
+</code></pre>
+<h3 id="42">4.2 共享組件庫<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="_13">核心共享組件<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>組件名稱</th>
+<th>用途</th>
+<th>複用度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ErrorBoundary</strong></td>
+<td>錯誤邊界，捕獲 React 錯誤</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>ToastProvider</strong></td>
+<td>Toast 通知系統</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Skeleton</strong></td>
+<td>骨架屏加載狀態</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>EmptyState</strong></td>
+<td>空狀態顯示組件</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>EmptyStatePresets</strong></td>
+<td>預設空狀態模板</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="skeleton">Skeleton 組件模式<a class="headerlink" href="#skeleton" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 卡片骨架
+&lt;Skeleton.Card count={3} /&gt;
+
+// 表格骨架
+&lt;Skeleton.Table rows={5} columns={4} /&gt;
+
+// 文本骨架
+&lt;Skeleton.Text lines={3} /&gt;
+
+// 圖表骨架
+&lt;Skeleton.Chart height={300} /&gt;
+
+// 全頁加載器
+&lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;
+</code></pre>
+<h4 id="emptystate">EmptyState 組件模式<a class="headerlink" href="#emptystate" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 基本用法
+&lt;EmptyState
+  icon=&quot;bi-inbox&quot;
+  title=&quot;No Data&quot;
+  message=&quot;There is no data to display.&quot;
+  action={&lt;button onClick={...}&gt;Load Data&lt;/button&gt;}
+  size=&quot;medium&quot;
+/&gt;
+
+// 預設模板
+&lt;EmptyStatePresets.NoSearchResults /&gt;
+&lt;EmptyStatePresets.NoItems /&gt;
+&lt;EmptyStatePresets.NoSignals /&gt;
+&lt;EmptyStatePresets.NoStrategies /&gt;
+&lt;EmptyStatePresets.LoadError /&gt;
+</code></pre>
+<h4 id="toast">Toast 使用模式<a class="headerlink" href="#toast" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { toast, success, error, warning, info } = useToast();
+
+success('操作成功！');
+error('操作失敗！');
+warning('注意：...');
+info('信息提示...');
+
+// 自定義 Toast
+toast('自定義消息', 'custom_type', 5000);
+</code></pre>
+<h3 id="43">4.3 狀態管理<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<h4 id="_14">狀態分類原則<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>狀態類型</th>
+<th>推薦方案</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>全局應用狀態</strong></td>
+<td>Zustand</td>
+<td>跨多個組件共享，如 Dashboard 核心數據</td>
+</tr>
+<tr>
+<td><strong>服務器狀態</strong></td>
+<td>React Query</td>
+<td>需要從 API 獲取，需要緩存和同步</td>
+</tr>
+<tr>
+<td><strong>功能特定狀態</strong></td>
+<td>Context</td>
+<td>特定功能的狀態共享，如 Persona、Toast</td>
+</tr>
+<tr>
+<td><strong>表單/UI 狀態</strong></td>
+<td>useState</td>
+<td>組件內部狀態，不需要共享</td>
+</tr>
+<tr>
+<td><strong>持久化狀態</strong></td>
+<td>LocalStorage</td>
+<td>需要跨會話保存，如用戶偏好、認證信息</td>
+</tr>
+</tbody>
+</table>
+<h4 id="zustand-store">Zustand Store<a class="headerlink" href="#zustand-store" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// store.js
+export const useStore = create((set) =&gt; ({
+  watchlist: [],
+  marketMovers: {
+    gainers: [],
+    losers: [],
+    most_active: []
+  },
+  heatmapData: [],
+  marketScore: {
+    current: null,
+    history: []
+  },
+  stockDetails: {},
+  lastUpdated: null,
+  loadingStatus: 'idle',
+  error: null,
+
+  fetchStage1Overview: async (force, targetDate, market) =&gt; {
+    // 獲取關鍵概覽數據
+  },
+
+  fetchStage2secondary: async (targetDate, market) =&gt; {
+    // 獲取次要數據
+  },
+
+  refreshDashboardData: () =&gt; {
+    // 強制刷新所有數據
+  }
+}));
+</code></pre>
+<p><strong>最佳實踐：</strong></p>
+<pre><code class="language-javascript">// ✅ 使用 refs 避免 useEffect 重新運行
+const { fetchStage1Overview } = useStore();
+const fetchStage1Ref = useRef(fetchStage1Overview);
+
+useEffect(() =&gt; {
+  fetchStage1Ref.current();
+}, []);
+
+// ❌ 不好的做法：直接使用會導致重新運行
+const { fetchStage1Overview } = useStore();
+
+useEffect(() =&gt; {
+  fetchStage1Overview();  // 每次狀態更新都會運行
+}, [fetchStage1Overview]);
+</code></pre>
+<h4 id="react-query">React Query 配置<a class="headerlink" href="#react-query" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: CONFIG.refetchOnWindowFocus,
+            retry: 1,
+            staleTime: CONFIG.staleTime,
+            gcTime: CONFIG.cacheTime,
+            refetchOnMount: CONFIG.refetchOnMount,
+        },
+    },
+});
+</code></pre>
+<h4 id="_15">快取預設<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const cachePresets = {
+  static: {
+    staleTime: 60 * 60 * 1000,      // 1 小時
+    gcTime: 24 * 60 * 60 * 1000,   // 24 小時
+  },  // 靜態數據（策略類型、配置）
+  user: {
+    staleTime: 5 * 60 * 1000,      // 5 分鐘
+    gcTime: 30 * 60 * 1000,        // 30 分鐘
+  },  // 用戶數據（用戶策略、投資組合）
+  dynamic: {
+    staleTime: 30 * 1000,         // 30 秒
+    gcTime: 5 * 60 * 1000,        // 5 分鐘
+  },  // 動態數據（市場價格、信號）
+  realtime: {
+    staleTime: 0,
+    gcTime: 0,
+  },  // 實時數據（回測結果）
+};
+</code></pre>
+<h4 id="useapicache-hook">useApiCache Hook<a class="headerlink" href="#useapicache-hook" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { data, isLoading, error, refetch } = useApiCache(
+  queryKey,          // 查詢鍵
+  fetcher,           // 數據獲取函數
+  options            // 可選配置
+);
+</code></pre>
+<p><strong>最佳實踐：</strong></p>
+<pre><code class="language-javascript">// ✅ 使用語義化的查詢鍵
+const { data } = useApiCache(
+  ['allocation', strategyId, years, rebalanceFreq],
+  fetchAllocationData
+);
+
+// ❌ 不好的做法：非語義化查詢鍵
+const { data } = useApiCache(
+  'allocation-data-123',
+  fetchAllocationData
+);
+</code></pre>
+<h3 id="44-ui">4.4 UI 模式<a class="headerlink" href="#44-ui" title="連結到此標題">&para;</a></h3>
+<h4 id="_16">加載狀態模式<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { data, error, isLoading } = useApiCache(key, fetcher);
+
+// 1. 加載狀態
+if (isLoading &amp;&amp; !data) {
+  return &lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;;
+}
+
+// 2. 錯誤狀態
+if (error) {
+  return (
+    &lt;EmptyStatePresets.LoadError
+      message={`Failed: ${error.message}`}
+      action={&lt;button onClick={refetch}&gt;Retry&lt;/button&gt;}
+    /&gt;
+  );
+}
+
+// 3. 空狀態
+if (!data || data.length === 0) {
+  return &lt;EmptyStatePresets.NoData /&gt;;
+}
+
+// 4. 主內容
+return &lt;div&gt;{/* 頁面內容 */}&lt;/div&gt;;
+</code></pre>
+<h4 id="_17">錯誤處理模式<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">try {
+    const response = await api.someMethod(params);
+    return response.data;
+} catch (err) {
+    const errorMsg = err.response?.data?.detail || err.message || 'Operation failed';
+    console.error('Error details:', err);
+    throw new Error(errorMsg);
+}
+</code></pre>
+<h4 id="_18">性能優化技巧<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 使用 React.memo 避免不必要的重新渲染
+const MemoizedComponent = React.memo(({ data }) =&gt; {
+  return &lt;div&gt;{data.value}&lt;/div&gt;;
+});
+
+// ✅ 使用 useMemo 緩存計算結果
+const sortedData = useMemo(
+  () =&gt; data.sort((a, b) =&gt; a.name.localeCompare(b.name)),
+  [data]
+);
+
+// ✅ 使用 useCallback 穩定回調函數
+const handleSave = useCallback(async () =&gt; {
+  await saveData(data);
+}, [data]);
+</code></pre>
+<h3 id="45-api">4.5 API 集成<a class="headerlink" href="#45-api" title="連結到此標題">&para;</a></h3>
+<h4 id="api">完整的 API 調用鏈路<a class="headerlink" href="#api" title="連結到此標題">&para;</a></h4>
+<pre><code>組件層 (Component Layer)
+    React Component (Page / UI)
+        ↓
+自定義 Hook 層 (Custom Hooks)
+    useMomentum, useAllocation, useStrategyAPI
+        ↓
+React Query 層 (TanStack Query)
+    useApiCache / useApiMutation
+    (緩存檢查、去重、重試)
+        ↓
+請求保護層 (Request Protection)
+    protectedFetch (去重、超時、重試)
+        ↓
+Axios 實例層 (HTTP Client)
+    apiClient (統一配置、攔截器)
+        ↓
+網絡層 (Network)
+    HTTP Request (GET / POST / PUT / DELETE)
+        ↓
+後端層 (Backend)
+    FastAPI (Python)
+        ↓
+響應層 (Response)
+    JSON Response / Error
+</code></pre>
+<h4 id="api_1">API 函數分類<a class="headerlink" href="#api_1" title="連結到此標題">&para;</a></h4>
+<p><strong>StockApi - 股票數據服務</strong></p>
+<pre><code class="language-javascript">getAllStocks()                         // 獲取所有股票
+getHistory(symbol, params)           // 獲取歷史數據
+getStockDetail(symbol, days)         // 獲取股票詳情
+getBatchStocks(symbols, days)         // 批量獲取
+addTrackedSymbols(symbols)            // 添加到監控列表
+deleteTrackedSymbol(symbol)           // 刪除監控符號
+</code></pre>
+<p><strong>MarketApi - 市場數據服務</strong></p>
+<pre><code class="language-javascript">getMovers()                           // 獲取漲跌幅榜
+getHeatmap(targetDate, market)        // 獲取熱力圖
+getSectorHeatmap(targetDate, market) // 獲取板塊熱力圖
+getMarketScore()                      // 獲取市場評分
+</code></pre>
+<p><strong>ScreenerApi - 篩選器服務</strong></p>
+<pre><code class="language-javascript">getSuperTrend(params)                 // SuperTrend 篩選
+getMacd(params)                       // MACD 篩選
+getExtremes(params)                   // 極值篩選
+getRsi(params)                        // RSI 篩選
+</code></pre>
+<h3 id="46">4.6 頁面組件類別<a class="headerlink" href="#46" title="連結到此標題">&para;</a></h3>
+<h4 id="_19">主頁和概覽<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MarketScanner</strong> (<code>/</code>) - 市場掃描儀</li>
+<li><strong>PublicSignalDashboard</strong> - 公共信號儀表板</li>
+<li><strong>DashboardPage</strong> (<code>/dashboard-analytics</code>) - 內部管理儀表板</li>
+</ul>
+<h4 id="_20">市場分析<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MarketBreadthPage</strong> (<code>/market-breadth</code>)</li>
+<li><strong>StockDetailPage</strong> (<code>/stock/:symbol</code>)</li>
+<li><strong>MarketHeatmapPage</strong> (<code>/market-heatmap</code>)</li>
+<li><strong>MarketIndicesPage</strong> (<code>/market-indices</code>)</li>
+</ul>
+<h4 id="_21">篩選器<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MacdScreenerPage</strong> (<code>/screener/macd</code>)</li>
+<li><strong>RsiScreenerPage</strong> (<code>/screener/rsi</code>)</li>
+<li><strong>SuperTrendScreenerPage</strong> (<code>/screener/supertrend</code>)</li>
+</ul>
+<h4 id="_22">策略頁面<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>AllocationPage</strong> (<code>/allocation</code>)</li>
+<li><strong>MomentumPage</strong> (<code>/momentum</code>)</li>
+<li><strong>BacktestHistoryPage</strong> (<code>/backtest-history</code>)</li>
+<li><strong>LaboratoryPage</strong> (<code>/laboratory</code>)</li>
+<li><strong>StrategyPage</strong> (<code>/strategies/:tab</code>)</li>
+</ul>
+<hr />
+<h2 id="5">5. 策略引擎<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51-istrategy">5.1 IStrategy 接口<a class="headerlink" href="#51-istrategy" title="連結到此標題">&para;</a></h3>
+<h4 id="_23">核心接口契約<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from dataclasses import dataclass
+from enum import Enum
+from typing import List
+from datetime import date
+
+class SignalAction(Enum):
+    BUY = &quot;BUY&quot;
+    SELL = &quot;SELL&quot;
+    HOLD = &quot;HOLD&quot;
+
+@dataclass
+class StrategySignal:
+    symbol: str
+    action: SignalAction
+    confidence: float  # 0.0 to 1.0
+
+    def __post_init__(self):
+        if not (0.0 &lt;= self.confidence &lt;= 1.0):
+            raise ValueError(&quot;Confidence must be 0.0-1.0&quot;)
+
+@dataclass
+class ExecutionContext:
+    portfolio_value: float
+    available_cash: float
+    current_positions: List['PositionState']
+    market_date: date
+    market_status: str  # 'OPEN', 'CLOSED', etc.
+
+@dataclass
+class PositionState:
+    symbol: str
+    quantity: int
+    current_price: float
+    # Optional: entry_price, unrealized_pnl, etc.
+
+class IStrategy:
+    @property
+    def name(self) -&gt; str:
+        &quot;&quot;&quot;策略標識符&quot;&quot;&quot;
+        raise NotImplementedError
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        &quot;&quot;&quot;
+        核心方法：生成交易信號
+
+        約束：
+        - 返回信號列表（每個標的最多一個）
+        - 只返回 BUY/SELL（HOLD 通過不返回表示）
+        - 信心分數 0.0-1.0
+        - 對相同輸入必須確定性
+        - 交易前檢查 market_status
+        - 尊重持倉狀態和現金約束
+        &quot;&quot;&quot;
+        raise NotImplementedError
+</code></pre>
+<h3 id="52">5.2 策略模板<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="1rsi">模板 1：均值回歸（RSI）<a class="headerlink" href="#1rsi" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class RSIStrategy(IStrategy):
+    &quot;&quot;&quot;使用 RSI 指標的均值回歸策略&quot;&quot;&quot;
+
+    name = &quot;rsi_mean_reversion&quot;
+
+    def __init__(
+        self,
+        period: int = 14,
+        buy_threshold: int = 30,
+        sell_threshold: int = 70,
+        min_trade_size: float = 1000.0
+    ):
+        if not (0 &lt; buy_threshold &lt; sell_threshold &lt; 100):
+            raise ValueError(&quot;Invalid threshold values&quot;)
+        self.period = period
+        self.buy_threshold = buy_threshold
+        self.sell_threshold = sell_threshold
+        self.min_trade_size = min_trade_size
+        self.rsi_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # 檢查市場狀態
+            if context.market_status != 'CLOSED':
+                continue
+
+            # 檢查是否已持有
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # 獲取 RSI 值
+            rsi = self._get_rsi(symbol, context.market_date)
+
+            # 生成買入信號（僅當未持有時）
+            if rsi &lt; self.buy_threshold and not existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=self._calculate_confidence(rsi, self.buy_threshold)
+                ))
+
+            # 生成賣出信號（僅當持有时）
+            elif rsi &gt; self.sell_threshold and existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=self._calculate_confidence(rsi, self.sell_threshold)
+                ))
+
+        return signals
+
+    def _get_rsi(self, symbol: str, date: date) -&gt; float:
+        &quot;&quot;&quot;獲取 RSI 值並緩存&quot;&quot;&quot;
+        if symbol not in self.rsi_cache:
+            # 使用向量化方法計算 RSI
+            pass
+        return self.rsi_cache[symbol].loc[date]
+
+    def _calculate_confidence(self, rsi: float, threshold: float) -&gt; float:
+        &quot;&quot;&quot;
+        根據距離閾值的距離計算信心分數。
+
+        返回：0.0 to 1.0
+        &quot;&quot;&quot;
+        if rsi &lt; threshold:  # 買入情況
+            return min(1.0, (threshold - rsi) / threshold)
+        else:  # 賣出情況
+            return min(1.0, (rsi - threshold) / (100 - threshold))
+</code></pre>
+<h4 id="2macd">模板 2：趨勢跟隨（MACD）<a class="headerlink" href="#2macd" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class MACDStrategy(IStrategy):
+    &quot;&quot;&quot;使用 MACD 交叉的趨勢跟隨策略&quot;&quot;&quot;
+
+    name = &quot;macd_trend_following&quot;
+
+    def __init__(
+        self,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9,
+        min_trade_size: float = 1000.0
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.signal = signal
+        self.min_trade_size = min_trade_size
+        self.indicator_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # 檢查市場狀態
+            if context.market_status != 'CLOSED':
+                continue
+
+            # 獲取當前和前一日的 MACD 值
+            macd, signal_line = self._get_macd(symbol, context.market_date)
+            prev_macd, prev_signal = self._get_macd_previous(symbol, context.market_date)
+
+            # 檢查現有持倉
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # MACD 向上交叉信號線（看漲）
+            if (macd &gt; signal_line and prev_macd &lt;= prev_signal) and not existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+            # MACD 向下交叉信號線（看跌）
+            elif (macd &lt; signal_line and prev_macd &gt;= prev_signal) and existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+        return signals
+</code></pre>
+<h4 id="3_1">模板 3：多指標匯合<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class ConfluenceStrategy(IStrategy):
+    &quot;&quot;&quot;需要多個指標達成共識的策略&quot;&quot;&quot;
+
+    name = &quot;multi_indicator_confluence&quot;
+
+    def __init__(self, min_agreement: int = 2):
+        self.min_agreement = min_agreement  # 需要達成共識的指標數
+        self.rsi_strategy = RSIStrategy()
+        self.macd_strategy = MACDStrategy()
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # 從每個子策略獲取信號
+            rsi_signals = self.rsi_strategy.generate_signals(context, [symbol])
+            macd_signals = self.macd_strategy.generate_signals(context, [symbol])
+
+            # 統計買入信號
+            buy_votes = sum(
+                1 for s in rsi_signals + macd_signals
+                if s.action == SignalAction.BUY
+            )
+
+            # 統計賣出信號
+            sell_votes = sum(
+                1 for s in rsi_signals + macd_signals
+                if s.action == SignalAction.SELL
+            )
+
+            # 如果達到最小共識則生成買入信號
+            if buy_votes &gt;= self.min_agreement:
+                avg_confidence = (
+                    sum(s.confidence for s in rsi_signals + macd_signals if s.action == SignalAction.BUY)
+                    / buy_votes
+                )
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=avg_confidence
+                ))
+
+            # 如果達到最小共識則生成賣出信號
+            elif sell_votes &gt;= self.min_agreement:
+                avg_confidence = (
+                    sum(s.confidence for s in rsi_signals + macd_signals if s.action == SignalAction.SELL)
+                    / sell_votes
+                )
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=avg_confidence
+                ))
+
+        return signals
+</code></pre>
+<h4 id="4_1">模板 4：組合策略<a class="headerlink" href="#4_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class CompositeStrategy(IStrategy):
+    &quot;&quot;&quot;使用可配置合併算法組合多個策略&quot;&quot;&quot;
+
+    name = &quot;composite_strategy&quot;
+
+    MERGE_ALGORITHMS = [
+        'majority_vote',  # 多數決
+        'unanimous',      # 一致同意
+        'weighted',       # 加權
+        'any'             # 任一
+    ]
+
+    def __init__(
+        self,
+        strategies: List[IStrategy],
+        merge_algorithm: str = 'majority_vote'
+    ):
+        if merge_algorithm not in self.MERGE_ALGORITHMS:
+            raise ValueError(f&quot;Invalid merge algorithm: {merge_algorithm}&quot;)
+        self.strategies = strategies
+        self.merge_algorithm = merge_algorithm
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        # 收集所有策略的信號
+        all_signals_by_symbol = {symbol: [] for symbol in symbols}
+
+        for strategy in self.strategies:
+            strategy_signals = strategy.generate_signals(context, symbols)
+            for signal in strategy_signals:
+                all_signals_by_symbol[signal.symbol].append(signal)
+
+        # 合併每個標的的信號
+        merged_signals = []
+        for symbol, signals in all_signals_by_symbol.items():
+            if not signals:
+                continue
+
+            merged_signal = self._merge_signals(symbol, signals)
+            if merged_signal:
+                merged_signals.append(merged_signal)
+
+        return merged_signals
+
+    def _merge_signals(self, symbol: str, signals: List[StrategySignal]) -&gt; StrategySignal:
+        &quot;&quot;&quot;使用配置的算法合併多個信號&quot;&quot;&quot;
+
+        if self.merge_algorithm == 'majority_vote':
+            buy_count = sum(1 for s in signals if s.action == SignalAction.BUY)
+            sell_count = sum(1 for s in signals if s.action == SignalAction.SELL)
+
+            if buy_count &gt; sell_count:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=buy_count / len(signals)
+                )
+            elif sell_count &gt; buy_count:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=sell_count / len(signals)
+                )
+
+        elif self.merge_algorithm == 'unanimous':
+            actions = [s.action for s in signals]
+            if all(a == SignalAction.BUY for a in actions):
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=1.0
+                )
+            elif all(a == SignalAction.SELL for a in actions):
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=1.0
+                )
+
+        # ... 其他合併算法
+
+        return None
+</code></pre>
+<h3 id="53-vectorbt">5.3 VectorBT 集成<a class="headerlink" href="#53-vectorbt" title="連結到此標題">&para;</a></h3>
+<h4 id="_24">數據加載器<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import pandas as pd
+from typing import List
+from datetime import date
+
+class VBTDataLoader:
+    &quot;&quot;&quot;為 VectorBT 執行加載和格式化數據&quot;&quot;&quot;
+
+    def __init__(self, connection):
+        self.conn = connection
+        self.data_cache = {}
+
+    def load_ohlcv(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載 VectorBT 格式的 OHLCV 數據。
+
+        返回：帶有 (symbol, date) 索引的 MultiIndex DataFrame
+        &quot;&quot;&quot;
+        cache_key = (tuple(symbols), start_date, end_date)
+        if cache_key in self.data_cache:
+            return self.data_cache[cache_key]
+
+        query = &quot;&quot;&quot;
+        SELECT
+            symbol,
+            date,
+            open,
+            high,
+            low,
+            close,
+            volume
+        FROM prices
+        WHERE symbol IN ({placeholders})
+          AND date BETWEEN ? AND ?
+        ORDER BY symbol, date
+        &quot;&quot;&quot;.format(placeholders=','.join(['?'] * len(symbols)))
+
+        params = symbols + [start_date, end_date]
+        df = pd.read_sql(query, self.conn, params=params)
+
+        # 格式化為 VectorBT：MultiIndex (symbol, date)
+        df = df.set_index(['symbol', 'date'])
+
+        self.data_cache[cache_key] = df
+        return df
+
+    def load_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        加載用於組合創建的收盤價。
+
+        返回：日期為索引、標的為列的 DataFrame
+        &quot;&quot;&quot;
+        ohlcv = self.load_ohlcv(symbols, start_date, end_date)
+        return ohlcv['close'].unstack(level='symbol')
+</code></pre>
+<h4 id="_25">信號適配器<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class SignalAdapter:
+    &quot;&quot;&quot;將 IStrategy 信號轉換為 VectorBT 格式&quot;&quot;&quot;
+
+    @staticmethod
+    def signals_to_vectorbt(
+        ohlcv_index: pd.MultiIndex,
+        signals_by_date: Dict[date, List[StrategySignal]]
+    ) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+        &quot;&quot;&quot;
+        將策略信號轉換為 VectorBT 進入/退出 DataFrame。
+
+        參數：
+            ohlcv_index: 來自 VBTDataLoader 的 MultiIndex
+            signals_by_date: 映射日期到 List[StrategySignal] 的字典
+
+        返回：
+            entries: DataFrame[symbol] = bool (True = 買入信號)
+            exits: DataFrame[symbol] = bool (True = 賣出信號)
+        &quot;&quot;&quot;
+        # 從索引中提取所有標的
+        symbols = ohlcv_index.get_level_values('symbol').unique()
+
+        # 創建空 DataFrame
+        entries = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+        exits = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+
+        # 填充信號
+        for signal_date, signals in signals_by_date.items():
+            if signal_date not in entries.index:
+                continue
+
+            for signal in signals:
+                if signal.symbol not in symbols:
+                    continue
+
+                if signal.action == SignalAction.BUY:
+                    entries.loc[signal_date, signal.symbol] = True
+                elif signal.action == SignalAction.SELL:
+                    exits.loc[signal_date, signal.symbol] = True
+
+        return entries, exits
+</code></pre>
+<h4 id="_26">統一策略引擎<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import vectorbt as vbt
+import pandas as pd
+from typing import List, Dict, Any
+
+class UnifiedStrategyEngine:
+    &quot;&quot;&quot;整合 IStrategy 與 VectorBT 的核心協調器&quot;&quot;&quot;
+
+    def __init__(
+        self,
+        data_loader: VBTDataLoader,
+        context_factory: ExecutionContextFactory
+    ):
+        self.data_loader = data_loader
+        self.context_factory = context_factory
+
+    def backtest(
+        self,
+        strategy: IStrategy,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+        initial_cash: float = 100000
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        使用 VectorBT 執行回測。
+
+        返回：
+            包含績效指標和結果的字典
+        &quot;&quot;&quot;
+        # 1. 加載歷史數據
+        ohlcv = self.data_loader.load_ohlcv(symbols, start_date, end_date)
+        prices = self.data_loader.load_prices(symbols, start_date, end_date)
+
+        # 2. 生成每日信號
+        dates = pd.date_range(start_date, end_date, freq='D')
+        signals_by_date = self._generate_signals_daily(
+            strategy,
+            dates,
+            symbols,
+            start_date,
+            end_date,
+            initial_cash
+        )
+
+        # 3. 將信號轉換為 VectorBT 格式
+        entries, exits = SignalAdapter.signals_to_vectorbt(
+            ohlcv.index,
+            signals_by_date
+        )
+
+        # 4. 執行 VectorBT 回測
+        pf = vbt.Portfolio.from_signals(
+            prices,
+            entries=entries,
+            exits=exits,
+            init_cash=initial_cash,
+            freq='1D',
+            fees=0.001,
+            slippage=0.0001
+        )
+
+        # 5. 提取指標
+        stats = pf.stats()
+
+        return {
+            'strategy': strategy.name,
+            'symbols': symbols,
+            'start_date': str(start_date),
+            'end_date': str(end_date),
+            'initial_cash': initial_cash,
+            'final_value': float(pf.value().iloc[-1]),
+            'total_return': float(stats['total_return']),
+            'sharpe_ratio': float(stats['sharpe_ratio']),
+            'max_drawdown': float(stats['max_drawdown']),
+            'win_rate': float(stats['win_rate']),
+            'num_trades': int(stats['num_trades']),
+            'equity_curve': pf.value().tolist(),
+            'entries': entries.to_dict(),
+            'exits': exits.to_dict()
+        }
+
+    def _generate_signals_daily(
+        self,
+        strategy: IStrategy,
+        dates: pd.DatetimeIndex,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+        initial_cash: float
+    ) -&gt; Dict[date, List[StrategySignal]]:
+        &quot;&quot;&quot;為日期範圍內的每個日期生成信號。&quot;&quot;&quot;
+        signals_by_date = {}
+        cash = initial_cash
+
+        # 重置上下文工廠
+        self.context_factory.reset()
+
+        for date in dates:
+            # 獲取當前價格
+            try:
+                prices_df = self.data_loader.load_prices(symbols, date, date)
+                current_prices = prices_df.iloc[0].to_dict()
+            except Exception:
+                continue
+
+            # 創建執行上下文
+            context = self.context_factory.create_context(
+                date=date.date(),
+                current_prices=current_prices,
+                cash=cash
+            )
+
+            # 生成信號
+            signals = strategy.generate_signals(context, symbols)
+
+            if signals:
+                signals_by_date[date.date()] = signals
+
+                # 模擬持倉更新
+                for signal in signals:
+                    if signal.action == SignalAction.BUY:
+                        position_size = min(cash * 0.1, cash)
+                        cash -= position_size
+                        self.context_factory.update_position(signal, current_prices[signal.symbol])
+                    elif signal.action == SignalAction.SELL and signal.symbol in self.context_factory.positions:
+                        position_value = (
+                            self.context_factory.positions[signal.symbol].quantity *
+                            current_prices[signal.symbol]
+                        )
+                        cash += position_value
+                        self.context_factory.update_position(signal, current_prices[signal.symbol])
+
+        return signals_by_date
+</code></pre>
+<h3 id="54">5.4 策略工廠<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">from typing import Dict, Any
+
+class StrategyFactory:
+    &quot;&quot;&quot;集中化策略實例化&quot;&quot;&quot;
+
+    @staticmethod
+    def create(strategy_type: str, params: Dict[str, Any] = None) -&gt; IStrategy:
+        &quot;&quot;&quot;
+        通過類型創建策略實例。
+
+        參數：
+            strategy_type: 策略標識符
+            params: 策略參數
+
+        返回：
+            IStrategy 實例
+        &quot;&quot;&quot;
+        params = params or {}
+
+        # 個體策略
+        if strategy_type == 'rsi':
+            return RSIStrategy(
+                period=params.get('period', 14),
+                buy_threshold=params.get('buy_threshold', 30),
+                sell_threshold=params.get('sell_threshold', 70),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        elif strategy_type == 'macd':
+            return MACDStrategy(
+                fast=params.get('fast', 12),
+                slow=params.get('slow', 26),
+                signal=params.get('signal', 9),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        elif strategy_type == 'confluence':
+            return ConfluenceStrategy(
+                min_agreement=params.get('min_agreement', 2)
+            )
+
+        # 組合策略
+        elif strategy_type == 'composite':
+            strategies = []
+            for strat_type in params.get('strategies', []):
+                strategies.append(StrategyFactory.create(strat_type['type'], strat_type.get('params', {})))
+
+            return CompositeStrategy(
+                strategies=strategies,
+                merge_algorithm=params.get('merge_algorithm', 'majority_vote')
+            )
+
+        else:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+</code></pre>
+<h3 id="55">5.5 核心算法<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<h4 id="rsi">向量化 RSI 計算<a class="headerlink" href="#rsi" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+class VectorizedRSI:
+    &quot;&quot;&quot;性能優化的向量化 RSI 計算&quot;&quot;&quot;
+
+    def calculate(self, prices: pd.Series, period: int = 14) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        使用向量化操作計算 RSI。
+
+        參數：
+            prices: 價格序列
+            period: RSI 週期
+
+        返回：
+            RSI 值
+        &quot;&quot;&quot;
+        # 計算價格變化
+        delta = prices.diff()
+
+        # 分離漲跌幅
+        gains = delta.where(delta &gt; 0, 0)
+        losses = -delta.where(delta &lt; 0, 0)
+
+        # 計算平均漲跌幅（指數加權）
+        avg_gains = gains.ewm(span=period, adjust=False).mean()
+        avg_losses = losses.ewm(span=period, adjust=False).mean()
+
+        # 計算 RSI
+        rs = avg_gains / avg_losses
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+</code></pre>
+<h4 id="macd">向量化 MACD 計算<a class="headerlink" href="#macd" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class VectorizedMACD:
+    &quot;&quot;&quot;向量化 MACD 計算&quot;&quot;&quot;
+
+    def calculate(
+        self,
+        prices: pd.Series,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9
+    ) -&gt; tuple[pd.Series, pd.Series]:
+        &quot;&quot;&quot;
+        使用向量化操作計算 MACD。
+
+        返回：
+            (macd_line, signal_line)
+        &quot;&quot;&quot;
+        # 計算 EMA
+        ema_fast = prices.ewm(span=fast, adjust=False).mean()
+        ema_slow = prices.ewm(span=slow, adjust=False).mean()
+
+        # MACD 線
+        macd_line = ema_fast - ema_slow
+
+        # 信號線（MACD 的 EMA）
+        signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+
+        return macd_line, signal_line
+</code></pre>
+<h3 id="56">5.6 優化策略<a class="headerlink" href="#56" title="連結到此標題">&para;</a></h3>
+<h4 id="1_1">優化 1：指標緩存<a class="headerlink" href="#1_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from functools import lru_cache
+from typing import Dict, Tuple
+
+class IndicatorCache:
+    &quot;&quot;&quot;緩存指標計算以重用&quot;&quot;&quot;
+
+    def __init__(self):
+        self.cache: Dict[Tuple, pd.Series] = {}
+
+    def get_or_compute(
+        self,
+        symbol: str,
+        indicator_fn: callable,
+        prices: pd.Series,
+        **params
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;從緩存獲取或計算指標。&quot;&quot;&quot;
+        cache_key = (symbol, indicator_fn.__name__, tuple(sorted(params.items())))
+
+        if cache_key not in self.cache:
+            self.cache[cache_key] = indicator_fn(prices, **params)
+
+        return self.cache[cache_key]
+
+    def clear(self):
+        &quot;&quot;&quot;清空緩存&quot;&quot;&quot;
+        self.cache.clear()
+</code></pre>
+<h4 id="2">優化 2：批量數據加載<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BatchDataLoader:
+    &quot;&quot;&quot;批量加載數據以提高性能&quot;&quot;&quot;
+
+    def __init__(self, connection, batch_size: int = 50):
+        self.conn = connection
+        self.batch_size = batch_size
+
+    def load_symbols_batch(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; Dict[str, pd.DataFrame]:
+        &quot;&quot;&quot;在批量查詢中加載多個標的。&quot;&quot;&quot;
+        results = {}
+
+        # 分批處理標的
+        for i in range(0, len(symbols), self.batch_size):
+            batch = symbols[i:i + self.batch_size]
+
+            # 整批的單個查詢
+            query = f&quot;&quot;&quot;
+            SELECT symbol, date, open, high, low, close, volume
+            FROM prices
+            WHERE symbol IN ({','.join(['?'] * len(batch))})
+              AND date BETWEEN ? AND ?
+            ORDER BY symbol, date
+            &quot;&quot;&quot;
+            params = batch + [start_date, end_date]
+
+            df = pd.read_sql(query, self.conn, params=params)
+
+            # 按標的分割
+            for symbol in batch:
+                results[symbol] = df[df['symbol'] == symbol].set_index('date')
+
+        return results
+</code></pre>
+<hr />
+<h2 id="6-git">6. Git 開發模式<a class="headerlink" href="#6-git" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 分支策略<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<h4 id="git-flow">推薦分支結構（Git Flow）<a class="headerlink" href="#git-flow" title="連結到此標題">&para;</a></h4>
+<pre><code>main (生產代碼)
+  ↑
+  develop (開發整合)
+  ↑
+  ├── feature/* (功能分支)
+  ├── hotfix/* (緊急修復)
+  ├── release/* (發布準備)
+  ├── fix/* (一般修復)
+  ├── refactor/* (代碼重構)
+  ├── docs/* (文檔更新)
+  └── test/* (測試相關)
+</code></pre>
+<h4 id="_27">分支命名規範<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h4>
+<p><strong>格式:</strong> <code>&lt;type&gt;/&lt;short-description&gt;</code></p>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>用途</th>
+<th>範例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feature/*</code></td>
+<td>新功能開發</td>
+<td><code>feature/add-momentum-indicator</code></td>
+</tr>
+<tr>
+<td><code>fix/*</code></td>
+<td>Bug 修復</td>
+<td><code>fix/data-fetching-timeout</code></td>
+</tr>
+<tr>
+<td><code>hotfix/*</code></td>
+<td>緊急生產修復</td>
+<td><code>hotfix/production-deployment</code></td>
+</tr>
+<tr>
+<td><code>refactor/*</code></td>
+<td>代碼重構</td>
+<td><code>refactor/restructure-database-layer</code></td>
+</tr>
+<tr>
+<td><code>docs/*</code></td>
+<td>文檔更新</td>
+<td><code>docs/update-readme</code></td>
+</tr>
+<tr>
+<td><code>test/*</code></td>
+<td>測試相關</td>
+<td><code>test/add-contract-tests</code></td>
+</tr>
+<tr>
+<td><code>release/*</code></td>
+<td>版本發布準備</td>
+<td><code>release/v1.0.0</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_28">分支保護規則<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h4>
+<p><strong>main 分支保護：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ✅ 要求分支是最新的（合併前更新）
+- ✅ 限制誰可以推送（僅維護者）
+- ✅ 要求線性歷史（禁止合併提交）</p>
+<p><strong>develop 分支保護：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ❌ 不限制誰可以推送（開發者可推送）</p>
+<h3 id="62">6.2 提交規範<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<h4 id="conventional-commits">Conventional Commits 規範<a class="headerlink" href="#conventional-commits" title="連結到此標題">&para;</a></h4>
+<p><strong>標準格式：</strong></p>
+<pre><code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+
+[optional body]
+
+[optional footer]
+</code></pre>
+<h4 id="_29">提交類型定義<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>用途</th>
+<th>使用場景</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat</code></td>
+<td>新功能開發</td>
+<td>添加新功能或特性</td>
+<td><code>feat: add momentum indicator</code></td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>Bug 修復</td>
+<td>修復錯誤或問題</td>
+<td><code>fix: correct API timeout</code></td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>代碼重構</td>
+<td>改進代碼結構，不改變功能</td>
+<td><code>refactor: extract database layer</code></td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>文檔更新</td>
+<td>更新文檔或註釋</td>
+<td><code>docs: update deployment docs</code></td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>測試相關</td>
+<td>添加或修改測試</td>
+<td><code>test: add contract tests for API</code></td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>調試記錄</td>
+<td>調試相關的臨時提交</td>
+<td><code>debug: log intermediate values</code></td>
+</tr>
+<tr>
+<td><code>perf</code></td>
+<td>性能優化</td>
+<td>性能改進</td>
+<td><code>perf: optimize database queries</code></td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td>代碼風格</td>
+<td>代碼風格調整</td>
+<td><code>style: format code with black</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="_30">提交類型分佈基準<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>建議比例</th>
+<th>Dashboard 實際比例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat</code></td>
+<td>30-40%</td>
+<td>34%</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>20-30%</td>
+<td>24%</td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>15-25%</td>
+<td>16%</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>8-12%</td>
+<td>10%</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>5-10%</td>
+<td>6%</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>&lt; 5%</td>
+<td>4%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_31">好的提交信息示例<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 簡短描述（20-40字符）
+feat: add momentum indicator
+fix: correct API timeout
+docs: update deployment docs
+
+# 中等長度（41-60字符）
+feat(performance): implement database operations for daily scheduler
+fix(system): remove duplicate API prefix from system routers
+
+# 帶子類型
+feat(ssot): add 5 SSoT registries with comprehensive metadata
+refactor(code-quality): clean debug code from production (ARCH-001)
+fix(technical): handle pandas Series in volatility reduction
+
+# 帶任務標記
+feat(tests): add contract tests for critical services (ARCH-005)
+refactor: complete REF-001 through REF-005 plus pytest improvements
+</code></pre>
+<h3 id="63">6.3 代碼審查流程<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<h4 id="pull-request">Pull Request 創建流程<a class="headerlink" href="#pull-request" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 創建功能分支：</strong></p>
+<pre><code class="language-bash">git checkout develop
+git pull origin develop
+git checkout -b feature/feature-name
+</code></pre>
+<p><strong>2. 開發和提交：</strong></p>
+<pre><code class="language-bash">git add .
+git commit -m &quot;feat: add new feature&quot;
+git push -u origin feature/feature-name
+</code></pre>
+<p><strong>3. 創建 Pull Request：</strong>
+- 使用 PR 模板
+- 關聯相關 Issue
+- 清晰描述變更
+- 添加測試證據</p>
+<h4 id="pr">PR 模板（推薦）<a class="headerlink" href="#pr" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown">## Pull Request 描述
+
+### 變更類型
+- [ ] 新功能 (feat)
+- [ ] Bug 修復 (fix)
+- [ ] 性能優化 (perf)
+- [ ] 重構 (refactor)
+- [ ] 文檔更新 (docs)
+- [ ] 測試相關 (test)
+- [ ] 調試記錄 (debug)
+
+### 相關 Issue
+關聯 Issue: #&lt;issue_number&gt;
+
+### 變更摘要
+- [ ] 前端變更
+- [ ] 後端變更
+- [ ] 資料庫變更
+- [ ] Docker 配置變更
+
+### 測試檢查清單
+- [ ] 前端已編譯 (`cd frontend &amp;&amp; npm run build`)
+- [ ] 後端測試通過 (`cd backend &amp;&amp; pytest -m &quot;not slow&quot;`)
+- [ ] 前端測試通過 (`cd frontend &amp;&amp; npm test -- --run`)
+- [ ] E2E 測試通過（如適用）
+- [ ] 測試覆蓋率未下降
+- [ ] 代碼 lint 通過
+
+### 截圖 / 演示
+（如適用，添加 UI 變更的截圖）
+
+### 審查者
+@reviewer1 @reviewer2
+</code></pre>
+<h3 id="64-cicd">6.4 CI/CD 流程<a class="headerlink" href="#64-cicd" title="連結到此標題">&para;</a></h3>
+<h4 id="ci-workflow">CI Workflow 結構<a class="headerlink" href="#ci-workflow" title="連結到此標題">&para;</a></h4>
+<p><strong>觸發條件：</strong>
+- 推送到 <code>main</code> 或 <code>develop</code> 分支
+- 創建 Pull Request</p>
+<p><strong>主要階段：</strong>
+1. <strong>Lint</strong> - 代碼檢查和格式化
+2. <strong>Test Backend</strong> - 後端測試
+3. <strong>Test Frontend</strong> - 前端測試
+4. <strong>Test E2E</strong> - 端到端測試（main/develop 分支）
+5. <strong>Build</strong> - 構建前端資源</p>
+<h4 id="_32">測試策略<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h4>
+<p><strong>測試分類（pytest markers）：</strong>
+- <code>smoke</code> - 快速冒煙測試，關鍵路徑
+- <code>fast</code> - 快速單元測試（&lt;1s each）
+- <code>unit</code> - 單元測試
+- <code>integration</code> - 集成測試
+- <code>slow</code> - 慢速測試（需要外部資源或計算密集）</p>
+<p><strong>CI 執行策略：</strong>
+- <strong>PR:</strong> 只運行快速測試 (<code>pytest -m "smoke or fast or unit"</code>)
+- <strong>develop:</strong> 運行所有測試（除 slow）(<code>pytest -m "not slow"</code>)
+- <strong>main:</strong> 運行完整測試套件 (<code>pytest -v --cov=. --cov-report=xml</code>)</p>
+<h3 id="65">6.5 版本管理<a class="headerlink" href="#65" title="連結到此標題">&para;</a></h3>
+<h4 id="semantic-versioning">版本號規範（Semantic Versioning）<a class="headerlink" href="#semantic-versioning" title="連結到此標題">&para;</a></h4>
+<p><strong>格式：</strong> <code>MAJOR.MINOR.PATCH</code></p>
+<ul>
+<li><strong>MAJOR:</strong> 不兼容的 API 變更</li>
+<li><strong>MINOR:</strong> 向後兼容的新功能</li>
+<li><strong>PATCH:</strong> 向後兼容的 Bug 修復</li>
+</ul>
+<p><strong>示例：</strong>
+- <code>1.0.0</code> → <code>1.0.1</code> - Bug 修復
+- <code>1.0.1</code> → <code>1.1.0</code> - 新功能
+- <code>1.1.0</code> → <code>2.0.0</code> - 不兼容變更</p>
+<h4 id="_33">發布流程<a class="headerlink" href="#_33" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 1. 創建發布分支
+git checkout develop
+git pull origin develop
+git checkout -b release/v1.0.0
+
+# 2. 準備發布
+# 更新版本號、CHANGELOG.md、運行完整測試、創建標籤
+git tag -a v1.0.0 -m &quot;Release version 1.0.0&quot;
+
+# 3. 合併到 main
+git checkout main
+git merge release/v1.0.0
+git push origin main
+git push origin v1.0.0
+
+# 4. 合併回 develop
+git checkout develop
+git merge release/v1.0.0
+git push origin develop
+git branch -d release/v1.0.0
+</code></pre>
+<hr />
+<h2 id="7">7. 代碼模式和最佳實踐<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 架構模式<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<h4 id="_34">分層架構<a class="headerlink" href="#_34" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────┐
+│         Presentation Layer              │  ← 前端 (React)
+├─────────────────────────────────────────┤
+│         API Gateway Layer               │  ← 中間件 (Auth, CORS, Rate Limit)
+├─────────────────────────────────────────┤
+│         Router Layer                    │  ← FastAPI Routers
+├─────────────────────────────────────────┤
+│         Service Layer                   │  ← 業務邏輯
+├─────────────────────────────────────────┤
+│         Repository Layer               │  ← 數據訪問
+├─────────────────────────────────────────┤
+│         Storage Layer                   │  ← 數據庫、緩存、文件
+└─────────────────────────────────────────┘
+</code></pre>
+<p><strong>關鍵原則：</strong>
+- <strong>關注點分離：</strong> 每層有單一職責
+- <strong>依賴方向：</strong> 上層依賴下層，不可反向
+- <strong>接口編程：</strong> 使用接口（抽象類）進行依賴</p>
+<h4 id="_35">設計模式<a class="headerlink" href="#_35" title="連結到此標題">&para;</a></h4>
+<p><strong>策略模式：</strong></p>
+<pre><code class="language-python"># 抽象策略接口
+class Strategy(ABC):
+    @abstractmethod
+    def generate_signals(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        pass
+
+# 具體實現
+class RSIStrategy(Strategy):
+    def generate_signals(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        # RSI 信號生成
+        pass
+</code></pre>
+<p><strong>工廠模式：</strong></p>
+<pre><code class="language-python">class StrategyFactory:
+    @staticmethod
+    def create_strategy(strategy_type: str, **params) -&gt; Strategy:
+        if strategy_type == &quot;rsi&quot;:
+            return RSIStrategy(**params)
+        elif strategy_type == &quot;macd&quot;:
+            return MACDStrategy(**params)
+        else:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+</code></pre>
+<p><strong>倉庫模式：</strong></p>
+<pre><code class="language-python">class StrategyRepository(ABC):
+    @abstractmethod
+    def find_by_id(self, strategy_id: str) -&gt; Optional[Strategy]:
+        pass
+
+    @abstractmethod
+    def save(self, strategy: Strategy) -&gt; Strategy:
+        pass
+</code></pre>
+<p><strong>適配器模式：</strong></p>
+<pre><code class="language-python">class MarketDataProviderAdapter:
+    def __init__(self, provider: str):
+        self.provider = provider
+
+    def fetch_data(self, symbol: str, start_date: date, end_date: date) -&gt; pd.DataFrame:
+        if self.provider == &quot;yahoo_finance&quot;:
+            return self._fetch_from_yahoo(symbol, start_date, end_date)
+        elif self.provider == &quot;alpha_vantage&quot;:
+            return self._fetch_from_av(symbol, start_date, end_date)
+</code></pre>
+<h3 id="72">7.2 依賴注入<a class="headerlink" href="#72" title="連結到此標題">&para;</a></h3>
+<h4 id="fastapi">FastAPI 依賴注入<a class="headerlink" href="#fastapi" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from fastapi import Depends
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    &quot;&quot;&quot;獲取當前用戶&quot;&quot;&quot;
+    return decode_token(token)
+
+def get_db_session():
+    &quot;&quot;&quot;獲取數據庫會話&quot;&quot;&quot;
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get(&quot;/strategies&quot;)
+async def get_strategies(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+    service: StrategyService = Depends()
+):
+    &quot;&quot;&quot;獲取用戶策略列表&quot;&quot;&quot;
+    return service.get_user_strategies(user.id)
+</code></pre>
+<h3 id="73">7.3 安全最佳實踐<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<h4 id="_36">認證安全<a class="headerlink" href="#_36" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>實踐</th>
+<th>實現</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>密碼哈希</td>
+<td>使用 bcrypt，salt rounds = 12</td>
+</tr>
+<tr>
+<td>JWT 簽名</td>
+<td>使用 RS256 或 HS256</td>
+</tr>
+<tr>
+<td>令牌過期</td>
+<td>Access Token 1 小時，Refresh Token 7 天</td>
+</tr>
+<tr>
+<td>速率限制</td>
+<td>登錄 5 次/分鐘，API 100 次/分鐘</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_37">輸入驗證<a class="headerlink" href="#_37" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from pydantic import BaseModel, Field, validator
+
+class StrategyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    type: StrategyType
+    parameters: Dict
+
+    @validator('name')
+    def name_must_not_contain_special_chars(cls, v):
+        if any(c in v for c in '&lt;&gt;&quot;/\\|?*'):
+            raise ValueError('名稱不能包含特殊字符')
+        return v
+</code></pre>
+<h3 id="74-react">7.4 React 最佳實踐<a class="headerlink" href="#74-react" title="連結到此標題">&para;</a></h3>
+<h4 id="_38">組件設計原則<a class="headerlink" href="#_38" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>單一職責原則</strong></li>
+<li>每個組件只負責一個功能</li>
+<li>保持組件小巧和專注</li>
+<li>
+<p>避免組件過大（建議 &lt; 500 行）</p>
+</li>
+<li>
+<p><strong>可複用性原則</strong></p>
+</li>
+<li>共享組件設計為通用和可配置</li>
+<li>使用 props 進行配置，而不是硬編碼</li>
+<li>
+<p>提取共同邏輯到 Custom Hooks</p>
+</li>
+<li>
+<p><strong>組件組合原則</strong></p>
+</li>
+<li>使用組合優於繼承</li>
+<li>設計組件為可組合的構建模塊</li>
+<li>
+<p>使用 children 和 render props 模式</p>
+</li>
+<li>
+<p><strong>清晰的 Props 接口</strong></p>
+</li>
+<li>為所有組件定義清晰的 props</li>
+<li>使用 JSDoc 或 TypeScript 註釋</li>
+<li>提供默認值和類型檢查</li>
+</ol>
+<h3 id="75">7.5 狀態管理最佳實踐<a class="headerlink" href="#75" title="連結到此標題">&para;</a></h3>
+<h4 id="zustand">Zustand 最佳實踐<a class="headerlink" href="#zustand" title="連結到此標題">&para;</a></h4>
+<p><strong>✅ 應該做：</strong></p>
+<pre><code class="language-javascript">// 保持 store 扁平化
+export const useStore = create((set) =&gt; ({
+  marketScore: { current: null, history: [] },
+  stockDetails: {},
+  loadingStatus: 'idle',
+}));
+
+// 使用 refs 避免 useEffect 重新運行
+const { fetchStage1Overview } = useStore();
+const fetchStage1Ref = useRef(fetchStage1Overview);
+
+useEffect(() =&gt; {
+  fetchStage1Ref.current();
+}, []);
+</code></pre>
+<p><strong>❌ 不應該做：</strong></p>
+<pre><code class="language-javascript">// 不要在 store 中直接調用副作用
+export const useStore = create((set) =&gt; ({
+  saveAndNavigate: () =&gt; {
+    set({ saved: true });
+    navigate('/home');  // ❌ 不應該在 store 中導航
+  },
+}));
+</code></pre>
+<h4 id="react-query_1">React Query 最佳實踐<a class="headerlink" href="#react-query_1" title="連結到此標題">&para;</a></h4>
+<p><strong>✅ 應該做：</strong></p>
+<pre><code class="language-javascript">// 使用語義化的查詢鍵
+const { data } = useApiCache(
+  ['allocation', strategyId, years, rebalanceFreq],
+  fetchAllocationData
+);
+
+// 根據數據類型選擇合適的預設
+const { data: strategies } = useApiCache(
+  'strategies',
+  fetchStrategies,
+  cachePresets.static  // 策略類型很少變化
+);
+
+// 使用 invalidateKeys 自動刷新相關數據
+const { mutate } = useApiMutation(
+  (data) =&gt; apiClient.post('/strategies', data),
+  {
+    invalidateKeys: ['strategies', 'allocation'],
+  }
+);
+</code></pre>
+<p><strong>❌ 不應該做：</strong></p>
+<pre><code class="language-javascript">// 不要在查詢鍵中使用不可序列化的值
+const { data } = useApiCache(
+  ['strategies', () =&gt; fetch],  // ❌ 函數不可序列化
+  fetchStrategies
+);
+
+// 不要過度依賴自動重獲
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: 'always',  // ❌ 可能導致過度請求
+    },
+  },
+});
+</code></pre>
+<h3 id="76">7.6 開發工作流程<a class="headerlink" href="#76" title="連結到此標題">&para;</a></h3>
+<h4 id="_39">新頁面開發流程<a class="headerlink" href="#_39" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 1. 創建頁面組件
+mkdir -p src/pages/new-page
+touch src/pages/new-page/index.jsx
+
+# 2. 使用標準模板（參見 2.3 節）
+
+# 3. 在 App.jsx 中添加路由
+const NewPage = React.lazy(() =&gt; import('./pages/NewPage/index.jsx'));
+
+&lt;Route path=&quot;/new-page&quot; element={
+  &lt;ProtectedRoute isEnabled={true} configLoaded={configLoaded}&gt;
+    &lt;NewPage /&gt;
+  &lt;/ProtectedRoute&gt;
+} /&gt;
+
+# 4. 在 DashboardLayout 中添加導航
+
+# 5. 添加頁面標題
+</code></pre>
+<h4 id="_40">新共享組件開發流程<a class="headerlink" href="#_40" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 1. 創建組件文件
+touch src/components/shared/MyComponent.jsx
+
+# 2. 使用標準模板
+import React from 'react';
+import './MyComponent.css';
+
+const MyComponent = ({ title = 'Default Title', children, onClick }) =&gt; {
+  return (
+    &lt;div className=&quot;my-component&quot; onClick={onClick}&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      {children}
+    &lt;/div&gt;
+  );
+};
+
+export default MyComponent;
+
+# 3. 在 index.js 中導出
+export { default as MyComponent } from './MyComponent';
+
+# 4. 使用組件
+import { MyComponent } from '../components/shared';
+</code></pre>
+<h3 id="77">7.7 代碼質量指標<a class="headerlink" href="#77" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>目標值</th>
+<th>Dashboard 實際值</th>
+<th>評估</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conventional Commits 遵循率</td>
+<td>100%</td>
+<td>100%</td>
+<td>✅ 優秀</td>
+</tr>
+<tr>
+<td>重構率</td>
+<td>15-25%</td>
+<td>16%</td>
+<td>✅ 良好</td>
+</tr>
+<tr>
+<td>測試覆蓋</td>
+<td>15-20%</td>
+<td>6%</td>
+<td>⚠️ 有待提升</td>
+</tr>
+<tr>
+<td>文檔更新</td>
+<td>8-12%</td>
+<td>10%</td>
+<td>✅ 良好</td>
+</tr>
+<tr>
+<td>調試比例</td>
+<td>&lt; 5%</td>
+<td>4%</td>
+<td>✅ 良好</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8">8. 測試和驗證方法<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 測試金字塔<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<pre><code>        /\
+       /E2E\           小數量
+      /──────\
+     / 集成 \          中等數量
+    /────────\
+   /  單元  \         大數量
+  /──────────\
+</code></pre>
+<h3 id="82">8.2 測試覆蓋率目標<a class="headerlink" href="#82" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>目標覆蓋率</th>
+<th>Dashboard 實際覆蓋率</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>後端單元測試</td>
+<td>&gt; 80%</td>
+<td>70%</td>
+<td>-10%</td>
+</tr>
+<tr>
+<td>前端 utils</td>
+<td>&gt; 90%</td>
+<td>100%</td>
+<td>✅ 達標</td>
+</tr>
+<tr>
+<td>前端 components</td>
+<td>&gt; 70%</td>
+<td>~30%</td>
+<td>-40%</td>
+</tr>
+<tr>
+<td>集成測試</td>
+<td>&gt; 70%</td>
+<td>未統計</td>
+<td>-</td>
+</tr>
+<tr>
+<td>總體覆蓋率</td>
+<td>&gt; 80%</td>
+<td>60%</td>
+<td>-20%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83">8.3 單元測試<a class="headerlink" href="#83" title="連結到此標題">&para;</a></h3>
+<h4 id="_41">後端單元測試模板<a class="headerlink" href="#_41" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import pytest
+from datetime import date
+from unittest.mock import Mock
+
+def test_strategy_interface():
+    &quot;&quot;&quot;測試策略正確實現 IStrategy&quot;&quot;&quot;
+    strategy = RSIStrategy(period=14)
+
+    # 檢查 name 屬性
+    assert hasattr(strategy, 'name')
+    assert strategy.name == &quot;rsi_mean_reversion&quot;
+
+    # 檢查 generate_signals 方法存在
+    assert hasattr(strategy, 'generate_signals')
+
+def test_strategy_signal_generation():
+    &quot;&quot;&quot;測試策略生成有效信號&quot;&quot;&quot;
+    strategy = RSIStrategy(period=14)
+
+    # 創建模擬上下文
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[],
+        market_date=date(2024, 1, 15),
+        market_status='CLOSED'
+    )
+    symbols = ['AAPL', 'MSFT']
+
+    # 生成信號
+    signals = strategy.generate_signals(context, symbols)
+
+    # 驗證輸出
+    assert isinstance(signals, list)
+    assert all(isinstance(s, StrategySignal) for s in signals)
+    assert all(s.symbol in symbols for s in signals)
+    assert all(0.0 &lt;= s.confidence &lt;= 1.0 for s in signals)
+
+def test_strategy_position_awareness():
+    &quot;&quot;&quot;測試策略尊重現有持倉&quot;&quot;&quot;
+    strategy = RSIStrategy()
+
+    # 創建帶有現有持倉的上下文
+    existing_pos = PositionState(symbol='AAPL', quantity=100, current_price=150.0)
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[existing_pos],
+        market_date=date(2024, 1, 15),
+        market_status='CLOSED'
+    )
+
+    # 生成信號
+    signals = strategy.generate_signals(context, ['AAPL', 'MSFT'])
+
+    # 應該不為 AAPL 生成 BUY（已持有）
+    aapl_buy_signals = [s for s in signals if s.symbol == 'AAPL' and s.action == SignalAction.BUY]
+    assert len(aapl_buy_signals) == 0
+</code></pre>
+<h4 id="_42">前端單元測試模板<a class="headerlink" href="#_42" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { describe, it, expect, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useApiCache } from './useApiCache';
+
+describe('useApiCache', () =&gt; {
+  it('should fetch data successfully', async () =&gt; {
+    const mockFetch = vi.fn().mockResolvedValue({ data: 'test' });
+
+    const { result } = renderHook(() =&gt;
+      useApiCache('test-key', mockFetch)
+    );
+
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () =&gt; {
+      await result.current.refetch();
+    });
+
+    expect(result.current.data).toEqual({ data: 'test' });
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('should handle errors', async () =&gt; {
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Failed'));
+
+    const { result } = renderHook(() =&gt;
+      useApiCache('test-key', mockFetch)
+    );
+
+    await act(async () =&gt; {
+      await result.current.refetch();
+    });
+
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
+});
+</code></pre>
+<h3 id="84">8.4 集成測試<a class="headerlink" href="#84" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">from unittest.mock import Mock, patch
+
+def test_strategy_with_vectorbt():
+    &quot;&quot;&quot;測試策略與 VectorBT 集成&quot;&quot;&quot;
+    strategy = RSIStrategy()
+
+    # 模擬數據加載器
+    mock_loader = Mock(spec=VBTDataLoader)
+    mock_loader.load_ohlcv.return_value = pd.DataFrame(...)  # 測試數據
+    mock_loader.load_prices.return_value = pd.DataFrame(...)  # 測試數據
+
+    # 創建引擎
+    engine = UnifiedStrategyEngine(
+        data_loader=mock_loader,
+        context_factory=ExecutionContextFactory()
+    )
+
+    # 執行回測
+    result = engine.backtest(
+        strategy=strategy,
+        symbols=['AAPL'],
+        start_date=date(2024, 1, 1),
+        end_date=date(2024, 12, 31),
+        initial_cash=100000
+    )
+
+    # 驗證結果
+    assert 'strategy' in result
+    assert 'total_return' in result
+    assert 'sharpe_ratio' in result
+    assert 'max_drawdown' in result
+    assert 'equity_curve' in result
+    assert result['strategy'] == strategy.name
+</code></pre>
+<h3 id="85-e2e">8.5 E2E 測試<a class="headerlink" href="#85-e2e" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">// cypress/e2e/strategy.spec.cy.js
+describe('Strategy Page E2E', () =&gt; {
+  beforeEach(() =&gt; {
+    cy.visit('/strategies');
+  });
+
+  it('should display strategy list', () =&gt; {
+    cy.get('[data-testid=&quot;strategy-list&quot;]').should('exist');
+    cy.get('[data-testid=&quot;strategy-card&quot;]').should('have.length.greaterThan', 0);
+  });
+
+  it('should create new strategy', () =&gt; {
+    cy.get('[data-testid=&quot;create-strategy-button&quot;]').click();
+
+    cy.get('[data-testid=&quot;strategy-name-input&quot;]').type('Test Strategy');
+    cy.get('[data-testid=&quot;strategy-type-select&quot;]').select('RSI');
+
+    cy.get('[data-testid=&quot;save-button&quot;]').click();
+
+    cy.get('[data-testid=&quot;toast-success&quot;]').should('be.visible');
+    cy.get('[data-testid=&quot;toast-success&quot;]').should('contain', 'Strategy created');
+  });
+
+  it('should run backtest', () =&gt; {
+    cy.get('[data-testid=&quot;strategy-card&quot;]').first().click();
+    cy.get('[data-testid=&quot;run-backtest-button&quot;]').click();
+
+    cy.get('[data-testid=&quot;backtest-results&quot;]').should('be.visible');
+  });
+});
+</code></pre>
+<h3 id="86">8.6 測試最佳實踐<a class="headerlink" href="#86" title="連結到此標題">&para;</a></h3>
+<h4 id="tdd">測試驅動開發（TDD）<a class="headerlink" href="#tdd" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># 1. 編寫失敗測試
+def test_strategy_generates_signals():
+    context = create_test_context()
+    strategy = RSIStrategy()
+    signals = strategy.generate_signals(context, ['AAPL'])
+    assert len(signals) &gt; 0  # 預期失敗
+
+# 2. 編寫最小代碼使測試通過
+def generate_signals(self, context, symbols):
+    return [StrategySignal(symbol='AAPL', action='BUY', confidence=0.8)]
+
+# 3. 重構優化
+def generate_signals(self, context, symbols):
+    signals = []
+    for symbol in symbols:
+        rsi = self._get_rsi(symbol, context.market_date)
+        if rsi &lt; 30:
+            signals.append(StrategySignal(symbol, 'BUY', self._calculate_confidence(rsi, 30)))
+    return signals
+</code></pre>
+<h4 id="_43">測試隔離<a class="headerlink" href="#_43" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>每個測試獨立運行</li>
+<li>使用測試數據庫（不污染生產數據）</li>
+<li>模擬外部依賴（如 API 調用）</li>
+</ul>
+<h4 id="_44">測試覆蓋<a class="headerlink" href="#_44" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>目標覆蓋：</strong> 80%+</li>
+<li><strong>關鍵路徑覆蓋：</strong> 100%</li>
+<li><strong>異常處理覆蓋：</strong> 100%</li>
+</ul>
+<hr />
+<h2 id="9">9. 故障排除常見問題<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="91">9.1 常見問題和解決方案<a class="headerlink" href="#91" title="連結到此標題">&para;</a></h3>
+<h4 id="1api">問題 1：API 請求失敗<a class="headerlink" href="#1api" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- 前端無法獲取數據
+- 顯示錯誤提示</p>
+<p><strong>可能原因：</strong>
+- 後端服務未啟動
+- API 端點配置錯誤
+- 認證失敗
+- 網絡問題</p>
+<p><strong>解決步驟：</strong></p>
+<pre><code class="language-bash"># 1. 檢查後端服務狀態
+curl http://localhost:8000/health
+
+# 2. 檢查 API 端點
+curl http://localhost:8000/api/v1/strategies
+
+# 3. 檢查認證令牌
+# 在瀏覽器開發者工具中查看 Network 標籤
+# 檢查請求頭中的 Authorization
+
+# 4. 查看後端日誌
+cd backend
+# 查看終端輸出或日誌文件
+</code></pre>
+<h4 id="2react-query">問題 2：React Query 緩存問題<a class="headerlink" href="#2react-query" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- 數據未更新
+- 顯示過時數據</p>
+<p><strong>可能原因：</strong>
+- staleTime 設置過長
+- 查詢鍵未變化
+- invalidateKeys 未調用</p>
+<p><strong>解決步驟：</strong></p>
+<pre><code class="language-javascript">// 1. 手動刷新
+const { refetch } = useApiCache('data-key', fetcher);
+refetch();
+
+// 2. 清除緩存
+import { cacheUtils } from '../hooks/useApiCache';
+cacheUtils.invalidate('data-key');
+
+// 3. 調整 staleTime
+const { data } = useApiCache(
+  'data-key',
+  fetcher,
+  { staleTime: 0 }  // 禁用緩存
+);
+
+// 4. 使用 invalidateKeys 自動刷新
+const { mutate } = useApiMutation(
+  updateData,
+  {
+    invalidateKeys: ['data-key'],
+  }
+);
+</code></pre>
+<h4 id="3_2">問題 3：策略回測失敗<a class="headerlink" href="#3_2" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- 回測返回錯誤
+- 無法獲取回測結果</p>
+<p><strong>可能原因：</strong>
+- 數據不足
+- 策略配置錯誤
+- VectorBT 執行錯誤</p>
+<p><strong>解決步驟：</strong></p>
+<pre><code class="language-python"># 1. 檢查數據可用性
+data_loader = VBTDataLoader(connection)
+try:
+    ohlcv = data_loader.load_ohlcv(['AAPL'], start_date, end_date)
+    print(f&quot;Data shape: {ohlcv.shape}&quot;)
+except Exception as e:
+    print(f&quot;Data loading error: {e}&quot;)
+
+# 2. 驗證策略配置
+strategy = RSIStrategy(period=14, buy_threshold=30, sell_threshold=70)
+print(f&quot;Strategy: {strategy.name}&quot;)
+
+# 3. 檢查信號生成
+context = create_test_context()
+signals = strategy.generate_signals(context, ['AAPL'])
+print(f&quot;Signals: {signals}&quot;)
+
+# 4. 運行簡化回測
+try:
+    result = engine.backtest(strategy, ['AAPL'], start_date, end_date, 10000)
+    print(f&quot;Result: {result}&quot;)
+except Exception as e:
+    print(f&quot;Backtest error: {e}&quot;)
+</code></pre>
+<h4 id="4git">問題 4：Git 合併衝突<a class="headerlink" href="#4git" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- Git 合併時出現衝突
+- 無法推送代碼</p>
+<p><strong>可能原因：</strong>
+- 多個開發者修改同一文件
+- 分支未及時同步</p>
+<p><strong>解決步驟：</strong></p>
+<pre><code class="language-bash"># 1. 切換到功能分支
+git checkout feature/my-feature
+
+# 2. 合併最新的 develop
+git merge origin/develop
+
+# 3. 手動解決衝突
+# ... 編輯衝突文件 ...
+
+# 4. 標記衝突已解決
+git add &lt;conflicted-files&gt;
+
+# 5. 完成合併
+git commit
+
+# 6. 推送更新
+git push origin feature/my-feature
+</code></pre>
+<h4 id="5cicd">問題 5：CI/CD 失敗<a class="headerlink" href="#5cicd" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- GitHub Actions 失敗
+- 無法合併 PR</p>
+<p><strong>可能原因：</strong>
+- Lint 失敗
+- 測試失敗
+- 構建失敗</p>
+<p><strong>解決步驟：</strong></p>
+<table>
+<thead>
+<tr>
+<th>失敗類型</th>
+<th>常見原因</th>
+<th>解決方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lint 失敗</td>
+<td>代碼風格不符</td>
+<td>運行 <code>ruff check --fix</code>, <code>black .</code>, <code>npm run lint -- --fix</code></td>
+</tr>
+<tr>
+<td>測試失敗</td>
+<td>測試不透過</td>
+<td>本地運行測試：<code>pytest</code>, <code>npm test</code></td>
+</tr>
+<tr>
+<td>構建失敗</td>
+<td>編譯錯誤</td>
+<td>檢查依賴，清理緩存：<code>rm -rf node_modules &amp;&amp; npm install</code></td>
+</tr>
+<tr>
+<td>覆蓋率下降</td>
+<td>測試不足</td>
+<td>添加測試覆蓋新代碼</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># 本地運行相同檢查
+cd backend
+ruff check --fix
+black .
+isort .
+mypy .
+pytest -m &quot;smoke or fast&quot;
+
+cd frontend
+npm run lint -- --fix
+npm run type-check
+npm test -- --run
+</code></pre>
+<h4 id="6docker">問題 6：Docker 容器問題<a class="headerlink" href="#6docker" title="連結到此標題">&para;</a></h4>
+<p><strong>症狀：</strong>
+- 容器無法啟動
+- 容器崩潰</p>
+<p><strong>可能原因：</strong>
+- Dockerfile 配置錯誤
+- 環境變量缺失
+- 端口衝突</p>
+<p><strong>解決步驟：</strong></p>
+<pre><code class="language-bash"># 1. 檢查容器狀態
+docker ps -a
+
+# 2. 查看容器日誌
+docker logs &lt;container-id&gt;
+
+# 3. 進入容器調試
+docker exec -it &lt;container-id&gt; /bin/bash
+
+# 4. 重建容器
+docker stop &lt;container-id&gt;
+docker rm &lt;container-id&gt;
+docker build -t dashboard-app:latest .
+docker run -d --name dashboard_app dashboard-app:latest
+
+# 5. 檢查環境變量
+docker inspect &lt;container-id&gt; | grep -A 10 Env
+</code></pre>
+<h3 id="92">9.2 調試技巧<a class="headerlink" href="#92" title="連結到此標題">&para;</a></h3>
+<h4 id="_45">後端調試<a class="headerlink" href="#_45" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># 使用 logging
+import logging
+logger = logging.getLogger(__name__)
+
+logger.info(&quot;Processing strategy: %s&quot;, strategy_id)
+logger.debug(&quot;Strategy parameters: %s&quot;, params)
+logger.error(&quot;Failed to load data: %s&quot;, str(e))
+
+# 使用 pdb 調試
+import pdb; pdb.set_trace()  # 斷點
+
+# 使用 print 臨時調試
+print(f&quot;DEBUG: signals = {signals}&quot;)
+</code></pre>
+<h4 id="_46">前端調試<a class="headerlink" href="#_46" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 使用 console.log
+console.log('Debug:', data);
+console.error('Error:', error);
+
+// 使用 debugger
+debugger;  // 斷點
+
+// 使用 React DevTools
+// 查看組件狀態、props、context
+</code></pre>
+<h3 id="93">9.3 性能問題<a class="headerlink" href="#93" title="連結到此標題">&para;</a></h3>
+<h4 id="_47">後端性能優化<a class="headerlink" href="#_47" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># 1. 使用批量查詢
+# ❌ 單次查詢
+for symbol in symbols:
+    data = get_data(symbol)
+
+# ✅ 批量查詢
+data = get_data_batch(symbols)
+
+# 2. 使用緩存
+from functools import lru_cache
+
+@lru_cache(maxsize=100)
+def get_indicator(symbol, period):
+    # 計算指標
+    pass
+
+# 3. 使用向量化操作
+import pandas as pd
+
+# ❌ 循環
+result = []
+for i in range(len(prices)):
+    result.append(calculate_indicator(prices[i]))
+
+# ✅ 向量化
+result = prices.apply(calculate_indicator)
+</code></pre>
+<h4 id="_48">前端性能優化<a class="headerlink" href="#_48" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 1. 使用 React.memo
+const MemoizedComponent = React.memo(({ data }) =&gt; {
+  return &lt;div&gt;{data.value}&lt;/div&gt;;
+});
+
+// 2. 使用 useMemo
+const sortedData = useMemo(
+  () =&gt; data.sort((a, b) =&gt; a.name.localeCompare(b.name)),
+  [data]
+);
+
+// 3. 使用 useCallback
+const handleSave = useCallback(async () =&gt; {
+  await saveData(data);
+}, [data]);
+
+// 4. 使用懶加載
+const HeavyComponent = React.lazy(() =&gt; import('./HeavyComponent'));
+</code></pre>
+<hr />
+<h2 id="10">10. 技術棧清單<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h2>
+<h3 id="101">10.1 後端技術棧<a class="headerlink" href="#101" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>技術</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>核心框架</strong></td>
+<td>FastAPI</td>
+<td>0.100+</td>
+<td>Web 框架，高性能 API</td>
+</tr>
+<tr>
+<td><strong>數據驗證</strong></td>
+<td>Pydantic</td>
+<td>v2</td>
+<td>數據驗證和序列化</td>
+</tr>
+<tr>
+<td><strong>ORM</strong></td>
+<td>SQLAlchemy</td>
+<td>2.0+</td>
+<td>ORM 框架，數據庫抽象層</td>
+</tr>
+<tr>
+<td><strong>數據庫遷移</strong></td>
+<td>Alembic</td>
+<td>1.10+</td>
+<td>數據庫遷移工具</td>
+</tr>
+<tr>
+<td><strong>回測引擎</strong></td>
+<td>Backtrader</td>
+<td>1.9.78+</td>
+<td>事件驅動回測引擎</td>
+</tr>
+<tr>
+<td><strong>回測引擎</strong></td>
+<td>VectorBT</td>
+<td>0.25+</td>
+<td>向量化回測引擎</td>
+</tr>
+<tr>
+<td><strong>數據處理</strong></td>
+<td>NumPy</td>
+<td>1.24+</td>
+<td>數值計算基礎</td>
+</tr>
+<tr>
+<td><strong>數據處理</strong></td>
+<td>Pandas</td>
+<td>2.0+</td>
+<td>數據處理和分析</td>
+</tr>
+<tr>
+<td><strong>分析數據庫</strong></td>
+<td>DuckDB</td>
+<td>0.9+</td>
+<td>內嵌式分析數據庫</td>
+</tr>
+<tr>
+<td><strong>關係數據庫</strong></td>
+<td>PostgreSQL</td>
+<td>15+</td>
+<td>用戶數據、會話、任務</td>
+</tr>
+<tr>
+<td><strong>緩存</strong></td>
+<td>Redis</td>
+<td>7+</td>
+<td>緩存、會話存儲、消息隊列</td>
+</tr>
+<tr>
+<td><strong>任務隊列</strong></td>
+<td>Celery</td>
+<td>5.2+</td>
+<td>異步任務執行</td>
+</tr>
+<tr>
+<td><strong>JWT</strong></td>
+<td>python-jose</td>
+<td>3.3+</td>
+<td>JWT 生成和驗證</td>
+</tr>
+<tr>
+<td><strong>密碼哈希</strong></td>
+<td>passlib</td>
+<td>1.7+</td>
+<td>密碼哈希（bcrypt）</td>
+</tr>
+<tr>
+<td><strong>ASGI 服務器</strong></td>
+<td>uvicorn</td>
+<td>0.23+</td>
+<td>ASGI 服務器</td>
+</tr>
+<tr>
+<td><strong>WSGI 服務器</strong></td>
+<td>gunicorn</td>
+<td>21.2+</td>
+<td>WSGI 服務器（生產）</td>
+</tr>
+<tr>
+<td><strong>測試框架</strong></td>
+<td>pytest</td>
+<td>7.4+</td>
+<td>單元測試框架</td>
+</tr>
+<tr>
+<td><strong>異步測試</strong></td>
+<td>pytest-asyncio</td>
+<td>0.21+</td>
+<td>異步測試支持</td>
+</tr>
+<tr>
+<td><strong>HTTP 客戶端</strong></td>
+<td>httpx</td>
+<td>0.24+</td>
+<td>HTTP 客戶端測試</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102">10.2 前端技術棧<a class="headerlink" href="#102" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>技術</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UI 框架</strong></td>
+<td>React</td>
+<td>19.2.0</td>
+<td>UI 框架</td>
+</tr>
+<tr>
+<td><strong>DOM 渲染</strong></td>
+<td>React DOM</td>
+<td>19.2.0</td>
+<td>DOM 渲染</td>
+</tr>
+<tr>
+<td><strong>構建工具</strong></td>
+<td>Vite</td>
+<td>7.2.4</td>
+<td>構建工具和開發服務器</td>
+</tr>
+<tr>
+<td><strong>路由</strong></td>
+<td>React Router DOM</td>
+<td>7.11.0</td>
+<td>客戶端路由</td>
+</tr>
+<tr>
+<td><strong>狀態管理</strong></td>
+<td>Zustand</td>
+<td>5.0.9</td>
+<td>全局狀態管理</td>
+</tr>
+<tr>
+<td><strong>服務端狀態</strong></td>
+<td>React Query</td>
+<td>5.90.16</td>
+<td>服務端狀態管理和緩存</td>
+</tr>
+<tr>
+<td><strong>CSS 框架</strong></td>
+<td>Bootstrap</td>
+<td>5.3.8</td>
+<td>CSS 框架</td>
+</tr>
+<tr>
+<td><strong>React 組件</strong></td>
+<td>React Bootstrap</td>
+<td>2.10.10</td>
+<td>Bootstrap React 組件</td>
+</tr>
+<tr>
+<td><strong>圖標</strong></td>
+<td>Bootstrap Icons</td>
+<td>1.13.1</td>
+<td>圖標庫</td>
+</tr>
+<tr>
+<td><strong>圖標</strong></td>
+<td>Lucide React</td>
+<td>0.562.0</td>
+<td>額外圖標庫</td>
+</tr>
+<tr>
+<td><strong>圖表</strong></td>
+<td>Chart.js</td>
+<td>4.5.1</td>
+<td>圖表庫</td>
+</tr>
+<tr>
+<td><strong>圖表</strong></td>
+<td>react-chartjs-2</td>
+<td>5.3.1</td>
+<td>Chart.js React 包裝器</td>
+</tr>
+<tr>
+<td><strong>圖表</strong></td>
+<td>ECharts</td>
+<td>6.0.0</td>
+<td>高級圖表庫</td>
+</tr>
+<tr>
+<td><strong>圖表</strong></td>
+<td>echarts-for-react</td>
+<td>3.0.5</td>
+<td>ECharts React 包裝器</td>
+</tr>
+<tr>
+<td><strong>圖表</strong></td>
+<td>Recharts</td>
+<td>3.6.0</td>
+<td>另一個圖表庫</td>
+</tr>
+<tr>
+<td><strong>日期處理</strong></td>
+<td>date-fns</td>
+<td>4.1.0</td>
+<td>日期處理</td>
+</tr>
+<tr>
+<td><strong>日期時間</strong></td>
+<td>Luxon</td>
+<td>3.7.2</td>
+<td>日期時間處理</td>
+</tr>
+<tr>
+<td><strong>HTTP 客戶端</strong></td>
+<td>Axios</td>
+<td>1.13.2</td>
+<td>HTTP 客戶端</td>
+</tr>
+<tr>
+<td><strong>國際化</strong></td>
+<td>i18next</td>
+<td>25.7.4</td>
+<td>國際化框架</td>
+</tr>
+<tr>
+<td><strong>國際化</strong></td>
+<td>react-i18next</td>
+<td>16.5.3</td>
+<td>React i18next 集成</td>
+</tr>
+<tr>
+<td><strong>測試框架</strong></td>
+<td>Vitest</td>
+<td>4.0.18</td>
+<td>單元測試框架</td>
+</tr>
+<tr>
+<td><strong>組件測試</strong></td>
+<td>@testing-library/react</td>
+<td>16.3.1</td>
+<td>React 組件測試</td>
+</tr>
+<tr>
+<td><strong>E2E 測試</strong></td>
+<td>Cypress</td>
+<td>15.9.0</td>
+<td>E2E 測試</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103">10.3 開發工具<a class="headerlink" href="#103" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>版本控制</strong></td>
+<td>Git</td>
+<td>版本控制</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions</td>
+<td>持續集成/持續部署</td>
+</tr>
+<tr>
+<td><strong>容器化</strong></td>
+<td>Docker</td>
+<td>容器化</td>
+</tr>
+<tr>
+<td><strong>容器編排</strong></td>
+<td>Docker Compose</td>
+<td>本地開發環境</td>
+</tr>
+<tr>
+<td><strong>Python Linter</strong></td>
+<td>ruff</td>
+<td>代碼風格檢查</td>
+</tr>
+<tr>
+<td><strong>Python 格式化</strong></td>
+<td>black</td>
+<td>代碼格式化</td>
+</tr>
+<tr>
+<td><strong>Python 類型檢查</strong></td>
+<td>mypy</td>
+<td>類型檢查</td>
+</tr>
+<tr>
+<td><strong>JavaScript Linter</strong></td>
+<td>eslint</td>
+<td>代碼風格檢查</td>
+</tr>
+<tr>
+<td><strong>監控</strong></td>
+<td>Prometheus</td>
+<td>指標收集和監控</td>
+</tr>
+<tr>
+<td><strong>可視化</strong></td>
+<td>Grafana</td>
+<td>可視化儀表板</td>
+</tr>
+<tr>
+<td><strong>日誌</strong></td>
+<td>ELK Stack</td>
+<td>日誌收集和分析</td>
+</tr>
+<tr>
+<td><strong>追蹤</strong></td>
+<td>OpenTelemetry</td>
+<td>分散式追蹤</td>
+</tr>
+</tbody>
+</table>
+<h3 id="104">10.4 工具優先級<a class="headerlink" href="#104" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>優先級</th>
+<th>工具</th>
+<th>熟練度要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0 - 必備</strong></td>
+<td>Git, pytest, Vitest, ruff, black, eslint, FastAPI, React</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td><strong>P1 - 進階</strong></td>
+<td>Cypress, Docker, GitHub Actions, pandas, Chart.js/ECharts</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>P2 - 可選</strong></td>
+<td>DuckDB, Zustand, React Query</td>
+<td>基礎</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_49">知識庫維護<a class="headerlink" href="#_49" title="連結到此標題">&para;</a></h2>
+<h3 id="_50">更新頻率<a class="headerlink" href="#_50" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>每 3-6 個月</strong> 進行全面審查和更新</li>
+<li><strong>每次重大流程變更</strong> 後立即更新</li>
+<li><strong>新工具引入</strong> 後更新工具清單</li>
+<li><strong>版本發布</strong> 後更新版本管理文檔</li>
+</ul>
+<h3 id="_51">反饋機制<a class="headerlink" href="#_51" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>開發者可以通過 Issue 提出改進建議</li>
+<li>定期收集团隊反饋</li>
+<li>根據實際使用情況調整最佳實踐</li>
+</ul>
+<hr />
+<p><strong>知識庫版本:</strong> 1.0
+<strong>最後更新:</strong> 2026-02-21
+<strong>維護者:</strong> Charlie Analyst
+<strong>下次審查:</strong> 2026-08-21</p>
+<p><em>本知識庫整合了 Dashboard 專案的後端架構、前端架構、策略引擎和 Git 開發模式知識，為 Programmer Sub-Agent 提供完整的開發指導。</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

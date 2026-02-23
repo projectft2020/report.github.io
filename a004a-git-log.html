@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 提交歷史分析報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Git 提交歷史分析報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="git">Git 提交歷史分析報告<a class="headerlink" href="#git" title="連結到此標題">&para;</a></h1>
+<p><strong>分析目標：</strong> 分析 Dashboard 的 Git 提交歷史，識別提交模式、頻率、提交信息格式，總結開發週期<br />
+<strong>分析範圍：</strong> 最近 50 次提交<br />
+<strong>Dashboard 路徑：</strong> /Users/charlie/Dashboard<br />
+<strong>分析時間：</strong> 2026-02-21  </p>
+<hr />
+<h2 id="1-50">1. 最近 50 次提交列表<a class="headerlink" href="#1-50" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>提交哈希</th>
+<th>日期時間</th>
+<th>類型</th>
+<th>提交信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>e063dcb</td>
+<td>2026-02-19 21:54:18</td>
+<td>feat</td>
+<td>添加 SKTASR 风险调整收益指标</td>
+</tr>
+<tr>
+<td>a6ccd19</td>
+<td>2026-02-07 01:13:20</td>
+<td>docs</td>
+<td>update deployment configuration and scripts</td>
+</tr>
+<tr>
+<td>9974d0f</td>
+<td>2026-02-06 23:40:14</td>
+<td>fix</td>
+<td>correct indentation errors and add missing theme exports</td>
+</tr>
+<tr>
+<td>d9a0940</td>
+<td>2026-02-06 23:29:52</td>
+<td>refactor</td>
+<td>complete REF-001 through REF-005 plus pytest improvements</td>
+</tr>
+<tr>
+<td>5111618</td>
+<td>2026-02-06 22:21:02</td>
+<td>feat(performance)</td>
+<td>implement database operations for daily scheduler</td>
+</tr>
+<tr>
+<td>bd457a8</td>
+<td>2026-02-06 22:08:11</td>
+<td>feat(backfill)</td>
+<td>add unified rate limiter and priority queue (Option A)</td>
+</tr>
+<tr>
+<td>4502c9b</td>
+<td>2026-02-06 21:35:46</td>
+<td>docs(cache)</td>
+<td>add Skills section to MODULE_REGISTRY (ARCH-008)</td>
+</tr>
+<tr>
+<td>6dcf2f0</td>
+<td>2026-02-06 21:30:16</td>
+<td>docs(frontend)</td>
+<td>add React hooks patterns doc and ESLint rules (ARCH-007)</td>
+</tr>
+<tr>
+<td>ccb11ef</td>
+<td>2026-02-06 21:17:53</td>
+<td>feat(models)</td>
+<td>add Pydantic models for type-safe service layer (ARCH-006)</td>
+</tr>
+<tr>
+<td>4b4870a</td>
+<td>2026-02-06 21:14:50</td>
+<td>feat(tests)</td>
+<td>add contract tests for critical services (ARCH-005)</td>
+</tr>
+<tr>
+<td>c61a411</td>
+<td>2026-02-06 21:04:10</td>
+<td>refactor(code-quality)</td>
+<td>clean debug code from monte_carlo service</td>
+</tr>
+<tr>
+<td>3c1312e</td>
+<td>2026-02-06 21:03:57</td>
+<td>feat(dev-tools)</td>
+<td>add pre-commit hook for debug code detection (ARCH-004)</td>
+</tr>
+<tr>
+<td>ee7c0ff</td>
+<td>2026-02-06 21:03:11</td>
+<td>refactor(type-safety)</td>
+<td>add type coercion utility and update filter base (ARCH-002)</td>
+</tr>
+<tr>
+<td>780702a</td>
+<td>2026-02-06 21:03:03</td>
+<td>refactor(code-quality)</td>
+<td>clean debug code from production (ARCH-001)</td>
+</tr>
+<tr>
+<td>e9cfc27</td>
+<td>2026-02-06 19:09:12</td>
+<td>docs(refactoring)</td>
+<td>add comprehensive refactoring plan for 2026</td>
+</tr>
+<tr>
+<td>aa7f2ff</td>
+<td>2026-02-06 17:31:47</td>
+<td>feat(market)</td>
+<td>implement Market Score 2.0 with momentum indicator</td>
+</tr>
+<tr>
+<td>64d66d7</td>
+<td>2026-02-06 16:52:37</td>
+<td>fix(system)</td>
+<td>remove duplicate API prefix from system routers</td>
+</tr>
+<tr>
+<td>0418706</td>
+<td>2026-02-06 15:19:50</td>
+<td>refactor(adapters)</td>
+<td>standardize signal_mode handling across adapters</td>
+</tr>
+<tr>
+<td>549ece6</td>
+<td>2026-02-06 15:18:30</td>
+<td>fix(strategies)</td>
+<td>fix RSI entry mode real-time calculation and add homepage docs</td>
+</tr>
+<tr>
+<td>6bc5971</td>
+<td>2026-02-06 04:34:38</td>
+<td>refactor</td>
+<td>code quality improvements and architecture cleanup</td>
+</tr>
+<tr>
+<td>4a3444f</td>
+<td>2026-02-06 04:06:10</td>
+<td>refactor</td>
+<td>break down monolithic files into modular components</td>
+</tr>
+<tr>
+<td>3c53b5e</td>
+<td>2026-02-06 02:47:47</td>
+<td>feat(ssot)</td>
+<td>add 5 SSoT registries with comprehensive metadata</td>
+</tr>
+<tr>
+<td>d9a57ba</td>
+<td>2026-02-06 01:57:44</td>
+<td>refactor(skills)</td>
+<td>consolidate and simplify skills (28 → 23)</td>
+</tr>
+<tr>
+<td>2e08eaa</td>
+<td>2026-02-06 01:42:05</td>
+<td>feat(skills)</td>
+<td>add SSoT Registry Pattern skill</td>
+</tr>
+<tr>
+<td>a90e82d</td>
+<td>2026-02-06 01:21:34</td>
+<td>docs</td>
+<td>reorganize planning structure and mark project completion</td>
+</tr>
+<tr>
+<td>192188f</td>
+<td>2026-02-06 01:15:03</td>
+<td>docs</td>
+<td>remove M-#19 and M-22 tasks (cancelled per user request)</td>
+</tr>
+<tr>
+<td>ff3552f</td>
+<td>2026-02-06 01:12:45</td>
+<td>feat(ui)</td>
+<td>add page interaction flow optimization components (Q4-#18)</td>
+</tr>
+<tr>
+<td>6872df5</td>
+<td>2026-02-06 00:57:20</td>
+<td>test(qos)</td>
+<td>add API contract tests and pre-commit hooks</td>
+</tr>
+<tr>
+<td>dd5833e</td>
+<td>2026-02-06 00:43:01</td>
+<td>fix(tests)</td>
+<td>update tests for API changes and skip incompatible tests</td>
+</tr>
+<tr>
+<td>8c85e28</td>
+<td>2026-02-06 00:18:46</td>
+<td>fix(tests)</td>
+<td>correct import paths and add missing HedgeTarget class</td>
+</tr>
+<tr>
+<td>4a6c8d7</td>
+<td>2026-02-06 00:14:51</td>
+<td>refactor(themes)</td>
+<td>modularize chartTheme.js into SSoT registry</td>
+</tr>
+<tr>
+<td>6dcdf4d</td>
+<td>2026-02-06 00:07:34</td>
+<td>feat(ssot)</td>
+<td>implement FEATURE_REGISTRY for access control</td>
+</tr>
+<tr>
+<td>615b73e</td>
+<td>2026-02-05 23:55:38</td>
+<td>feat(ssot)</td>
+<td>implement STRATEGY_TYPE_REGISTRY and MARKET_REGISTRY</td>
+</tr>
+<tr>
+<td>db32e54</td>
+<td>2026-02-05 23:49:09</td>
+<td>test(ssot)</td>
+<td>add test suites for StrategyType, Market, and Feature registries</td>
+</tr>
+<tr>
+<td>bb8d41e</td>
+<td>2026-02-05 20:30:47</td>
+<td>feat(strategies)</td>
+<td>implement Single Source of Truth for strategy parameters</td>
+</tr>
+<tr>
+<td>c652491</td>
+<td>2026-02-05 19:38:55</td>
+<td>refactor(architecture)</td>
+<td>add type safety utilities and contract validation</td>
+</tr>
+<tr>
+<td>312d48b</td>
+<td>2026-02-05 18:17:06</td>
+<td>feat(shadow-trading)</td>
+<td>add position reduction shadow signal capture and fix analysis API</td>
+</tr>
+<tr>
+<td>7c1526</td>
+<td>2026-02-05 15:12:19</td>
+<td>fix(filters)</td>
+<td>remove filter_category from shadow_engine call</td>
+</tr>
+<tr>
+<td>6de918a</td>
+<td>2026-02-05 15:02:38</td>
+<td>debug(technical)</td>
+<td>add comprehensive logging for universal filter params</td>
+</tr>
+<tr>
+<td>5c432d7</td>
+<td>2026-02-05 14:43:45</td>
+<td>fix(technical)</td>
+<td>handle empty Series in volatility reduction stats</td>
+</tr>
+<tr>
+<td>3306c53</td>
+<td>2026-02-05 14:31:19</td>
+<td>debug(technical)</td>
+<td>add extensive logging for volatility reduction</td>
+</tr>
+<tr>
+<td>bb230cb</td>
+<td>2026-02-05 14:24:20</td>
+<td>fix(technical)</td>
+<td>properly handle pandas Series in volatility reduction</td>
+</tr>
+<tr>
+<td>2f801a4</td>
+<td>2026-02-05 14:20:42</td>
+<td>fix(technical)</td>
+<td>handle pandas Series in volatility params</td>
+</tr>
+<tr>
+<td>5b32479</td>
+<td>2026-02-05 14:18:19</td>
+<td>fix(technical)</td>
+<td>ensure volatility params are scalars for formatting</td>
+</tr>
+<tr>
+<td>f003217</td>
+<td>2026-02-05 13:34:45</td>
+<td>feat(technical)</td>
+<td>add volatility-based position size reduction</td>
+</tr>
+<tr>
+<td>2f03251</td>
+<td>2026-02-05 13:23:25</td>
+<td>feat(dual_momentum)</td>
+<td>add volatility reduction to DualMomentumService</td>
+</tr>
+<tr>
+<td>4397a2e</td>
+<td>2026-02-05 13:16:43</td>
+<td>fix(handler)</td>
+<td>add price data loading for volatility weight adjustment</td>
+</tr>
+<tr>
+<td>c340bff</td>
+<td>2026-02-05 13:01:57</td>
+<td>feat(ui)</td>
+<td>add historical volatility reference labels to filter inputs</td>
+</tr>
+<tr>
+<td>e4e7da7</td>
+<td>2026-02-05 05:23:58</td>
+<td>feat(strategy)</td>
+<td>add universal filter system with volatility filter</td>
+</tr>
+<tr>
+<td>df0580d</td>
+<td>2026-02-05 05:00:45</td>
+<td>feat(strategy)</td>
+<td>add ATR Breakout and Squeeze strategies</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 提交類型統計<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 各類型提交數量和比例<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>數量</th>
+<th>比例</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>feat</td>
+<td>17</td>
+<td>34.0%</td>
+<td>新功能開發，佔比最高</td>
+</tr>
+<tr>
+<td>fix</td>
+<td>12</td>
+<td>24.0%</td>
+<td>錯誤修復，第二大類型</td>
+</tr>
+<tr>
+<td>refactor</td>
+<td>8</td>
+<td>16.0%</td>
+<td>代碼重構</td>
+</tr>
+<tr>
+<td>docs</td>
+<td>5</td>
+<td>10.0%</td>
+<td>文檔更新</td>
+</tr>
+<tr>
+<td>test</td>
+<td>3</td>
+<td>6.0%</td>
+<td>測試相關</td>
+</tr>
+<tr>
+<td>debug</td>
+<td>2</td>
+<td>4.0%</td>
+<td>調試記錄</td>
+</tr>
+<tr>
+<td>feat(subtype)</td>
+<td>3</td>
+<td>6.0%</td>
+<td>帶子類型的新功能</td>
+</tr>
+</tbody>
+</table>
+<p><strong>總計：</strong> 50 次提交</p>
+<h3 id="22">2.2 類型分佈分析<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>開發導向強烈：</strong> feat + fix = 58%，顯示活躍的功能開發和維護</li>
+<li><strong>代碼質量重視：</strong> refactor + test = 22%，注重代碼重構和測試</li>
+<li><strong>文檔維護：</strong> docs 佔 10%，文檔更新比例適中</li>
+<li><strong>調試需求：</strong> debug 佔 4%，調試相對較少</li>
+</ul>
+<hr />
+<h2 id="3">3. 提交信息格式分析<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 格式遵循情況<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<p><strong>遵循 Conventional Commits 規範：</strong> ✅ 100%</p>
+<p>所有提交都嚴格遵循 <code>type: description</code> 格式，格式一致性極高。</p>
+<h3 id="32">3.2 提交信息長度分析<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>長度範圍</th>
+<th>數量</th>
+<th>比例</th>
+<th>特點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>短描述 (20-40字符)</td>
+<td>28</td>
+<td>56%</td>
+<td>簡潔明瞭</td>
+</tr>
+<tr>
+<td>中等長度 (41-60字符)</td>
+<td>15</td>
+<td>30%</td>
+<td>信息完整</td>
+</tr>
+<tr>
+<td>長描述 (61+字符)</td>
+<td>7</td>
+<td>14%</td>
+<td>詳細說明</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33">3.3 子類型使用模式<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<p><strong>常用子類型：</strong>
+- <code>feat(performance)</code> - 性能相關功能
+- <code>feat(models)</code> - 數據模型
+- <code>feat(ssot)</code> - 單一數據源
+- <code>feat(strategies)</code> - 策略相關
+- <code>feat(ui)</code> - 用戶界面
+- <code>refactor(code-quality)</code> - 代碼質量
+- <code>fix(technical)</code> - 技術性修復</p>
+<p><strong>子類型使用率：</strong> 6/50 = 12%，顯示有系統性的模塊化開發</p>
+<h3 id="34">3.4 任務標記使用<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<p><strong>任務標記類型：</strong>
+- <code>ARCH-001</code> 到 <code>ARCH-008</code> (架構任務)
+- <code>Q4-#18</code> (季度任務)
+- <code>REF-001</code> 到 <code>REF-005</code> (重構任務)</p>
+<p><strong>標記使用率：</strong> 8/50 = 16%，顯示有結構化的任務管理</p>
+<hr />
+<h2 id="4">4. 提交時間模式分析<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 日期分佈<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>日期</th>
+<th>提交數量</th>
+<th>活躍度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-02-05</td>
+<td>14</td>
+<td>🔴 高強度開發日</td>
+</tr>
+<tr>
+<td>2026-02-06</td>
+<td>34</td>
+<td>🔴 超高強度開發日</td>
+</tr>
+<tr>
+<td>2026-02-07</td>
+<td>1</td>
+<td>🟢 維護日</td>
+</tr>
+<tr>
+<td>2026-02-19</td>
+<td>1</td>
+<td>🟢 維護日</td>
+</tr>
+</tbody>
+</table>
+<p><strong>特點：</strong>
+- <strong>集中式開發：</strong> 96% 的提交集中在 2 天內 (2/5-2/6)
+- <strong>間歇性維護：</strong> 2/7 和 2/19 各 1 次維護提交
+- <strong>開發節奏：</strong> 明顯的 sprint 模式</p>
+<h3 id="42">4.2 時間分佈（小時）<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>時間段</th>
+<th>提交數量</th>
+<th>開發模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>00:00-06:00</td>
+<td>5</td>
+<td>深夜開發</td>
+</tr>
+<tr>
+<td>06:00-12:00</td>
+<td>1</td>
+<td>上午開發</td>
+</tr>
+<tr>
+<td>12:00-18:00</td>
+<td>14</td>
+<td>下午主力開發</td>
+</tr>
+<tr>
+<td>18:00-24:00</td>
+<td>30</td>
+<td>晚間主力開發</td>
+</tr>
+</tbody>
+</table>
+<p><strong>開發時段偏好：</strong>
+- <strong>晚間開發 (18:00-24:00)：</strong> 60%，主要開發時段
+- <strong>下午開發 (12:00-18:00)：</strong> 28%，次要開發時段
+- <strong>深夜開發 (00:00-06:00)：</strong> 10%，深夜調試/趕工
+- <strong>上午開發 (06:00-12:00)：</strong> 2%，最少</p>
+<h3 id="43">4.3 連續開發模式<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<p><strong>最活躍時段：</strong> 2026-02-06 00:07:34 - 23:40:14（近24小時連續開發）
+- <strong>提交密度：</strong> 34 次提交在 24 小時內
+- <strong>平均頻率：</strong> 約 42 分鐘/次提交</p>
+<hr />
+<h2 id="5">5. 開發週期總結<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 開發週期特徵<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<h4 id="sprint">🚀 <strong>Sprint 模式開發</strong><a class="headerlink" href="#sprint" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>時間跨度：</strong> 2-3 天的密集開發 Sprint</li>
+<li><strong>特點：</strong> 高強度、高頻率、集中式</li>
+<li><strong>適用場景：</strong> 重大功能開發、架構重構</li>
+</ul>
+<h4 id="_1">📊 <strong>階段性開發模式</strong><a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h4>
+<pre><code>Phase 1: 基礎架構 (2/5) - 14 commits
+  ├── 策略開發 (volatility filter, ATR Breakout)
+  ├── SSoT 註冊表實現
+  └── 測試套件構建
+
+Phase 2: 系統完善 (2/6) - 34 commits
+  ├── 架構重構 (REF-001 到 REF-005)
+  ├── 代碼質量提升 (ARCH-001 到 ARCH-008)
+  ├── 功能完善 (Market Score 2.0, UI 優化)
+  └── 文檔更新
+
+Phase 3: 維護階段 (2/7, 2/19) - 2 commits
+  ├── 部署配置更新
+  └── 新功能添加 (SKTASR 指標)
+</code></pre>
+<h3 id="52">5.2 技術重點分析<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="_2">🔧 <strong>核心開發主題</strong><a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>單一數據源 (SSoT) 模式：</strong> 多個相關提交</li>
+<li><strong>波動性分析系統：</strong> 集中在技術指標開發</li>
+<li><strong>代碼質量提升：</strong> 重構和類型安全</li>
+<li><strong>測試框架完善：</strong> 合約測試和預提交鉤子</li>
+</ol>
+<h4 id="_3">📈 <strong>開發質量指標</strong><a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>重構率：</strong> 16% (8/50) - 積極的代碼維護</li>
+<li><strong>測試覆蓋：</strong> 6% (3/50) - 有待提升</li>
+<li><strong>文檔更新：</strong> 10% (5/50) - 適中</li>
+<li><strong>調試比例：</strong> 4% (2/50) - 代碼質量較好</li>
+</ul>
+<h3 id="53">5.3 開發習慣分析<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="_4">👨‍💻 <strong>工作模式</strong><a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>夜貓子模式：</strong> 晚間 18:00-24:00 為主要開發時間</li>
+<li><strong>專注時段：</strong> 能夠維持 24 小時的連續開發</li>
+<li><strong>結構化開發：</strong> 使用任務標記和子類型分類</li>
+</ul>
+<h4 id="_5">🎯 <strong>開發風格</strong><a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>模組化導向：</strong> 大量使用子類型分類</li>
+<li><strong>質量意識：</strong> 重視重構和代碼質量</li>
+<li><strong>文檔同步：</strong> 開發與文檔更新同步進行</li>
+</ul>
+<h3 id="54">5.4 建議與優化<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<h4 id="_6">💡 <strong>優化建議</strong><a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>測試覆蓋率提升：</strong> 目前 6% 偏低，建議提高到 15-20%</li>
+<li><strong>開發節奏調整：</strong> 避免過於密集的開發，保持可持續節奏</li>
+<li><strong>文檔整合：</strong> 考慮將 docs 類型提交整合到相關功能開發中</li>
+</ol>
+<h4 id="_7">📅 <strong>未來開發建議</strong><a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>保持 Sprint 模式：</strong> 當前模式效率高，適合重大功能開發</li>
+<li><strong>增加代碼審查：</strong> 在密集開發後增加代碼審查階段</li>
+<li><strong>監控技術債務：</strong> 重構比例 16% 是健康指標，繼續保持</li>
+</ul>
+<hr />
+<p><strong>分析完成時間：</strong> 2026-02-21 00:19<br />
+<strong>分析工具：</strong> Git log 分析 + 人工模式識別<br />
+<strong>建議更新週期：</strong> 每月更新一次提交歷史分析</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

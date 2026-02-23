@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析報告：動態計算勝率和賺賠比 - 無需修改數據庫 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>分析報告：動態計算勝率和賺賠比 - 無需修改數據庫</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="-">分析報告：動態計算勝率和賺賠比 - 無需修改數據庫<a class="headerlink" href="#-" title="連結到此標題">&para;</a></h1>
+<p><strong>分析日期</strong>: 2026-02-22
+<strong>任務</strong>: 分析 vectorBT 回測引擎能否動態計算勝率和賺賠比，而無需修改數據庫
+<strong>Label</strong>: 20260222-114500-a001</p>
+<hr />
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p><strong>結論</strong>: ✅ <strong>可行</strong> - vectorBT 可以直接從回測結果動態計算 win_rate 和 profit_factor，無需修改數據庫架構。</p>
+<p><strong>推薦方案</strong>: <strong>方案 A</strong>（查詢 backtest_runs 表）或 <strong>方案 B</strong>（從 backtest_history 動態重新計算）</p>
+<p><strong>核心優勢</strong>:
+- vectorBT 的 <code>.stats()</code> 方法內建計算勝率和賺賠比的功能
+- 這些指標可從交易記錄（trades）自動計算
+- 零數據庫修改，最小異動原則</p>
+<hr />
+<h2 id="1-vectorbt">1. vectorBT 動態計算能力分析<a class="headerlink" href="#1-vectorbt" title="連結到此標題">&para;</a></h2>
+<h3 id="11-vectorbt">1.1 vectorBT 內建的統計功能<a class="headerlink" href="#11-vectorbt" title="連結到此標題">&para;</a></h3>
+<p>vectorBT 提供了完整的統計計算能力，包括：</p>
+<p><strong>Portfolio.stats() 方法</strong>:</p>
+<pre><code class="language-python">import vectorbt as vbt
+
+# 假設已有回測的 portfolio 對象
+pf = vbt.Portfolio.from_signals(...)
+
+# 獲取完整統計信息
+stats = pf.stats()
+
+# stats 包含以下關鍵指標：
+# - Win Rate [%]        : 勝率（盈利交易 / 總交易）
+# - Profit Factor       : 賺賠比（總盈利 / 總虧損）
+# - Expectancy          : 期望值
+# - Total Trades        : 總交易數
+# - Total Closed Trades : 已平倉交易數
+</code></pre>
+<p><strong>Positions.stats() 方法</strong>:</p>
+<pre><code class="language-python"># 也可以從 positions 對象獲取統計
+positions_stats = pf.positions.stats()
+</code></pre>
+<p><strong>Trades.stats() 方法</strong>:</p>
+<pre><code class="language-python"># 從交易記錄獲取統計
+trades_stats = pf.trades.stats()
+</code></pre>
+<h3 id="12">1.2 計算公式<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<p>vectorBT 使用以下公式計算這些指標：</p>
+<p><strong>勝率 (Win Rate)</strong>:</p>
+<pre><code>Win Rate = (盈利交易數 / 總已平倉交易數) × 100%
+</code></pre>
+<p><strong>賺賠比 (Profit Factor)</strong>:</p>
+<pre><code>Profit Factor = 總盈利金額 / 總虧損金額
+</code></pre>
+<h3 id="13">1.3 數據來源<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<p>這些統計基於 vectorBT 的 <strong>Trade Records</strong>：
+- 每筆交易都有 PnL（盈虧）信息
+- 包含進場價格、出場價格、費用等信息
+- 可以區分已平倉和未平倉交易</p>
+<hr />
+<h2 id="2-backtest_history-vs-backtest_runs">2. backtest_history vs backtest_runs 數據分析<a class="headerlink" href="#2-backtest_history-vs-backtest_runs" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 數據對比<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>表名</th>
+<th>win_rate</th>
+<th>profit_factor</th>
+<th>其他數據</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>backtest_runs</strong></td>
+<td>✅ 已有</td>
+<td>✅ 已有</td>
+<td>完整回測詳情</td>
+<td>回測執行記錄</td>
+</tr>
+<tr>
+<td><strong>backtest_history</strong></td>
+<td>❌ 無</td>
+<td>❌ 無</td>
+<td>歷史快照</td>
+<td>回測歷史記錄</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-backtest_history">2.2 backtest_history 可能存儲的數據<a class="headerlink" href="#22-backtest_history" title="連結到此標題">&para;</a></h3>
+<p>基於典型的回測系統架構，<code>backtest_history</code> 表可能存儲：</p>
+<p><strong>核心數據</strong>:</p>
+<pre><code class="language-sql">- id: 主鍵
+- user_id: 用戶 ID
+- strategy_id: 策略 ID
+- params: 策略參數（JSON）
+- start_date: 回測開始日期
+- end_date: 回測結束日期
+- created_at: 創建時間
+- ... 其他統計數據
+</code></pre>
+<p><strong>可能包含的用於計算的數據</strong>:
+- <strong>trades_json</strong>: 完整交易記錄 JSON 數組
+- <strong>equity_curve</strong>: 資金曲線數據
+- <strong>returns_json</strong>: 收益率數組
+- <strong>raw_results</strong>: vectorBT 原始結果對象的序列化</p>
+<hr />
+<h2 id="3">3. 解決方案分析<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="a-backtest_runs">方案 A：查詢 backtest_runs（已有完整數據）<a class="headerlink" href="#a-backtest_runs" title="連結到此標題">&para;</a></h3>
+<h4 id="_2">實現方式<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<p>修改 <code>BacktestHistoryPage</code> 的查詢邏輯，從 <code>backtest_runs</code> 獲取數據：</p>
+<pre><code class="language-python"># 原始查詢（假設）
+# SELECT * FROM backtest_history WHERE user_id = ?
+
+# 修改後
+SELECT
+    bh.*,
+    br.win_rate,
+    br.profit_factor
+FROM backtest_history bh
+LEFT JOIN backtest_runs br ON bh.run_id = br.id
+WHERE bh.user_id = ?
+ORDER BY bh.created_at DESC
+</code></pre>
+<h4 id="_3">優點<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>✅ <strong>零異動</strong>：無需修改數據庫架構</li>
+<li>✅ <strong>直接使用</strong>：數據已計算並存儲</li>
+<li>✅ <strong>性能最佳</strong>：查詢即可，無需重新計算</li>
+<li>✅ <strong>實現最簡</strong>：只需修改 SQL 查詢</li>
+</ul>
+<h4 id="_4">缺點<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>⚠️ 依賴 <code>backtest_runs</code> 和 <code>backtest_history</code> 的關聯</li>
+<li>⚠️ 如果兩表關聯關係不明確，需要調整</li>
+</ul>
+<h4 id="_5">適用場景<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><code>backtest_history</code> 有外鍵關聯到 <code>backtest_runs</code></li>
+<li>數據一致性好，兩表同步更新</li>
+</ul>
+<hr />
+<h3 id="b-backtest_history">方案 B：從 backtest_history 動態重新計算<a class="headerlink" href="#b-backtest_history" title="連結到此標題">&para;</a></h3>
+<h4 id="_6">實現方式<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<p><strong>步驟 1: 確認 backtest_history 存儲的數據</strong></p>
+<pre><code class="language-python"># 檢查 backtest_history 表結構
+# 重點關注是否有以下字段：
+# - trades: 交易記錄 JSON
+# - params: 策略參數（可能包含足夠信息）
+# - vectorbt_results: 序列化的 vectorBT 對象
+</code></pre>
+<p><strong>步驟 2: 實現動態計算函數</strong></p>
+<pre><code class="language-python">import vectorbt as vbt
+import pandas as pd
+import numpy as np
+
+def calculate_win_rate_profit_factor(history_record):
+    &quot;&quot;&quot;
+    從 backtest_history 記錄動態計算 win_rate 和 profit_factor
+
+    Args:
+        history_record: backtest_history 表的一條記錄
+
+    Returns:
+        tuple: (win_rate, profit_factor)
+    &quot;&quot;&quot;
+
+    # 情況 1: 如果存儲了完整的交易記錄
+    if 'trades' in history_record and history_record['trades']:
+        trades_df = pd.DataFrame(history_record['trades'])
+
+        # 勝率 = 盈利交易數 / 總交易數
+        winning_trades = trades_df[trades_df['pnl'] &gt; 0]
+        win_rate = len(winning_trades) / len(trades_df) * 100
+
+        # 賺賠比 = 總盈利 / 總虧損
+        total_profit = trades_df[trades_df['pnl'] &gt; 0]['pnl'].sum()
+        total_loss = abs(trades_df[trades_df['pnl'] &lt; 0]['pnl'].sum())
+        profit_factor = total_profit / total_loss if total_loss &gt; 0 else float('inf')
+
+        return win_rate, profit_factor
+
+    # 情況 2: 如果存儲了 vectorBT 結果對象
+    elif 'vectorbt_results' in history_record:
+        # 反序列化 vectorBT 對象
+        pf = deserialize_vectorbt_portfolio(history_record['vectorbt_results'])
+
+        # 使用 vectorBT 內建的 stats() 方法
+        stats = pf.stats()
+        win_rate = stats['Win Rate [%]']
+        profit_factor = stats['Profit Factor']
+
+        return win_rate, profit_factor
+
+    # 情況 3: 只有參數，需要重新運行回測（不推薦）
+    elif 'params' in history_record:
+        # 重新構建 vectorBT portfolio
+        # 這需要完整的價格數據
+        pass
+
+    return None, None
+
+def deserialize_vectorbt_portfolio(serialized_data):
+    &quot;&quot;&quot;
+    反序列化 vectorBT Portfolio 對象
+    &quot;&quot;&quot;
+    # 實現反序列化邏輯
+    # 取決於序列化方式：pickle, json, etc.
+    pass
+</code></pre>
+<p><strong>步驟 3: 修改 BacktestHistoryPage</strong></p>
+<pre><code class="language-python"># 在 API 端點中動態計算
+@app.get(&quot;/api/backtest/history&quot;)
+async def get_backtest_history(user_id: int):
+    histories = db.query(backtest_history).filter_by(user_id=user_id).all()
+
+    results = []
+    for history in histories:
+        result = history.to_dict()
+
+        # 動態計算 win_rate 和 profit_factor
+        win_rate, profit_factor = calculate_win_rate_profit_factor(result)
+
+        result['win_rate'] = win_rate
+        result['profit_factor'] = profit_factor
+
+        results.append(result)
+
+    return results
+</code></pre>
+<h4 id="_7">優點<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>✅ <strong>零數據庫異動</strong></li>
+<li>✅ <strong>不依賴外鍵關聯</strong></li>
+<li>✅ <strong>數據獨立</strong>：backtest_history 自給自足</li>
+<li>✅ <strong>靈活</strong>：可以根據需要計算其他指標</li>
+</ul>
+<h4 id="_8">缺點<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>⚠️ <strong>性能開銷</strong>：每次查詢都需要計算</li>
+<li>⚠️ <strong>依賴存儲數據</strong>：需要足夠的交易記錄</li>
+<li>⚠️ <strong>複雜度較高</strong>：需要實現計算邏輯</li>
+</ul>
+<h4 id="_9">優化建議<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<p><strong>緩存機制</strong>:</p>
+<pre><code class="language-python">from functools import lru_cache
+
+@lru_cache(maxsize=100)
+def calculate_win_rate_profit_factor_cached(history_id, trades_hash):
+    # 使用緩存避免重複計算
+    pass
+</code></pre>
+<p><strong>異步計算</strong>:</p>
+<pre><code class="language-python"># 可以在後台預計算並存儲
+# 或者使用懶加載策略
+</code></pre>
+<h4 id="_10">適用場景<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><code>backtest_history</code> 存儲了完整的交易記錄</li>
+<li>不希望依賴 <code>backtest_runs</code> 表</li>
+<li>可以接受一定的性能開銷</li>
+</ul>
+<hr />
+<h3 id="c">方案 C：前端動態計算<a class="headerlink" href="#c" title="連結到此標題">&para;</a></h3>
+<h4 id="_11">實現方式<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<p>如果 <code>backtest_history</code> 返回的交易數據足夠完整，可以在前端進行計算：</p>
+<pre><code class="language-typescript">// React/TypeScript 示例
+interface Trade {
+  pnl: number;
+  entryPrice: number;
+  exitPrice: number;
+  // ... 其他字段
+}
+
+function calculateMetrics(trades: Trade[]) {
+  const winningTrades = trades.filter(t =&gt; t.pnl &gt; 0);
+  const losingTrades = trades.filter(t =&gt; t.pnl &lt; 0);
+
+  const winRate = (winningTrades.length / trades.length) * 100;
+  const totalProfit = winningTrades.reduce((sum, t) =&gt; sum + t.pnl, 0);
+  const totalLoss = Math.abs(losingTrades.reduce((sum, t) =&gt; sum + t.pnl, 0));
+  const profitFactor = totalLoss &gt; 0 ? totalProfit / totalLoss : Infinity;
+
+  return { winRate, profitFactor };
+}
+
+// 在 BacktestHistoryPage 組件中使用
+function BacktestHistoryPage() {
+  const [histories, setHistories] = useState([]);
+
+  const enhancedHistories = histories.map(h =&gt; ({
+    ...h,
+    winRate: calculateMetrics(h.trades).winRate,
+    profitFactor: calculateMetrics(h.trades).profitFactor
+  }));
+
+  return (
+    // 渲染邏輯
+  );
+}
+</code></pre>
+<h4 id="_12">優點<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>✅ <strong>零後端異動</strong></li>
+<li>✅ <strong>實時計算</strong>：無需後端支持</li>
+<li>✅ <strong>用戶體驗</strong>：前端響應快</li>
+</ul>
+<h4 id="_13">缺點<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>❌ <strong>數據傳輸量大</strong>：需要完整的交易記錄</li>
+<li>❌ <strong>安全性問題</strong>：前端可見所有數據</li>
+<li>❌ <strong>性能問題</strong>：大量數據在前端計算可能卡頓</li>
+<li>❌ <strong>不一致性</strong>：不同瀏覽器計算可能有細微差異</li>
+</ul>
+<h4 id="_14">適用場景<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>交易數據量較小（&lt; 1000 筆）</li>
+<li>不敏感的統計數據</li>
+<li>快速原型開發</li>
+</ul>
+<hr />
+<h3 id="d">方案 D：混合方案（推薦）<a class="headerlink" href="#d" title="連結到此標題">&para;</a></h3>
+<h4 id="_15">實現方式<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h4>
+<p>結合方案 A 和方案 B 的優點：</p>
+<pre><code class="language-python">async def get_backtest_history_with_metrics(user_id: int):
+    histories = db.query(backtest_history).filter_by(user_id=user_id).all()
+
+    results = []
+    for history in histories:
+        result = history.to_dict()
+
+        # 優先從 backtest_runs 獲取
+        if 'run_id' in result and result['run_id']:
+            run = db.query(backtest_runs).get(result['run_id'])
+            if run and run.win_rate is not None and run.profit_factor is not None:
+                result['win_rate'] = run.win_rate
+                result['profit_factor'] = run.profit_factor
+                results.append(result)
+                continue
+
+        # 降級到動態計算
+        win_rate, profit_factor = calculate_win_rate_profit_factor(result)
+        result['win_rate'] = win_rate
+        result['profit_factor'] = profit_factor
+
+        results.append(result)
+
+    return results
+</code></pre>
+<h4 id="_16">優點<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>✅ <strong>最佳性能</strong>：優先使用已有數據</li>
+<li>✅ <strong>最大兼容性</strong>：降級機制保證可用</li>
+<li>✅ <strong>零數據庫異動</strong></li>
+<li>✅ <strong>靈活性高</strong></li>
+</ul>
+<h4 id="_17">缺點<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>⚠️ 實現複雜度中等</li>
+<li>⚠️ 需要維護兩種邏輯</li>
+</ul>
+<h4 id="_18">適用場景<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>想要最佳性能和最大兼容性</li>
+<li>未來可能需要遷移到純動態計算</li>
+<li>企業級應用</li>
+</ul>
+<hr />
+<h2 id="4">4. 推薦方案順序<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<p>根據 <strong>最小異動原則</strong> 和 <strong>用戶要求</strong>，推薦順序如下：</p>
+<h3 id="a-backtest_runs_1">🥇 第一選擇：方案 A（查詢 backtest_runs）<a class="headerlink" href="#a-backtest_runs_1" title="連結到此標題">&para;</a></h3>
+<p><strong>理由</strong>:
+- ✅ 實現最簡單，只需修改 SQL 查詢
+- ✅ 性能最佳，無需計算
+- ✅ 數據已存在且準確
+- ✅ 完全符合"最小異動原則"</p>
+<p><strong>實施步驟</strong>:
+1. 確認 <code>backtest_history</code> 和 <code>backtest_runs</code> 的關聯關係
+2. 修改 <code>BacktestHistoryPage</code> 的 SQL 查詢
+3. 測試數據正確性
+4. 部署</p>
+<p><strong>風險</strong>: 低</p>
+<hr />
+<h3 id="d_1">🥈 第二選擇：方案 D（混合方案）<a class="headerlink" href="#d_1" title="連結到此標題">&para;</a></h3>
+<p><strong>理由</strong>:
+- ✅ 兼顧性能和兼容性
+- ✅ 未來擴展性好
+- ✅ 降級機制保證可用性</p>
+<p><strong>實施步驟</strong>:
+1. 實現動態計算函數
+2. 實現優先級查詢邏輯
+3. 添加緩存機制（可選）
+4. 測試各種場景
+5. 部署</p>
+<p><strong>風險</strong>: 中等</p>
+<hr />
+<h3 id="b">🥉 第三選擇：方案 B（純動態計算）<a class="headerlink" href="#b" title="連結到此標題">&para;</a></h3>
+<p><strong>理由</strong>:
+- ✅ 不依賴外鍵關聯
+- ✅ 數據完全獨立
+- ✅ 靈活性高</p>
+<p><strong>實施步驟</strong>:
+1. 確認 <code>backtest_history</code> 存儲的交易數據
+2. 實現動態計算函數
+3. 添加緩存優化
+4. 性能測試
+5. 部署</p>
+<p><strong>風險</strong>: 中高（取決於數據存儲情況）</p>
+<hr />
+<h3 id="c_1">❌ 不推薦：方案 C（前端計算）<a class="headerlink" href="#c_1" title="連結到此標題">&para;</a></h3>
+<p><strong>理由</strong>:
+- ❌ 數據傳輸開銷大
+- ❌ 安全性問題
+- ❌ 性能問題（大量數據）
+- ❌ 不符合最小異動原則（需要修改後端 API 返回更多數據）</p>
+<hr />
+<h2 id="5">5. 實施建議<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 前置調查（必須）<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<p>在選擇方案前，必須確認：</p>
+<ol>
+<li><strong>數據庫表結構</strong>
+   ```sql
+   -- 查看 backtest_history 表結構
+   DESCRIBE backtest_history;</li>
+</ol>
+<p>-- 查看 backtest_runs 表結構
+   DESCRIBE backtest_runs;</p>
+<p>-- 查看關聯關係
+   SELECT
+       CONSTRAINT_NAME,
+       UNIQUE_CONSTRAINT_NAME,
+       REFERENCED_TABLE_NAME
+   FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+   WHERE TABLE_NAME = 'backtest_history';
+   ```</p>
+<ol>
+<li><strong>數據內容檢查</strong>
+   ```sql
+   -- 檢查 backtest_history 是否存儲交易數據
+   SELECT id, params, trades_json, vectorbt_results
+   FROM backtest_history
+   LIMIT 5;</li>
+</ol>
+<p>-- 檢查 win_rate 和 profit_factor 的數據質量
+   SELECT
+       COUNT(*) as total,
+       COUNT(win_rate) as has_win_rate,
+       COUNT(profit_factor) as has_profit_factor
+   FROM backtest_runs;
+   ```</p>
+<ol>
+<li><strong>代碼現狀分析</strong></li>
+<li>找到 <code>BacktestHistoryPage</code> 的實現文件</li>
+<li>分析當前的查詢邏輯</li>
+<li>了解數據模型定義</li>
+</ol>
+<h3 id="52">5.2 選擇決策樹<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<pre><code>開始
+  │
+  ├─ backtest_history 有 run_id 外鍵？
+  │   ├─ 是 ─→ 檢查 backtest_runs 數據完整性
+  │   │       ├─ win_rate/profit_factor 數據完整？
+  │   │       │   ├─ 是 ─→ 🔥 推薦方案 A
+  │   │       │   └─ 否 ─→ 考慮方案 D 或 B
+  │   │
+  │   └─ 否 ─→ 檢查 backtest_history 數據內容
+  │           ├─ 有完整交易記錄？
+  │           │   ├─ 是 ─→ 考慮方案 B 或 D
+  │           │   └─ 否 ─→ 需要數據遷移（超出範圍）
+  │
+  └─ 結束
+</code></pre>
+<h3 id="53">5.3 實施檢查清單<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<p><strong>方案 A 實施檢查清單</strong>:
+- [ ] 確認 backtest_history.run_id 外鍵
+- [ ] 確認 backtest_runs.win_rate/profit_factor 數據完整性
+- [ ] 修改 BacktestHistoryPage SQL 查詢
+- [ ] 單元測試
+- [ ] 集成測試
+- [ ] 性能測試
+- [ ] 代碼審查
+- [ ] 部署</p>
+<p><strong>方案 B 實施檢查清單</strong>:
+- [ ] 確認 backtest_history 數據內容
+- [ ] 實現 calculate_win_rate_profit_factor 函數
+- [ ] 添加緩存機制
+- [ ] 單元測試
+- [ ] 集成測試
+- [ ] 性能測試
+- [ ] 代碼審查
+- [ ] 部署</p>
+<p><strong>方案 D 實施檢查清單</strong>:
+- [ ] 完成方案 A 和方案 B 的檢查清單
+- [ ] 實現優先級查詢邏輯
+- [ ] 添加降級處理
+- [ ] 監控和日誌
+- [ ] 部署</p>
+<hr />
+<h2 id="6">6. 性能對比<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>查詢時間</th>
+<th>計算時間</th>
+<th>總時間</th>
+<th>複雜度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>方案 A</strong></td>
+<td>~10ms</td>
+<td>0ms</td>
+<td>~10ms</td>
+<td>⭐</td>
+</tr>
+<tr>
+<td><strong>方案 B</strong></td>
+<td>~10ms</td>
+<td>~50-200ms</td>
+<td>~60-210ms</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>方案 B（緩存）</strong></td>
+<td>~10ms</td>
+<td>~5ms</td>
+<td>~15ms</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>方案 D</strong></td>
+<td>~10ms</td>
+<td>0-50ms</td>
+<td>~10-60ms</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>方案 C</strong></td>
+<td>~100-500ms*</td>
+<td>~10-50ms</td>
+<td>~110-550ms</td>
+<td>⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p>*取決於數據傳輸量</p>
+<hr />
+<h2 id="7">7. 代碼示例<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71-a">7.1 方案 A 完整示例<a class="headerlink" href="#71-a" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># models.py (假設的模型定義)
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+class BacktestRun(Base):
+    __tablename__ = 'backtest_runs'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer)
+    strategy_id = Column(Integer)
+    params = Column(String)
+    win_rate = Column(Float)
+    profit_factor = Column(Float)
+    created_at = Column(DateTime)
+
+class BacktestHistory(Base):
+    __tablename__ = 'backtest_history'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer)
+    run_id = Column(Integer, ForeignKey('backtest_runs.id'))  # 外鍵
+    snapshot_date = Column(DateTime)
+    # ... 其他字段
+</code></pre>
+<pre><code class="language-python"># api/backtest.py
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from typing import List
+
+router = APIRouter()
+
+@router.get(&quot;/api/backtest/history&quot;)
+async def get_backtest_history(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    &quot;&quot;&quot;
+    獲取回測歷史記錄，包含 win_rate 和 profit_factor
+    &quot;&quot;&quot;
+    # 方案 A: JOIN 查詢
+    query = &quot;&quot;&quot;
+    SELECT
+        bh.*,
+        br.win_rate,
+        br.profit_factor
+    FROM backtest_history bh
+    LEFT JOIN backtest_runs br ON bh.run_id = br.id
+    WHERE bh.user_id = :user_id
+    ORDER BY bh.snapshot_date DESC
+    LIMIT 100
+    &quot;&quot;&quot;
+
+    results = db.execute(query, {&quot;user_id&quot;: user_id}).fetchall()
+
+    # 轉換為字典列表
+    histories = [
+        {
+            &quot;id&quot;: row.id,
+            &quot;run_id&quot;: row.run_id,
+            &quot;snapshot_date&quot;: row.snapshot_date.isoformat(),
+            &quot;win_rate&quot;: float(row.win_rate) if row.win_rate else None,
+            &quot;profit_factor&quot;: float(row.profit_factor) if row.profit_factor else None,
+            # ... 其他字段
+        }
+        for row in results
+    ]
+
+    return {&quot;histories&quot;: histories}
+</code></pre>
+<pre><code class="language-typescript">// frontend/BacktestHistoryPage.tsx
+import React, { useEffect, useState } from 'react';
+
+interface BacktestHistory {
+  id: number;
+  run_id: number | null;
+  snapshot_date: string;
+  win_rate: number | null;
+  profit_factor: number | null;
+  // ... 其他字段
+}
+
+function BacktestHistoryPage() {
+  const [histories, setHistories] = useState&lt;BacktestHistory[]&gt;([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    async function fetchHistories() {
+      try {
+        const response = await fetch('/api/backtest/history?user_id=1');
+        const data = await response.json();
+        setHistories(data.histories);
+      } catch (error) {
+        console.error('Failed to fetch histories:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchHistories();
+  }, []);
+
+  if (loading) return &lt;div&gt;Loading...&lt;/div&gt;;
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Backtest History&lt;/h1&gt;
+      &lt;table&gt;
+        &lt;thead&gt;
+          &lt;tr&gt;
+            &lt;th&gt;Date&lt;/th&gt;
+            &lt;th&gt;Win Rate&lt;/th&gt;
+            &lt;th&gt;Profit Factor&lt;/th&gt;
+          &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+          {histories.map((history) =&gt; (
+            &lt;tr key={history.id}&gt;
+              &lt;td&gt;{new Date(history.snapshot_date).toLocaleDateString()}&lt;/td&gt;
+              &lt;td&gt;{history.win_rate ? `${history.win_rate.toFixed(2)}%` : 'N/A'}&lt;/td&gt;
+              &lt;td&gt;{history.profit_factor ? history.profit_factor.toFixed(2) : 'N/A'}&lt;/td&gt;
+            &lt;/tr&gt;
+          ))}
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default BacktestHistoryPage;
+</code></pre>
+<h3 id="72-b">7.2 方案 B 完整示例<a class="headerlink" href="#72-b" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># utils/backtest_metrics.py
+import pandas as pd
+import numpy as np
+import json
+from typing import Tuple, Optional, Dict, Any
+
+def calculate_win_rate_profit_factor(
+    history_record: Dict[str, Any]
+) -&gt; Tuple[Optional[float], Optional[float]]:
+    &quot;&quot;&quot;
+    從 backtest_history 記錄動態計算 win_rate 和 profit_factor
+
+    Args:
+        history_record: backtest_history 表的一條記錄（字典格式）
+
+    Returns:
+        tuple: (win_rate, profit_factor) 如果無法計算返回 (None, None)
+    &quot;&quot;&quot;
+
+    # 嘗試從 trades_json 字段計算
+    if 'trades_json' in history_record and history_record['trades_json']:
+        try:
+            trades = json.loads(history_record['trades_json'])
+            trades_df = pd.DataFrame(trades)
+
+            return _calculate_from_dataframe(trades_df)
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f&quot;Error parsing trades_json: {e}&quot;)
+            return None, None
+
+    # 嘗試從 params 中的 vectorBT 結果計算
+    if 'params' in history_record and history_record['params']:
+        try:
+            params = json.loads(history_record['params'])
+            if 'vectorbt_portfolio' in params:
+                return _calculate_from_vectorbt(params['vectorbt_portfolio'])
+        except (json.JSONDecodeError, KeyError) as e:
+            print(f&quot;Error parsing params: {e}&quot;)
+
+    # 嘗試從單獨的字段組合計算
+    if all(key in history_record for key in ['winning_trades', 'losing_trades', 'total_profit', 'total_loss']):
+        winning_count = history_record['winning_trades']
+        losing_count = history_record['losing_trades']
+        total_profit = history_record['total_profit']
+        total_loss = history_record['total_loss']
+
+        if (winning_count + losing_count) &gt; 0:
+            win_rate = (winning_count / (winning_count + losing_count)) * 100
+        else:
+            win_rate = None
+
+        if total_loss &gt; 0:
+            profit_factor = total_profit / total_loss
+        else:
+            profit_factor = float('inf') if total_profit &gt; 0 else None
+
+        return win_rate, profit_factor
+
+    return None, None
+
+def _calculate_from_dataframe(trades_df: pd.DataFrame) -&gt; Tuple[float, float]:
+    &quot;&quot;&quot;
+    從交易 DataFrame 計算 win_rate 和 profit_factor
+    &quot;&quot;&quot;
+    if trades_df.empty:
+        return None, None
+
+    # 檢查必需字段
+    required_fields = ['pnl']
+    if not all(field in trades_df.columns for field in required_fields):
+        print(f&quot;Missing required fields: {[f for f in required_fields if f not in trades_df.columns]}&quot;)
+        return None, None
+
+    # 過濾掉 PnL 為 0 的交易（如果需要）
+    filtered_df = trades_df[trades_df['pnl'] != 0]
+
+    if filtered_df.empty:
+        return None, None
+
+    # 勝率 = 盈利交易數 / 總交易數
+    winning_trades = filtered_df[filtered_df['pnl'] &gt; 0]
+    total_trades = len(filtered_df)
+
+    win_rate = (len(winning_trades) / total_trades) * 100
+
+    # 賺賠比 = 總盈利 / 總虧損
+    total_profit = winning_trades['pnl'].sum()
+    losing_trades = filtered_df[filtered_df['pnl'] &lt; 0]
+    total_loss = abs(losing_trades['pnl'].sum())
+
+    if total_loss &gt; 0:
+        profit_factor = total_profit / total_loss
+    else:
+        profit_factor = float('inf') if total_profit &gt; 0 else 0.0
+
+    return win_rate, profit_factor
+
+def _calculate_from_vectorbt(serialized_pf: str) -&gt; Tuple[float, float]:
+    &quot;&quot;&quot;
+    從序列化的 vectorBT Portfolio 對象計算
+    &quot;&quot;&quot;
+    try:
+        # 這裡需要根據實際的序列化方式進行反序列化
+        # 例如使用 pickle, json, 或其他格式
+        import pickle
+        pf = pickle.loads(serialized_pf.encode('latin1'))
+
+        # 使用 vectorBT 的 stats() 方法
+        stats = pf.stats()
+
+        win_rate = stats.get('Win Rate [%]', None)
+        profit_factor = stats.get('Profit Factor', None)
+
+        return win_rate, profit_factor
+    except Exception as e:
+        print(f&quot;Error deserializing vectorBT portfolio: {e}&quot;)
+        return None, None
+
+# 添加緩存裝飾器
+from functools import lru_cache
+
+@lru_cache(maxsize=100)
+def calculate_win_rate_profit_factor_cached(
+    history_id: int,
+    trades_json: str
+) -&gt; Tuple[Optional[float], Optional[float]]:
+    &quot;&quot;&quot;
+    帶緩存的計算函數
+    &quot;&quot;&quot;
+    history_record = {
+        'trades_json': trades_json,
+        'id': history_id
+    }
+    return calculate_win_rate_profit_factor(history_record)
+</code></pre>
+<pre><code class="language-python"># api/backtest.py（方案 B 版本）
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from utils.backtest_metrics import calculate_win_rate_profit_factor
+
+router = APIRouter()
+
+@router.get(&quot;/api/backtest/history&quot;)
+async def get_backtest_history(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    &quot;&quot;&quot;
+    獲取回測歷史記錄，動態計算 win_rate 和 profit_factor
+    &quot;&quot;&quot;
+    # 查詢 backtest_history
+    histories = db.query(BacktestHistory).filter_by(user_id=user_id).all()
+
+    results = []
+    for history in histories:
+        # 轉換為字典
+        result = {
+            &quot;id&quot;: history.id,
+            &quot;run_id&quot;: history.run_id,
+            &quot;snapshot_date&quot;: history.snapshot_date.isoformat(),
+            &quot;trades_json&quot;: history.trades_json,
+            &quot;params&quot;: history.params,
+            # ... 其他字段
+        }
+
+        # 動態計算 win_rate 和 profit_factor
+        win_rate, profit_factor = calculate_win_rate_profit_factor(result)
+
+        result['win_rate'] = win_rate
+        result['profit_factor'] = profit_factor
+
+        # 移除原始數據以減少響應大小
+        del result['trades_json']
+        del result['params']
+
+        results.append(result)
+
+    return {&quot;histories&quot;: results}
+</code></pre>
+<hr />
+<h2 id="8">8. 風險評估與緩解措施<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81-a">8.1 方案 A 風險<a class="headerlink" href="#81-a" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>影響</th>
+<th>概率</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>外鍵關聯不存在</td>
+<td>高</td>
+<td>中</td>
+<td>前置調查表結構</td>
+</tr>
+<tr>
+<td>backtest_runs 數據不完整</td>
+<td>中</td>
+<td>低</td>
+<td>數據驗證和補充</td>
+</tr>
+<tr>
+<td>性能問題（大量 JOIN）</td>
+<td>低</td>
+<td>低</td>
+<td>索引優化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-b">8.2 方案 B 風險<a class="headerlink" href="#82-b" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>影響</th>
+<th>概率</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>backtest_history 數據不足</td>
+<td>高</td>
+<td>中</td>
+<td>前置數據檢查</td>
+</tr>
+<tr>
+<td>計算性能問題</td>
+<td>中</td>
+<td>中</td>
+<td>緩存機制、異步計算</td>
+</tr>
+<tr>
+<td>數據格式變化</td>
+<td>中</td>
+<td>低</td>
+<td>版本控制和降級處理</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-d">8.3 方案 D 風險<a class="headerlink" href="#83-d" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>影響</th>
+<th>概率</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>複雜度增加</td>
+<td>中</td>
+<td>低</td>
+<td>良好的文檔和測試</td>
+</tr>
+<tr>
+<td>維護成本</td>
+<td>低</td>
+<td>低</td>
+<td>模塊化設計</td>
+</tr>
+<tr>
+<td>性能波動</td>
+<td>低</td>
+<td>低</td>
+<td>監控和優化</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9">9. 總結與建議<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="91">9.1 核心發現<a class="headerlink" href="#91" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>✅ <strong>vectorBT 具備完整的動態計算能力</strong></li>
+<li><code>.stats()</code> 方法提供 win_rate 和 profit_factor</li>
+<li>
+<p>基於交易記錄自動計算，無需手動實現</p>
+</li>
+<li>
+<p>✅ <strong>無需修改數據庫架構</strong></p>
+</li>
+<li>所有方案都遵循最小異動原則</li>
+<li>
+<p>可充分利用現有數據</p>
+</li>
+<li>
+<p>✅ <strong>有多種可行方案</strong></p>
+</li>
+<li>從最簡單的 JOIN 查詢到靈活的動態計算</li>
+<li>可根據實際情況選擇</li>
+</ol>
+<h3 id="92">9.2 行動計劃<a class="headerlink" href="#92" title="連結到此標題">&para;</a></h3>
+<p><strong>第一階段：前置調查（1-2小時）</strong>
+1. 檢查數據庫表結構
+2. 驗證數據完整性和關聯關係
+3. 分析現有代碼實現</p>
+<p><strong>第二階段：方案選擇與實施（2-4小時）</strong>
+1. 根據調查結果選擇最佳方案
+2. 實施代碼修改
+3. 編寫單元測試</p>
+<p><strong>第三階段：測試與部署（1-2小時）</strong>
+1. 集成測試
+2. 性能測試
+3. 代碼審查
+4. 部署上線</p>
+<p><strong>總計：4-8 小時</strong></p>
+<h3 id="93">9.3 最終建議<a class="headerlink" href="#93" title="連結到此標題">&para;</a></h3>
+<p><strong>優先推薦：方案 A</strong>
+- ✅ 最符合最小異動原則
+- ✅ 實現簡單，風險最低
+- ✅ 性能最佳</p>
+<p><strong>備選方案：方案 D</strong>
+- ✅ 如果方案 A 不可行，方案 D 是最佳備選
+- ✅ 兼顧性能和兼容性
+- ✅ 適合長期維護</p>
+<hr />
+<h2 id="10">10. 參考資料<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h2>
+<h3 id="vectorbt">vectorBT 官方文檔<a class="headerlink" href="#vectorbt" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><a href="https://vectorbt.dev/api/portfolio/base/">vectorBT Portfolio API</a></li>
+<li><a href="https://vectorbt.dev/api/portfolio/trades/">vectorBT Trades API</a></li>
+<li><a href="https://github.com/polakowo/vectorbt">vectorBT GitHub</a></li>
+</ul>
+<h3 id="_19">相關概念<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>Win Rate (勝率)</strong>: 盈利交易數 / 總交易數 × 100%</li>
+<li><strong>Profit Factor (賺賠比)</strong>: 總盈利金額 / 總虧損金額</li>
+<li><strong>Expectancy (期望值)</strong>: 每筆交易的平均盈虧</li>
+</ul>
+<h3 id="_20">最佳實踐<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>使用 vectorBT 內建方法而非手動計算</li>
+<li>添加適當的緩存機制優化性能</li>
+<li>實施完整的單元測試和集成測試</li>
+<li>監控性能指標</li>
+</ul>
+<hr />
+<p><strong>文檔版本</strong>: 1.0
+<strong>最後更新</strong>: 2026-02-22
+<strong>作者</strong>: Architect Agent
+<strong>審核狀態</strong>: 待審核</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

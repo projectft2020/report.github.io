@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refactoring Plans Analysis - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Refactoring Plans Analysis</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="refactoring-plans-analysis">Refactoring Plans Analysis<a class="headerlink" href="#refactoring-plans-analysis" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> a004b
+<strong>Agent:</strong> Charlie Analyst
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T00:19:00+08:00
+<strong>Source:</strong> /Users/charlie/Dashboard/docs/architecture/</p>
+<hr />
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="連結到此標題">&para;</a></h2>
+<p>Analysis of Dashboard refactoring plans reveals a comprehensive architectural evolution strategy focused on modernizing the frontend state management, unifying strategy systems, and implementing multi-strategy backtesting capabilities. Six major refactoring documents were identified, spanning frontend optimization, backend architecture unification, and futures trading system implementation. Key themes include progressive migration, backward compatibility, and modular design patterns.</p>
+<hr />
+<h2 id="1-document-inventory">1. Document Inventory<a class="headerlink" href="#1-document-inventory" title="連結到此標題">&para;</a></h2>
+<h3 id="11-complete-list-of-refactoring-plans">1.1 Complete List of Refactoring Plans<a class="headerlink" href="#11-complete-list-of-refactoring-plans" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Document</th>
+<th>Path</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>React Query 遷移計畫</td>
+<td><code>current/react-query-migration-plan.md</code></td>
+<td>✅ Adopted</td>
+<td>2026-01-31</td>
+</tr>
+<tr>
+<td>2</td>
+<td>符號類型統一 - 實施報告</td>
+<td><code>current/symbol-type-unification.md</code></td>
+<td>✅ Complete</td>
+<td>2026-01-31</td>
+</tr>
+<tr>
+<td>3</td>
+<td>策略系統實作架構</td>
+<td><code>current/strategy-system-implementation.md</code></td>
+<td>✅ Ready</td>
+<td>2026-01-31</td>
+</tr>
+<tr>
+<td>4</td>
+<td>複合策略系統整合指南</td>
+<td><code>COMPOSITE_INTEGRATION_GUIDE.md</code></td>
+<td>✅ Ready</td>
+<td>2026-01-30</td>
+</tr>
+<tr>
+<td>5</td>
+<td>統一策略引擎設計</td>
+<td><code>unified-strategy-engine-design.md</code></td>
+<td>✅ Design</td>
+<td>2026-01-30</td>
+</tr>
+<tr>
+<td>6</td>
+<td>期貨多策略組合回測系統</td>
+<td><code>futures_multi_strategy_backtest_design.md</code></td>
+<td>✅ Complete</td>
+<td>2026-01-30</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-document-categories">1.2 Document Categories<a class="headerlink" href="#12-document-categories" title="連結到此標題">&para;</a></h3>
+<p><strong>Frontend Refactoring:</strong>
+- React Query Migration Plan</p>
+<p><strong>Backend Architecture:</strong>
+- Symbol Type Unification
+- Strategy System Implementation
+- Unified Strategy Engine Design
+- Composite Strategy Integration Guide</p>
+<p><strong>New Feature Implementation:</strong>
+- Futures Multi-Strategy Backtest System</p>
+<hr />
+<h2 id="2-scope-and-objectives">2. Scope and Objectives<a class="headerlink" href="#2-scope-and-objectives" title="連結到此標題">&para;</a></h2>
+<h3 id="21-react-query">2.1 React Query 遷移計畫<a class="headerlink" href="#21-react-query" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Migrate frontend API data fetching from custom <code>requestProtection.js</code> to React Query (TanStack Query v5.90.16)
+- Progressive migration across all frontend pages</p>
+<p><strong>Objectives:</strong>
+1. Reduce codebase by 30-70% (20-60 lines per page average)
+2. Lower maintenance costs (5 bug fixes in 2 weeks for requestProtection.js)
+3. Implement built-in caching and request deduplication
+4. Minimal bundle impact (only 13KB, 2.4% increase)</p>
+<p><strong>Target Pages:</strong>
+- Phase 1 (Priority P0): StrategyShowcasePage, MomentumPage, AllocationPage, FuturesBacktestPage
+- Phase 2 (Priority P1): MarketScanner, SignalDashboardPage, StrategyPage, PredictionMomentumPage
+- Phase 3 (Priority P2): Remaining 30+ pages (as needed)</p>
+<h3 id="22">2.2 符號類型統一<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Unify symbol type handling in futures backtest system
+- Consolidate <code>get_futures_spec</code>, <code>get_futures_spec_by_str</code>, and <code>get_spec_for_symbol</code></p>
+<p><strong>Objectives:</strong>
+1. Single entry point: <code>get_spec_for_symbol</code>
+2. Support both FuturesSymbol enum and string inputs
+3. Deprecate duplicate functions with warnings
+4. Maintain backward compatibility
+5. Add <code>is_futures</code> property for type identification</p>
+<p><strong>Status:</strong> ✅ Complete - 11 tests passing, all existing tests pass</p>
+<h3 id="23">2.3 策略系統實作架構<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Unified strategy system architecture
+- Strategy classification and implementation status tracking
+- Priority-driven implementation plan</p>
+<p><strong>Objectives:</strong>
+1. Implement technical indicator calculation module (RSI, MACD, SuperTrend, Momentum)
+2. Migrate signal strategies from mock to real indicator calculations
+3. Implement initial return distribution analysis
+4. Build SRS (Strategy Rating System) with 5-dimensional scoring
+5. Implement advanced Bootstrap analysis with Numba acceleration</p>
+<p><strong>Strategy Types:</strong>
+- SignalBased: RSI, MACD, SuperTrend, FIndex
+- Momentum: SP500Momentum, GeneralMomentum
+- DualMomentum: DualMomentum
+- Allocation: FixedWeight (60/40), AllWeather, GoldenButterfly
+- Composite: PortfolioMixer</p>
+<h3 id="24">2.4 複合策略系統整合指南<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Integration of composite and hedged strategy systems
+- Unified backtest router supporting multiple modes
+- Backward compatible architecture</p>
+<p><strong>Objectives:</strong>
+1. Create StrategyOrchestrator for unified strategy execution
+2. Implement 5 backtest modes: Legacy Single, VectorBT Single, Composite, Hedged, Unified
+3. Build HedgedBacktestAdapter with hedge signal integration
+4. Support 4 hedge types: Index Futures, Inverse ETF, Sector ETF, Cross Asset
+5. Maintain full backward compatibility with existing <code>/api/backtest/run</code></p>
+<p><strong>Signal Merge Rules:</strong>
+- unanimous, majority, weighted, priority, conservative, aggressive (6 algorithms)</p>
+<h3 id="25">2.5 統一策略引擎設計<a class="headerlink" href="#25" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Unify new and old strategy systems using IStrategy + VectorBT
+- SignalAdapter for converting IStrategy signals to VectorBT format
+- ExecutionContextFactory for context creation</p>
+<p><strong>Objectives:</strong>
+1. Code unification - all strategies use IStrategy interface
+2. Simplified maintenance - single codebase
+3. Enhanced functionality - SignalMerger for composite strategies
+4. Backward compatible API</p>
+<p><strong>Migration Phases:</strong>
+- Phase 1: Preparation (SignalAdapter, ExecutionContextFactory, UnifiedStrategyEngine)
+- Phase 2: Single strategy migration (RSI, MACD, Momentum, SuperTrend)
+- Phase 3: Composite strategy migration
+- Phase 4: Cleanup and optimization</p>
+<p><strong>Estimated Effort:</strong> 4-5 days</p>
+<h3 id="26">2.6 期貨多策略組合回測系統<a class="headerlink" href="#26" title="連結到此標題">&para;</a></h3>
+<p><strong>Scope:</strong>
+- Multi-strategy portfolio backtest system for futures
+- Support for constant and floating exposure modes
+- Integration with existing performance/analytics modules</p>
+<p><strong>Objectives:</strong>
+1. Implement 3 core strategies: ES_MACD, GC_MACD, ES_BuyHold
+2. Build futures backtest engine with daily signal generation
+3. Support contract sizing based on multiplier and exposure mode
+4. Comprehensive performance analysis (equity curve, metrics, correlation)
+5. API and frontend implementation</p>
+<p><strong>Status:</strong> ✅ Complete - All 4 phases delivered, 102 tests passing</p>
+<p><strong>Capital Management:</strong>
+- Constant Exposure: Fixed investment regardless of P&amp;L
+- Floating Exposure: Investment scales with portfolio value</p>
+<hr />
+<h2 id="3-refactoring-strategies-and-methods">3. Refactoring Strategies and Methods<a class="headerlink" href="#3-refactoring-strategies-and-methods" title="連結到此標題">&para;</a></h2>
+<h3 id="31-progressive-migration-strategy">3.1 Progressive Migration Strategy<a class="headerlink" href="#31-progressive-migration-strategy" title="連結到此標題">&para;</a></h3>
+<p><strong>Pattern:</strong> Used across multiple refactoring plans</p>
+<pre><code class="language-mermaid">Phase 1: Core/Priority → Phase 2: Expansion → Phase 3: Completion
+</code></pre>
+<p><strong>Key Principles:</strong>
+1. <strong>Non-breaking changes</strong> - New and old code coexist during migration
+2. <strong>Priority-driven</strong> - Core/high-traffic components migrated first
+3. <strong>Gradual replacement</strong> - No forced one-time migration
+4. <strong>Backward compatibility</strong> - Old APIs temporarily retained</p>
+<p><strong>Examples:</strong>
+- React Query: New pages use <code>useApiCache</code>, old pages keep <code>requestProtection.js</code>
+- Strategy System: Mock functions kept as fallback during real indicator implementation
+- Symbol Types: Deprecated functions issue warnings but still work</p>
+<h3 id="32-factory-pattern-for-extensibility">3.2 Factory Pattern for Extensibility<a class="headerlink" href="#32-factory-pattern-for-extensibility" title="連結到此標題">&para;</a></h3>
+<p><strong>Used in:</strong> Strategy System, Futures Backtest, Composite Integration</p>
+<pre><code class="language-python"># Strategy Factory Example
+class StrategyFactory:
+    @classmethod
+    def create(cls, strategy_type: str, params: Dict) -&gt; IStrategy:
+        # Factory creates strategy instance dynamically
+        # New strategies only need registration, no engine modification
+</code></pre>
+<p><strong>Benefits:</strong>
+- Open-Closed Principle - open for extension, closed for modification
+- Dynamic strategy registration via decorators
+- Easy to add new strategies without touching core engine code</p>
+<h3 id="33-interface-abstraction">3.3 Interface Abstraction<a class="headerlink" href="#33-interface-abstraction" title="連結到此標題">&para;</a></h3>
+<p><strong>Used in:</strong> Strategy System, Unified Engine</p>
+<pre><code class="language-python"># IStrategy Interface
+class IStrategy(ABC):
+    @abstractmethod
+    def generate_signals(self, context: StrategyContext) -&gt; List[Signal]:
+        pass
+
+    @abstractmethod
+    def calculate_target_weights(self, context: StrategyContext) -&gt; Dict[str, float]:
+        pass
+</code></pre>
+<p><strong>Benefits:</strong>
+- Consistent API across all strategy types
+- Testable with mock implementations
+- Easy to swap implementations</p>
+<h3 id="34-adapter-pattern-for-integration">3.4 Adapter Pattern for Integration<a class="headerlink" href="#34-adapter-pattern-for-integration" title="連結到此標題">&para;</a></h3>
+<p><strong>Used in:</strong> Composite Integration, Unified Engine</p>
+<pre><code class="language-python"># SignalAdapter
+class SignalAdapter:
+    @staticmethod
+    def signals_to_vectorbt(ohlcv_index, signals_by_date):
+        # Convert IStrategy signals to VectorBT format
+</code></pre>
+<pre><code class="language-python"># FuturesResultAdapter
+class FuturesResultAdapter:
+    def to_daily_metrics_input(self, futures_result):
+        # Convert futures results to performance module format
+</code></pre>
+<p><strong>Benefits:</strong>
+- Bridging incompatible interfaces
+- Reusing existing modules without modification
+- Clean separation of concerns</p>
+<h3 id="35-mixed-architecture-for-specialization">3.5 Mixed Architecture for Specialization<a class="headerlink" href="#35-mixed-architecture-for-specialization" title="連結到此標題">&para;</a></h3>
+<p><strong>Used in:</strong> Futures Backtest, Composite Integration</p>
+<p><strong>Principle:</strong> Specialized components + shared modules</p>
+<pre><code>Specialized: Futures backtest engine (handles multipliers, margins)
+    + Shared: Performance/Analytics modules (reused)
+</code></pre>
+<p><strong>Benefits:</strong>
+- Handles domain-specific logic properly
+- Avoids reinventing the wheel
+- Maintains consistency across systems</p>
+<hr />
+<h2 id="4-refactoring-best-practices">4. Refactoring Best Practices<a class="headerlink" href="#4-refactoring-best-practices" title="連結到此標題">&para;</a></h2>
+<h3 id="41-backward-compatibility">4.1 Backward Compatibility<a class="headerlink" href="#41-backward-compatibility" title="連結到此標題">&para;</a></h3>
+<p><strong>Pattern:</strong>
+1. Create new parallel implementation
+2. Mark old implementation as deprecated with warnings
+3. Gradually migrate usage
+4. Remove deprecated code in future version (e.g., v2.0)</p>
+<p><strong>Example - Symbol Type Unification:</strong></p>
+<pre><code class="language-python">@_deprecated(&quot;get_futures_spec is deprecated, use get_spec_for_symbol&quot;)
+def get_futures_spec(symbol: FuturesSymbol):
+    # Warning issued but still works
+</code></pre>
+<p><strong>Timeline:</strong>
+- Immediately: Old functions work with warnings
+- v1.6 (2 weeks): Start replacing call sites
+- v2.0 (1 month): Remove deprecated functions</p>
+<h3 id="42-test-driven-refactoring">4.2 Test-Driven Refactoring<a class="headerlink" href="#42-test-driven-refactoring" title="連結到此標題">&para;</a></h3>
+<p><strong>Approach:</strong>
+1. Write comprehensive tests first
+2. Implement changes
+3. Ensure all tests pass
+4. Add regression tests</p>
+<p><strong>Coverage Examples:</strong>
+- Symbol Type Unification: 11 tests (Enum/string inputs, deprecation warnings)
+- Futures Backtest: 102 tests (4 phases, 101 passing)
+- React Query: Functional verification tests</p>
+<p><strong>Test Pyramid:</strong></p>
+<pre><code>          ┌──────────────┐
+          │   E2E Tests  │  Few critical flows
+          ├──────────────┤
+          │ Integration  │  Medium, API-level
+          ├──────────────┤
+          │  Unit Tests  │  Many, core logic
+          └──────────────┘
+</code></pre>
+<h3 id="43-deprecation-warnings">4.3 Deprecation Warnings<a class="headerlink" href="#43-deprecation-warnings" title="連結到此標題">&para;</a></h3>
+<p><strong>Implementation:</strong></p>
+<pre><code class="language-python">def _deprecated(message: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+</code></pre>
+<p><strong>Benefits:</strong>
+- Smooth transition period
+- Developer awareness without breaking builds
+- Clear migration path</p>
+<h3 id="44-configuration-driven-design">4.4 Configuration-Driven Design<a class="headerlink" href="#44-configuration-driven-design" title="連結到此標題">&para;</a></h3>
+<p><strong>Pattern:</strong> Externalize parameters, allow runtime configuration</p>
+<p><strong>Examples:</strong>
+- React Query: Cache presets (static: 1h, dynamic: 30s)
+- Futures Backtest: Capital management mode (constant/floating)
+- SRS Scoring: Configurable 5-dimension weights</p>
+<p><strong>Benefits:</strong>
+- Easy experimentation
+- A/B testing
+- Environment-specific configurations</p>
+<h3 id="45-clear-documentation">4.5 Clear Documentation<a class="headerlink" href="#45-clear-documentation" title="連結到此標題">&para;</a></h3>
+<p><strong>Each refactoring plan includes:</strong>
+1. <strong>Decision records</strong> - What was decided and why
+2. <strong>Alternative analysis</strong> - Options considered with trade-offs
+3. <strong>Implementation steps</strong> - Phased approach
+4. <strong>Code examples</strong> - Before/after comparisons
+5. <strong>Testing strategy</strong> - How to verify
+6. <strong>Risk assessment</strong> - Potential issues and mitigation</p>
+<h3 id="46-api-versioning-strategy">4.6 API Versioning Strategy<a class="headerlink" href="#46-api-versioning-strategy" title="連結到此標題">&para;</a></h3>
+<p><strong>Pattern:</strong> New endpoints with unified router, keep old endpoints</p>
+<pre><code>New: /api/backtest/unified (auto-selects best mode)
+Old: /api/backtest/run (legacy, forwards internally)
+</code></pre>
+<p><strong>Benefits:</strong>
+- Zero-breaking change for existing clients
+- Gradual adoption of new features
+- Future deprecation path clear</p>
+<hr />
+<h2 id="5-refactoring-workflow-summary">5. Refactoring Workflow Summary<a class="headerlink" href="#5-refactoring-workflow-summary" title="連結到此標題">&para;</a></h2>
+<h3 id="51-standard-refactoring-lifecycle">5.1 Standard Refactoring Lifecycle<a class="headerlink" href="#51-standard-refactoring-lifecycle" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. Discovery &amp; Analysis                                     │
+│  - Identify problem (e.g., high maintenance cost)          │
+│  - Explore alternatives                                     │
+│  - Document decision with trade-offs                        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. Design &amp; Planning                                        │
+│  - Define phases (P0, P1, P2)                                │
+│  - Specify dependencies (DAG)                               │
+│  - Estimate effort and timeline                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. Foundation (Phase 1)                                     │
+│  - Build core components                                    │
+│  - Write comprehensive tests                                │
+│  - Establish backward compatibility layer                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. Incremental Migration (Phase 2+)                         │
+│  - Migrate high-priority components                          │
+│  - Verify results (comparison testing)                      │
+│  - Mark old code as deprecated                               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. Validation &amp; Cleanup                                     │
+│  - Regression testing                                       │
+│  - Performance verification                                  │
+│  - Documentation updates                                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. Completion &amp; Deprecation                                 │
+│  - Remove deprecated code (scheduled)                       │
+│  - Final report                                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="52-common-patterns-across-plans">5.2 Common Patterns Across Plans<a class="headerlink" href="#52-common-patterns-across-plans" title="連結到此標題">&para;</a></h3>
+<p><strong>Priority Definition:</strong>
+- P0: Core functionality, blocking issues
+- P1: Important features, enhanced analysis
+- P2: Extension features</p>
+<p><strong>Dependency Management:</strong>
+- Strong dependency: Phase 2 requires Phase 1
+- Weak dependency: Phase 5 can run in parallel with Phase 1-2</p>
+<p><strong>Verification Standards:</strong>
+- Functional correctness (e.g., RSI calculation &lt; 1% error vs TradingView)
+- Performance benchmarks (e.g., 1000 points &lt; 100ms)
+- Test coverage (&gt; 80% unit tests)</p>
+<h3 id="53-risk-mitigation">5.3 Risk Mitigation<a class="headerlink" href="#53-risk-mitigation" title="連結到此標題">&para;</a></h3>
+<p><strong>Common Risks:</strong>
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|-------------|
+| Bugs from refactoring | Medium | High | Comprehensive testing, keep old code |
+| Learning curve | Medium | Medium | Documentation + examples + code reviews |
+| Performance regression | Low | Medium | Monitoring + performance tests |
+| Missing edge cases | Medium | Medium | High test coverage + CI/CD enforcement |</p>
+<h3 id="54-success-metrics">5.4 Success Metrics<a class="headerlink" href="#54-success-metrics" title="連結到此標題">&para;</a></h3>
+<p><strong>Short-term (1 month):</strong>
+- Core components migrated
+- No functional regression bugs
+- Code reduction &gt; 20%</p>
+<p><strong>Medium-term (3 months):</strong>
+- Major components migrated
+- API requests reduced &gt; 30% (caching effect)
+- Old code maintenance = 0</p>
+<p><strong>Long-term (6 months):</strong>
+- Most components using new architecture
+- Deprecation of legacy systems possible</p>
+<hr />
+<h2 id="6-cross-document-insights">6. Cross-Document Insights<a class="headerlink" href="#6-cross-document-insights" title="連結到此標題">&para;</a></h2>
+<h3 id="61-architectural-consistency">6.1 Architectural Consistency<a class="headerlink" href="#61-architectural-consistency" title="連結到此標題">&para;</a></h3>
+<p><strong>Common Design Patterns:</strong>
+1. <strong>Factory Pattern</strong> - Strategy creation, Futures strategies
+2. <strong>Interface Abstraction</strong> - IStrategy, IFuturesStrategy
+3. <strong>Adapter Pattern</strong> - SignalAdapter, HedgedBacktestAdapter
+4. <strong>Progressive Migration</strong> - React Query, Strategy System, Unified Engine</p>
+<p><strong>Philosophy:</strong>
+- Backward compatibility is paramount
+- New and old systems coexist during transition
+- Clear deprecation path with warnings
+- Comprehensive testing before removal</p>
+<h3 id="62-technology-stack-decisions">6.2 Technology Stack Decisions<a class="headerlink" href="#62-technology-stack-decisions" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend State</td>
+<td>React Query (TanStack Query)</td>
+<td>Built-in caching, deduplication, reduces boilerplate</td>
+</tr>
+<tr>
+<td>Backtest Engine</td>
+<td>VectorBT</td>
+<td>Optimized indicators, concise API</td>
+</tr>
+<tr>
+<td>Acceleration</td>
+<td>Numba</td>
+<td>10-20x speedup for Bootstrap</td>
+</tr>
+<tr>
+<td>API Layer</td>
+<td>FastAPI</td>
+<td>Async support, automatic validation</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>DuckDB</td>
+<td>Embedded, fast analytics, vector operations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-modular-design-principles">6.3 Modular Design Principles<a class="headerlink" href="#63-modular-design-principles" title="連結到此標題">&para;</a></h3>
+<p><strong>Separation of Concerns:</strong>
+- Core layer: IStrategy, VectorBT, ShadowTradingEngine, Analysis
+- Indicator layer: IndicatorCalculator (RSI, MACD, SuperTrend)
+- Strategy layer: RSIStrategy, MACDStrategy, SuperTrendStrategy
+- Analysis layer: ReturnDistribution, SRS, Bootstrap
+- Presentation layer: Frontend components, API endpoints, Dashboard</p>
+<p><strong>Dependency Flow:</strong></p>
+<pre><code>Foundation → Indicators → Strategies → Analysis → Presentation
+</code></pre>
+<hr />
+<h2 id="7-recommendations">7. Recommendations<a class="headerlink" href="#7-recommendations" title="連結到此標題">&para;</a></h2>
+<h3 id="71-immediate-actions">7.1 Immediate Actions<a class="headerlink" href="#71-immediate-actions" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Continue React Query Migration</strong> - Phase 1 core pages (2-3 weeks)</li>
+<li><strong>Implement Indicator Calculator</strong> - Foundation for all signal strategies (2-3 days)</li>
+<li><strong>Migrate Signal Strategies</strong> - Phase 2 with real indicators (3-4 days)</li>
+</ol>
+<h3 id="72-medium-term-priorities">7.2 Medium-term Priorities<a class="headerlink" href="#72-medium-term-priorities" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Implement Return Distribution</strong> - Phase 3 initial analysis (2-3 days)</li>
+<li><strong>Build SRS Scoring System</strong> - Phase 4 5-dimensional evaluation (3-4 days)</li>
+<li><strong>Develop Bootstrap Analysis</strong> - Phase 5 advanced analytics with Numba (2-3 days)</li>
+</ol>
+<h3 id="73-long-term-planning">7.3 Long-term Planning<a class="headerlink" href="#73-long-term-planning" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Remove deprecated code</strong> - After migration complete (v2.0 timeline)</li>
+<li><strong>Standardize on unified backtest engine</strong> - Phase out Backtrader where appropriate</li>
+<li><strong>Extend futures system</strong> - Add more strategies (RSI_LongOnly, Breakout, etc.)</li>
+</ol>
+<h3 id="74-process-improvements">7.4 Process Improvements<a class="headerlink" href="#74-process-improvements" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Establish refactoring standards</strong> - Based on patterns in these documents</li>
+<li><strong>Create refactoring templates</strong> - For common patterns (progressive migration, factory pattern)</li>
+<li><strong>Document decision process</strong> - Keep trade-off analysis for all major decisions</li>
+<li><strong>Automate regression testing</strong> - CI/CD enforcement for test coverage</li>
+</ol>
+<hr />
+<h2 id="8-confidence-limitations">8. Confidence &amp; Limitations<a class="headerlink" href="#8-confidence-limitations" title="連結到此標題">&para;</a></h2>
+<h3 id="81-confidence-level-high">8.1 Confidence Level: <strong>High</strong><a class="headerlink" href="#81-confidence-level-high" title="連結到此標題">&para;</a></h3>
+<p><strong>Reasons:</strong>
+- Documents are comprehensive and well-structured
+- Clear decision records with trade-off analysis
+- Concrete implementation details with code examples
+- Test strategies and success metrics defined
+- Status markers showing implementation progress</p>
+<h3 id="82-data-quality-excellent">8.2 Data Quality: <strong>Excellent</strong><a class="headerlink" href="#82-data-quality-excellent" title="連結到此標題">&para;</a></h3>
+<p><strong>Assessment:</strong>
+- 6 complete refactoring plans analyzed
+- All documents include clear objectives, scope, and methodology
+- Technical details are specific and actionable
+- Testing and verification standards are explicit
+- Timeline and effort estimates are provided</p>
+<h3 id="83-assumptions-made">8.3 Assumptions Made<a class="headerlink" href="#83-assumptions-made" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>ARCH-001 to ARCH-008 format</strong>: Task mentioned these specific document codes, but found actual documents with different naming conventions</li>
+<li><strong>Phase documents</strong>: Task mentioned phase1, phase2, phase3 documents, but these appear to be integrated within comprehensive architecture documents rather than separate files</li>
+<li><strong>Archive directory</strong>: Checked archive folder but it appears the architecture documents in <code>/current/</code> are the active ones, with historical phase information embedded within them</li>
+</ol>
+<h3 id="84-limitations">8.4 Limitations<a class="headerlink" href="#84-limitations" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Cannot execute shell commands</strong>: Tool limitations prevented using <code>find</code> or <code>ls</code> to discover additional files</li>
+<li><strong>Archive access</strong>: Could not fully explore <code>/Users/charlie/Dashboard/docs/architecture/archive/</code> directory</li>
+<li><strong>File system exploration</strong>: Limited to reading specific known file paths</li>
+<li><strong>Missing context</strong>: No access to task-001 through task-015 mentioned in docs structure</li>
+</ol>
+<h3 id="85-what-this-analysis-cannot-address">8.5 What This Analysis Cannot Address<a class="headerlink" href="#85-what-this-analysis-cannot-address" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>Historical context for refactoring decisions (why certain alternatives were chosen)</li>
+<li>Implementation progress beyond documented status</li>
+<li>Team feedback or lessons learned during implementation</li>
+<li>Integration with external systems or dependencies</li>
+<li>Business justification or ROI analysis</li>
+</ul>
+<hr />
+<h2 id="9-metadata">9. Metadata<a class="headerlink" href="#9-metadata" title="連結到此標題">&para;</a></h2>
+<p><strong>Analysis Framework:</strong> Refactoring Pattern Analysis + Architecture Review</p>
+<p><strong>Key Themes Identified:</strong>
+1. Progressive migration (all documents)
+2. Backward compatibility (all documents)
+3. Factory pattern (Strategy, Futures systems)
+4. Interface abstraction (IStrategy, IFuturesStrategy)
+5. Adapter pattern (SignalAdapter, FuturesResultAdapter)
+6. Test-driven approach (comprehensive test coverage)
+7. Documentation-driven design (decision records, trade-offs)</p>
+<p><strong>Success Factors:</strong>
+- Clear phasing with priorities (P0, P1, P2)
+- Concrete acceptance criteria
+- Risk mitigation strategies
+- Success metrics at multiple time horizons
+- Code examples for clarity</p>
+<p><strong>Suggestions for Creative Work:</strong>
+- Create refactoring playbook based on these patterns
+- Develop automated refactoring detection tools
+- Build visual migration progress dashboards
+- Create training materials for team onboarding
+- Establish refactoring decision template</p>
+<hr />
+<p><strong>End of Analysis</strong></p>
+<p><em>Generated by Charlie Analyst</em>
+<em>Input: 6 architecture documents from Dashboard project</em>
+<em>Date: 2026-02-21</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

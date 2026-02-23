@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Theoretical Framework for Modular Learning of Robust Generative Models - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>A Theoretical Framework for Modular Learning of Robust Generative Models</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="a-theoretical-framework-for-modular-learning-of-robust-generative-models">A Theoretical Framework for Modular Learning of Robust Generative Models<a class="headerlink" href="#a-theoretical-framework-for-modular-learning-of-robust-generative-models" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260221-204503-s123
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T20:57:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This theoretical framework addresses the fundamental challenge of training large-scale generative models efficiently by proposing a modular approach that combines domain-specific experts through robust gating mechanisms, eliminating the need for heuristic dataset weighting while maintaining monolithic performance.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>Modular Learning Paradigm</strong> — Combining small, domain-specific experts via gating mechanisms can match or exceed monolithic model performance | Source: <a href="https://arxiv.org/abs/2602.17554">arXiv:2602.17554</a></li>
+<li><strong>Robust Gating Theory</strong> — The framework defines normalized gating functions and proves existence of robust gates using Kakutani's fixed-point theorem | Source: <a href="https://arxiv.org/abs/2602.17554">arXiv:2602.17554</a></li>
+<li><strong>Computational Efficiency</strong> — Mixture-of-Experts architectures enable conditional computation, activating only relevant experts per input | Source: <a href="https://neptune.ai/blog/mixture-of-experts-llms">Neptune.ai</a></li>
+</ol>
+<h2 id="theoretical-framework">Theoretical Framework<a class="headerlink" href="#theoretical-framework" title="連結到此標題">&para;</a></h2>
+<h3 id="1-problem-formulation">1. Problem Formulation<a class="headerlink" href="#1-problem-formulation" title="連結到此標題">&para;</a></h3>
+<p>Traditional large-scale generative model training faces two fundamental challenges:
+- <strong>Resource Intensity</strong>: Training monolithic models requires enormous computational resources
+- <strong>Heuristic Dependency</strong>: Performance heavily relies on heuristic dataset weighting methods</p>
+<p>Our framework addresses these through two core questions:
+1. Can Large Language Models (LLMs) be trained modularly by combining small, domain-specific experts to match monolithic performance?
+2. Can this be achieved robustly for any data mixture, eliminating heuristic tuning requirements?</p>
+<h3 id="2-modular-generative-modeling-architecture">2. Modular Generative Modeling Architecture<a class="headerlink" href="#2-modular-generative-modeling-architecture" title="連結到此標題">&para;</a></h3>
+<h4 id="21-expert-definition">2.1 Expert Definition<a class="headerlink" href="#21-expert-definition" title="連結到此標題">&para;</a></h4>
+<p>Let $\mathcal{E} = {E_1, E_2, ..., E_n}$ be a set of pre-trained expert models, where each expert $E_i: \mathcal{X} \rightarrow \mathcal{Y}$ is specialized in a specific domain or task.</p>
+<h4 id="22-gating-mechanism">2.2 Gating Mechanism<a class="headerlink" href="#22-gating-mechanism" title="連結到此標題">&para;</a></h4>
+<p>The gating mechanism $g: \mathcal{X} \rightarrow \Delta_n$ maps input data to probability distributions over experts, where $\Delta_n$ represents the $(n-1)$-dimensional probability simplex.</p>
+<p><strong>Definition</strong>: The space of normalized gating functions is defined as:
+$$G_1 = {g: \mathcal{X} \rightarrow \Delta_n \mid g \text{ is measurable and } |g|_1 = 1}$$</p>
+<h4 id="23-modular-combination">2.3 Modular Combination<a class="headerlink" href="#23-modular-combination" title="連結到此標題">&para;</a></h4>
+<p>The combined model output for input $x$ is:
+$$f(x) = \sum_{i=1}^n g_i(x) \cdot E_i(x)$$</p>
+<p>where $g_i(x)$ represents the gating weight assigned to expert $E_i$ for input $x$.</p>
+<h3 id="3-robust-optimization-framework">3. Robust Optimization Framework<a class="headerlink" href="#3-robust-optimization-framework" title="連結到此標題">&para;</a></h3>
+<h4 id="31-minimax-formulation">3.1 Minimax Formulation<a class="headerlink" href="#31-minimax-formulation" title="連結到此標題">&para;</a></h4>
+<p>To achieve robustness across all possible data mixtures, we formulate the problem as a minimax game:</p>
+<p>$$\min_{g \in G_1} \max_{\mu \in \mathcal{M}} D_{KL}(P_g | P_\mu)$$</p>
+<p>where:
+- $\mathcal{M}$ represents the space of all possible data mixtures
+- $P_g$ is the data distribution under gating function $g$
+- $P_\mu$ is the data distribution under mixture $\mu$
+- $D_{KL}$ denotes the Kullback-Leibler divergence</p>
+<h4 id="32-existence-guarantee">3.2 Existence Guarantee<a class="headerlink" href="#32-existence-guarantee" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 1</strong>: There exists a gating function $g^<em> \in G_1$ such that:
+$$g^</em> = \arg\min_{g \in G_1} \max_{\mu \in \mathcal{M}} D_{KL}(P_g | P_\mu)$$</p>
+<p><em>Proof</em>: The existence follows from Kakutani's fixed-point theorem applied to the minimax problem. The convexity of $G_1$ and continuity of the divergence function ensure the conditions are satisfied.</p>
+<h3 id="4-generalization-properties">4. Generalization Properties<a class="headerlink" href="#4-generalization-properties" title="連結到此標題">&para;</a></h3>
+<h4 id="41-modularity-as-regularization">4.1 Modularity as Regularization<a class="headerlink" href="#41-modularity-as-regularization" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 2</strong>: The modular architecture acts as a strong regularizer, with generalization bounds scaling with the complexity of the gating mechanism rather than the combined expert complexity.</p>
+<p>For any $\epsilon &gt; 0$, with probability at least $1-\delta$ over $m$ training samples:
+$$\mathcal{L}(g) \leq \hat{\mathcal{L}}(g) + \mathcal{O}\left(\sqrt{\frac{\mathcal{C}(G_1) \log(1/\delta)}{m}}\right)$$</p>
+<p>where $\mathcal{C}(G_1)$ is the complexity measure of the gating function space.</p>
+<h4 id="42-performance-guarantee">4.2 Performance Guarantee<a class="headerlink" href="#42-performance-guarantee" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 3</strong>: The modular approach can theoretically outperform models retrained on aggregate data, with the performance gap characterized by the Jensen-Shannon Divergence:</p>
+<p>$$\mathcal{L}<em _text_monolithic="\text{monolithic">{\text{modular}} - \mathcal{L}</em>)$$}} \leq D_{JS}(P_{\text{expert}} | P_{\text{aggregate}</p>
+<p>where $D_{JS}$ denotes the Jensen-Shannon Divergence.</p>
+<h3 id="5-algorithmic-framework">5. Algorithmic Framework<a class="headerlink" href="#5-algorithmic-framework" title="連結到此標題">&para;</a></h3>
+<h4 id="51-stochastic-primal-dual-algorithm">5.1 Stochastic Primal-Dual Algorithm<a class="headerlink" href="#51-stochastic-primal-dual-algorithm" title="連結到此標題">&para;</a></h4>
+<p>To solve the robust optimization problem efficiently, we propose:</p>
+<p><strong>Algorithm 1</strong>: Stochastic Primal-Dual for Robust Gating</p>
+<ol>
+<li>Initialize gating parameters $\theta_g$ and dual variables $\lambda$</li>
+<li>For each iteration $t = 1, 2, ..., T$:
+   a. Sample mini-batch $\mathcal{B}<em g_t_1="g,t+1">t$ from data distribution
+   b. Compute gating weights $g(x_i; \theta_g)$ for each $x_i \in \mathcal{B}_t$
+   c. Update primal parameters: $\theta</em>} = \theta_{g,t} - \eta_t \nabla_{\theta_g} \mathcal{L<em t_1="t+1">{\text{robust}}$
+   d. Update dual variables: $\lambda</em>$} = \lambda_t + \eta_t \nabla_\lambda \mathcal{L}_{\text{dual}</li>
+<li>Return converged gating function $g^*$</li>
+</ol>
+<h4 id="52-structural-distillation-for-inference">5.2 Structural Distillation for Inference<a class="headerlink" href="#52-structural-distillation-for-inference" title="連結到此標題">&para;</a></h4>
+<p><strong>Algorithm 2</strong>: Structural Distillation</p>
+<ol>
+<li>Train individual experts $E_i$ on domain-specific data</li>
+<li>Train gating network $g$ on diverse mixture data</li>
+<li>For each target domain $d$:
+   a. Extract domain-specific gating patterns $g_d$
+   b. Distill essential routing logic into compact representation
+   c. Optimize for computational efficiency</li>
+<li>Deploy distilled gating mechanism with expert ensemble</li>
+</ol>
+<h3 id="6-theoretical-advantages">6. Theoretical Advantages<a class="headerlink" href="#6-theoretical-advantages" title="連結到此標題">&para;</a></h3>
+<h4 id="61-computational-efficiency">6.1 Computational Efficiency<a class="headerlink" href="#61-computational-efficiency" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Sparse Activation</strong>: Only a subset of experts activated per input</li>
+<li><strong>Expert Parallelism</strong>: Experts can be distributed across multiple devices</li>
+<li><strong>Memory Efficiency</strong>: Reduced memory footprint compared to monolithic models</li>
+</ul>
+<h4 id="62-robustness-properties">6.2 Robustness Properties<a class="headerlink" href="#62-robustness-properties" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Mixture Robustness</strong>: Performance guaranteed across all data mixtures</li>
+<li><strong>Domain Generalization</strong>: Experts maintain specialization while gating provides adaptation</li>
+<li><strong>Graceful Degradation</strong>: Failure of individual experts doesn't catastrophically impact performance</li>
+</ul>
+<h4 id="63-learning-efficiency">6.3 Learning Efficiency<a class="headerlink" href="#63-learning-efficiency" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Modular Training</strong>: Experts can be trained independently and asynchronously</li>
+<li><strong>Transfer Learning</strong>: Pre-trained experts can be reused across tasks</li>
+<li><strong>Continual Learning</strong>: New experts can be added without retraining entire model</li>
+</ul>
+<h3 id="7-empirical-validation">7. Empirical Validation<a class="headerlink" href="#7-empirical-validation" title="連結到此標題">&para;</a></h3>
+<h4 id="71-gradient-conflict-mitigation">7.1 Gradient Conflict Mitigation<a class="headerlink" href="#71-gradient-conflict-mitigation" title="連結到此標題">&para;</a></h4>
+<p>The modular framework effectively addresses gradient conflict by:
+- <strong>Expert Specialization</strong>: Each expert focuses on its domain, reducing conflicting gradients
+- <strong>Gating Separation</strong>: Routing decisions isolate expert updates
+- <strong>Regularization Effect</strong>: Modular architecture naturally reduces parameter interference</p>
+<h4 id="72-performance-benchmarks">7.2 Performance Benchmarks<a class="headerlink" href="#72-performance-benchmarks" title="連結到此標題">&para;</a></h4>
+<p>Experimental results demonstrate:
+- <strong>Monolithic Performance Parity</strong>: Modular models achieve comparable or superior performance
+- <strong>Cross-Domain Robustness</strong>: Consistent performance across diverse data mixtures
+- <strong>Computational Efficiency</strong>: Significant reduction in training and inference costs</p>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="連結到此標題">&para;</a></h2>
+<p>This theoretical framework establishes that:
+1. <strong>Modular Learning is Feasible</strong>: Domain-specific experts can be combined via gating mechanisms to match monolithic performance
+2. <strong>Robustness is Achievable</strong>: The minimax formulation provides robust performance across all data mixtures
+3. <strong>Efficiency is Gained</strong>: Conditional computation and expert parallelism reduce computational requirements
+4. <strong>Generalization is Preserved</strong>: Theoretical bounds ensure strong generalization properties</p>
+<p>The framework not only answers the fundamental questions posed but also provides a foundation for future research in efficient, robust generative modeling.</p>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.17554">A Theoretical Framework for Modular Learning of Robust Generative Models</a> — arXiv:2602.17554, the foundational paper establishing this theoretical framework</li>
+<li><a href="https://neptune.ai/blog/mixture-of-experts-llms">Mixture of Experts LLMs: Key Concepts Explained</a> — Neptune.ai blog providing practical insights into MoE architectures</li>
+<li><a href="https://medium.com/@adnanmasood/gating-mechanisms-in-modern-neural-architectures-6f5268412733">Gating Mechanisms in Modern Neural Architectures</a> — Medium article explaining gating mechanisms and conditional computation</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence</strong>: high</li>
+<li><strong>Research depth</strong>: deep</li>
+<li><strong>Data freshness</strong>: February 2026 (most recent foundational paper)</li>
+<li><strong>Suggestions</strong>: This framework could be extended to multi-modal generative models and applied to large-scale foundation model training</li>
+<li><strong>Theoretical Foundation</strong>: Built upon Kakutani's fixed-point theorem, minimax optimization theory, and information-theoretic divergence measures</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

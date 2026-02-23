@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>因子投資在台股和美股的應用：研究報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>因子投資在台股和美股的應用：研究報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">因子投資在台股和美股的應用：研究報告<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務編號：</strong> 20260223-050852-f06
+<strong>研究人員：</strong> Charlie Research
+<strong>狀態：</strong> 已完成
+<strong>時間戳：</strong> 2026-02-23T05:22:00Z</p>
+<h2 id="_2">研究摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>本報告深入探討因子投資在台灣股市和美國股市的應用，分析兩個市場的因子特徵、歷史表現、市場結構差異以及實務應用建議。研究發現，雖然兩個市場都存在有效的因子溢酬，但在因子有效性、市場結構影響及實務應用上存在顯著差異。美國市場擁有更成熟的因子理論體系（如Fama-French模型），而台灣市場則具有獨特的內部人持股和庫藏股等特有因子。</p>
+<h2 id="_3">主要發現<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>台股因子特徵</strong> — 內部人持股因子（特別是經理人持股）在台股市場表現顯著，庫藏股回購對股價有正面影響 | Source: TEJ研究, 2024</p>
+</li>
+<li>
+<p><strong>美股因子理論</strong> — Fama-French三因子和五因子模型在美股市場廣泛應用，規模、價值、動能、獲利能力和投資因子構成核心框架 | Source: Wikipedia, 2025</p>
+</li>
+<li>
+<p><strong>市場結構差異</strong> — 美股市場效率較高，因子溢酬較穩定；台股市場結構較為特殊，流動性集中且易受政策影響 | Source: 多學術研究, 2022-2025</p>
+</li>
+<li>
+<p><strong>實務應用策略</strong> — 跨市場配置可分散風險，但需考慮交易成本和流動性限制，建議採用量化方法進行因子組合管理 | Source: 綜合分析, 2026</p>
+</li>
+</ol>
+<h2 id="_4">詳細分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="1">1. 台股市場的因子特徵<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<h4 id="11">1.1 台股有效的因子<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h4>
+<p><strong>價值因子</strong>
+- 台股市場的價值因子主要包括本益比、股價淨值比、股價營收比等指標
+- 根據研究，低本益比和低股價淨值比的股票在長期表現優於大盤
+- 葉怡成博士的研究顯示，以「股東權益報酬率、股價淨值比、最近一個月股票報酬率」三個因子的加權評分選股法，在過去20年有良好表現</p>
+<p><strong>動能因子</strong>
+- 一年期動能因子（MOM1y）在台股市場具有顯著的預測能力
+- 研究顯示，過去252個交易日的最高價動能因子IC值達到0.05以上，屬於有效因子
+- 但動能因子存在波動性較高的問題，需要與其他因子結合使用</p>
+<p><strong>品質因子</strong>
+- 股東權益報酬率（ROE）是台股市場重要的品質因子
+- 營業利益率、資產報酬率等財務指標也顯示出選股效果
+- 品質因子在經濟衰退期表現尤其突出</p>
+<h4 id="12">1.2 台股因子溢酬的歷史數據<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h4>
+<p><strong>歷史表現數據</strong>
+- 根據TEJ研究（2013-2024年），經理人持股月變動率因子組合的年化報酬率達到15-20%
+- 內部人持股因子與動能因子結合的組合策略，年化報酬率可提升至25%以上
+- 庫藏股回購公告後，股價在3-6個月內平均上漲5-8%</p>
+<p><strong>因子穩定性分析</strong>
+- 規模因子在台股市場的效果備受質疑，其顯著性及夏普值皆不明顯
+- 動能因子雖有效但波動性較大，需風險管理
+- 內部人持股因子相對穩定，特別是經理人持股相關指標</p>
+<h4 id="13">1.3 台股特有因子<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h4>
+<p><strong>庫藏股因子</strong>
+- 台灣特有的庫藏股制度為因子投資提供了獨特機會
+- 公司回購庫藏股通常釋放正面信號，但需綜合分析公司歷史執行、股價位階及基本面表現
+- 庫藏股回購價格、執行率和公司基本面決定其真正效果</p>
+<p><strong>內部人持股因子</strong>
+- 董監事持股、經理人持股和主要股東持股（持股10%以上）構成重要因子
+- 研究發現，經理人持股因子的表現顯著優於董監事和主要股東持股因子
+- 經理人持股月變動率是穩定的選股指標，IC值達到有效水準</p>
+<p><strong>政策影響因子</strong>
+- 台股市場受政策影響較大，包括產業政策、稅收政策等
+- 政府基金操作對市場流動性有顯著影響
+- 兩岸關係變化也會影響特定產業的因子表現</p>
+<h3 id="2">2. 美股市場的因子特徵<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<h4 id="21-fama-french">2.1 美股有效因子（Fama-French模型）<a class="headerlink" href="#21-fama-french" title="連結到此標題">&para;</a></h4>
+<p><strong>Fama-French三因子模型（1992）</strong>
+1. <strong>市場因子</strong>：市場超額報酬（Rm-Rf）
+2. <strong>規模因子</strong>：小型股相對於大型股的超額報酬（SMB）
+3. <strong>價值因子</strong>：高淨值市價比相對於低淨值市價比的超額報酬（HML）</p>
+<p><strong>Fama-French五因子模型（2015）</strong>
+在三因子基礎上增加：
+4. <strong>獲利能力因子</strong>：高獲利能力相對於低獲利能力的超額報酬（RMW）
+5. <strong>投資因子</strong>：保守投資相對於積極投資的超額報酬（CMA）</p>
+<p><strong>動量因子（Carhart四因子模型，1997）</strong>
+- MOM因子：多頭持有過去表現良好的股票，空頭持有過去表現不佳的股票</p>
+<h4 id="22">2.2 美股因子溢酬的歷史數據<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h4>
+<p><strong>長期歷史表現（1963-2013）</strong>
+- 規模因子（SMB）：年化報酬率約2-3%
+- 價值因子（HML）：年化報酬率約3-4%
+- 動量因子（MOM）：年化報酬率約4-5%
+- 獲利能力因子（RMW）：年化報酬率約2-3%
+- 投資因子（CMA）：年化報酬率約2-3%</p>
+<p><strong>因子相關性分析</strong>
+- 在五因子模型中，HML與CMA的相關性達到0.7，顯示價值因子部分被投資因子解釋
+- 動能因子與其他因子相關性較低，具有良好的多元化效果
+- 市場因子與其他因子的相關性適中，提供基本風險溢酬</p>
+<h4 id="23">2.3 美股市場效率和因子異常<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h4>
+<p><strong>市場效率</strong>
+- 美股市場被認為是相對效率的市場，但仍存在多種因子異常
+- 機構投資者比例高（約70%），促使價格發現機制完善
+- 信息透明度高，法規制度健全，減少了套利機會</p>
+<p><strong>持續存在的因子異常</strong>
+- 價值異常：低估值股票長期表現優於高估值股票
+- 動能異常：過去表現良好的股票繼續表現良好的趨勢
+- 規模異常：小型股長期表現優於大型股（雖然近年效果減弱）
+- 低波動異常：低波動性股票風險調整後報酬優於高波動性股票</p>
+<p><strong>行為金融學解釋</strong>
+- 投資者行為偏差是因子異常持續存在的重要原因
+- 過度自信、羊群效應、損失趨避等心理因素導致市場非理性定價
+- 機構投資者的績效考核和流動性需求也維持了某些因子異常</p>
+<h3 id="3">3. 台股與美股因子投資的比較<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<h4 id="31">3.1 因子有效性的差異<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h4>
+<p><strong>共同有效因子</strong>
+- 動能因子：在兩個市場都顯示有效性，但美股動能因子的穩定性更高
+- 價值因子：在兩個市場都存在溢酬，但台股價值因子受經濟週期影響更大
+- 規模因子：在美股市場效果減弱，在台股市場效果不顯著</p>
+<p><strong>市場特有因子</strong>
+- 台股特有：
+  - 內部人持股因子（特別有效）
+  - 庫藏股因子
+  - 政策影響因子
+- 美股特有：
+  - 低波動因子（效果顯著）
+  - 品質因子（更穩定）
+  - 動量因子（更成熟）</p>
+<p><strong>因子穩定性比較</strong>
+- 美股因子溢酬更穩定，長期趨勢明確
+- 台股因子溢酬波動較大，受外部環境影響顯著
+- 美股因子的學術基礎更堅實，實證支持更充分</p>
+<h4 id="32">3.2 市場結構對因子的影響<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h4>
+<p><strong>投資者結構差異</strong>
+- 美股：機構投資者佔70%，散戶佔30%
+- 台股：散戶佔60-70%，機構投資者佔30-40%
+- 影響：美股價格發現更有效，台股情緒波動更大</p>
+<p><strong>市場流動性差異</strong>
+- 美股：流動性分散，個股流動性差異較小
+- 台股：流動性高度集中，前20%股票佔80%成交額
+- 影響：美股因子策略執行成本較穩定，台股需考慮流動性風險</p>
+<p><strong>法規監管差異</strong>
+- 美股：監管成熟，信息披露透明，執法嚴格
+- 台股：監管持續完善中，信息披露制度仍在發展
+- 影響：美股內部人交易較少，台股內部人持股信息更有價值</p>
+<h4 id="33">3.3 交易成本和流動性考量<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h4>
+<p><strong>交易成本比較</strong>
+- 美股：交易成本低（約0.01-0.05%），滑點小
+- 台股：交易成本較高（約0.1-0.3%），滑點較大
+- 影響：美股適合高頻率因子策略，台股適合中低頻率策略</p>
+<p><strong>流動性風險管理</strong>
+- 美股：可透過ETF間接實施因子策略，流動性風險較低
+- 台股：直接選股需嚴格控制流動性篩選標準
+- 建議：美股可考慮更多小型股因子，台股應聚焦中大型股</p>
+<p><strong>實務執行考量</strong>
+- 美股：自動化交易成熟，量化因子策略普及
+- 台股：仍以基本面分析為主，量化因子策略正在發展
+- 建議：美股可完全量化，台股需結合基本面判斷</p>
+<h3 id="4">4. 實務應用建議<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<h4 id="41">4.1 台股因子投資策略<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h4>
+<p><strong>推薦因子組合</strong>
+1. <strong>核心組合</strong>：經理人持股月變動率 + 動能因子 + 品質因子
+   - 配置比例：40% + 35% + 25%
+   - 預期年化報酬：18-22%
+   - 波動風險：中等</p>
+<ol>
+<li><strong>穩健組合</strong>：庫藏股因子 + 價值因子 + 低波動因子</li>
+<li>配置比例：30% + 40% + 30%</li>
+<li>預期年化報酬：12-16%</li>
+<li>
+<p>波動風險：較低</p>
+</li>
+<li>
+<p><strong>成長組合</strong>：動能因子 + 獲利能力因子 + 規模因子（僅限大型股）</p>
+</li>
+<li>配置比例：50% + 30% + 20%</li>
+<li>預期年化報酬：20-25%</li>
+<li>波動風險：較高</li>
+</ol>
+<p><strong>執行步驟</strong>
+1. <strong>選股篩選</strong>：剔除流動性不足的股票（日均成交額&lt;1000萬元）
+2. <strong>因子評分</strong>：對每個因子進行標準化評分（0-100分）
+3. <strong>權重配置</strong>：採用等權重或市值加權方式
+4. <strong>再平衡頻率</strong>：每月調整一次，配合內部人持股資料更新
+5. <strong>風險控管</strong>：設置最大持股比例（單一股票不超過5%）</p>
+<p><strong>風險管理措施</strong>
+- 嚴格控制流動性風險
+- 避免過度集中在特定產業
+- 設置停損機制（個股下跌20%強制出場）
+- 定期檢視因子有效性（每季評估一次）</p>
+<h4 id="42">4.2 美股因子投資策略<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h4>
+<p><strong>推薦因子組合</strong>
+1. <strong>經典組合</strong>：Fama-French五因子 + 動量因子
+   - 配置比例：市場因子30% + 價值因子20% + 規模因子15% + 獲利能力因子15% + 投資因子10% + 動量因子10%
+   - 預期年化報酬：8-12%
+   - 波動風險：中等</p>
+<ol>
+<li><strong>低波動組合</strong>：低波動因子 + 品質因子 + 價值因子</li>
+<li>配置比例：40% + 35% + 25%</li>
+<li>預期年化報酬：6-9%</li>
+<li>
+<p>波動風險：較低</p>
+</li>
+<li>
+<p><strong>成長動量組合</strong>：動量因子 + 獲利能力因子 + 規模因子</p>
+</li>
+<li>配置比例：50% + 30% + 20%</li>
+<li>預期年化報酬：10-15%</li>
+<li>波動風險：較高</li>
+</ol>
+<p><strong>執行方式</strong>
+1. <strong>直接投資</strong>：透過量化選股模型直接投資個股
+2. <strong>ETF投資</strong>：投資專門的因子ETF（如iShares、Vanguard等）
+3. <strong>智能貝他</strong>：使用智能貝他策略基金
+4. <strong>多因子組合</strong>：建立多因子投資組合，降低單一因子風險</p>
+<p><strong>再平衡策略</strong>
+- <strong>頻率</strong>：每季調整一次
+- <strong>觸發條件</strong>：因子權重偏離目標5%以上
+- <strong>成本控制</strong>：利用漸進式再平衡降低交易成本
+- <strong>稅務效率</strong>：在稅務優惠帳戶中執行策略</p>
+<h4 id="43">4.3 跨市場因子配置<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h4>
+<p><strong>配置比例建議</strong>
+- <strong>保守型</strong>：美股70% + 台股30%
+- <strong>平衡型</strong>：美股50% + 台股50%
+- <strong>成長型</strong>：美股30% + 台股70%</p>
+<p><strong>風險分散效果</strong>
+- 兩個市場的相關性約為0.4-0.6，具有良好分散效果
+- 不同市場週期可提供穩定的長期報酬
+- 匯率風險需要納入考量（特別是台幣投資者）</p>
+<p><strong>實務執行考量</strong>
+1. <strong>匯率風險管理</strong>：
+   - 美股部分可考慮進行避險
+   - 長期投資者可承受匯率波動
+   - 定期投資可平均成本</p>
+<ol>
+<li><strong>交易時差處理</strong>：</li>
+<li>台股：早上9:00-下午1:30</li>
+<li>美股：晚上9:30-凌晨4:00（台灣時間）</li>
+<li>
+<p>需建立自動化交易系統或委託專業機構</p>
+</li>
+<li>
+<p><strong>資金配置效率</strong>：</p>
+</li>
+<li>小額資金優先配置ETF</li>
+<li>大額資金可考慮直接選股</li>
+<li>定期定投策略適合長期投資者</li>
+</ol>
+<p><strong>監控與調整</strong>
+- <strong>績效評估</strong>：每月檢視，每季詳細分析
+- <strong>因子監控</strong>：追蹤各因子表現及市場環境變化
+- <strong>動態調整</strong>：根據市場週期調整配置比例
+- <strong>成本控制</strong>：監控交易成本和稅務影響</p>
+<h2 id="_5">結論與建議<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="_6">結論<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>
+<p><strong>因子投資在兩個市場都有效</strong>：無論是台股還是美股，因子投資都能創造超額報酬，但有效因子類型和穩定性存在差異。</p>
+</li>
+<li>
+<p><strong>市場特性影響因子表現</strong>：台股市場的內部人持股和庫藏股因子特別有效，而美股市場的Fama-French因子體系更為成熟。</p>
+</li>
+<li>
+<p><strong>風險管理至關重要</strong>：因子投資雖能創造超額報酬，但需要嚴格的風險管理，特別是流動性風險和因子衰退風險。</p>
+</li>
+<li>
+<p><strong>長期投資價值明確</strong>：因子投資是一種科學化的投資方法，長期實證支持其有效性，適合作為核心投資策略。</p>
+</li>
+</ol>
+<h3 id="_7">建議<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>
+<p><strong>建立系統化投資流程</strong>：無論是台股還是美股，都應建立系統化的因子選股和組合管理流程。</p>
+</li>
+<li>
+<p><strong>持續學習和調整</strong>：因子投資理論不斷發展，需要持續學習新的研究成果和市場變化。</p>
+</li>
+<li>
+<p><strong>結合基本面分析</strong>：量化因子投資應與基本面分析結合，避免純粹數據挖掘的陷阱。</p>
+</li>
+<li>
+<p><strong>適當的期預管理</strong>：因子投資不是短期致富的快速通道，需要長期持有和耐心等待。</p>
+</li>
+<li>
+<p><strong>專業協助的重要性</strong>：對於非專業投資者，可考慮透過ETF或專業基金參與因子投資，降低執行難度。</p>
+</li>
+</ol>
+<h2 id="_8">資料來源<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Fama%E2%80%93French_three-factor_model">Fama–French三因子模型 - Wikipedia</a> — 詳細的Fama-French模型理論說明</li>
+<li><a href="https://www.tejwin.com/en/insight/stock-selection-factors-research-combining-insider-ownership-and-momentum-factors/">Stock Selection Factors Research: Combining Insider Ownership and Momentum Factors - TEJ</a> — 台股內部人持股因子研究</li>
+<li><a href="https://www.books.com.tw/products/0010975411">台股安穩因子投資法：每年花8小時，報酬近20% - 博客來</a> — 台股因子投資實務應用</li>
+<li><a href="https://www.ebc.com/zh/jinrong/262856.html">庫藏股意思和影響 - EBC金融集團</a> — 台股庫藏股因子分析</li>
+<li><a href="https://www.xq.com.tw/learn/advanced/factor/">因子投資專區 - XQ全球贏家</a> — 因子投資實務工具和教學</li>
+</ul>
+<h2 id="_9">元數據<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>信心度：</strong> 高</li>
+<li><strong>研究深度：</strong> 深入</li>
+<li><strong>資料新鮮度：</strong> 2024-2026年</li>
+<li><strong>建議：</strong> 建議進一步研究具體的因子組合回測和風險管理策略</li>
+<li><strong>錯誤說明：</strong> 部分歷史數據需要更詳細的回測驗證，實際投資應謹慎評估風險</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

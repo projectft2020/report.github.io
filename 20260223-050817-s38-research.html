@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When More Experts Hurt: Underfitting in Multi-Expert Systems Research Report - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>When More Experts Hurt: Underfitting in Multi-Expert Systems Research Report</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="when-more-experts-hurt-underfitting-in-multi-expert-systems-research-report">When More Experts Hurt: Underfitting in Multi-Expert Systems Research Report<a class="headerlink" href="#when-more-experts-hurt-underfitting-in-multi-expert-systems-research-report" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s38<br />
+<strong>Agent:</strong> Charlie Research<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-23T01:16:00Z  </p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This research investigates the counterintuitive phenomenon where adding more experts to multi-expert learning systems leads to underfitting and performance degradation. Through analysis of recent research, particularly the paper "When More Experts Hurt: Underfitting in Multi-Expert Learning to Defer," we examine the theoretical foundations, underlying mechanisms, and potential solutions to this paradoxical problem.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Multi-expert underfitting is inherent</strong> — Unlike single-expert systems where underfitting occurs only under specific conditions, multi-expert systems naturally suffer from underfitting due to expert aggregation effects | Source: arXiv:2602.17144</p>
+</li>
+<li>
+<p><strong>Expert aggregation term causes label flattening</strong> — The mathematical term 𝒜(𝒙) = ∑ⱼ Accⱼ(𝒙) scales with the number of experts (O(J)), flattening label distributions and making optimal labels harder to distinguish | Source: arXiv:2602.17144</p>
+</li>
+<li>
+<p><strong>Traditional methods fail with multiple experts</strong> — Existing surrogate loss methods (Cross-Entropy, One-vs-All) that work well for single-expert scenarios become ineffective as more experts are added | Source: arXiv:2602.17144</p>
+</li>
+<li>
+<p><strong>PiCCE provides effective mitigation</strong> — The proposed "Pick the Confident and Correct Expert" method resolves underfitting by adaptively identifying reliable experts based on empirical evidence | Source: arXiv:2602.17144</p>
+</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="multi-expert-theory">Multi-Expert Theory<a class="headerlink" href="#multi-expert-theory" title="連結到此標題">&para;</a></h3>
+<p>Multi-expert systems, particularly Mixture of Experts (MoE), represent a sophisticated form of ensemble learning where multiple expert networks divide a problem space into homogeneous regions. The fundamental architecture consists of:</p>
+<ul>
+<li><strong>Expert Networks</strong>: Specialized sub-models trained on different regions of the input space</li>
+<li><strong>Gating Network</strong>: A routing mechanism that determines which expert(s) to consult for each input</li>
+<li><strong>Aggregation Mechanism</strong>: Combines expert predictions to produce final outputs</li>
+</ul>
+<p>The theoretical foundation stems from the principle that different experts can specialize in different aspects of complex problems, potentially leading to better overall performance than any single expert. However, this theoretical advantage assumes optimal learning conditions that are often violated in practice.</p>
+<h3 id="underfitting-mechanisms">Underfitting Mechanisms<a class="headerlink" href="#underfitting-mechanisms" title="連結到此標題">&para;</a></h3>
+<p>The research reveals that multi-expert systems suffer from a fundamental underfitting problem that differs significantly from traditional underfitting:</p>
+<h4 id="expert-aggregation-problem">Expert Aggregation Problem<a class="headerlink" href="#expert-aggregation-problem" title="連結到此標題">&para;</a></h4>
+<p>The core issue lies in the structure of the multi-expert risk function:</p>
+<pre><code>Rℓ_ϕ|𝒙(𝜽) = ∑ᵧ ηᵧ(𝒙)ϕ(𝜽,y) + ∑ⱼ Accⱼ(𝒙)ϕ(𝜽,j+K)
+</code></pre>
+<p>This formulation creates a dummy distribution where class probabilities are normalized by the expert aggregation term:</p>
+<pre><code>p̂(y|𝒙) = ηᵧ(𝒙) / (1 + 𝒜(𝒙))
+p̂(⊥ⱼ|𝒙) = Accⱼ(𝒙) / (1 + 𝒜(𝒙))
+</code></pre>
+<p>where 𝒜(𝒙) = ∑ⱼ Accⱼ(𝒙) = O(J).</p>
+<h4 id="label-distribution-flattening">Label Distribution Flattening<a class="headerlink" href="#label-distribution-flattening" title="連結到此標題">&para;</a></h4>
+<p>As the number of experts J increases:
+- The denominator (1 + 𝒜(𝒙)) grows proportionally to J
+- Class probabilities become increasingly similar (flattened)
+- The margin between optimal and suboptimal labels narrows
+- The classifier struggles to identify the correct label confidently</p>
+<p>This effect is particularly problematic because:
+- It occurs even without deferral costs (unlike single-expert cases)
+- It scales linearly with the number of experts
+- It fundamentally limits the learning capacity of the base classifier</p>
+<h3 id="theoretical-bounds">Theoretical Bounds<a class="headerlink" href="#theoretical-bounds" title="連結到此標題">&para;</a></h3>
+<p>The research provides several key theoretical insights:</p>
+<h4 id="risk-decomposition">Risk Decomposition<a class="headerlink" href="#risk-decomposition" title="連結到此標題">&para;</a></h4>
+<p>The multi-expert risk can be decomposed as:</p>
+<pre><code>Rℓ_ϕ|𝒙(𝜽) = ∑ᵧ ηᵧ(𝒙)ϕ(𝜽,y) + ∑ⱼ Accⱼ(𝒙)ϕ(𝜽,j+K)
+</code></pre>
+<p>This shows that the expert aggregation term 𝒜(𝒙) grows as O(J), creating a fundamental scaling limitation.</p>
+<h4 id="consistency-analysis">Consistency Analysis<a class="headerlink" href="#consistency-analysis" title="連結到此標題">&para;</a></h4>
+<p>Under standard assumptions, the research proves that:
+1. <strong>Classifier Consistency</strong>: The base classifier can still learn optimal label predictions
+2. <strong>System Consistency</strong>: Under the "Information Advantage of Optimal Expert" condition, the entire L2D system can achieve Bayes optimality
+3. <strong>Expert Accuracy Recovery</strong>: The method can consistently estimate expert accuracies, crucial for uncertainty quantification</p>
+<h4 id="generalization-bounds">Generalization Bounds<a class="headerlink" href="#generalization-bounds" title="連結到此標題">&para;</a></h4>
+<p>The theoretical analysis reveals that:
+- Without mitigation, generalization error scales with O(J) due to label flattening
+- With proper mitigation (PiCCE), the error becomes O(1), independent of the number of experts</p>
+<h3 id="experimental-results">Experimental Results<a class="headerlink" href="#experimental-results" title="連結到此標題">&para;</a></h3>
+<h4 id="performance-degradation-with-expert-count">Performance Degradation with Expert Count<a class="headerlink" href="#performance-degradation-with-expert-count" title="連結到此標題">&para;</a></h4>
+<p>Experiments conducted on CIFAR-100 and ImageNet datasets demonstrate clear performance degradation:</p>
+<p><strong>CIFAR-100 Results</strong>:
+- 4 experts: 18.48% error (vanilla CE), 18.32% error (PiCCE)
+- 20 experts: 21.13% error (vanilla CE), 18.11% error (PiCCE)
+- Performance gap increases from 0.16% to 3.02% as experts grow</p>
+<p><strong>ImageNet Results</strong>:
+- 4 experts: 42.74% error (vanilla CE), 42.10% error (PiCCE)
+- 20 experts: 48.00% error (vanilla CE), 41.32% error (PiCCE)
+- Performance gap increases from 0.64% to 6.68% as experts grow</p>
+<h4 id="real-world-validation">Real-World Validation<a class="headerlink" href="#real-world-validation" title="連結到此標題">&para;</a></h4>
+<p>Testing on real-world expert datasets (MiceBone, Chaoyang) confirmed:
+- The underfitting phenomenon persists beyond synthetic expert scenarios
+- PiCCE maintains stable performance regardless of expert count
+- Traditional methods show significant degradation with additional experts</p>
+<h4 id="statistical-significance">Statistical Significance<a class="headerlink" href="#statistical-significance" title="連結到此標題">&para;</a></h4>
+<p>All experiments were conducted over 3 trials, showing:
+- Consistent performance degradation for vanilla methods
+- Statistically significant improvements with PiCCE
+- Robustness across different base architectures (WideResNet, MobileNet-v2)</p>
+<h3 id="mitigation-strategies">Mitigation Strategies<a class="headerlink" href="#mitigation-strategies" title="連結到此標題">&para;</a></h3>
+<h4 id="picce-pick-the-confident-and-correct-expert">PiCCE: Pick the Confident and Correct Expert<a class="headerlink" href="#picce-pick-the-confident-and-correct-expert" title="連結到此標題">&para;</a></h4>
+<p>The proposed solution addresses the fundamental underfitting issue through:</p>
+<p><strong>Key Innovation</strong>: Instead of considering all experts, PiCCE restricts attention to the subset of experts that are both:
+1. <strong>Confident</strong>: Have high model scores
+2. <strong>Correct</strong>: Have demonstrated empirical correctness (𝟙[mⱼ = y])</p>
+<p><strong>Mathematical Formulation</strong>:</p>
+<pre><code>ℓ̃ᵩ(𝜽,y,𝒎) = ϕ(𝜽,y) + ϕ(𝜽, argmax_{j∈[𝒎=y]} θⱼ₊ₖ + K)
+</code></pre>
+<p><strong>Advantages</strong>:
+- <strong>Continuity</strong>: Unlike previous approaches, PiCCE maintains continuity essential for gradient-based optimization
+- <strong>Underfitting Resistance</strong>: Reduces the expert aggregation term from O(J) to O(1)
+- <strong>Statistical Consistency</strong>: Provable guarantees for recovering Bayes optimal solutions</p>
+<h4 id="implementation-guidelines">Implementation Guidelines<a class="headerlink" href="#implementation-guidelines" title="連結到此標題">&para;</a></h4>
+<p>Based on the research findings, effective mitigation strategies include:</p>
+<ol>
+<li><strong>Expert Pruning</strong>: Remove or deprioritize experts with low accuracy</li>
+<li><strong>Confidence Weighting</strong>: Use model confidence scores to weight expert contributions</li>
+<li><strong>Empirical Filtering</strong>: Focus only on experts with demonstrated correctness</li>
+<li><strong>Adaptive Aggregation</strong>: Dynamically adjust aggregation based on input characteristics</li>
+</ol>
+<h4 id="practical-considerations">Practical Considerations<a class="headerlink" href="#practical-considerations" title="連結到此標題">&para;</a></h4>
+<p>When implementing multi-expert systems:
+- <strong>Start Small</strong>: Begin with fewer experts and gradually increase
+- <strong>Monitor Underfitting</strong>: Track classifier performance separately from system performance
+- <strong>Use PiCCE</strong>: Implement the proposed loss function for large expert ensembles
+- <strong>Validate Real-World</strong>: Test on actual expert data, not just synthetic scenarios</p>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><a href="https://arxiv.org/abs/2602.17144">Liu et al. (2025) "When More Experts Hurt: Underfitting in Multi-Expert Learning to Defer"</a> — Primary research paper identifying and solving multi-expert underfitting</p>
+</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Mixture_of_experts">Wikipedia: "Mixture of experts"</a> — Comprehensive overview of MoE theory and applications</p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/1701.06538">Shazeer et al. (2017) "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer"</a> — Foundational work on modern MoE architectures</p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/2209.01667">Fedus et al. (2022) "A Review of Sparse Expert Models in Deep Learning"</a> — Survey of expert model developments</p>
+</li>
+</ol>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (primary source)</li>
+<li><strong>Suggestions:</strong> Further research could explore the application of PiCCE to other multi-expert architectures beyond Learning to Defer</li>
+<li><strong>Errors:</strong> No significant limitations identified; research appears comprehensive and well-validated</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

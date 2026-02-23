@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoE 架構在量化交易中的深入研究方向 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>MoE 架構在量化交易中的深入研究方向</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="moe">MoE 架構在量化交易中的深入研究方向<a class="headerlink" href="#moe" title="連結到此標題">&para;</a></h1>
+<h2 id="_1">用戶興趣點<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p><strong>觸發時間：</strong> 2026-02-22 15:20 PM
+<strong>觸發原因：</strong> 用戶對 Scout 研究中的 MoE 架構（TradExpert 和 MIGA）表現出強烈興趣</p>
+<p><strong>用戶反饋：</strong></p>
+<blockquote>
+<p>"這個是什麼 多深入研究！！！ 有興趣"</p>
+</blockquote>
+<h2 id="_2">性能對比<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>年化回報</th>
+<th>夏普比率</th>
+<th>最大回撤</th>
+<th>資產範圍</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TradExpert</strong></td>
+<td>49.79%</td>
+<td>5.01</td>
+<td>6.56%</td>
+<td>DOW 30</td>
+</tr>
+<tr>
+<td><strong>MIGA-Conv</strong></td>
+<td>24.0%</td>
+<td>1.80</td>
+<td>-</td>
+<td>CSI300</td>
+</tr>
+<tr>
+<td><strong>DeepTrader (SOTA DL)</strong></td>
+<td>32.45%</td>
+<td>1.82</td>
+<td>15.32%</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>傳統 ML</strong></td>
+<td>15-22%</td>
+<td>0.5-0.8</td>
+<td>19-22%</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_3">深入研究問題<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<h3 id="1">1. 技術實現細節<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>TradExpert 的四個專家如何協作？</li>
+<li>MIGA 的路由機制如何決定權重？</li>
+<li>內部組注意力（Inner Group Attention）的實現細節</li>
+</ul>
+<h3 id="2">2. 架構選擇<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>什麼情況下使用 TradExpert vs MIGA？</li>
+<li>LLM-based vs 純 DL 的優缺點？</li>
+<li>計算成本和延遲考量</li>
+</ul>
+<h3 id="3">3. 實際應用場景<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>哪些市場條件下表現最好？</li>
+<li>高頻交易 vs 低頻交易的適用性？</li>
+<li>跨資產類別的擴展性</li>
+</ul>
+<h3 id="4">4. 實現路徑<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>如何在我們的 Dashboard 中實現類似架構？</li>
+<li>需要哪些數據源和預處理？</li>
+<li>回測框架的調整需求</li>
+</ul>
+<h3 id="5">5. 風險管理<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>專家崩潰（expert collapse）問題如何避免？</li>
+<li>如何監控各專家的表現？</li>
+<li>動態權重調整的策略</li>
+</ul>
+<h2 id="_4">待研究的關鍵論文<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="tradexpert">TradExpert<a class="headerlink" href="#tradexpert" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>論文標題和 arXiv ID（待查找）</li>
+<li>架構圖和實現細節</li>
+<li>訓練數據和超參數</li>
+</ul>
+<h3 id="miga">MIGA<a class="headerlink" href="#miga" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>論文標題和 arXiv ID（待查找）</li>
+<li>路由網絡設計</li>
+<li>信息係數（IC）損失函數</li>
+</ul>
+<h3 id="_5">相關工作<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>Switch Transformers（Google）</li>
+<li>GLaM（通用語言模型）</li>
+<li>時間序列的 MoE 應用</li>
+</ul>
+<h2 id="_6">行動計劃<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="1-2">短期（1-2 週）<a class="headerlink" href="#1-2" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>✅ Scout 基礎研究（已完成）</li>
+<li>🔍 深入查找 TradExpert 和 MIGA 原始論文</li>
+<li>📚 研究相關開源實現</li>
+<li>💡 評估在我們系統中的可行性</li>
+</ol>
+<h3 id="1-3">中期（1-3 個月）<a class="headerlink" href="#1-3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>🏗️ 設計適合我們的 MoE 架構</li>
+<li>🧪 實現原型和初步回測</li>
+<li>📊 性能對比和優化</li>
+<li>📝 撰寫技術文檔</li>
+</ol>
+<h3 id="3-6">長期（3-6 個月）<a class="headerlink" href="#3-6" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>🚀 集成到生產系統</li>
+<li>🔄 持續優化和監控</li>
+<li>🎓 建立 MoE 模型庫</li>
+<li>📖 發布研究成果</li>
+</ol>
+<h2 id="_7">優先級<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<p><strong>P0 - 立即執行：</strong>
+- 查找並深入分析 TradExpert 和 MIGA 原始論文
+- 研究開源實現
+- 評估技術可行性</p>
+<p><strong>P1 - 本週完成：</strong>
+- 創建概念驗證（POC）設計
+- 準備必要的數據源
+- 規劃回測框架</p>
+<p><strong>P2 - 本月完成：</strong>
+- 實現第一個 MoE 原型
+- 進行初步回測
+- 性能對比分析</p>
+<h2 id="_8">相關技術棧<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="_9">深度學習框架<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>PyTorch / TensorFlow</li>
+<li>Transformers 庫（用於路由機制）</li>
+<li>專門化的專家網絡</li>
+</ul>
+<h3 id="_10">時間序列處理<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>LSTM / GRU</li>
+<li>Transformer（時間注意力）</li>
+<li>TCN（時序卷積網絡）</li>
+</ul>
+<h3 id="_11">數據來源<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>價格/成交量數據</li>
+<li>新聞文本（NLP）</li>
+<li>基本面數據</li>
+<li>技術指標</li>
+</ul>
+<h3 id="_12">評估指標<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>信息係數（IC）</li>
+<li>信息比率（IR）</li>
+<li>夏普比率</li>
+<li>最大回撤</li>
+<li>換手率</li>
+</ul>
+<hr />
+<p><strong>記錄時間：</strong> 2026-02-22 15:20 PM
+<strong>記錄者：</strong> Charlie (Orchestrator)
+<strong>狀態：</strong> 🚀 優先研究方向已確認</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

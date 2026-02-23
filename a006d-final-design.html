@@ -1,0 +1,4223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmer Sub-Agent 最終設計規劃 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Programmer Sub-Agent 最終設計規劃</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="programmer-sub-agent">Programmer Sub-Agent 最終設計規劃<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>文檔 ID:</strong> a006d-final
+<strong>版本:</strong> 1.0
+<strong>狀態:</strong> Final
+<strong>創建日期:</strong> 2026-02-21
+<strong>最後更新:</strong> 2026-02-21
+<strong>適用對象:</strong> Programmer Sub-Agent 實施團隊
+<strong>基於文件:</strong>
+- a005-competencies.md (高級架構師能力定義)
+- a006a-5.md (統一知識庫)
+- a006c-1.md (實施路徑框架)
+- a006c-2.md (評估指標和方法)
+- a006c-3.md (代碼和文檔)
+- a006-design-plan.md (設計規劃)</p>
+<hr />
+<h2 id="_1">目錄<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><a href="#1-概述和目標">概述和目標</a></li>
+<li><a href="#2-核心設計原則">核心設計原則</a></li>
+<li><a href="#3-能力模型和技能矩陣">能力模型和技能矩陣</a></li>
+<li><a href="#4-統一知識庫">統一知識庫</a></li>
+<li><a href="#5-實施路徑框架">實施路徑框架</a></li>
+<li><a href="#6-評估指標和方法">評估指標和方法</a></li>
+<li><a href="#7-實踐項目清單">實踐項目清單</a></li>
+<li><a href="#8-風險管理和後備方案">風險管理和後備方案</a></li>
+<li><a href="#9-時間線和里程碑">時間線和里程碑</a></li>
+<li><a href="#10-結論和建議">結論和建議</a></li>
+</ol>
+<hr />
+<h2 id="1">1. 概述和目標<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 項目背景<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p>Programmer Sub-Agent 是專為 Dashboard 量化交易系統設計的智能編程助手。本設計規劃基於系統的完整技術架構分析，提供一套<strong>完整的能力建設、知識整合和實施指南</strong>，確保 Sub-Agent 能夠從初級開發者逐步成長為高級架構師。</p>
+<p>Dashboard 系統採用<strong>前後端分離架構</strong>、<strong>統一策略引擎</strong>、<strong>微服務化後端</strong>、<strong>測試驅動開發</strong>，具備<strong>完善的 CI/CD 基礎設施</strong>和<strong>嚴格的代碼規範</strong>。</p>
+<h3 id="12">1.2 核心目標<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>目標類別</th>
+<th>具體目標</th>
+<th>成功指標</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>能力建設</strong></td>
+<td>建立從初級到架構師的完整能力模型</td>
+<td>4 階段路徑覆蓋率 100%</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>知識整合</strong></td>
+<td>統一後端、前端、策略引擎、Git 開發模式知識庫</td>
+<td>知識庫覆蓋率 ≥ 95%</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>質量保證</strong></td>
+<td>建立測試驅動開發和代碼審查文化</td>
+<td>測試覆蓋率 ≥ 80%，審查通過率 ≥ 90%</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>持續改進</strong></td>
+<td>建立評估機制和反饋循環</td>
+<td>每季度評估一次，改進措施執行率 ≥ 80%</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>風險管理</strong></td>
+<td>識別和緩解實施風險</td>
+<td>風險緩解覆蓋率 100%</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 技術棧概覽<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                        前端層 (Frontend)                        │
+│  React 19 + Vite + Zustand + React Query + Bootstrap 5        │
+├─────────────────────────────────────────────────────────────────┤
+│                        API 網關層 (API Gateway)                   │
+│  FastAPI Middleware (Auth, CORS, Rate Limit)                   │
+├─────────────────────────────────────────────────────────────────┤
+│                        後端服務層 (Backend Services)             │
+│  策略服務 | 市場數據服務 | 分析服務 | 執行服務                  │
+├─────────────────────────────────────────────────────────────────┤
+│                        策略引擎層 (Strategy Engine)              │
+│  IStrategy 接口 | VectorBT | Backtrader | Signal Adapter      │
+├─────────────────────────────────────────────────────────────────┤
+│                        數據存儲層 (Storage)                      │
+│  PostgreSQL | DuckDB | Redis | File System                    │
+├─────────────────────────────────────────────────────────────────┤
+│                        開發工具層 (DevTools)                    │
+│  Git | GitHub Actions | Docker | pytest | Vitest               │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="14">1.4 預期成果<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>具體成果</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>文檔成果</strong></td>
+<td>完整的設計規劃文檔</td>
+<td>專業評審通過</td>
+</tr>
+<tr>
+<td><strong>能力成果</strong></td>
+<td>清晰的能力模型和技能矩陣</td>
+<td>4 階段路徑完整</td>
+</tr>
+<tr>
+<td><strong>實施成果</strong></td>
+<td>可執行的實施路徑</td>
+<td>實踐項目驗證</td>
+</tr>
+<tr>
+<td><strong>質量成果</strong></td>
+<td>測試驅動開發文化和代碼審查機制</td>
+<td>覆蓋率和審查率達標</td>
+</tr>
+<tr>
+<td><strong>風險成果</strong></td>
+<td>完整的風險識別和後備方案</td>
+<td>風險評估報告</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 核心設計原則<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<p>本設計基於以下核心原則，指導整個實施過程：</p>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+<th>應用場景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>漸進式複雜度</strong></td>
+<td>從簡單的 CRUD 開始，逐步增加到複雜的策略架構</td>
+<td>所有 4 個階段</td>
+</tr>
+<tr>
+<td><strong>測試驅動</strong></td>
+<td>每個階段都強調 TDD，確保代碼質量</td>
+<td>代碼實踐</td>
+</tr>
+<tr>
+<td><strong>實踐優先</strong></td>
+<td>通過實際項目和代碼示例學習，而非理論堆砌</td>
+<td>所有任務</td>
+</tr>
+<tr>
+<td><strong>知識整合</strong></td>
+<td>前後端、策略引擎、數據庫知識逐步融合</td>
+<td>知識庫設計</td>
+</tr>
+<tr>
+<td><strong>反饋循環</strong></td>
+<td>每個階段都有明確的驗證標準和評估機制</td>
+<td>評估體系</td>
+</tr>
+<tr>
+<td><strong>可量化</strong></td>
+<td>所有指標應該可測量、可驗證</td>
+<td>評估方法</td>
+</tr>
+<tr>
+<td><strong>可執行</strong></td>
+<td>所有任務都有明確的交付物和驗證標準</td>
+<td>實施路徑</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3">3. 能力模型和技能矩陣<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 四階段能力模型<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<pre><code>階段 1: 初級開發者 (0-3 個月)
+   ├─ P0: 基礎生存技能
+   └─ 目標: 獨立完成簡單的前後端功能
+
+階段 2: 中級開發者 (3-6 個月)
+   ├─ P0+P1: 核心開發技能
+   └─ 目標: 掌握回測引擎和策略引擎
+
+階段 3: 高級開發者 (6-12 個月)
+   ├─ P0+P1+P2: 進階技能
+   └─ 目標: 掌握複合策略和性能優化
+
+階段 4: 高級架構師 (12+ 個月)
+   ├─ P0-P3: 全部技能
+   └─ 目標: 微服務架構和技術領導力
+</code></pre>
+<h3 id="32">3.2 能力維度框架<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                  程序員能力評估框架                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  技術能力 (40%)                                              │
+│  ├─ 代碼質量 (測試覆蓋率、複雜度、重複率)                      │
+│  ├─ 架構設計 (API 設計、數據模型、微服務)                      │
+│  ├─ 技術棧掌握 (Python/FastAPI, React, 回測引擎)              │
+│  └─ 問題解決能力 (調試、優化、故障排除)                        │
+│                                                             │
+│  實踐能力 (30%)                                              │
+│  ├─ TDD 執行度 (測試先於實現、測試策略)                        │
+│  ├─ 代碼審查參與度 (審查頻率、回應時間、質量)                  │
+│  ├─ 文檔完整性 (Docstring、API 文檔、README)                  │
+│  └─ Git 規範遵循度 (Conventional Commits、分支管理)           │
+│                                                             │
+│  領域知識 (20%)                                              │
+│  ├─ 量化交易知識 (技術指標、回測概念、市場數據)                 │
+│  ├─ 策略引擎理解 (IStrategy 接口、信號處理、策略工廠)           │
+│  ├─ 金融指標掌握 (Sharpe Ratio, Max Drawdown 等)             │
+│  └─ 數據分析能力 (pandas、NumPy、統計計算)                    │
+│                                                             │
+│  領導力 (10%) - 僅高級/架構師階段                             │
+│  ├─ 技術指導 (代碼審查、知識分享、導師制度)                     │
+│  ├─ 技術決策 (ADR、技術選型、技術債管理)                       │
+│  └─ 團隊影響力 (規範制定、團隊建設、技術文化)                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="33">3.3 技能優先級層級<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│ P0 (必備) - 基礎生存技能                             │
+│ Python/FastAPI, React 19, 測試驅動開發, Git 提交規範 │
+├─────────────────────────────────────────────────────┤
+│ P1 (重要) - 核心開發技能                             │
+│ VectorBT/Backtrader, Zustand, React Query, 策略引擎  │
+├─────────────────────────────────────────────────────┤
+│ P2 (可選) - 進階技能                                 │
+│ Three.js, Celery, 高級圖表, 性能優化                 │
+├─────────────────────────────────────────────────────┤
+│ P3 (未來擴展) - 專家技能                             │
+│ 機器學習, 實時數據流, Kubernetes, 架構設計           │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="34">3.4 評分標準<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>等級</th>
+<th>分數範圍</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>優秀 (A)</strong></td>
+<td>90-100</td>
+<td>超越預期，可作為參考標準</td>
+</tr>
+<tr>
+<td><strong>良好 (B)</strong></td>
+<td>80-89</td>
+<td>達到預期，有改進空間</td>
+</tr>
+<tr>
+<td><strong>合格 (C)</strong></td>
+<td>70-79</td>
+<td>基本達標，需要改進</td>
+</tr>
+<tr>
+<td><strong>待改進 (D)</strong></td>
+<td>60-69</td>
+<td>未達標，必須改進</td>
+</tr>
+<tr>
+<td><strong>不合格 (F)</strong></td>
+<td>0-59</td>
+<td>嚴重不達標，需重新培訓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35">3.5 晉升門檻<a class="headerlink" href="#35" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>最低分數</th>
+<th>必備條件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>階段 1 → 階段 2</td>
+<td>75 分</td>
+<td>所有 P0 指標達到 C 以上</td>
+</tr>
+<tr>
+<td>階段 2 → 階段 3</td>
+<td>80 分</td>
+<td>所有 P0+P1 指標達到 B 以上</td>
+</tr>
+<tr>
+<td>階段 3 → 階段 4</td>
+<td>85 分</td>
+<td>所有 P0-P2 指標達到 B 以上，領導力達到 C 以上</td>
+</tr>
+<tr>
+<td>架構師維持</td>
+<td>85 分</td>
+<td>所有指標達到 B 以上</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4">4. 統一知識庫<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 知識庫架構<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<p>統一知識庫整合 Dashboard 專案的完整技術知識，為 Programmer Sub-Agent 提供開發所需的：</p>
+<pre><code>統一知識庫 (KB-UNIFIED-001)
+├── 後端架構知識
+│   ├── API 端點設計
+│   ├── 服務層架構
+│   ├── 數據結構和模型
+│   ├── 錯誤處理機制
+│   └── 緩存策略
+├── 前端架構知識
+│   ├── React 組件層級
+│   ├── 共享組件庫
+│   ├── 狀態管理 (Zustand + React Query)
+│   ├── UI 模式
+│   └── API 集成
+├── 策略引擎知識
+│   ├── IStrategy 接口
+│   ├── 策略模板 (RSI, MACD, Confluence, Composite)
+│   ├── VectorBT 集成
+│   ├── 策略工廠
+│   └── 核心算法 (向量化 RSI/MACD)
+└── Git 開發模式
+    ├── 分支策略 (Git Flow)
+    ├── Conventional Commits
+    ├── Code Review 流程
+    └── CI/CD 集成
+</code></pre>
+<h3 id="42-5">4.2 快速開始指南（5 分鐘上手）<a class="headerlink" href="#42-5" title="連結到此標題">&para;</a></h3>
+<h4 id="421-2">4.2.1 環境準備（2 分鐘）<a class="headerlink" href="#421-2" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 1. 克隆專案
+git clone &lt;repo-url&gt;
+cd Dashboard
+
+# 2. 設置 Python 環境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+pip install -r backend/requirements.txt
+
+# 3. 設置 Node 環境
+cd frontend
+npm install
+
+# 4. 啟動開發服務器
+# 終端 1: 後端
+cd backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# 終端 2: 前端
+cd frontend
+npm run dev
+</code></pre>
+<h4 id="422-1">4.2.2 創建第一個策略（1 分鐘）<a class="headerlink" href="#422-1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># backend/strategies/my_strategy.py
+from .base import IStrategy, Signal, SignalAction, ExecutionContext
+from datetime import date
+from typing import List
+
+class MyFirstStrategy(IStrategy):
+    &quot;&quot;&quot;簡單的趨勢跟隨策略&quot;&quot;&quot;
+    name = &quot;my_first_strategy&quot;
+
+    def __init__(self, short_period: int = 5, long_period: int = 20):
+        self.short_period = short_period
+        self.long_period = long_period
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        &quot;&quot;&quot;生成交易信號&quot;&quot;&quot;
+        signals = []
+
+        for symbol in symbols:
+            # 獲取移動平均線數據
+            short_ma = self._get_ma(symbol, context.market_date, self.short_period)
+            long_ma = self._get_ma(symbol, context.market_date, self.long_period)
+
+            # 簡單的交叉策略
+            if short_ma &gt; long_ma:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=0.8
+                ))
+
+        return signals
+
+    def _get_ma(self, symbol: str, date: date, period: int) -&gt; float:
+        &quot;&quot;&quot;獲取移動平均線值&quot;&quot;&quot;
+        # 實現略
+        pass
+</code></pre>
+<h4 id="423-1">4.2.3 提交代碼（1 分鐘）<a class="headerlink" href="#423-1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 1. 創建功能分支
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-first-strategy
+
+# 2. 提交代碼（遵循 Conventional Commits）
+git add .
+git commit -m &quot;feat: add my first strategy implementation&quot;
+
+# 3. 推送到遠端
+git push -u origin feature/my-first-strategy
+</code></pre>
+<h3 id="43">4.3 核心設計原則<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>分層架構</strong></td>
+<td>前端 → API → 服務 → 倉庫 → 存儲，清晰的關注點分離</td>
+</tr>
+<tr>
+<td><strong>接口驅動</strong></td>
+<td>策略引擎基於 <code>IStrategy</code> 接口，實現策略邏輯與執行分離</td>
+</tr>
+<tr>
+<td><strong>狀態分類</strong></td>
+<td>全局狀態(Zustand) + 服務端狀態(React Query) + 本地狀態(useState)</td>
+</tr>
+<tr>
+<td><strong>API 版本化</strong></td>
+<td>RESTful 設計，統一的請求/響應格式</td>
+</tr>
+<tr>
+<td><strong>測試金字塔</strong></td>
+<td>單元測試 → 集成測試 → E2E 測試</td>
+</tr>
+<tr>
+<td><strong>Git Flow</strong></td>
+<td>feature/fix/hotfix 分支 + Conventional Commits + CI/CD</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44">4.4 後端架構核心知識<a class="headerlink" href="#44" title="連結到此標題">&para;</a></h3>
+<h4 id="441-api">4.4.1 API 端點設計<a class="headerlink" href="#441-api" title="連結到此標題">&para;</a></h4>
+<p><strong>策略管理端點:</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>描述</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies</code></td>
+<td>列出策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies</code></td>
+<td>創建策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>獲取策略詳情</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>更新策略配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>刪除策略</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>請求示例 - 創建策略:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies
+{
+  &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+  &quot;description&quot;: &quot;雙均線交叉策略&quot;,
+  &quot;type&quot;: &quot;trend_following&quot;,
+  &quot;parameters&quot;: {
+    &quot;short_period&quot;: 5,
+    &quot;long_period&quot;: 20,
+    &quot;symbol&quot;: &quot;AAPL&quot;
+  },
+  &quot;risk_limits&quot;: {
+    &quot;max_position_size&quot;: 1000,
+    &quot;max_drawdown&quot;: 0.15
+  }
+}
+</code></pre>
+<p><strong>響應格式:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;id&quot;: &quot;str_123456&quot;,
+    &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+    &quot;type&quot;: &quot;trend_following&quot;,
+    &quot;status&quot;: &quot;active&quot;,
+    &quot;parameters&quot;: { ... },
+    &quot;risk_limits&quot;: { ... },
+    &quot;created_at&quot;: &quot;2026-02-20T15:30:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-02-20T15:30:00Z&quot;
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="442">4.4.2 核心服務<a class="headerlink" href="#442" title="連結到此標題">&para;</a></h4>
+<p><strong>StrategyRegistry</strong> - 策略註冊表</p>
+<pre><code class="language-python">class StrategyRegistry:
+    def register(self, strategy_id: str, strategy: IStrategy):
+        &quot;&quot;&quot;註冊策略&quot;&quot;&quot;
+
+    def unregister(self, strategy_id: str):
+        &quot;&quot;&quot;註銷策略&quot;&quot;&quot;
+
+    def get(self, strategy_id: str) -&gt; Optional[IStrategy]:
+        &quot;&quot;&quot;獲取策略實例&quot;&quot;&quot;
+
+    def list_ids(self) -&gt; List[str]:
+        &quot;&quot;&quot;列出所有策略 ID&quot;&quot;&quot;
+</code></pre>
+<p><strong>TechnicalStrategyService</strong> - 技術指標工廠</p>
+<pre><code class="language-python">class TechnicalStrategyService:
+    def generate_strategy(self, strategy_type: str, universe: str, params: dict):
+        &quot;&quot;&quot;根據策略類型生成策略結果&quot;&quot;&quot;
+
+    def calc_metrics(self, backtest_result: dict) -&gt; dict:
+        &quot;&quot;&quot;計算回測指標&quot;&quot;&quot;
+
+# 支持的策略類型
+SUPPORTED_TYPES = [
+    'RSI', 'MACD', 'Supertrend', 'Bollinger Bands',
+    'Momentum', 'Dual Momentum', 'Sector Rotation',
+    'Extremes', 'RSI Trend'
+]
+</code></pre>
+<h4 id="443">4.4.3 數據結構<a class="headerlink" href="#443" title="連結到此標題">&para;</a></h4>
+<p><strong>Strategy 模型:</strong></p>
+<pre><code class="language-python">@dataclass
+class Strategy:
+    id: str  # 策略 ID (e.g., &quot;str_123456&quot;)
+    name: str
+    description: str
+    type: str  # 策略類型 (trend_following, mean_reversion, etc.)
+    status: str  # active, inactive, archived
+    parameters: Dict  # 策略參數
+    risk_limits: Dict  # 風險限制
+    created_at: datetime
+    updated_at: datetime
+</code></pre>
+<p><strong>PerformanceMetrics 模型:</strong></p>
+<pre><code class="language-python">@dataclass
+class PerformanceMetrics:
+    total_return: float
+    cagr: float  # 複合年化增長率
+    sharpe_ratio: float
+    sortino_ratio: float
+    max_drawdown: float
+    volatility: float
+    calmar_ratio: float
+    win_rate: float
+    profit_factor: float
+    avg_win: float
+    avg_loss: float
+    total_trades: int
+</code></pre>
+<h4 id="444">4.4.4 錯誤處理<a class="headerlink" href="#444" title="連結到此標題">&para;</a></h4>
+<p><strong>統一錯誤碼:</strong></p>
+<table>
+<thead>
+<tr>
+<th>錯誤碼</th>
+<th>HTTP 狀態</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>422</td>
+<td>請求參數驗證失敗</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NOT_FOUND</code></td>
+<td>404</td>
+<td>策略不存在</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NAME_EXISTS</code></td>
+<td>409</td>
+<td>策略名稱已存在</td>
+</tr>
+<tr>
+<td><code>BACKTEST_NOT_FOUND</code></td>
+<td>404</td>
+<td>回測任務不存在</td>
+</tr>
+<tr>
+<td><code>INVALID_DATE_RANGE</code></td>
+<td>422</td>
+<td>無效日期範圍</td>
+</tr>
+<tr>
+<td><code>INSUFFICIENT_DATA</code></td>
+<td>400</td>
+<td>數據不足</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>未授權訪問</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>403</td>
+<td>無權限訪問</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>內部服務器錯誤</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45">4.5 前端架構核心知識<a class="headerlink" href="#45" title="連結到此標題">&para;</a></h3>
+<h4 id="451-react">4.5.1 React 組件層級<a class="headerlink" href="#451-react" title="連結到此標題">&para;</a></h4>
+<pre><code>App (根組件)
+├── ErrorBoundary (錯誤邊界)
+├── QueryClientProvider (React Query)
+├── PersonaProvider (Persona 上下文)
+├── ToastProvider (Toast 通知)
+├── Router (BrowserRouter)
+└── DashboardLayout (主佈局組件)
+    ├── Sidebar (側邊欄)
+    ├── Header (頂部欄)
+    └── Main Content (主內容區)
+        └── Routes → Page Components (40+ 頁面)
+</code></pre>
+<h4 id="452">4.5.2 共享組件庫<a class="headerlink" href="#452" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>組件名稱</th>
+<th>用途</th>
+<th>複用度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ErrorBoundary</strong></td>
+<td>錯誤邊界，捕獲 React 錯誤</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>ToastProvider</strong></td>
+<td>Toast 通知系統</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Skeleton</strong></td>
+<td>骨架屏加載狀態</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>EmptyState</strong></td>
+<td>空狀態顯示組件</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>EmptyStatePresets</strong></td>
+<td>預設空狀態模板</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="453">4.5.3 狀態管理分類<a class="headerlink" href="#453" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>狀態類型</th>
+<th>推薦方案</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>全局應用狀態</strong></td>
+<td>Zustand</td>
+<td>跨多個組件共享，如 Dashboard 核心數據</td>
+</tr>
+<tr>
+<td><strong>服務器狀態</strong></td>
+<td>React Query</td>
+<td>需要從 API 獲取，需要緩存和同步</td>
+</tr>
+<tr>
+<td><strong>功能特定狀態</strong></td>
+<td>Context</td>
+<td>特定功能的狀態共享，如 Persona、Toast</td>
+</tr>
+<tr>
+<td><strong>表單/UI 狀態</strong></td>
+<td>useState</td>
+<td>組件內部狀態，不需要共享</td>
+</tr>
+<tr>
+<td><strong>持久化狀態</strong></td>
+<td>LocalStorage</td>
+<td>需要跨會話保存，如用戶偏好、認證信息</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Zustand Store 示例:</strong></p>
+<pre><code class="language-javascript">const useStore = create((set) =&gt; ({
+  watchlist: [],
+  marketMovers: {
+    gainers: [],
+    losers: [],
+    most_active: []
+  },
+  heatmapData: [],
+  marketScore: {
+    current: null,
+    history: []
+  },
+  stockDetails: {},
+  lastUpdated: null,
+  loadingStatus: 'idle',
+  error: null,
+
+  fetchStage1Overview: async (force, targetDate, market) =&gt; {
+    // 獲取關鍵概覽數據
+  },
+
+  fetchStage2secondary: async (targetDate, market) =&gt; {
+    // 獲取次要數據
+  },
+
+  refreshDashboardData: () =&gt; {
+    // 強制刷新所有數據
+  }
+}));
+</code></pre>
+<p><strong>React Query 配置:</strong></p>
+<pre><code class="language-javascript">const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: CONFIG.refetchOnWindowFocus,
+            retry: 1,
+            staleTime: CONFIG.staleTime,
+            gcTime: CONFIG.cacheTime,
+            refetchOnMount: CONFIG.refetchOnMount,
+        },
+    },
+});
+</code></pre>
+<h4 id="454-ui">4.5.4 UI 模式<a class="headerlink" href="#454-ui" title="連結到此標題">&para;</a></h4>
+<p><strong>加載狀態模式:</strong></p>
+<pre><code class="language-javascript">const { data, error, isLoading } = useApiCache(key, fetcher);
+
+// 1. 加載狀態
+if (isLoading &amp;&amp; !data) {
+  return &lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;;
+}
+
+// 2. 錯誤狀態
+if (error) {
+  return (
+    &lt;EmptyStatePresets.LoadError
+      message={`Failed: ${error.message}`}
+      action={&lt;button onClick={refetch}&gt;Retry&lt;/button&gt;}
+    /&gt;
+  );
+}
+
+// 3. 空狀態
+if (!data || data.length === 0) {
+  return &lt;EmptyStatePresets.NoData /&gt;;
+}
+
+// 4. 主內容
+return &lt;div&gt;{/* 頁面內容 */}&lt;/div&gt;;
+</code></pre>
+<h4 id="455-api">4.5.5 API 集成鏈路<a class="headerlink" href="#455-api" title="連結到此標題">&para;</a></h4>
+<pre><code>組件層 (Component Layer)
+    React Component (Page / UI)
+        ↓
+自定義 Hook 層 (Custom Hooks)
+    useMomentum, useAllocation, useStrategyAPI
+        ↓
+React Query 層 (TanStack Query)
+    useApiCache / useApiMutation
+    (緩存檢查、去重、重試)
+        ↓
+請求保護層 (Request Protection)
+    protectedFetch (去重、超時、重試)
+        ↓
+Axios 實例層 (HTTP Client)
+    apiClient (統一配置、攔截器)
+        ↓
+網絡層 (Network)
+    HTTP Request (GET / POST / PUT / DELETE)
+        ↓
+後端層 (Backend)
+    FastAPI (Python)
+        ↓
+響應層 (Response)
+    JSON Response / Error
+</code></pre>
+<h3 id="46">4.6 策略引擎核心知識<a class="headerlink" href="#46" title="連結到此標題">&para;</a></h3>
+<h4 id="461-istrategy">4.6.1 IStrategy 接口契約<a class="headerlink" href="#461-istrategy" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class SignalAction(Enum):
+    BUY = &quot;BUY&quot;
+    SELL = &quot;SELL&quot;
+    HOLD = &quot;HOLD&quot;
+
+@dataclass
+class Signal:
+    symbol: str
+    action: SignalAction
+    confidence: float  # 0.0 to 1.0
+    reason: str = &quot;&quot;
+
+    def __post_init__(self):
+        if not (0.0 &lt;= self.confidence &lt;= 1.0):
+            raise ValueError(&quot;Confidence must be 0.0-1.0&quot;)
+
+@dataclass
+class ExecutionContext:
+    portfolio_value: float
+    available_cash: float
+    current_positions: List['PositionState']
+    market_date: date
+    market_status: str  # 'OPEN', 'CLOSED', etc.
+
+class IStrategy:
+    @property
+    def name(self) -&gt; str:
+        &quot;&quot;&quot;策略標識符&quot;&quot;&quot;
+        raise NotImplementedError
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        &quot;&quot;&quot;
+        核心方法：生成交易信號
+
+        約束：
+        - 返回信號列表（每個標的最多一個）
+        - 只返回 BUY/SELL（HOLD 通過不返回表示）
+        - 信心分數 0.0-1.0
+        - 對相同輸入必須確定性
+        - 交易前檢查 market_status
+        - 尊重持倉狀態和現金約束
+        &quot;&quot;&quot;
+        raise NotImplementedError
+</code></pre>
+<h4 id="462">4.6.2 策略模板<a class="headerlink" href="#462" title="連結到此標題">&para;</a></h4>
+<p><strong>模板 1: RSI 均值回歸策略</strong></p>
+<pre><code class="language-python">class RSIStrategy(IStrategy):
+    &quot;&quot;&quot;使用 RSI 指標的均值回歸策略&quot;&quot;&quot;
+
+    name = &quot;rsi_mean_reversion&quot;
+
+    def __init__(
+        self,
+        period: int = 14,
+        buy_threshold: int = 30,
+        sell_threshold: int = 70,
+        min_trade_size: float = 1000.0
+    ):
+        if not (0 &lt; buy_threshold &lt; sell_threshold &lt; 100):
+            raise ValueError(&quot;Invalid threshold values&quot;)
+        self.period = period
+        self.buy_threshold = buy_threshold
+        self.sell_threshold = sell_threshold
+        self.min_trade_size = min_trade_size
+        self.rsi_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        signals = []
+
+        for symbol in symbols:
+            # 檢查市場狀態
+            if context.market_status != 'CLOSED':
+                continue
+
+            # 檢查是否已持有
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # 獲取 RSI 值
+            rsi = self._get_rsi(symbol, context.market_date)
+
+            # 生成買入信號（僅當未持有時）
+            if rsi &lt; self.buy_threshold and not existing_position:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=self._calculate_confidence(rsi, self.buy_threshold)
+                ))
+
+            # 生成賣出信號（僅當持有时）
+            elif rsi &gt; self.sell_threshold and existing_position:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=self._calculate_confidence(rsi, self.sell_threshold)
+                ))
+
+        return signals
+</code></pre>
+<p><strong>模板 2: MACD 趨勢跟隨策略</strong></p>
+<pre><code class="language-python">class MACDStrategy(IStrategy):
+    &quot;&quot;&quot;使用 MACD 交叉的趨勢跟隨策略&quot;&quot;&quot;
+
+    name = &quot;macd_trend_following&quot;
+
+    def __init__(
+        self,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9,
+        min_trade_size: float = 1000.0
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.signal = signal
+        self.min_trade_size = min_trade_size
+        self.indicator_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        signals = []
+
+        for symbol in symbols:
+            # 檢查市場狀態
+            if context.market_status != 'CLOSED':
+                continue
+
+            # 獲取當前和前一日的 MACD 值
+            macd, signal_line = self._get_macd(symbol, context.market_date)
+            prev_macd, prev_signal = self._get_macd_previous(symbol, context.market_date)
+
+            # 檢查現有持倉
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # MACD 向上交叉信號線（看漲）
+            if (macd &gt; signal_line and prev_macd &lt;= prev_signal) and not existing_position:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+            # MACD 向下交叉信號線（看跌）
+            elif (macd &lt; signal_line and prev_macd &gt;= prev_signal) and existing_position:
+                signals.append(Signal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+        return signals
+</code></pre>
+<p><strong>模板 3: 組合策略</strong></p>
+<pre><code class="language-python">class CompositeStrategy(IStrategy):
+    &quot;&quot;&quot;使用可配置合併算法組合多個策略&quot;&quot;&quot;
+
+    name = &quot;composite_strategy&quot;
+
+    MERGE_ALGORITHMS = [
+        'majority_vote',  # 多數決
+        'unanimous',      # 一致同意
+        'weighted',       # 加權
+        'any'             # 任一
+    ]
+
+    def __init__(
+        self,
+        strategies: List[IStrategy],
+        merge_algorithm: str = 'majority_vote'
+    ):
+        if merge_algorithm not in self.MERGE_ALGORITHMS:
+            raise ValueError(f&quot;Invalid merge algorithm: {merge_algorithm}&quot;)
+        self.strategies = strategies
+        self.merge_algorithm = merge_algorithm
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        # 收集所有策略的信號
+        all_signals_by_symbol = {symbol: [] for symbol in symbols}
+
+        for strategy in self.strategies:
+            strategy_signals = strategy.generate_signals(context, symbols)
+            for signal in strategy_signals:
+                all_signals_by_symbol[signal.symbol].append(signal)
+
+        # 合併每個標的的信號
+        merged_signals = []
+        for symbol, signals in all_signals_by_symbol.items():
+            if not signals:
+                continue
+
+            merged_signal = self._merge_signals(symbol, signals)
+            if merged_signal:
+                merged_signals.append(merged_signal)
+
+        return merged_signals
+</code></pre>
+<h4 id="463-vectorbt">4.6.3 VectorBT 集成<a class="headerlink" href="#463-vectorbt" title="連結到此標題">&para;</a></h4>
+<p><strong>信號適配器:</strong></p>
+<pre><code class="language-python">class SignalAdapter:
+    &quot;&quot;&quot;將 IStrategy 信號轉換為 VectorBT 格式&quot;&quot;&quot;
+
+    @staticmethod
+    def signals_to_vectorbt(
+        ohlcv_index: pd.MultiIndex,
+        signals_by_date: Dict[date, List[Signal]]
+    ) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+        &quot;&quot;&quot;
+        將策略信號轉換為 VectorBT 進入/退出 DataFrame
+
+        參數：
+            ohlcv_index: 來自 VBTDataLoader 的 MultiIndex
+            signals_by_date: 映射日期到 List[Signal] 的字典
+
+        返回：
+            entries: DataFrame[symbol] = bool (True = 買入信號)
+            exits: DataFrame[symbol] = bool (True = 賣出信號)
+        &quot;&quot;&quot;
+        # 從索引中提取所有標的
+        symbols = ohlcv_index.get_level_values('symbol').unique()
+
+        # 創建空 DataFrame
+        entries = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+        exits = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+
+        # 填充信號
+        for signal_date, signals in signals_by_date.items():
+            if signal_date not in entries.index:
+                continue
+
+            for signal in signals:
+                if signal.symbol not in symbols:
+                    continue
+
+                if signal.action == SignalAction.BUY:
+                    entries.loc[signal_date, signal.symbol] = True
+                elif signal.action == SignalAction.SELL:
+                    exits.loc[signal_date, signal.symbol] = True
+
+        return entries, exits
+</code></pre>
+<h4 id="464">4.6.4 策略工廠<a class="headerlink" href="#464" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from typing import Dict, Any
+
+class StrategyFactory:
+    &quot;&quot;&quot;集中化策略實例化&quot;&quot;&quot;
+
+    @staticmethod
+    def create(strategy_type: str, params: Dict[str, Any] = None) -&gt; IStrategy:
+        &quot;&quot;&quot;
+        通過類型創建策略實例
+
+        參數：
+            strategy_type: 策略標識符
+            params: 策略參數
+
+        返回：
+            IStrategy 實例
+        &quot;&quot;&quot;
+        params = params or {}
+
+        # 個體策略
+        if strategy_type == 'rsi':
+            return RSIStrategy(
+                period=params.get('period', 14),
+                buy_threshold=params.get('buy_threshold', 30),
+                sell_threshold=params.get('sell_threshold', 70),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        elif strategy_type == 'macd':
+            return MACDStrategy(
+                fast=params.get('fast', 12),
+                slow=params.get('slow', 26),
+                signal=params.get('signal', 9),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        # 組合策略
+        elif strategy_type == 'composite':
+            strategies = []
+            for strat_type in params.get('strategies', []):
+                strategies.append(StrategyFactory.create(strat_type['type'], strat_type.get('params', {})))
+
+            return CompositeStrategy(
+                strategies=strategies,
+                merge_algorithm=params.get('merge_algorithm', 'majority_vote')
+            )
+
+        else:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+</code></pre>
+<h4 id="465">4.6.5 核心算法<a class="headerlink" href="#465" title="連結到此標題">&para;</a></h4>
+<p><strong>向量化 RSI 計算:</strong></p>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+class VectorizedRSI:
+    &quot;&quot;&quot;性能優化的向量化 RSI 計算&quot;&quot;&quot;
+
+    def calculate(self, prices: pd.Series, period: int = 14) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        使用向量化操作計算 RSI
+
+        參數：
+            prices: 價格序列
+            period: RSI 週期
+
+        返回：
+            RSI 值
+        &quot;&quot;&quot;
+        # 計算價格變化
+        delta = prices.diff()
+
+        # 分離漲跌幅
+        gains = delta.where(delta &gt; 0, 0)
+        losses = -delta.where(delta &lt; 0, 0)
+
+        # 計算平均漲跌幅（指數加權）
+        avg_gains = gains.ewm(span=period, adjust=False).mean()
+        avg_losses = losses.ewm(span=period, adjust=False).mean()
+
+        # 計算 RSI
+        rs = avg_gains / avg_losses
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+</code></pre>
+<p><strong>向量化 MACD 計算:</strong></p>
+<pre><code class="language-python">class VectorizedMACD:
+    &quot;&quot;&quot;向量化 MACD 計算&quot;&quot;&quot;
+
+    def calculate(
+        self,
+        prices: pd.Series,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9
+    ) -&gt; tuple[pd.Series, pd.Series]:
+        &quot;&quot;&quot;
+        使用向量化操作計算 MACD
+
+        返回：
+            (macd_line, signal_line)
+        &quot;&quot;&quot;
+        # 計算 EMA
+        ema_fast = prices.ewm(span=fast, adjust=False).mean()
+        ema_slow = prices.ewm(span=slow, adjust=False).mean()
+
+        # MACD 線
+        macd_line = ema_fast - ema_slow
+
+        # 信號線（MACD 的 EMA）
+        signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+
+        return macd_line, signal_line
+</code></pre>
+<h3 id="47-git">4.7 Git 開發模式<a class="headerlink" href="#47-git" title="連結到此標題">&para;</a></h3>
+<h4 id="471-git-flow">4.7.1 分支策略（Git Flow）<a class="headerlink" href="#471-git-flow" title="連結到此標題">&para;</a></h4>
+<pre><code>main (生產代碼)
+  ↑
+  develop (開發整合)
+  ↑
+  ├── feature/* (功能分支)
+  ├── hotfix/* (緊急修復)
+  ├── release/* (發布準備)
+  ├── fix/* (一般修復)
+  └── refactor/* (代碼重構)
+</code></pre>
+<h4 id="472-conventional-commits">4.7.2 Conventional Commits 規範<a class="headerlink" href="#472-conventional-commits" title="連結到此標題">&para;</a></h4>
+<pre><code>&lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;
+
+&lt;body&gt;
+
+&lt;footer&gt;
+</code></pre>
+<p><strong>Type 類型:</strong>
+- <code>feat</code>: 新功能
+- <code>fix</code>: Bug 修復
+- <code>docs</code>: 文檔更新
+- <code>style</code>: 代碼格式（不影響代碼運行）
+- <code>refactor</code>: 重構（不是新功能也不是修復）
+- <code>test</code>: 添加測試
+- <code>chore</code>: 構建過程或輔助工具的變動</p>
+<p><strong>示例:</strong></p>
+<pre><code class="language-bash">git commit -m &quot;feat(strategies): add RSI mean reversion strategy&quot;
+git commit -m &quot;fix(api): handle empty items list gracefully&quot;
+git commit -m &quot;refactor(items): extract validation logic to separate function&quot;
+git commit -m &quot;docs(readme): update installation instructions&quot;
+git commit -m &quot;test(items): add comprehensive tests for items API&quot;
+git commit -m &quot;style(items): format code with black and ruff&quot;
+</code></pre>
+<h4 id="473-pr">4.7.3 PR 流程<a class="headerlink" href="#473-pr" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown">## PR 模板
+
+### 描述
+簡要描述這個 PR 的目的和實現的功能。
+
+### 變更類型
+- [ ] Bug 修復
+- [ ] 新功能
+- [ ] 代碼重構
+- [ ] 文檔更新
+- [ ] 其他
+
+### 測試
+- [ ] 已添加單元測試
+- [ ] 已添加集成測試
+- [ ] 已通過所有測試
+
+### 檢查清單
+- [ ] 代碼遵循項目規範
+- [ ] 已通過 linter 檢查
+- [ ] 已更新相關文檔
+- [ ] 已通過代碼審查
+</code></pre>
+<hr />
+<h2 id="5">5. 實施路徑框架<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 實施路徑概述<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<p>本實施路徑基於 <strong>漸進式能力建設</strong> 原則，包含 4 個清晰的階段：</p>
+<pre><code>階段 1: 初級開發者 (0-3 個月)
+   ├─ P0: 基礎生存技能
+   ├─ 核心學習目標: 掌握全棧基礎、建立 TDD 習慣
+   ├─ 預估時間: 8-9 週
+   └─ 晉升門檻: 總分 ≥ 75 分
+
+階段 2: 中級開發者 (3-6 個月)
+   ├─ P0+P1: 核心開發技能
+   ├─ 核心學習目標: 掌握回測引擎、策略引擎、狀態管理
+   ├─ 預估時間: 10-11 週
+   └─ 晉升門檻: 總分 ≥ 80 分
+
+階段 3: 高級開發者 (6-12 個月)
+   ├─ P0+P1+P2: 進階技能
+   ├─ 核心學習目標: 掌握複合策略、性能優化、架構思維
+   ├─ 預估時間: 12-16 週
+   └─ 晉升門檻: 總分 ≥ 85 分
+
+階段 4: 高級架構師 (12+ 個月)
+   ├─ P0-P3: 全部技能
+   ├─ 核心學習目標: 微服務架構、DevOps、跨領域整合
+   ├─ 預估時間: 持續進階
+   └─ 維持標準: 總分 ≥ 85 分
+</code></pre>
+<h3 id="52-1-0-3">5.2 階段 1: 初級開發者 (0-3 個月)<a class="headerlink" href="#52-1-0-3" title="連結到此標題">&para;</a></h3>
+<h4 id="521">5.2.1 核心學習目標<a class="headerlink" href="#521" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>掌握全棧基礎技能</strong>: 能夠獨立完成簡單的前後端功能</li>
+<li><strong>建立測試驅動開發習慣</strong>: TDD 成為開發的默認模式</li>
+<li><strong>理解系統架構</strong>: 掌握分層架構和 API 設計基本概念</li>
+<li><strong>熟悉開發工作流</strong>: Git 提交規範、代碼審查流程</li>
+</ol>
+<h4 id="522">5.2.2 必備技能矩陣<a class="headerlink" href="#522" title="連結到此標題">&para;</a></h4>
+<p><strong>後端開發 (P0):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python 基礎</strong></td>
+<td>數據類型、函數、類、異步編程</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>代碼審查</td>
+</tr>
+<tr>
+<td><strong>FastAPI 基礎</strong></td>
+<td>路由、依賴注入、請求/響應模型</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>單元測試</td>
+</tr>
+<tr>
+<td><strong>Pydantic 驗證</strong></td>
+<td>數據模型、驗證規則、錯誤處理</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>測試覆蓋率</td>
+</tr>
+<tr>
+<td><strong>DuckDB 基礎</strong></td>
+<td>連接、查詢、CRUD 操作</td>
+<td>⭐⭐⭐⭐</td>
+<td>集成測試</td>
+</tr>
+<tr>
+<td><strong>錯誤處理</strong></td>
+<td>自定義異常、全局異常處理器</td>
+<td>⭐⭐⭐⭐</td>
+<td>代碼審查</td>
+</tr>
+</tbody>
+</table>
+<p><strong>前端開發 (P0):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>React 19 基礎</strong></td>
+<td>函數組件、Hooks (useState, useEffect)</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>組件測試</td>
+</tr>
+<tr>
+<td><strong>Bootstrap 5</strong></td>
+<td>響應式佈局、組件使用</td>
+<td>⭐⭐⭐⭐</td>
+<td>UI 審查</td>
+</tr>
+<tr>
+<td><strong>Axios</strong></td>
+<td>HTTP 客戶端配置、GET/POST/PUT/DELETE</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>測試 Mock</td>
+</tr>
+<tr>
+<td><strong>狀態管理基礎</strong></td>
+<td>useState, useContext</td>
+<td>⭐⭐⭐⭐</td>
+<td>單元測試</td>
+</tr>
+<tr>
+<td><strong>表單處理</strong></td>
+<td>受控組件、表單驗證</td>
+<td>⭐⭐⭐⭐</td>
+<td>E2E 測試</td>
+</tr>
+</tbody>
+</table>
+<p><strong>測試驅動開發 (P0):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pytest 基礎</strong></td>
+<td>測試編寫、fixture、mock</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>測試覆蓋率</td>
+</tr>
+<tr>
+<td><strong>vitest 基礎</strong></td>
+<td>單元測試、組件測試</td>
+<td>⭐⭐⭐⭐</td>
+<td>測試覆蓋率</td>
+</tr>
+<tr>
+<td><strong>TDD 流程</strong></td>
+<td>Red-Green-Refactor</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>代碼審查</td>
+</tr>
+<tr>
+<td><strong>AAA 模式</strong></td>
+<td>Arrange-Act-Assert</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>測試審查</td>
+</tr>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td>pytest-cov, vitest coverage</td>
+<td>⭐⭐⭐</td>
+<td>CI/CD 報告</td>
+</tr>
+</tbody>
+</table>
+<h4 id="523">5.2.3 實踐任務清單<a class="headerlink" href="#523" title="連結到此標題">&para;</a></h4>
+<p><strong>任務 1.1: 創建完整的 CRUD API</strong></p>
+<p><strong>目標</strong>: 實現完整的 CRUD API</p>
+<p><strong>交付物</strong>:
+- <code>backend/routers/items.py</code> (150 行)
+- <code>backend/tests/test_items.py</code> (100 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 實現 GET/POST/PUT/DELETE 端點
+- [ ] 使用 Pydantic 模型驗證
+- [ ] 使用 DuckDB 存儲數據
+- [ ] 統一錯誤處理
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<p><strong>任務 1.2: 實現技術指標計算</strong></p>
+<p><strong>目標</strong>: 掌握 pandas 數據處理和技術指標計算</p>
+<p><strong>交付物</strong>:
+- <code>backend/indicators/simple_rsi.py</code> (80 行)
+- <code>backend/indicators/simple_macd.py</code> (80 行)
+- <code>backend/tests/test_indicators.py</code> (120 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 使用 pandas 進行向量化計算
+- [ ] 實現 RSI 和 MACD 類
+- [ ] 編寫單元測試
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<p><strong>任務 1.3: 創建前端頁面</strong></p>
+<p><strong>目標</strong>: 創建項目管理的前端頁面</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/pages/ItemsPage/index.jsx</code> (200 行)
+- <code>frontend/src/pages/ItemsPage/__tests__/ItemsPage.test.jsx</code> (150 行)
+- 組件測試覆蓋率 ≥ 70%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 使用 React 19 Hooks
+- [ ] 使用 Bootstrap 5 佈局
+- [ ] 整合後端 API
+- [ ] 實現表單驗證
+- [ ] 組件測試覆蓋率 ≥ 70%</p>
+<h4 id="524">5.2.4 預估學習時間<a class="headerlink" href="#524" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python/FastAPI 基礎</td>
+<td>2 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>React 19 基礎</td>
+<td>2 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>測試驅動開發</td>
+<td>1 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>DuckDB 基礎</td>
+<td>3 天</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Git 規範</td>
+<td>2 天</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 1.1-1.3)</td>
+<td>4 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>8-9 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="525">5.2.5 驗證標準<a class="headerlink" href="#525" title="連結到此標題">&para;</a></h4>
+<p><strong>代碼質量驗證</strong>:
+- [ ] 所有 API 端點有完整的單元測試（覆蓋率 ≥ 80%）
+- [ ] 所有前端組件有組件測試
+- [ ] 所有提交遵循 Conventional Commits 規範（100%）
+- [ ] 代碼通過 linter 檢查（ruff, eslint）
+- [ ] 代碼通過格式化工具（black, prettier）</p>
+<p><strong>功能驗證</strong>:
+- [ ] 能夠獨立完成完整的 CRUD API 實現
+- [ ] 能夠實現簡單的技術指標計算
+- [ ] 前後端能夠正確交互
+- [ ] 能夠處理常見錯誤情況</p>
+<p><strong>知識驗證</strong>:
+- [ ] 能夠解釋分層架構的概念
+- [ ] 能夠解釋 TDD 的 Red-Green-Refactor 流程
+- [ ] 能夠解釋 RESTful API 的設計原則
+- [ ] 能夠閱讀和理解現有代碼</p>
+<p><strong>晉升門檻</strong>: 總分 ≥ 75 分，且所有 P0 指標達到 C 以上</p>
+<h3 id="53-2-3-6">5.3 階段 2: 中級開發者 (3-6 個月)<a class="headerlink" href="#53-2-3-6" title="連結到此標題">&para;</a></h3>
+<h4 id="531">5.3.1 核心學習目標<a class="headerlink" href="#531" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>掌握回測引擎使用</strong>: 能夠使用 VectorBT 和 Backtrader 進行策略回測</li>
+<li><strong>理解策略引擎架構</strong>: 掌握 IStrategy 接口和策略模式</li>
+<li><strong>熟練狀態管理</strong>: 精通 Zustand 和 React Query</li>
+<li><strong>建立代碼審查能力</strong>: 能夠審查他人代碼並提供建設性反饋</li>
+</ol>
+<h4 id="532">5.3.2 必備技能矩陣<a class="headerlink" href="#532" title="連結到此標題">&para;</a></h4>
+<p><strong>回測引擎 (P1):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VectorBT 基礎</strong></td>
+<td>數據加載、信號生成、組合創建</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>回測結果驗證</td>
+</tr>
+<tr>
+<td><strong>Backtrader 基礎</strong></td>
+<td>Cerebro、策略類、數據 feed</td>
+<td>⭐⭐⭐⭐</td>
+<td>回測對比</td>
+</tr>
+<tr>
+<td><strong>績效指標計算</strong></td>
+<td>Sharpe Ratio、Max Drawdown、Win Rate</td>
+<td>⭐⭐⭐⭐</td>
+<td>指標驗證</td>
+</tr>
+<tr>
+<td><strong>參數優化</strong></td>
+<td>網格搜索、並行回測</td>
+<td>⭐⭐⭐</td>
+<td>優化結果</td>
+</tr>
+</tbody>
+</table>
+<p><strong>策略引擎 (P1):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IStrategy 接口</strong></td>
+<td>generate_signals 實現</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>接口契約測試</td>
+</tr>
+<tr>
+<td><strong>策略模式</strong></td>
+<td>工廠模式、適配器模式、組合策略</td>
+<td>⭐⭐⭐⭐</td>
+<td>設計審查</td>
+</tr>
+<tr>
+<td><strong>信號處理</strong></td>
+<td>信號生成、合併、過濾</td>
+<td>⭐⭐⭐⭐</td>
+<td>信號測試</td>
+</tr>
+<tr>
+<td><strong>策略工廠</strong></td>
+<td>策略註冊、實例化</td>
+<td>⭐⭐⭐⭐</td>
+<td>工廠測試</td>
+</tr>
+</tbody>
+</table>
+<p><strong>狀態管理 (P1):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zustand</strong></td>
+<td>Store 定義、actions、selectors</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>Store 測試</td>
+</tr>
+<tr>
+<td><strong>React Query</strong></td>
+<td>useApiCache、useApiMutation、cache 管理</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>緩存測試</td>
+</tr>
+<tr>
+<td><strong>狀態分類原則</strong></td>
+<td>全局狀態、服務端狀態、本地狀態</td>
+<td>⭐⭐⭐⭐</td>
+<td>代碼審查</td>
+</tr>
+<tr>
+<td><strong>快取策略</strong></td>
+<td>staleTime、gcTime、invalidate</td>
+<td>⭐⭐⭐⭐</td>
+<td>性能測試</td>
+</tr>
+</tbody>
+</table>
+<h4 id="533">5.3.3 實踐任務清單<a class="headerlink" href="#533" title="連結到此標題">&para;</a></h4>
+<p><strong>任務 2.1: 實現完整的 RSI 策略</strong></p>
+<p><strong>目標</strong>: 掌握 IStrategy 接口和 VectorBT 回測</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/rsi_strategy.py</code> (150 行)
+- <code>backend/backtest/vectorbt_executor.py</code> (200 行)
+- <code>backend/tests/test_rsi_strategy.py</code> (120 行)
+- 測試覆蓋率 ≥ 85%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 實現 RSIStrategy 類
+- [ ] 使用 VectorBT 執行回測
+- [ ] 計算績效指標
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<p><strong>任務 2.2: 實現策略工廠</strong></p>
+<p><strong>目標</strong>: 掌握工廠模式和策略註冊機制</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/factory.py</code> (80 行)
+- <code>backend/tests/test_strategy_factory.py</code> (60 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 實現 StrategyFactory 類
+- [ ] 註冊內置策略
+- [ ] 支持動態策略註冊
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<p><strong>任務 2.3: 實現 React Query 緩存管理</strong></p>
+<p><strong>目標</strong>: 掌握 React Query 的緩存和狀態管理</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/hooks/useApiCache.js</code> (150 行)
+- <code>frontend/src/hooks/__tests__/useApiCache.test.js</code> (100 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 實現 useApiCache hook
+- [ ] 實現 useApiMutation hook
+- [ ] 實現快取預設
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<p><strong>任務 2.4: 實現 Zustand Store</strong></p>
+<p><strong>目標</strong>: 掌握 Zustand 全局狀態管理</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/store/dashboardStore.js</code> (120 行)
+- <code>frontend/src/store/__tests__/dashboardStore.test.js</code> (80 行)
+- 測試覆蓋率 ≥ 85%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 創建 Dashboard store
+- [ ] 實現 actions 和 selectors
+- [ ] 整合 React Query
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<h4 id="534">5.3.4 預估學習時間<a class="headerlink" href="#534" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VectorBT 學習</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Backtrader 學習</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>策略引擎架構</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Zustand 精通</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>React Query 精通</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>集成測試</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 2.1-2.4)</td>
+<td>5 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>10-11 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="535">5.3.5 驗證標準<a class="headerlink" href="#535" title="連結到此標題">&para;</a></h4>
+<p><strong>代碼質量驗證</strong>:
+- [ ] 策略實現遵循 IStrategy 接口契約
+- [ ] 回測代碼有完整的單元測試和集成測試
+- [ ] 測試覆蓋率 ≥ 85%
+- [ ] 所有提交遵循 Conventional Commits
+- [ ] 代碼審查通過（至少 1 次他人審查）</p>
+<p><strong>功能驗證</strong>:
+- [ ] 能夠使用 VectorBT 執行策略回測
+- [ ] 能夠正確實現並使用策略工廠
+- [ ] 能夠使用 React Query 管理服務端狀態
+- [ ] 能夠使用 Zustand 管理全局狀態
+- [ ] 能夠編寫集成測試</p>
+<p><strong>知識驗證</strong>:
+- [ ] 能夠解釋策略模式的工作原理
+- [ ] 能夠解釋向量化計算的性能優勢
+- [ ] 能夠解釋 React Query 的緩存策略
+- [ ] 能夠審查他人代碼並提供建設性反饋
+- [ ] 能夠設計測試策略</p>
+<p><strong>晉升門檻</strong>: 總分 ≥ 80 分，且所有 P0+P1 指標達到 B 以上</p>
+<h3 id="54-3-6-12">5.4 階段 3: 高級開發者 (6-12 個月)<a class="headerlink" href="#54-3-6-12" title="連結到此標題">&para;</a></h3>
+<h4 id="541">5.4.1 核心學習目標<a class="headerlink" href="#541" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>掌握複合策略設計</strong>: 能夠設計和實現組合策略和信號合併算法</li>
+<li><strong>精通性能優化</strong>: 能夠識別和解決性能瓶頸</li>
+<li><strong>建立架構思維</strong>: 能夠進行技術選型和架構設計決策</li>
+<li><strong>具備技術指導能力</strong>: 能夠指導初級和中級開發者</li>
+</ol>
+<h4 id="542">5.4.2 必備技能矩陣<a class="headerlink" href="#542" title="連結到此標題">&para;</a></h4>
+<p><strong>複合策略 (P2):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>組合策略</strong></td>
+<td>CompositeStrategy、多策略組合</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>回測驗證</td>
+</tr>
+<tr>
+<td><strong>信號合併算法</strong></td>
+<td>多數決、一緻同意、加權投票</td>
+<td>⭐⭐⭐⭐</td>
+<td>算法測試</td>
+</tr>
+<tr>
+<td><strong>策略共識機制</strong></td>
+<td>信號共振、多指標匯合</td>
+<td>⭐⭐⭐</td>
+<td>共識測試</td>
+</tr>
+<tr>
+<td><strong>策略優化</strong></td>
+<td>參數掃描、網格搜索</td>
+<td>⭐⭐⭐</td>
+<td>優化結果</td>
+</tr>
+</tbody>
+</table>
+<p><strong>性能優化 (P2):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>向量化優化</strong></td>
+<td>NumPy、pandas 向量化操作</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>性能基準測試</td>
+</tr>
+<tr>
+<td><strong>並行處理</strong></td>
+<td>multiprocessing、asyncio</td>
+<td>⭐⭐⭐⭐</td>
+<td>並行效率</td>
+</tr>
+<tr>
+<td><strong>查詢優化</strong></td>
+<td>SQL 優化、索引優化</td>
+<td>⭐⭐⭐⭐</td>
+<td>查詢性能</td>
+</tr>
+<tr>
+<td><strong>緩存策略</strong></td>
+<td>多級緩存、緩存失效</td>
+<td>⭐⭐⭐⭐</td>
+<td>緩存命中率</td>
+</tr>
+</tbody>
+</table>
+<p><strong>架構設計 (P2):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構</strong></td>
+<td>服務拆分、API 網關</td>
+<td>⭐⭐⭐⭐</td>
+<td>架構審查</td>
+</tr>
+<tr>
+<td><strong>API 版本化</strong></td>
+<td>向後兼容、遷移策略</td>
+<td>⭐⭐⭐⭐</td>
+<td>API 設計審查</td>
+</tr>
+<tr>
+<td><strong>數據架構設計</strong></td>
+<td>Schema 設計、ETL 流程</td>
+<td>⭐⭐⭐⭐</td>
+<td>數據建模</td>
+</tr>
+<tr>
+<td><strong>技術選型</strong></td>
+<td>ADR、權衡分析</td>
+<td>⭐⭐⭐⭐</td>
+<td>ADR 文檔</td>
+</tr>
+<tr>
+<td><strong>E2E 測試策略</strong></td>
+<td>測試金字塔、測試覆蓋</td>
+<td>⭐⭐⭐⭐</td>
+<td>測試計劃</td>
+</tr>
+</tbody>
+</table>
+<h4 id="543">5.4.3 實踐任務清單<a class="headerlink" href="#543" title="連結到此標題">&para;</a></h4>
+<p><strong>任務 3.1: 實現複合策略和信號合併</strong></p>
+<p><strong>目標</strong>: 掌握複合策略設計和信號合併算法</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/composite_strategy.py</code> (250 行)
+- <code>backend/strategies/signal_merger.py</code> (200 行)
+- <code>backend/tests/test_composite_strategy.py</code> (180 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 實現 CompositeStrategy 類
+- [ ] 實現 5 種信號合併算法
+- [ ] 支持動態配置合併算法
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<p><strong>任務 3.2: 性能優化和並行處理</strong></p>
+<p><strong>目標</strong>: 掌握性能優化和並行處理技術</p>
+<p><strong>交付物</strong>:
+- <code>backend/optimization/vectorized_indicators.py</code> (180 行)
+- <code>backend/optimization/parallel_backtest.py</code> (150 行)
+- <code>backend/optimization/cache_manager.py</code> (120 行)
+- 性能提升 ≥ 50%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 向量化指標計算
+- [ ] 並行化回測執行
+- [ ] 實現多級緩存
+- [ ] 性能提升 ≥ 50%</p>
+<p><strong>任務 3.3: Three.js 3D 可視化</strong></p>
+<p><strong>目標</strong>: 掌握 Three.js 3D 可視化</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/components/ThreeDChart.jsx</code> (200 行)
+- <code>frontend/src/components/__tests__/ThreeDChart.test.jsx</code> (80 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗證標準</strong>:
+- [ ] 使用 Three.js 創建 3D 圖表
+- [ ] 實現交互式 3D 可視化
+- [ ] 優化渲染性能
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<p><strong>任務 3.4: 架構決策記錄 (ADR)</strong></p>
+<p><strong>目標</strong>: 掌握架構決策記錄的編寫</p>
+<p><strong>交付物</strong>:
+- <code>docs/adr/001-choose-vectorbt.md</code>
+- <code>docs/adr/002-api-versioning.md</code>
+- <code>docs/adr/003-cache-strategy.md</code></p>
+<p><strong>驗證標準</strong>:
+- [ ] 寫 3 個 ADR
+- [ ] 包含技術選型的權衡分析
+- [ ] 獲得團隊審查
+- [ ] 遵循 ADR 模板</p>
+<h4 id="544">5.4.4 預估學習時間<a class="headerlink" href="#544" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>複合策略設計</td>
+<td>2 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>信號合併算法</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>性能優化</td>
+<td>2 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Three.js 學習</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>架構設計</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>技術選型</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 3.1-3.4)</td>
+<td>8 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>16-18 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="545">5.4.5 驗證標準<a class="headerlink" href="#545" title="連結到此標題">&para;</a></h4>
+<p><strong>代碼質量驗證</strong>:
+- [ ] 複合策略實現完整且可擴展
+- [ ] 信號合併算法實現正確且高效
+- [ ] 性能優化效果明顯（≥ 50%）
+- [ ] 測試覆蓋率 ≥ 90%
+- [ ] 所有提交遵循 Conventional Commits</p>
+<p><strong>功能驗證</strong>:
+- [ ] 能夠組合多個策略
+- [ ] 能夠使用多種信號合併算法
+- [ ] 性能顯著提升
+- [ ] 3D 可視化流暢
+- [ ] 架構決策記錄完整</p>
+<p><strong>知識驗證</strong>:
+- [ ] 能夠解釋複合策略的設計模式
+- [ ] 能夠解釋性能優化的方法
+- [ ] 能夠進行技術選型和權衡分析
+- [ ] 能夠指導初級和中級開發者
+- [ ] 能夠進行架構審查</p>
+<p><strong>晉升門檻</strong>: 總分 ≥ 85 分，且所有 P0-P2 指標達到 B 以上，領導力達到 C 以上</p>
+<h3 id="55-4-12">5.5 階段 4: 高級架構師 (12+ 個月)<a class="headerlink" href="#55-4-12" title="連結到此標題">&para;</a></h3>
+<h4 id="551">5.5.1 核心學習目標<a class="headerlink" href="#551" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>掌握微服務架構</strong>: 能夠設計和實現微服務系統</li>
+<li><strong>精通 DevOps</strong>: 能夠設置 CI/CD 和容器化部署</li>
+<li><strong>跨領域整合</strong>: 能夠整合機器學習、實時數據流等技術</li>
+<li><strong>技術領導力</strong>: 能夠制定技術路線圖和培養團隊</li>
+</ol>
+<h4 id="552">5.5.2 必備技能矩陣<a class="headerlink" href="#552" title="連結到此標題">&para;</a></h4>
+<p><strong>微服務技術 (P3):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構</strong></td>
+<td>服務拆分、API 網關、服務發現</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>架構實現審查</td>
+</tr>
+<tr>
+<td><strong>gRPC</strong></td>
+<td>Protobuf、gRPC 服務</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>gRPC 服務實現</td>
+</tr>
+<tr>
+<td><strong>API 網關</strong></td>
+<td>路由、認證、限流</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>網關實現審查</td>
+</tr>
+<tr>
+<td><strong>服務發現</strong></td>
+<td>Consul、etcd</td>
+<td>⭐⭐⭐⭐</td>
+<td>服務發現集成</td>
+</tr>
+<tr>
+<td><strong>分布式事務</strong></td>
+<td>Saga、TCC</td>
+<td>⭐⭐⭐</td>
+<td>事務處理實現</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DevOps (P3):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docker</strong></td>
+<td>容器化、Docker Compose</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>容器化所有服務</td>
+</tr>
+<tr>
+<td><strong>Kubernetes</strong></td>
+<td>Pod、Deployment、Service</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>部署到 K8s</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions、Jenkins</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>設置自動部署</td>
+</tr>
+<tr>
+<td><strong>監控</strong></td>
+<td>Prometheus、Grafana</td>
+<td>⭐⭐⭐⭐</td>
+<td>實現監控</td>
+</tr>
+<tr>
+<td><strong>日誌</strong></td>
+<td>ELK、Loki</td>
+<td>⭐⭐⭐</td>
+<td>集中日誌</td>
+</tr>
+</tbody>
+</table>
+<p><strong>機器學習 (P3):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>模型訓練</strong></td>
+<td>scikit-learn、XGBoost</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>訓練 3 個模型</td>
+</tr>
+<tr>
+<td><strong>模型部署</strong></td>
+<td>Flask、FastAPI、MLflow</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>部署模型</td>
+</tr>
+<tr>
+<td><strong>特徵工程</strong></td>
+<td>數據預處理、特徵選擇</td>
+<td>⭐⭐⭐⭐</td>
+<td>設計特徵</td>
+</tr>
+<tr>
+<td><strong>模型評估</strong></td>
+<td>交叉驗證、超參調優</td>
+<td>⭐⭐⭐⭐</td>
+<td>優化模型</td>
+</tr>
+</tbody>
+</table>
+<p><strong>技術領導力 (P3):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+<th>驗證方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術路線圖</strong></td>
+<td>規劃、優先級、里程碑</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>制定路線圖</td>
+</tr>
+<tr>
+<td><strong>人才培養</strong></td>
+<td>導師計劃、技能評估</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>培養 3 人</td>
+</tr>
+<tr>
+<td><strong>技術規範</strong></td>
+<td>編碼規範、架構規範</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>制定規範</td>
+</tr>
+<tr>
+<td><strong>技術演進</strong></td>
+<td>技術債管理、重構計劃</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>管理技術債</td>
+</tr>
+</tbody>
+</table>
+<h4 id="553">5.5.3 實踐任務清單<a class="headerlink" href="#553" title="連結到此標題">&para;</a></h4>
+<p><strong>任務 4.1: 微服務架構實現</strong></p>
+<p><strong>目標</strong>: 設計和實現完整的微服務架構</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>microservices/
+├── api-gateway/ (API 網關服務)
+├── strategy-service/ (策略服務)
+├── market-data-service/ (市場數據服務)
+├── backtest-service/ (回測服務)
+├── execution-service/ (執行服務)
+└── docker-compose.yml
+</code></pre>
+<p><strong>驗證標準</strong>:
+- [ ] 設計服務邊界
+- [ ] 實現 API 網關
+- [ ] 集成服務發現
+- [ ] 實現分布式事務
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<p><strong>任務 4.2: Kubernetes 部署和監控</strong></p>
+<p><strong>目標</strong>: 設置 Kubernetes 集群和監控系統</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>k8s/
+├── api-gateway/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── ingress.yaml
+├── strategy-service/
+│   ├── deployment.yaml
+│   └── service.yaml
+├── monitoring/
+│   ├── prometheus/
+│   ├── grafana/
+│   └── alertmanager/
+└── charts/
+</code></pre>
+<p><strong>驗證標準</strong>:
+- [ ] 編寫 Kubernetes manifests
+- [ ] 設置 Helm charts
+- [ ] 集成 Prometheus 和 Grafana
+- [ ] 設置告警系統
+- [ ] 實現自動部署</p>
+<p><strong>任務 4.3: 機器學習模型集成</strong></p>
+<p><strong>目標</strong>: 訓練和部署機器學習模型</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>ml/
+├── models/
+│   ├── price_prediction.py
+│   ├── sentiment_analysis.py
+│   └── anomaly_detection.py
+├── training/
+│   └── train_models.py
+├── deployment/
+│   └── model_api.py
+└── monitoring/
+    └── model_monitoring.py
+</code></pre>
+<p><strong>驗證標準</strong>:
+- [ ] 訓練 3 個不同的 ML 模型
+- [ ] 實現特徵工程
+- [ ] 部署模型為 API 服務
+- [ ] 實現模型監控
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<p><strong>任務 4.4: 技術路線圖制定</strong></p>
+<p><strong>目標</strong>: 制定完整的技術路線圖</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>docs/
+├── roadmap/
+│   ├── current_state.md
+│   ├── technical_debt.md
+│   ├── goals/
+│   │   ├── short_term.md
+│   │   └── long_term.md
+│   ├── milestones.md
+│   └── resource_plan.md
+</code></pre>
+<p><strong>驗證標準</strong>:
+- [ ] 分析當前技術現狀
+- [ ] 識別技術債
+- [ ] 制定短期和長期目標
+- [ ] 規劃資源和時間
+- [ ] 獲得團隊批准</p>
+<h4 id="554">5.5.4 預估學習時間<a class="headerlink" href="#554" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>微服務架構</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>Kubernetes</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>機器學習</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>實時數據流</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>技術領導力</td>
+<td>持續</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 4.1-4.4)</td>
+<td>16 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>32-36 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="555">5.5.5 驗證標準<a class="headerlink" href="#555" title="連結到此標題">&para;</a></h4>
+<p><strong>架構質量驗證</strong>:
+- [ ] 微服務架構設計合理
+- [ ] 服務邊界清晰
+- [ ] API 網關功能完整
+- [ ] 分布式事務處理正確
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<p><strong>DevOps 驗證</strong>:
+- [ ] 所有服務容器化
+- [ ] Kubernetes 部署成功
+- [ ] CI/CD 流程自動化
+- [ ] 監控和告警系統運作
+- [ ] 自動部署正常</p>
+<p><strong>機器學習驗證</strong>:
+- [ ] 模型訓練完成
+- [ ] 模型部署成功
+- [ ] 模型監控運作
+- [ ] 性能指標達標
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<p><strong>領導力驗證</strong>:
+- [ ] 技術路線圖完整
+- [ ] 團隊培養計劃執行
+- [ ] 技術規範制定
+- [ ] 技術債管理有效
+- [ ] 團隊成長明顯</p>
+<p><strong>維持標準</strong>: 總分 ≥ 85 分，且所有指標達到 B 以上</p>
+<hr />
+<h2 id="6">6. 評估指標和方法<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 評估體系概述<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<p>本評估體系基於 <strong>科學量化</strong> 和 <strong>持續改進</strong> 原則：</p>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>可量化性</strong></td>
+<td>所有指標應該可測量、可驗證</td>
+</tr>
+<tr>
+<td><strong>多維度</strong></td>
+<td>從技術、實踐、領域、領導力四個維度評估</td>
+</tr>
+<tr>
+<td><strong>漸進性</strong></td>
+<td>評估標準隨階段逐步提高</td>
+</tr>
+<tr>
+<td><strong>客觀性</strong></td>
+<td>通過自動化工具和同行審查減少主觀偏差</td>
+</tr>
+<tr>
+<td><strong>行動導向</strong></td>
+<td>評估結果應該直接導向具體改進行動</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 評估維度框架<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<pre><code>技術能力 (40%)                                              │
+├─ 代碼質量 (15%)                                          │
+│  ├─ 測試覆蓋率 (5%)                                      │
+│  ├─ Linter 通過率 (3%)                                   │
+│  ├─ 代碼複雜度 (3%)                                      │
+│  ├─ 代碼重複率 (2%)                                      │
+│  └─ 類型註解覆蓋 (2%)                                    │
+├─ 架構設計 (10-15%)                                       │
+│  ├─ API 設計質量 (3-4%)                                   │
+│  ├─ 狀態管理設計 (3%)                                    │
+│  ├─ 策略模式應用 (2%)                                    │
+│  ├─ 工廠模式應用 (2%)                                    │
+│  └─ 微服務架構理解 (3-4%)                                 │
+└─ 技術棧掌握 (10-15%)                                      │
+   ├─ VectorBT/Backtrader (3%)                             │
+   ├─ React 19 (4%)                                       │
+   ├─ Zustand/React Query (4%)                             │
+   └─ 策略引擎 (3%)                                        │
+
+實踐能力 (30%)                                              │
+├─ TDD 執行度 (8-10%)                                       │
+│  ├─ 測試先於實現比例 (3-4%)                               │
+│  ├─ 集成測試覆蓋 (3%)                                     │
+│  └─ E2E 測試覆蓋 (3%)                                     │
+├─ 代碼審查能力 (10-12%)                                     │
+│  ├─ 審查參與頻率 (3%)                                     │
+│  ├─ 審查回應時間 (2%)                                     │
+│  ├─ 審查質量評分 (3-4%)                                   │
+│  └─ 建設性反饋 (2%)                                       │
+├─ 文檔完整性 (5-7%)                                        │
+│  ├─ Docstring 覆蓋率 (3-4%)                               │
+│  ├─ API 文檔質量 (2%)                                     │
+│  └─ README 質量 (1-2%)                                    │
+└─ Git 規範遵循度 (4-5%)                                    │
+   ├─ Conventional Commits (2-3%)                          │
+   ├─ PR 描述質量 (2%)                                      │
+   └─ 提交粒度 (1%)                                         │
+
+領域知識 (20%)                                              │
+├─ 回測引擎掌握 (8-10%)                                      │
+│  ├─ VectorBT 熟練度 (3-4%)                                │
+│  ├─ Backtrader 熟練度 (3%)                               │
+│  ├─ 績效指標理解 (2%)                                    │
+│  └─ 參數優化理解 (1%)                                     │
+├─ 策略引擎深入 (6-8%)                                       │
+│  ├─ 策略工廠設計 (3%)                                     │
+│  ├─ 信號合併理解 (2%)                                     │
+│  └─ 策略參數管理 (1%)                                     │
+└─ 技術指標掌握 (4-6%)                                       │
+   ├─ 技術指標實現 (2-3%)                                   │
+   └─ 指標優化 (2%)                                         │
+
+領導力 (10%) - 僅高級/架構師階段                            │
+├─ 技術指導 (6%)                                           │
+│  ├─ 指導初級開發者 (2%)                                   │
+│  ├─ 代碼審查指導 (2%)                                     │
+│  └─ 知識傳遞 (2%)                                         │
+└─ 技術決策 (4%)                                           │
+   ├─ ADR 質量 (2%)                                         │
+   └─ 技術選型影響 (2%)                                     │
+</code></pre>
+<h3 id="63-1">6.3 階段 1 評估指標<a class="headerlink" href="#63-1" title="連結到此標題">&para;</a></h3>
+<h4 id="631-40">6.3.1 技術能力指標 (40%)<a class="headerlink" href="#631-40" title="連結到此標題">&para;</a></h4>
+<p><strong>代碼質量 (15%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td><code>pytest-cov</code> / <code>vitest coverage</code></td>
+<td>5%</td>
+<td>≥80%</td>
+<td>80%=70分, 85%=80分, 90%=90分, 95+=100分</td>
+</tr>
+<tr>
+<td><strong>Linter 通過率</strong></td>
+<td><code>ruff check</code> / <code>eslint</code></td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 90%=60分, &lt;90%=0分</td>
+</tr>
+<tr>
+<td><strong>代碼複雜度</strong></td>
+<td><code>radon</code> / <code>complexity report</code></td>
+<td>3%</td>
+<td>≤10</td>
+<td>≤10=100分, 15=80分, 20=60分, &gt;20=0分</td>
+</tr>
+<tr>
+<td><strong>代碼重複率</strong></td>
+<td><code>duplication detector</code></td>
+<td>2%</td>
+<td>&lt;5%</td>
+<td>&lt;3%=100分, 3-5%=80分, 5-10%=60分, &gt;10%=0分</td>
+</tr>
+<tr>
+<td><strong>類型註解覆蓋</strong></td>
+<td><code>mypy</code> 檢查</td>
+<td>2%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=80分, 100%=100分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>架構設計理解 (10%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>分層架構理解</strong></td>
+<td>代碼審查 + 問答</td>
+<td>3%</td>
+<td>正確理解分層</td>
+<td>完全理解=100分, 基本理解=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>RESTful API 設計</strong></td>
+<td>API 設計審查</td>
+<td>3%</td>
+<td>符合 REST 原則</td>
+<td>完全符合=100分, 基本符合=70分, 不符合=0分</td>
+</tr>
+<tr>
+<td><strong>數據模型設計</strong></td>
+<td>Schema 設計審查</td>
+<td>2%</td>
+<td>合理規範</td>
+<td>合理=100分, 可改進=70分, 不合理=0分</td>
+</tr>
+<tr>
+<td><strong>錯誤處理</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>全面正確</td>
+<td>全面=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>技術棧掌握 (15%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>權重</th>
+<th>測量方法</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>基礎語法、異步編程</td>
+<td>3%</td>
+<td>代碼審查 + 測試</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>FastAPI</strong></td>
+<td>路由、依賴注入、驗證</td>
+<td>4%</td>
+<td>API 實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>React 19</strong></td>
+<td>Hooks、組件、狀態</td>
+<td>4%</td>
+<td>組件實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>DuckDB</strong></td>
+<td>查詢、CRUD 操作</td>
+<td>2%</td>
+<td>數據操作審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Conventional Commits</td>
+<td>2%</td>
+<td>提交歷史檢查</td>
+<td>100% 遵循</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="632-30">6.3.2 實踐能力指標 (30%)<a class="headerlink" href="#632-30" title="連結到此標題">&para;</a></h4>
+<p><strong>TDD 執行度 (10%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試先於實現比例</strong></td>
+<td>Git 提交歷史分析</td>
+<td>4%</td>
+<td>≥80%</td>
+<td>80%=70分, 90%=90分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>測試數量與功能匹配</strong></td>
+<td>測試/功能比</td>
+<td>3%</td>
+<td>≥3:1</td>
+<td>3:1=70分, 5:1=90分, 10:1=100分</td>
+</tr>
+<tr>
+<td><strong>AAA 模式遵循度</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>代碼審查參與度 (5%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PR 創建頻率</strong></td>
+<td>PR 數量 / 月</td>
+<td>2%</td>
+<td>≥4 PR/月</td>
+<td>4=70分, 6=90分, 8+=100分</td>
+</tr>
+<tr>
+<td><strong>PR 審查回應時間</strong></td>
+<td>平均回應時間</td>
+<td>2%</td>
+<td>&lt;24小時</td>
+<td>&lt;24h=100分, 24-48h=70分, &gt;48h=0分</td>
+</tr>
+<tr>
+<td><strong>審查質量評分</strong></td>
+<td>審查反饋質量</td>
+<td>1%</td>
+<td>≥3/5</td>
+<td>3=60分, 4=80分, 5=100分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>文檔完整性 (10%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docstring 覆蓋率</strong></td>
+<td><code>pydocstyle</code> 檢查</td>
+<td>4%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=80分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>API 文檔完整性</strong></td>
+<td>Swagger/OpenAPI 檢查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+<tr>
+<td><strong>README 質量</strong></td>
+<td>人工審查</td>
+<td>2%</td>
+<td>完整清晰</td>
+<td>完整=100分, 基本=70分, 不完整=0分</td>
+</tr>
+<tr>
+<td><strong>註釋質量</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>合理必要</td>
+<td>合理=100分, 過多/過少=50分, 不當=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Git 規範遵循度 (5%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>Commit 檢查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 90%=70分, &lt;90%=0分</td>
+</tr>
+<tr>
+<td><strong>分支命名規範</strong></td>
+<td>分支名檢查</td>
+<td>1%</td>
+<td>100%</td>
+<td>100%=100分, 否則=0分</td>
+</tr>
+<tr>
+<td><strong>提交粒度</strong></td>
+<td>人工審查</td>
+<td>1%</td>
+<td>合理</td>
+<td>合理=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="633-20">6.3.3 領域知識指標 (20%)<a class="headerlink" href="#633-20" title="連結到此標題">&para;</a></h4>
+<p><strong>量化交易基礎 (8%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術指標理解</strong></td>
+<td>問答 + 實現</td>
+<td>3%</td>
+<td>理解至少 3 個</td>
+<td>3個=70分, 5個=90分, 10+=100分</td>
+</tr>
+<tr>
+<td><strong>回測概念理解</strong></td>
+<td>問答</td>
+<td>2%</td>
+<td>理解基本概念</td>
+<td>完全理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>市場數據結構</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確使用</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>交易信號概念</strong></td>
+<td>問答</td>
+<td>1%</td>
+<td>理解買賣信號</td>
+<td>理解=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>策略引擎理解 (6%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IStrategy 接口理解</strong></td>
+<td>問答 + 代碼審查</td>
+<td>3%</td>
+<td>理解接口契約</td>
+<td>完全理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>信號生成邏輯</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確實現</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>執行上下文理解</strong></td>
+<td>問答</td>
+<td>1%</td>
+<td>理解各欄位</td>
+<td>理解=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>數據分析能力 (6%):</strong></p>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pandas 操作</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>數據清洗</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確處理</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>統計計算</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>正確計算</td>
+<td>正確=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="634-1">6.3.4 階段 1 總評分表<a class="headerlink" href="#634-1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>權重</th>
+<th>得分</th>
+<th>加權得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術能力</td>
+<td>40%</td>
+<td>___ / 100</td>
+<td>___ / 40</td>
+</tr>
+<tr>
+<td>實踐能力</td>
+<td>30%</td>
+<td>___ / 100</td>
+<td>___ / 30</td>
+</tr>
+<tr>
+<td>領域知識</td>
+<td>20%</td>
+<td>___ / 100</td>
+<td>___ / 20</td>
+</tr>
+<tr>
+<td>領導力</td>
+<td>0%</td>
+<td>N/A</td>
+<td>0 / 0</td>
+</tr>
+<tr>
+<td><strong>總分</strong></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>___ / 90</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>晉升門檻</strong>: 總分 ≥ 75 分，且所有 P0 指標達到 C 以上</p>
+<h3 id="64-2-4">6.4 階段 2-4 評估指標概覽<a class="headerlink" href="#64-2-4" title="連結到此標題">&para;</a></h3>
+<p>由於篇幅限制，這裡提供階段 2-4 的關鍵變化：</p>
+<p><strong>階段 2 中級開發者:</strong>
+- 測試覆蓋率目標: ≥85%
+- 代碼複雜度目標: ≤8
+- 代碼重複率目標: &lt;3%
+- 類型註解目標: ≥95%
+- 新增領導力指標: 10% (代碼審查領導力 + 知識分享)
+- 晉升門檻: 總分 ≥ 80 分，所有 P0+P1 指標達到 B 以上</p>
+<p><strong>階段 3 高級開發者:</strong>
+- 測試覆蓋率目標: ≥90%
+- 代碼複雜度目標: ≤5
+- 代碼重複率目標: &lt;2%
+- 類型註解目標: ≥98%
+- 領導力指標提升: 技術指導 (6%) + 技術決策 (4%)
+- 晉升門檻: 總分 ≥ 85 分，所有 P0-P2 指標達到 B 以上，領導力達到 C 以上</p>
+<p><strong>階段 4 高級架構師:</strong>
+- 測試覆蓋率目標: ≥95%
+- 代碼複雜度目標: ≤3
+- 代碼重複率目標: &lt;1%
+- 新增安全審查指標
+- 領導力指標提升: 技術領導 (6%) + 技術決策 (4%)
+- 維持標準: 總分 ≥ 85 分，所有指標達到 B 以上</p>
+<h3 id="65">6.5 評估方法和工具<a class="headerlink" href="#65" title="連結到此標題">&para;</a></h3>
+<h4 id="651">6.5.1 自評工具<a class="headerlink" href="#651" title="連結到此標題">&para;</a></h4>
+<p><strong>自評腳本示例:</strong></p>
+<pre><code class="language-python"># scripts/self_assessment.py
+import subprocess
+import json
+from pathlib import Path
+
+class SelfAssessment:
+    &quot;&quot;&quot;自評工具&quot;&quot;&quot;
+
+    def __init__(self, repo_path: str):
+        self.repo_path = Path(repo_path)
+
+    def measure_test_coverage(self) -&gt; float:
+        &quot;&quot;&quot;測量測試覆蓋率&quot;&quot;&quot;
+        result = subprocess.run(
+            ['pytest', '--cov=backend', '--cov-report=json'],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        # 解析 coverage.json
+        coverage_file = self.repo_path / 'coverage.json'
+        if coverage_file.exists():
+            with open(coverage_file) as f:
+                data = json.load(f)
+            return data['totals']['percent_covered']
+        return 0.0
+
+    def measure_code_complexity(self) -&gt; float:
+        &quot;&quot;&quot;測量代碼複雜度&quot;&quot;&quot;
+        result = subprocess.run(
+            ['radon', 'cc', 'backend/', '-a', '-j'],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            # 計算平均複雜度
+            total_complexity = 0
+            count = 0
+            for module in data.values():
+                for klass in module.values():
+                    for method in klass.values():
+                        total_complexity += method['complexity']
+                        count += 1
+
+            if count &gt; 0:
+                return total_complexity / count
+        return 0.0
+
+    def analyze_tdd_compliance(self) -&gt; float:
+        &quot;&quot;&quot;分析 TDD 合規性&quot;&quot;&quot;
+        # 實現略
+        pass
+
+    def generate_report(self) -&gt; Dict:
+        &quot;&quot;&quot;生成自評報告&quot;&quot;&quot;
+        report = {
+            'test_coverage': self.measure_test_coverage(),
+            'code_complexity': self.measure_code_complexity(),
+            'tdd_compliance': self.analyze_tdd_compliance()
+        }
+
+        return report
+</code></pre>
+<h4 id="652">6.5.2 代碼審查檢查清單<a class="headerlink" href="#652" title="連結到此標題">&para;</a></h4>
+<p><strong>通用代碼審查清單:</strong></p>
+<pre><code class="language-markdown"># 代碼審查檢查清單
+
+## 代碼質量
+
+- [ ] 測試覆蓋率是否足夠？（目標: 階段 1 ≥80%, 階段 2 ≥85%, 階段 3 ≥90%, 階段 4 ≥95%）
+- [ ] 代碼複雜度是否合理？（目標: 階段 1 ≤10, 階段 2 ≤8, 階段 3 ≤5, 階段 4 ≤3）
+- [ ] 是否有代碼重複？
+- [ ] 是否有明顯的 bug？
+- [ ] 是否有潛在的安全漏洞？
+- [ ] 錯誤處理是否完善？
+- [ ] 類型註解是否完整？
+
+## 架構和設計
+
+- [ ] 設計是否符合分層架構原則？
+- [ ] API 設計是否符合 RESTful 原則？
+- [ ] 數據模型設計是否合理？
+- [ ] 是否有循環依賴？
+- [ ] 模塊職責是否清晰？
+
+## 測試
+
+- [ ] 測試是否遵循 TDD 原則？
+- [ ] 測試是否獨立且可重複？
+- [ ] 測試是否覆蓋邊界情況？
+- [ ] 是否有集成測試？
+- [ ] 測試命名是否清晰？
+
+## 文檔
+
+- [ ] Docstring 是否完整？
+- [ ] API 文檔是否更新？
+- [ ] README 是否需要更新？
+- [ ] 是否有適當的註釋？
+
+## Git 和工作流
+
+- [ ] Commit message 是否符合 Conventional Commits？
+- [ ] PR 描述是否清晰完整？
+- [ ] 是否拆分合理的 PR？
+
+## 性能
+
+- [ ] 是否有性能問題？
+- [ ] 是否有必要的性能測試？
+- [ ] 數據庫查詢是否優化？
+
+## 安全
+
+- [ ] 是否有 SQL 注入風險？
+- [ ] 是否有 XSS 風險？
+- [ ] 敏感信息是否硬編碼？
+</code></pre>
+<h3 id="66">6.6 評估時間表和頻率<a class="headerlink" href="#66" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>評估類型</th>
+<th>頻率</th>
+<th>責任人</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自評</strong></td>
+<td>每月</td>
+<td>個人</td>
+<td>自我反思和改進</td>
+</tr>
+<tr>
+<td><strong>代碼審查</strong></td>
+<td>每次 PR</td>
+<td>審查者</td>
+<td>即時反饋</td>
+</tr>
+<tr>
+<td><strong>同行評估</strong></td>
+<td>每季度</td>
+<td>團隊</td>
+<td>360 度視角</td>
+</tr>
+<tr>
+<td><strong>項目評估</strong></td>
+<td>每項目完成後</td>
+<td>項目負責人</td>
+<td>項目質量評估</td>
+</tr>
+<tr>
+<td><strong>階段評估</strong></td>
+<td>每階段結束</td>
+<td>導師 + 自評</td>
+<td>晉升評估</td>
+</tr>
+<tr>
+<td><strong>年度評估</strong></td>
+<td>每年</td>
+<td>HR + 導師</td>
+<td>總體發展評估</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7">7. 實踐項目清單<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 實踐項目總覽<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<p>本節提供完整的實踐項目清單，分為 4 個階段，每個階段包含多個具體項目：</p>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>項目數量</th>
+<th>總預估時間</th>
+<th>核心技能覆蓋</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>階段 1</td>
+<td>3 個項目</td>
+<td>8-9 週</td>
+<td>P0 基礎技能</td>
+</tr>
+<tr>
+<td>階段 2</td>
+<td>4 個項目</td>
+<td>10-11 週</td>
+<td>P0+P1 核心技能</td>
+</tr>
+<tr>
+<td>階段 3</td>
+<td>4 個項目</td>
+<td>16-18 週</td>
+<td>P0+P1+P2 進階技能</td>
+</tr>
+<tr>
+<td>階段 4</td>
+<td>4 個項目</td>
+<td>32-36 週</td>
+<td>P0-P3 全部技能</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-1">7.2 階段 1 實踐項目<a class="headerlink" href="#72-1" title="連結到此標題">&para;</a></h3>
+<h4 id="11-crud-api">項目 1.1: CRUD API 開發<a class="headerlink" href="#11-crud-api" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 實現完整的項目管理系統 API</p>
+<p><strong>技能覆蓋</strong>: FastAPI、Pydantic、DuckDB、錯誤處理、pytest</p>
+<p><strong>交付物</strong>:
+- <code>backend/routers/items.py</code> (150 行)
+- <code>backend/tests/test_items.py</code> (100 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 實現 GET/POST/PUT/DELETE 端點
+- [ ] 使用 Pydantic 模型驗證
+- [ ] 使用 DuckDB 存儲數據
+- [ ] 統一錯誤處理
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<h4 id="12_1">項目 1.2: 技術指標計算<a class="headerlink" href="#12_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 實現 RSI 和 MACD 技術指標</p>
+<p><strong>技能覆蓋</strong>: pandas、NumPy、向量化計算、pytest</p>
+<p><strong>交付物</strong>:
+- <code>backend/indicators/simple_rsi.py</code> (80 行)
+- <code>backend/indicators/simple_macd.py</code> (80 行)
+- <code>backend/tests/test_indicators.py</code> (120 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 使用 pandas 進行向量化計算
+- [ ] 實現 RSI 和 MACD 類
+- [ ] 編寫單元測試
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<h4 id="13_1">項目 1.3: 前端項目管理頁面<a class="headerlink" href="#13_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 創建項目管理的前端頁面</p>
+<p><strong>技能覆蓋</strong>: React 19、Bootstrap 5、Axios、useState、表單處理</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/pages/ItemsPage/index.jsx</code> (200 行)
+- <code>frontend/src/pages/ItemsPage/__tests__/ItemsPage.test.jsx</code> (150 行)
+- 組件測試覆蓋率 ≥ 70%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 使用 React 19 Hooks
+- [ ] 使用 Bootstrap 5 佈局
+- [ ] 整合後端 API
+- [ ] 實現表單驗證
+- [ ] 組件測試覆蓋率 ≥ 70%</p>
+<h3 id="73-2">7.3 階段 2 實踐項目<a class="headerlink" href="#73-2" title="連結到此標題">&para;</a></h3>
+<h4 id="21-rsi">項目 2.1: RSI 策略實現<a class="headerlink" href="#21-rsi" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 IStrategy 接口和 VectorBT 回測</p>
+<p><strong>技能覆蓋</strong>: IStrategy 接口、VectorBT、回測執行、績效指標</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/rsi_strategy.py</code> (150 行)
+- <code>backend/backtest/vectorbt_executor.py</code> (200 行)
+- <code>backend/tests/test_rsi_strategy.py</code> (120 行)
+- 測試覆蓋率 ≥ 85%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 實現 RSIStrategy 類
+- [ ] 使用 VectorBT 執行回測
+- [ ] 計算績效指標
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<h4 id="22">項目 2.2: 策略工廠實現<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握工廠模式和策略註冊機制</p>
+<p><strong>技能覆蓋</strong>: 工廠模式、策略註冊、動態實例化</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/factory.py</code> (80 行)
+- <code>backend/tests/test_strategy_factory.py</code> (60 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 實現 StrategyFactory 類
+- [ ] 註冊內置策略
+- [ ] 支持動態策略註冊
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<h4 id="23-react-query">項目 2.3: React Query 緩存管理<a class="headerlink" href="#23-react-query" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 React Query 的緩存和狀態管理</p>
+<p><strong>技能覆蓋</strong>: React Query、useApiCache、useApiMutation、快取策略</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/hooks/useApiCache.js</code> (150 行)
+- <code>frontend/src/hooks/__tests__/useApiCache.test.js</code> (100 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 實現 useApiCache hook
+- [ ] 實現 useApiMutation hook
+- [ ] 實現快取預設
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<h4 id="24-zustand">項目 2.4: Zustand 實現<a class="headerlink" href="#24-zustand" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 Zustand 全局狀態管理</p>
+<p><strong>技能覆蓋</strong>: Zustand、Store、actions、selectors</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/store/dashboardStore.js</code> (120 行)
+- <code>frontend/src/store/__tests__/dashboardStore.test.js</code> (80 行)
+- 測試覆蓋率 ≥ 85%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 創建 Dashboard store
+- [ ] 實現 actions 和 selectors
+- [ ] 整合 React Query
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<h3 id="74-3">7.4 階段 3 實踐項目<a class="headerlink" href="#74-3" title="連結到此標題">&para;</a></h3>
+<h4 id="31_1">項目 3.1: 複合策略實現<a class="headerlink" href="#31_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握組合策略和信號合併算法</p>
+<p><strong>技能覆蓋</strong>: CompositeStrategy、信號合併、並行計算</p>
+<p><strong>交付物</strong>:
+- <code>backend/strategies/composite_strategy.py</code> (250 行)
+- <code>backend/strategies/signal_merger.py</code> (200 行)
+- <code>backend/tests/test_composite_strategy.py</code> (180 行)
+- 測試覆蓋率 ≥ 90%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 實現 CompositeStrategy 類
+- [ ] 實現 5 種信號合併算法
+- [ ] 支持動態配置合併算法
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<h4 id="32_1">項目 3.2: 性能優化<a class="headerlink" href="#32_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 識別和解決性能瓶頸</p>
+<p><strong>技能覆蓋</strong>: 向量化、並行處理、多級緩存</p>
+<p><strong>交付物</strong>:
+- <code>backend/optimization/vectorized_indicators.py</code> (180 行)
+- <code>backend/optimization/parallel_backtest.py</code> (150 行)
+- <code>backend/optimization/cache_manager.py</code> (120 行)
+- 性能提升 ≥ 50%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 向量化指標計算
+- [ ] 並行化回測執行
+- [ ] 實現多級緩存
+- [ ] 性能提升 ≥ 50%</p>
+<h4 id="33-threejs">項目 3.3: Three.js 可視化<a class="headerlink" href="#33-threejs" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 Three.js 3D 可視化</p>
+<p><strong>技能覆蓋</strong>: Three.js、3D 圖表、渲染優化</p>
+<p><strong>交付物</strong>:
+- <code>frontend/src/components/ThreeDChart.jsx</code> (200 行)
+- <code>frontend/src/components/__tests__/ThreeDChart.test.jsx</code> (80 行)
+- 測試覆蓋率 ≥ 80%</p>
+<p><strong>驗收標準</strong>:
+- [ ] 使用 Three.js 創建 3D 圖表
+- [ ] 實現交互式 3D 可視化
+- [ ] 優化渲染性能
+- [ ] 測試覆蓋率 ≥ 80%</p>
+<h4 id="34-adr">項目 3.4: ADR 文檔<a class="headerlink" href="#34-adr" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握架構決策記錄的編寫</p>
+<p><strong>技能覆蓋</strong>: ADR、技術選型、權衡分析</p>
+<p><strong>交付物</strong>:
+- <code>docs/adr/001-choose-vectorbt.md</code>
+- <code>docs/adr/002-api-versioning.md</code>
+- <code>docs/adr/003-cache-strategy.md</code></p>
+<p><strong>驗收標準</strong>:
+- [ ] 寫 3 個 ADR
+- [ ] 包含技術選型的權衡分析
+- [ ] 獲得團隊審查
+- [ ] 遵循 ADR 模板</p>
+<h3 id="75-4">7.5 階段 4 實踐項目<a class="headerlink" href="#75-4" title="連結到此標題">&para;</a></h3>
+<h4 id="41_1">項目 4.1: 微服務架構<a class="headerlink" href="#41_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 設計和實現完整的微服務架構</p>
+<p><strong>技能覆蓋</strong>: 微服務、API 網關、服務發現、分布式事務</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>microservices/
+├── api-gateway/
+├── strategy-service/
+├── market-data-service/
+├── backtest-service/
+├── execution-service/
+└── docker-compose.yml
+</code></pre>
+<p><strong>驗收標準</strong>:
+- [ ] 設計服務邊界
+- [ ] 實現 API 網關
+- [ ] 集成服務發現
+- [ ] 實現分布式事務
+- [ ] 測試覆蓋率 ≥ 90%</p>
+<h4 id="42-kubernetes">項目 4.2: Kubernetes 部署<a class="headerlink" href="#42-kubernetes" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 設置 Kubernetes 集群和監控系統</p>
+<p><strong>技能覆蓋</strong>: Kubernetes、Helm、Prometheus、Grafana</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>k8s/
+├── api-gateway/
+├── strategy-service/
+├── monitoring/
+│   ├── prometheus/
+│   ├── grafana/
+│   └── alertmanager/
+└── charts/
+</code></pre>
+<p><strong>驗收標準</strong>:
+- [ ] 編寫 Kubernetes manifests
+- [ ] 設置 Helm charts
+- [ ] 集成 Prometheus 和 Grafana
+- [ ] 設置告警系統
+- [ ] 實現自動部署</p>
+<h4 id="43_1">項目 4.3: 機器學習集成<a class="headerlink" href="#43_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 訓練和部署機器學習模型</p>
+<p><strong>技能覆蓋</strong>: scikit-learn、模型訓練、模型部署、模型監控</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>ml/
+├── models/
+│   ├── price_prediction.py
+│   ├── sentiment_analysis.py
+│   └── anomaly_detection.py
+├── training/
+│   └── train_models.py
+├── deployment/
+│   └── model_api.py
+└── monitoring/
+    └── model_monitoring.py
+</code></pre>
+<p><strong>驗收標準</strong>:
+- [ ] 訓練 3 個不同的 ML 模型
+- [ ] 實現特徵工程
+- [ ] 部署模型為 API 服務
+- [ ] 實現模型監控
+- [ ] 測試覆蓋率 ≥ 85%</p>
+<h4 id="44_1">項目 4.4: 技術路線圖<a class="headerlink" href="#44_1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 制定完整的技術路線圖</p>
+<p><strong>技能覆蓋</strong>: 技術規劃、資源管理、里程碑設置</p>
+<p><strong>交付物</strong>:</p>
+<pre><code>docs/
+├── roadmap/
+│   ├── current_state.md
+│   ├── technical_debt.md
+│   ├── goals/
+│   ├── milestones.md
+│   └── resource_plan.md
+</code></pre>
+<p><strong>驗收標準</strong>:
+- [ ] 分析當前技術現狀
+- [ ] 識別技術債
+- [ ] 制定短期和長期目標
+- [ ] 規劃資源和時間
+- [ ] 獲得團隊批准</p>
+<hr />
+<h2 id="8">8. 風險管理和後備方案<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 風險識別<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險類別</th>
+<th>風險描述</th>
+<th>影響程度</th>
+<th>發生概率</th>
+<th>風險等級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>學習曲線風險</strong></td>
+<td>新技術學習時間超出預期</td>
+<td>高</td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>質量風險</strong></td>
+<td>代碼質量不達標，影響系統穩定性</td>
+<td>高</td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>進度風險</strong></td>
+<td>項目進度延遲，影響晉升時間</td>
+<td>中</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>資源風險</strong></td>
+<td>導師資源不足，影響學習效果</td>
+<td>高</td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>技術風險</strong></td>
+<td>技術選型錯誤，需要重新學習</td>
+<td>高</td>
+<td>低</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>文化風險</strong></td>
+<td>團隊不支持 TDD 和代碼審查文化</td>
+<td>中</td>
+<td>中</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82">8.2 風險緩解措施<a class="headerlink" href="#82" title="連結到此標題">&para;</a></h3>
+<h4 id="821">8.2.1 學習曲線風險<a class="headerlink" href="#821" title="連結到此標題">&para;</a></h4>
+<p><strong>緩解措施:</strong>
+1. <strong>漸進式學習</strong>: 從簡單到複雜，分階段學習
+2. <strong>多種學習資源</strong>: 官方文檔、在線課程、實踐項目
+3. <strong>導師指導</strong>: 安排經驗豐富的開發者作為導師
+4. <strong>學習小組</strong>: 組織學習小組，互相幫助</p>
+<p><strong>後備方案:</strong>
+- 如果某個技術學習困難，調整時間表，增加學習時間
+- 提供額外的培訓資源和支持</p>
+<h4 id="822">8.2.2 質量風險<a class="headerlink" href="#822" title="連結到此標題">&para;</a></h4>
+<p><strong>緩解措施:</strong>
+1. <strong>TDD 強制執行</strong>: 測試先於實現，確保代碼質量
+2. <strong>代碼審查</strong>: 所有代碼必須通過審查才能合併
+3. <strong>自動化檢查</strong>: CI/CD 自動運行測試、linter、格式化工具
+4. <strong>質量門檻</strong>: 設置最低質量標準，達標才能晉升</p>
+<p><strong>後備方案:</strong>
+- 如果代碼質量不達標，延長當前階段，直到達標
+- 提供額外的代碼審查和指導</p>
+<h4 id="823">8.2.3 進度風險<a class="headerlink" href="#823" title="連結到此標題">&para;</a></h4>
+<p><strong>緩解措施:</strong>
+1. <strong>明確的里程碑</strong>: 設置清晰的里程碑和交付物
+2. <strong>定期評估</strong>: 每週評估進度，及時調整計劃
+3. <strong>優先級管理</strong>: 優先完成高優先級任務
+4. <strong>靈活調整</strong>: 根據實際情況調整時間表</p>
+<p><strong>後備方案:</strong>
+- 如果進度嚴重延遲，調整晉升門檻或時間表
+- 提供額外的資源和支持</p>
+<h4 id="824">8.2.4 資源風險<a class="headerlink" href="#824" title="連結到此標題">&para;</a></h4>
+<p><strong>緩解措施:</strong>
+1. <strong>導師計劃</strong>: 建立正式的導師計劃
+2. <strong>知識分享</strong>: 定期組織技術分享會
+3. <strong>文檔完善</strong>: 維護完善的技術文檔和知識庫
+4. <strong>團隊協作</strong>: 建立積極的團隊協作文化</p>
+<p><strong>後備方案:</strong>
+- 如果導師資源不足，尋找外部導師或培訓
+- 如果團隊文化不支持，從小範圍開始推動 TDD 和代碼審查</p>
+<h3 id="83">8.3 監控和報告機制<a class="headerlink" href="#83" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>監控指標</th>
+<th>監控頻率</th>
+<th>報告對象</th>
+<th>閾值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>測試覆蓋率</td>
+<td>每週</td>
+<td>個人、導師</td>
+<td>&lt;目標值 - 5%</td>
+</tr>
+<tr>
+<td>代碼複雜度</td>
+<td>每週</td>
+<td>個人、導師</td>
+<td>&gt;目標值 + 2</td>
+</tr>
+<tr>
+<td>PR 審查時間</td>
+<td>即時</td>
+<td>審查者</td>
+<td>&gt;48小時</td>
+</tr>
+<tr>
+<td>學習進度</td>
+<td>每週</td>
+<td>導師</td>
+<td>落後 &gt;1週</td>
+</tr>
+<tr>
+<td>質量評分</td>
+<td>每月</td>
+<td>個人、導師</td>
+<td>&lt;C 等級</td>
+</tr>
+</tbody>
+</table>
+<h3 id="84">8.4 應急計劃<a class="headerlink" href="#84" title="連結到此標題">&para;</a></h3>
+<p><strong>場景 1: 技術學習嚴重困難</strong></p>
+<p>症狀: 連續 2 週無法完成預期的學習任務</p>
+<p>行動:
+1. 暫停當前技術學習
+2. 評估困難原因
+3. 調整學習策略或更換學習資源
+4. 增加導師指導時間
+5. 考虑延長學習時間或調整技能優先級</p>
+<p><strong>場景 2: 代碼質量長期不達標</strong></p>
+<p>症狀: 連續 3 個月測試覆蓋率或代碼複雜度不達標</p>
+<p>行動:
+1. 停止新功能開發
+2. 集中進行代碼重構和質量提升
+3. 提供額外的代碼審查和指導
+4. 可能需要重新培訓或調整角色定位</p>
+<p><strong>場景 3: 導師資源不足</strong></p>
+<p>症狀: 無法及時提供導師指導</p>
+<p>行動:
+1. 尋找替代導師資源
+2. 建立學習小組，互相幫助
+3. 利用在線社區和論壇
+4. 考慮外部培訓或諮詢</p>
+<hr />
+<h2 id="9">9. 時間線和里程碑<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="91">9.1 整體時間線<a class="headerlink" href="#91" title="連結到此標題">&para;</a></h3>
+<pre><code>2026-02-21: 設計規劃完成
+
+階段 1: 初級開發者 (8-9 週)
+  2026-02-22 ~ 2026-04-22
+  ├─ 週 1-2: 環境設置 &amp; Python/FastAPI 基礎
+  ├─ 週 3-4: React 19 基礎
+  ├─ 週 5: DuckDB &amp; 數據操作
+  ├─ 週 6: React Hooks &amp; 表單
+  ├─ 週 7: 錯誤處理 &amp; 認證
+  ├─ 週 8-9: TDD 實踐 &amp; 項目整合
+  └─ 里程碑: 總分 ≥ 75 分
+
+階段 2: 中級開發者 (10-11 週)
+  2026-04-23 ~ 2026-07-10
+  ├─ 週 1-2: VectorBT 基礎
+  ├─ 週 3-4: Backtrader 基礎
+  ├─ 週 5-6: 策略引擎
+  ├─ 週 7-8: Zustand Store
+  ├─ 週 9-10: React Query
+  ├─ 週 11: 集成測試
+  └─ 里程碑: 總分 ≥ 80 分
+
+階段 3: 高級開發者 (16-18 週)
+  2026-07-11 ~ 2026-11-10
+  ├─ 週 1-3: 複合策略
+  ├─ 週 4-6: 信號合併算法
+  ├─ 週 7-9: 性能優化
+  ├─ 週 10-12: 架構設計
+  ├─ 週 13-15: 技術選型
+  ├─ 週 16-18: 領導力
+  └─ 里程碑: 總分 ≥ 85 分
+
+階段 4: 高級架構師 (32-36 週)
+  2026-11-11 ~ 2027-07-25
+  ├─ 週 1-4: 微服務架構
+  ├─ 週 5-8: gRPC 和服務發現
+  ├─ 週 9-12: Kubernetes
+  ├─ 週 13-16: 機器學習
+  ├─ 週 17-20: 實時數據流
+  ├─ 週 21-24: 技術領導力
+  ├─ 週 25-28: 技術路線圖
+  ├─ 週 29-32: 人才培養
+  ├─ 週 33-36: 持續改進
+  └─ 維持標準: 總分 ≥ 85 分
+</code></pre>
+<h3 id="92">9.2 關鍵里程碑<a class="headerlink" href="#92" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>里程碑</th>
+<th>日期</th>
+<th>驗收標準</th>
+<th>成功指標</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>M1: 階段 1 完成</strong></td>
+<td>2026-04-22</td>
+<td>總分 ≥ 75 分</td>
+<td>所有 P0 指標達到 C 以上</td>
+</tr>
+<tr>
+<td><strong>M2: 階段 2 完成</strong></td>
+<td>2026-07-10</td>
+<td>總分 ≥ 80 分</td>
+<td>所有 P0+P1 指標達到 B 以上</td>
+</tr>
+<tr>
+<td><strong>M3: 階段 3 完成</strong></td>
+<td>2026-11-10</td>
+<td>總分 ≥ 85 分</td>
+<td>所有 P0-P2 指標達到 B 以上</td>
+</tr>
+<tr>
+<td><strong>M4: 階段 4 完成</strong></td>
+<td>2027-07-25</td>
+<td>總分 ≥ 85 分</td>
+<td>所有指標達到 B 以上</td>
+</tr>
+<tr>
+<td><strong>M5: 架構師認證</strong></td>
+<td>2027-08-01</td>
+<td>通過架構師評估</td>
+<td>維持標準 ≥ 6 個月</td>
+</tr>
+</tbody>
+</table>
+<h3 id="93">9.3 每月檢查點<a class="headerlink" href="#93" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>月份</th>
+<th>檢查項目</th>
+<th>責任人</th>
+<th>預期結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-03</td>
+<td>階段 1 進度評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 60%</td>
+</tr>
+<tr>
+<td>2026-04</td>
+<td>階段 1 最終評估</td>
+<td>導師 + 個人</td>
+<td>達到晉升門檻</td>
+</tr>
+<tr>
+<td>2026-05</td>
+<td>階段 2 進度評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 40%</td>
+</tr>
+<tr>
+<td>2026-06</td>
+<td>階段 2 中期評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 80%</td>
+</tr>
+<tr>
+<td>2026-07</td>
+<td>階段 2 最終評估</td>
+<td>導師 + 個人</td>
+<td>達到晉升門檻</td>
+</tr>
+<tr>
+<td>2026-08</td>
+<td>階段 3 進度評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 30%</td>
+</tr>
+<tr>
+<td>2026-09</td>
+<td>階段 3 中期評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 60%</td>
+</tr>
+<tr>
+<td>2026-10</td>
+<td>階段 3 後期評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 90%</td>
+</tr>
+<tr>
+<td>2026-11</td>
+<td>階段 3 最終評估</td>
+<td>導師 + 個人</td>
+<td>達到晉升門檻</td>
+</tr>
+<tr>
+<td>2026-12</td>
+<td>階段 4 進度評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 25%</td>
+</tr>
+<tr>
+<td>2027-01</td>
+<td>階段 4 中期評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 50%</td>
+</tr>
+<tr>
+<td>2027-02</td>
+<td>階段 4 後期評估</td>
+<td>導師</td>
+<td>完成進度 ≥ 75%</td>
+</tr>
+<tr>
+<td>2027-03</td>
+<td>階段 4 最終評估</td>
+<td>導師 + 個人</td>
+<td>達到維持標準</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10">10. 結論和建議<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h2>
+<h3 id="101">10.1 總結<a class="headerlink" href="#101" title="連結到此標題">&para;</a></h3>
+<p>本設計規劃整合了 Programmer Sub-Agent 的完整能力建設、知識整合和實施指南，提供了一條從初級開發者到高級架構師的清晰路徑。文檔包含：</p>
+<ol>
+<li><strong>完整的能力模型</strong>: 4 階段能力建設路徑，清晰的技能矩陣</li>
+<li><strong>統一的知識庫</strong>: 整合後端、前端、策略引擎、Git 開發模式知識</li>
+<li><strong>詳細的實施路徑</strong>: 每個階段都有具體的學習目標、技能要求、實踐任務</li>
+<li><strong>科學的評估體系</strong>: 多維度評估，可量化的指標，明確的晉升門檻</li>
+<li><strong>豐富的實踐項目</strong>: 15 個實踐項目，覆蓋所有核心技能</li>
+<li><strong>完善風險管理</strong>: 識別風險，制定緩解措施和後備方案</li>
+</ol>
+<h3 id="102">10.2 核心優勢<a class="headerlink" href="#102" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>優勢</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>漸進式複雜度</strong></td>
+<td>從簡單到複雜，每個階段都有明確的目標和驗收標準</td>
+</tr>
+<tr>
+<td><strong>測試驅動</strong></td>
+<td>強調 TDD，確保代碼質量從一開始就得到保障</td>
+</tr>
+<tr>
+<td><strong>實踐優先</strong></td>
+<td>通過實際項目學習，而非純理論</td>
+</tr>
+<tr>
+<td><strong>知識整合</strong></td>
+<td>前後端、策略引擎、Git 開發模式知識完全整合</td>
+</tr>
+<tr>
+<td><strong>反饋循環</strong></td>
+<td>每個階段都有明確的驗證標準和評估機制</td>
+</tr>
+<tr>
+<td><strong>可量化</strong></td>
+<td>所有指標都可測量、可驗證</td>
+</tr>
+<tr>
+<td><strong>可執行</strong></td>
+<td>所有任務都有明確的交付物和驗證標準</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103">10.3 實施建議<a class="headerlink" href="#103" title="連結到此標題">&para;</a></h3>
+<h4 id="1031">10.3.1 立即行動項<a class="headerlink" href="#1031" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>建立實施團隊</strong></li>
+<li>指定專案負責人</li>
+<li>選拔導師團隊</li>
+<li>
+<p>定義角色和職責</p>
+</li>
+<li>
+<p><strong>設置基礎設施</strong></p>
+</li>
+<li>搭建開發環境</li>
+<li>配置 CI/CD</li>
+<li>
+<p>建立代碼審查流程</p>
+</li>
+<li>
+<p><strong>啟動階段 1</strong></p>
+</li>
+<li>開始環境設置和基礎學習</li>
+<li>建立學習小組</li>
+<li>設置監控和報告機制</li>
+</ol>
+<h4 id="1032-1-3">10.3.2 中期行動項（1-3 個月）<a class="headerlink" href="#1032-1-3" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>完善知識庫</strong></li>
+<li>補充更多代碼示例</li>
+<li>添加更多 FAQ</li>
+<li>
+<p>建立知識分享機制</p>
+</li>
+<li>
+<p><strong>優化評估體系</strong></p>
+</li>
+<li>自動化更多評估流程</li>
+<li>完善同行評估機制</li>
+<li>
+<p>建立改進計劃模板</p>
+</li>
+<li>
+<p><strong>擴展實踐項目</strong></p>
+</li>
+<li>根據實際情況調整項目</li>
+<li>添加更多真實場景項目</li>
+<li>建立項目庫</li>
+</ol>
+<h4 id="1033-6-12">10.3.3 長期行動項（6-12 個月）<a class="headerlink" href="#1033-6-12" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>持續改進</strong></li>
+<li>收集反饋，持續優化</li>
+<li>更新技術棧和知識庫</li>
+<li>
+<p>改進評估指標和方法</p>
+</li>
+<li>
+<p><strong>擴展應用</strong></p>
+</li>
+<li>推廣到其他團隊</li>
+<li>建立最佳實踐庫</li>
+<li>
+<p>建立社區和知識分享平台</p>
+</li>
+<li>
+<p><strong>長期跟蹤</strong></p>
+</li>
+<li>跟蹤畢業生的職業發展</li>
+<li>收集成功案例和經驗</li>
+<li>持續改進培訓計劃</li>
+</ol>
+<h3 id="104">10.4 成功因素<a class="headerlink" href="#104" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>成功因素</th>
+<th>說明</th>
+<th>重要性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>管理支持</strong></td>
+<td>高層管理的大力支持是成功的關鍵</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>導師質量</strong></td>
+<td>導師的經驗和指導能力直接影響學習效果</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>學習動力</strong></td>
+<td>學習者的主動性和學習動力</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>資源投入</strong></td>
+<td>充足的時間、資源和人力投入</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>文化支持</strong></td>
+<td>支持 TDD 和代碼審查的團隊文化</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>持續改進</strong></td>
+<td>根據反饋持續改進培訓計劃</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>評估機制</strong></td>
+<td>公平、透明、科學的評估機制</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="105">10.5 未來展望<a class="headerlink" href="#105" title="連結到此標題">&para;</a></h3>
+<p>本設計規劃為 Programmer Sub-Agent 提供了完整的成長路徑，未來可以進一步擴展：</p>
+<ol>
+<li><strong>更多技術棧</strong>: 添加更多前沿技術棧，如 Web3、區塊鏈等</li>
+<li><strong>更多領域</strong>: 擴展到其他領域，如金融科技、醫療科技等</li>
+<li><strong>AI 輔助</strong>: 探索 AI 輔助編程和學習</li>
+<li><strong>全球化</strong>: 支持多語言和全球化推廣</li>
+<li><strong>社區建設</strong>: 建立開發者社區，促進知識分享和協作</li>
+</ol>
+<hr />
+<h2 id="_2">附錄<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="a">A. 參考文獻<a class="headerlink" href="#a" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>Dashboard 專案技術文檔</li>
+<li>FastAPI 官方文檔</li>
+<li>React 19 官方文檔</li>
+<li>VectorBT 官方文檔</li>
+<li>Backtrader 官方文檔</li>
+<li>Zustand 官方文檔</li>
+<li>React Query 官方文檔</li>
+<li>Clean Code (Robert C. Martin)</li>
+<li>Test-Driven Development (Kent Beck)</li>
+<li>Design Patterns (Erich Gamma et al.)</li>
+</ol>
+<h3 id="b">B. 術語表<a class="headerlink" href="#b" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>術語</th>
+<th>定義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IStrategy</strong></td>
+<td>策略接口，定義策略生成信號的契約</td>
+</tr>
+<tr>
+<td><strong>VectorBT</strong></td>
+<td>Python 庫，用於向量化回測</td>
+</tr>
+<tr>
+<td><strong>Backtrader</strong></td>
+<td>Python 庫，用於策略回測</td>
+</tr>
+<tr>
+<td><strong>Zustand</strong></td>
+<td>React 狀態管理庫</td>
+</tr>
+<tr>
+<td><strong>React Query</strong></td>
+<td>React 服務端狀態管理庫</td>
+</tr>
+<tr>
+<td><strong>TDD</strong></td>
+<td>測試驅動開發</td>
+</tr>
+<tr>
+<td><strong>AAA</strong></td>
+<td>Arrange-Act-Assert 測試模式</td>
+</tr>
+<tr>
+<td><strong>ADR</strong></td>
+<td>架構決策記錄</td>
+</tr>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>Git 提交信息規範</td>
+</tr>
+<tr>
+<td><strong>Git Flow</strong></td>
+<td>Git 分支管理策略</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c">C. 聯繫方式<a class="headerlink" href="#c" title="連結到此標題">&para;</a></h3>
+<p>如有問題或建議，請聯繫：
+- 專案負責人: [待定]
+- 技術負責人: [待定]
+- 電子郵件: [待定]</p>
+<hr />
+<p><strong>文檔版本歷史:</strong></p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>日期</th>
+<th>作者</th>
+<th>變更說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>2026-02-21</td>
+<td>Programmer Sub-Agent 設計團隊</td>
+<td>初始版本，整合所有設計文檔</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>文檔狀態:</strong> Final</p>
+<p><strong>審批狀態:</strong> 待審批</p>
+<p><strong>最後審閱:</strong> 2026-02-21</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

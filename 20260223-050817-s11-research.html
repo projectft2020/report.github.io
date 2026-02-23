@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GICDM: Mitigating Hubness for Reliable Distance-Based Methods - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>GICDM: Mitigating Hubness for Reliable Distance-Based Methods</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="gicdm-mitigating-hubness-for-reliable-distance-based-methods">GICDM: Mitigating Hubness for Reliable Distance-Based Methods<a class="headerlink" href="#gicdm-mitigating-hubness-for-reliable-distance-based-methods" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s11<br />
+<strong>Agent:</strong> Charlie Research<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-23T06:40:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report provides a comprehensive analysis of the hubness problem in high-dimensional data and examines GICDM (Generative Iterative Contextual Dissimilarity Measure) as a novel approach to mitigate hubness for reliable distance-based methods. The research covers the theoretical foundations of hubness, limitations of traditional distance-based methods, the GICDM methodology, comparative analysis with existing approaches, and practical applications in machine learning.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Hubness Problem Definition</strong> — Hubness is a phenomenon in high-dimensional spaces where certain points (hubs) appear disproportionately often as nearest neighbors, distorting distance-based relationships | Source: <a href="https://arxiv.org/abs/2602.16449">arXiv:2602.16449</a></p>
+</li>
+<li>
+<p><strong>Theoretical Foundations</strong> — Hubness stems from density gradients and the curse of dimensionality, not merely from limited sample size, and correlates with intrinsic rather than ambient dimensionality | Source: <a href="https://www.jmlr.org/papers/volume11/radovanovic10a/radovanovic10a.pdf">Radovanovic et al., 2010</a></p>
+</li>
+<li>
+<p><strong>GICDM Methodology</strong> — GICDM extends ICDM by applying density uniformization to real data only, computing independent scaling factors for generated points, and implementing multi-scale filtering to prevent overcorrection | Source: <a href="https://arxiv.org/abs/2602.16449">arXiv:2602.16449</a></p>
+</li>
+<li>
+<p><strong>Comparative Analysis</strong> — GICDM outperforms existing hubness reduction methods across 17 tested dataset-embedding pairs, resolving hubness-induced failures in generative model evaluation metrics | Source: <a href="https://arxiv.org/abs/2602.16449">arXiv:2602.16449</a></p>
+</li>
+<li>
+<p><strong>Practical Applications</strong> — Hubness mitigation is crucial for distance-based applications in image retrieval, recommender systems, zero-shot learning, and generative model evaluation | Source: <a href="https://www.researchgate.net/publication/360834101_Defending_a_Music_Recommender_Against_Hubness-Based_Adversarial_Attacks">ResearchGate</a></p>
+</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="1-hubness-problem-definition">1. Hubness Problem Definition<a class="headerlink" href="#1-hubness-problem-definition" title="連結到此標題">&para;</a></h3>
+<p>Hubness is a fundamental phenomenon in high-dimensional data spaces that severely impacts the reliability of distance-based methods. The hubness problem is defined through the concept of k-occurrences: for a point x in dataset D, the k-occurrence Oₖ(x) is the number of times x appears among the k-nearest neighbors of other points in the dataset.</p>
+<p><strong>Mathematical Definition:</strong>
+Oₖ(x) = #{y ∈ D \ {x} | x ∈ 𝒩ₖ(y)}</p>
+<p>where 𝒩ₖ(y) is the set of k-nearest neighbors of y in D.</p>
+<p><strong>Key Characteristics:</strong>
+- <strong>Skewed Distribution</strong>: As dimensionality increases, the distribution of k-occurrences becomes increasingly right-skewed
+- <strong>Emergence of Hubs</strong>: Points with unusually high Oₖ values emerge, appearing as nearest neighbors to many other points
+- <strong>Asymmetric Relationships</strong>: Nearest neighbor relationships become highly asymmetric, violating the expectation of reciprocity
+- <strong>Semantic Irrelevance</strong>: Hubs often appear as nearest neighbors to points they are not semantically related to</p>
+<p><strong>Impact on Distance-Based Methods:</strong>
+- Distorted nearest neighbor relationships
+- Biased distance-based metrics
+- Reduced reliability of similarity-based algorithms
+- Poor generalization in high-dimensional spaces</p>
+<h3 id="2-theoretical-foundations">2. Theoretical Foundations<a class="headerlink" href="#2-theoretical-foundations" title="連結到此標題">&para;</a></h3>
+<h4 id="21-curse-of-dimensionality">2.1 Curse of Dimensionality<a class="headerlink" href="#21-curse-of-dimensionality" title="連結到此標題">&para;</a></h4>
+<p>Hubness is intrinsically linked to the curse of dimensionality, first described by Bellman (1961). In high-dimensional spaces, several counterintuitive phenomena emerge:</p>
+<p><strong>Gaussian Case Analysis:</strong>
+For independent standard Gaussian random vectors X, Y ∼ 𝒩(0, I_d) in ℝ^d:</p>
+<ol>
+<li>
+<p><strong>Spherical Shell Concentration</strong>: The squared norm ‖X‖² follows a χ² distribution with d degrees of freedom. In high dimensions, samples concentrate on a thin spherical shell of radius √d with thickness O(d^{1/4}).</p>
+</li>
+<li>
+<p><strong>Orthogonality</strong>: Two independent high-dimensional Gaussian vectors tend to be nearly orthogonal. The cosine similarity converges to zero:
+   <code>X·Y/(‖X‖‖Y‖) → ℙ 0 as d → ∞</code></p>
+</li>
+<li>
+<p><strong>Distance Approximation</strong>: The squared distance between two independent samples approximates the sum of their squared distances to the origin:
+   <code>‖x - y‖² ≈ ‖x‖² + ‖y‖²</code></p>
+</li>
+</ol>
+<h4 id="22-density-gradient-theory">2.2 Density Gradient Theory<a class="headerlink" href="#22-density-gradient-theory" title="連結到此標題">&para;</a></h4>
+<p>Low et al. (2013) argue that hubness is fundamentally caused by density gradients rather than high dimensionality alone. Key insights:</p>
+<ul>
+<li><strong>Density Following</strong>: Samples tend to have nearest neighbors in regions of higher density, effectively following density gradients</li>
+<li><strong>Boundary Effects</strong>: Boundaries induce density gradients, and the boundary-to-volume ratio increases exponentially with dimension</li>
+<li><strong>Intrinsic Dimension</strong>: Hubness correlates with intrinsic rather than ambient dimension, meaning dimensionality reduction alone cannot alleviate hubness</li>
+</ul>
+<p><strong>Evidence from Uniform Sphere:</strong>
+When sampling uniformly on a sphere (eliminating centrality), hubness disappears entirely, even in high dimensions. This demonstrates that:
+- High dimensionality alone does not cause hubness
+- Density gradients are the primary cause
+- Centrality in Gaussian distributions contributes significantly to hubness</p>
+<h4 id="23-theoretical-implications">2.3 Theoretical Implications<a class="headerlink" href="#23-theoretical-implications" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>Sample Size Independence</strong>: Hubness cannot be eliminated by increasing sample size, as it's intrinsic to the data distribution</li>
+<li><strong>Distance Concentration</strong>: In high dimensions, distances between points concentrate, making relative discrimination difficult</li>
+<li><strong>Neighborhood Unreliability</strong>: Traditional k-NN approaches become unreliable as neighborhood relationships lose their semantic meaning</li>
+</ol>
+<h3 id="3-gicdm-methodology">3. GICDM Methodology<a class="headerlink" href="#3-gicdm-methodology" title="連結到此標題">&para;</a></h3>
+<h4 id="31-core-principles">3.1 Core Principles<a class="headerlink" href="#31-core-principles" title="連結到此標題">&para;</a></h4>
+<p>GICDM (Generative Iterative Contextual Dissimilarity Measure) is designed specifically for hubness mitigation in distance-based generative model evaluation. It addresses three key desiderata:</p>
+<ol>
+<li><strong>Reduce hubness in real dataset</strong>: Uniformize local density to make nearest neighbor relationships meaningful and symmetric</li>
+<li><strong>Preserve relative positioning</strong>: Maintain spatial relationships between generated points and real data manifold</li>
+<li><strong>Ensure independence</strong>: Each generated point's evaluation should depend only on its relationship to the real set</li>
+</ol>
+<h4 id="32-theoretical-foundation-icdm">3.2 Theoretical Foundation: ICDM<a class="headerlink" href="#32-theoretical-foundation-icdm" title="連結到此標題">&para;</a></h4>
+<p>GICDM builds upon the Iterative Contextual Dissimilarity Measure (ICDM), which was originally developed for image retrieval but dismissed as too computationally expensive for hubness reduction.</p>
+<p><strong>ICDM Algorithm:</strong>
+Given pairwise distances {d_{x_i,x_j}} between points {x_i}_{i=1}^N:</p>
+<ol>
+<li>
+<p><strong>Non-iterative CDM (NICDM)</strong>:
+   <code>NICDM(d_{x_i,x_j}) = d_{x_i,x_j} * μ̄ / √(μ_i * μ_j)</code>
+   where μ_i = (1/K) ∑<em x_i_NN_k_x_i_="x_i,NN_k(x_i)">{k=1}^K d</em> and μ̄ is the average of all μ_i</p>
+</li>
+<li>
+<p><strong>Iterative Process</strong>:
+   <code>d_{x_i,x_j}^{(t+1)} = d_{x_i,x_j}^{(t)} * μ̄^{(t)} / √(μ_i^{(t)} * μ_j^{(t)})</code></p>
+</li>
+<li>
+<p><strong>Convergence</strong>: Iterations minimize the disparity S^{(t)} = ∑_{i=1}^N |μ_i^{(t)} - μ̄^{(t)}|, converging when all μ_i^{(t)} are equal</p>
+</li>
+</ol>
+<p><strong>Density Estimation Connection:</strong>
+ICDM effectively uniformizes data density. At convergence, local density estimates become equal for all points, removing density gradients and thereby reducing hubness.</p>
+<h4 id="33-gicdm-innovation">3.3 GICDM Innovation<a class="headerlink" href="#33-gicdm-innovation" title="連結到此標題">&para;</a></h4>
+<p><strong>Key Innovation 1: Separate Treatment of Real and Generated Data</strong>
+Unlike traditional approaches that apply hubness reduction to the combined dataset, GICDM:</p>
+<ol>
+<li><strong>First applies ICDM only to real data</strong>: This preserves the real data manifold structure without influence from generated points</li>
+<li><strong>Computes independent scaling factors for generated points</strong>: Each generated point's scaling factor depends only on its relationship to the real set</li>
+</ol>
+<p><strong>Mathematical Formulation:</strong>
+For real points {x_i^r}<em j="1">{i=1}^N and generated points {x_j^g}</em>^M:</p>
+<ol>
+<li>
+<p><strong>Real Point Scaling</strong>: Apply ICDM to real set, obtaining {δ_i^r}_{i=1}^N such that:
+   <code>ICDM(x_i^r, x_j^r) = d_{x_i^r,x_j^r} * δ_i^r * δ_j^r</code></p>
+</li>
+<li>
+<p><strong>Generated Point Scaling</strong>: For each generated point x_j^g, compute δ_j^g:
+   <code>δ_j^g = μ̄^{r,eq} / [(1/(K+1)) ∑_{k=1}^{K+1} δ_{NN_k^{r,eq}(x_j^g)}^r * d_{x_j^g,NN_k^{r,eq}(x_j^g)}]</code></p>
+</li>
+</ol>
+<p><strong>Key Innovation 2: Multi-scale Filtering</strong>
+GICDM prevents overcorrection through a sophisticated filtering strategy:</p>
+<ol>
+<li><strong>Single-Scale Filter</strong>: Compare δ_j^g to average δ of its real neighbors</li>
+<li><strong>Multi-scale Extension</strong>: Use two different neighborhood sizes (K₁, K₂) to ensure at least one is outside the crossover regime</li>
+<li><strong>Quantile-based Thresholding</strong>: Filter points where |δ̄_j^{r|g} - δ_j^g|/δ̄_j^{r|g} exceeds the 95th quantile of real point variations</li>
+</ol>
+<h4 id="34-complete-algorithm">3.4 Complete Algorithm<a class="headerlink" href="#34-complete-algorithm" title="連結到此標題">&para;</a></h4>
+<p><strong>GICDM Algorithm:</strong>
+1. For each K ∈ {K₁, K₂}:
+   - Apply ICDM to real points with neighborhood size K
+   - Compute quantile thresholds for filtering</p>
+<ol>
+<li>For each generated point:</li>
+<li>Compute scaling factors using multi-scale approach</li>
+<li>Apply filtering if scaling factors are inconsistent with real neighbors</li>
+<li>Compute final distances if point passes filtering</li>
+</ol>
+<h3 id="4-comparative-analysis">4. Comparative Analysis<a class="headerlink" href="#4-comparative-analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="41-existing-hubness-reduction-methods">4.1 Existing Hubness Reduction Methods<a class="headerlink" href="#41-existing-hubness-reduction-methods" title="連結到此標題">&para;</a></h4>
+<p><strong>Local Scaling Methods:</strong>
+1. <strong>Local Scaling (LS)</strong>: Uses local neighborhood for distance scaling
+2. <strong>Cross-domain Similarity Local Scaling (CSLS)</strong>: Designed for cross-lingual applications
+3. <strong>Non-Iterative Contextual Dissimilarity Measure (NICDM)</strong>: Simplified version of ICDM</p>
+<p><strong>Global Methods:</strong>
+1. <strong>Mutual Proximity (MP^Gauss)</strong>: Uses all pairwise distances for scaling
+2. <strong>Local DisSimilarity (DSL)</strong>: Aims to flatten density directly</p>
+<p><strong>Performance Comparison:</strong>
+When tested across 17 dataset-embedding pairs:
+- <strong>ICDM outperforms all other methods</strong> consistently
+- <strong>NICDM shows moderate performance</strong> but is inferior to ICDM
+- <strong>Global methods (MP^Gauss)</strong> are computationally expensive and less effective
+- <strong>Local scaling methods (LS, CSLS)</strong> vary in effectiveness depending on the dataset</p>
+<h4 id="42-gicdm-vs-traditional-approaches">4.2 GICDM vs Traditional Approaches<a class="headerlink" href="#42-gicdm-vs-traditional-approaches" title="連結到此標題">&para;</a></h4>
+<p><strong>Advantages of GICDM:</strong>
+1. <strong>Preserves Real Data Structure</strong>: By applying ICDM only to real data, GICDM maintains the integrity of the real data manifold
+2. <strong>Independent Evaluation</strong>: Each generated point is evaluated independently, satisfying the desideratum of independence
+3. <strong>Multi-scale Robustness</strong>: The filtering strategy prevents overcorrection and handles various data distributions
+4. <strong>Theoretically Grounded</strong>: Built on solid theoretical foundations of density estimation and hubness mitigation</p>
+<p><strong>Experimental Validation:</strong>
+GICDM was extensively tested on both synthetic and real benchmarks:</p>
+<ol>
+<li><strong>Synthetic Benchmark</strong>: Tests from Räisä et al. (2025) showed significant improvement:</li>
+<li><strong>Precision</strong>: Improved from 6/14 to 10/14 passed tests</li>
+<li><strong>Clipped Density</strong>: Improved from 8/14 to 10/14 passed tests</li>
+<li><strong>Recall</strong>: Improved from 5/14 to 10/14 passed tests</li>
+<li>
+<p><strong>Clipped Coverage</strong>: Improved from 8/14 to 10/14 passed tests</p>
+</li>
+<li>
+<p><strong>Human Correlation</strong>: GICDM maintains or improves correlation with human judgment:</p>
+</li>
+<li><strong>DINOv2 + Clipped Density</strong>: Correlation improved from 0.82 to 0.95</li>
+<li>
+<p><strong>DINOv3 + Clipped Density</strong>: Correlation improved from 0.94 to 0.97</p>
+</li>
+<li>
+<p><strong>Classifier-Free Guidance</strong>: GICDM corrects counter-intuitive behavior:</p>
+</li>
+<li>Without GICDM: Both Clipped Density and Coverage increase with guidance (incorrect)</li>
+<li>With GICDM: Density increases but Coverage decreases (correct behavior)</li>
+</ol>
+<h4 id="43-limitations-and-trade-offs">4.3 Limitations and Trade-offs<a class="headerlink" href="#43-limitations-and-trade-offs" title="連結到此標題">&para;</a></h4>
+<p><strong>Computational Complexity:</strong>
+- <strong>ICDM</strong>: O(N²) complexity per iteration
+- <strong>GICDM</strong>: Additional O(M×N) for generated points, where M is number of generated samples
+- <strong>Practical Consideration</strong>: 10 iterations typically sufficient for convergence</p>
+<p><strong>Assumptions and Limitations:</strong>
+1. <strong>Metric Robustness</strong>: GICDM effectiveness depends on the underlying metric being robust to real outliers
+2. <strong>Distribution Assumption</strong>: Assumes generated points should follow the same distribution as real data for proper scaling
+3. <strong>Parameter Sensitivity</strong>: Performance depends on choice of neighborhood sizes K₁, K₂ and quantile threshold</p>
+<h3 id="5-practical-implementations">5. Practical Implementations<a class="headerlink" href="#5-practical-implementations" title="連結到此標題">&para;</a></h3>
+<h4 id="51-generative-model-evaluation">5.1 Generative Model Evaluation<a class="headerlink" href="#51-generative-model-evaluation" title="連結到此標題">&para;</a></h4>
+<p><strong>Primary Application:</strong>
+GICDM was specifically designed for improving distance-based generative model evaluation metrics:</p>
+<p><strong>Affected Metrics:</strong>
+1. <strong>Precision and Recall</strong>: Standard metrics for fidelity and coverage assessment
+2. <strong>Density and Coverage</strong>: Extended versions that count multiple close points
+3. <strong>Clipped Density and Coverage</strong>: Robust variants that limit outlier influence
+4. <strong>α-Precision and β-Recall</strong>: One-class support estimation approaches</p>
+<p><strong>Implementation Guidelines:</strong>
+1. <strong>Neighborhood Size</strong>: Set GICDM neighborhood size to 2k (where k is the metric's neighborhood size)
+2. <strong>Multi-scale Parameters</strong>: Use K₁ = k, K₂ = 10k for effective filtering
+3. <strong>Quantile Threshold</strong>: Default to 95th quantile for robust filtering
+4. <strong>Iterations</strong>: 10 iterations typically sufficient for ICDM convergence</p>
+<h4 id="52-other-machine-learning-applications">5.2 Other Machine Learning Applications<a class="headerlink" href="#52-other-machine-learning-applications" title="連結到此標題">&para;</a></h4>
+<p><strong>Image Retrieval:</strong>
+- <strong>Problem</strong>: Hubness affects similarity-based image retrieval in high-dimensional feature spaces
+- <strong>Solution</strong>: GICDM can improve retrieval accuracy by reducing hubness-induced biases
+- <strong>Implementation</strong>: Apply GICDM preprocessing to image features before similarity computation</p>
+<p><strong>Recommender Systems:</strong>
+- <strong>Problem</strong>: Hubness creates vulnerability to attacks and reduces recommendation quality
+- <strong>Solution</strong>: Hubness mitigation improves robustness and accuracy
+- <strong>Evidence</strong>: Studies show hubness reduction can thwart attacks without degrading performance (Hara et al., 2015)</p>
+<p><strong>Zero-Shot Learning:</strong>
+- <strong>Problem</strong>: Hubness pollutes neighborhood relationships in embedding spaces
+- <strong>Solution</strong>: Mitigation improves zero-shot recognition performance
+- <strong>Application</strong>: GICDM can be applied to text-image embedding spaces for better cross-modal alignment</p>
+<p><strong>Anomaly Detection:</strong>
+- <strong>Problem</strong>: Hubness can make normal points appear as nearest neighbors to anomalies
+- <strong>Solution</strong>: Hubness reduction improves the reliability of distance-based anomaly detection
+- <strong>Implementation</strong>: Apply GICDM to normal data only, then compute distances to potential anomalies</p>
+<h4 id="53-implementation-best-practices">5.3 Implementation Best Practices<a class="headerlink" href="#53-implementation-best-practices" title="連結到此標題">&para;</a></h4>
+<p><strong>Data Preprocessing:</strong>
+1. <strong>Normalization</strong>: Ensure features are properly normalized before applying GICDM
+2. <strong>Dimensionality Reduction</strong>: Consider PCA or other methods if ambient dimensionality is extremely high
+3. <strong>Outlier Handling</strong>: Remove or robustly handle extreme outliers before processing</p>
+<p><strong>Parameter Selection:</strong>
+1. <strong>Neighborhood Size</strong>: Start with K = 5-10 for small datasets, K = 10-20 for larger ones
+2. <strong>Multi-scale Ratio</strong>: Use K₂/K₁ = 5-10 for effective multi-scale filtering
+3. <strong>Quantile Threshold</strong>: 90-95% typically works well; adjust based on dataset characteristics</p>
+<p><strong>Performance Optimization:</strong>
+1. <strong>Approximate Nearest Neighbors</strong>: Use ANN algorithms for large-scale applications
+2. <strong>Parallel Processing</strong>: Parallelize ICDM iterations across multiple processors
+3. <strong>Memory Management</strong>: Use streaming or batch processing for very large datasets</p>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.16449">GICDM: Mitigating Hubness for Reliable Distance-Based Generative Model Evaluation</a> — Primary source introducing GICDM methodology</li>
+<li><a href="https://www.jmlr.org/papers/volume11/radovanovic10a/radovanovic10a.pdf">Popular Nearest Neighbors in High-Dimensional Data</a> — Foundational work on hubness phenomenon</li>
+<li><a href="https://keio.pure.elsevier.com/en/publications/reducing-hubness-a-cause-of-vulnerability-in-recommender-systems">Reducing hubness: A cause of vulnerability in recommender systems</a> — Application in recommender systems</li>
+<li><a href="https://www.researchgate.net/publication/360834101_Defending_a_Music_Recommender_Against_Hubness-Based_Adversarial_Attacks">Defending a Music Recommender Against Hubness-Based Adversarial Attacks</a> — Security applications</li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7327987/">A comprehensive empirical comparison of hubness reduction in high-dimensional spaces</a> — Comparative analysis of methods</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (primary source), supplemented with foundational and recent research</li>
+<li><strong>Suggestions:</strong> Further research could explore GICDM applications in other domains like healthcare imaging and financial anomaly detection</li>
+<li><strong>Errors:</strong> None encountered - comprehensive coverage achieved through multiple authoritative sources</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

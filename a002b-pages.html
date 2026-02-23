@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 頁面結構分析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 頁面結構分析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard">Dashboard 頁面結構分析<a class="headerlink" href="#dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>分析目標：</strong> 分析 Dashboard 前端的頁面結構，為設計 programmer sub-agent 提供完整的頁面知識基礎。</p>
+<p><strong>Dashboard 前端路徑：</strong> <code>/Users/charlie/Dashboard/</code></p>
+<p><strong>分析日期：</strong> 2026-02-21</p>
+<p><strong>技術棧：</strong>
+- Frontend: React 19.2.0 + Vite
+- 路由: React Router v7
+- UI Framework: Bootstrap 5 + Custom CSS modules
+- 狀態管理: Zustand + React Context
+- API: Axios + TanStack Query (React Query)
+- 圖表: Chart.js, ECharts, Recharts, Three.js
+- 國際化: i18next</p>
+<hr />
+<h2 id="_1">一、頁面文件清單（按功能分類）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 主要導航頁面<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Market Scanner</strong></td>
+<td><code>/</code></td>
+<td><code>/pages/market-scanner/index.jsx</code></td>
+<td>市場掃描儀首頁，顯示高共鳴度股票和策略信號</td>
+</tr>
+<tr>
+<td><strong>Signal Dashboard</strong></td>
+<td><code>/signals</code></td>
+<td><code>/pages/SignalDashboardPage/index.jsx</code></td>
+<td>信號儀表板，決策漏斗入口點</td>
+</tr>
+<tr>
+<td><strong>Strategy Showcase</strong></td>
+<td><code>/strategy-showcase</code></td>
+<td><code>/pages/StrategyShowcasePage/</code></td>
+<td>公開策略展示頁（免費用戶）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 策略相關頁面<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unified Strategy Page</strong></td>
+<td><code>/strategies/:tab</code></td>
+<td><code>/pages/StrategyPage/index.jsx</code></td>
+<td>統一策略中心（Builder、Backtest、History）</td>
+</tr>
+<tr>
+<td><strong>Strategy Studio</strong></td>
+<td><code>/strategy-studio</code> → <code>/strategies/builder</code></td>
+<td><code>/pages/StrategyStudioPage/</code></td>
+<td>策略工作室（舊版，重定向到新頁面）</td>
+</tr>
+<tr>
+<td><strong>Strategy Comparison</strong></td>
+<td><code>/strategy-comparison</code></td>
+<td><code>/pages/StrategyComparisonPage/</code></td>
+<td>策略比較實驗室</td>
+</tr>
+<tr>
+<td><strong>Allocation Strategies</strong></td>
+<td><code>/allocation</code></td>
+<td><code>/pages/AllocationPage/index.jsx</code></td>
+<td>配置策略頁面（統合 6040/All-Weather/Golden Butterfly）</td>
+</tr>
+<tr>
+<td><strong>Momentum Strategies</strong></td>
+<td><code>/momentum</code></td>
+<td><code>/pages/MomentumPage/index.jsx</code></td>
+<td>動量策略頁面（US/TW 統一）</td>
+</tr>
+<tr>
+<td><strong>Technical Strategy Lab</strong></td>
+<td><code>/strategies/technical-lab</code></td>
+<td><code>/pages/TechnicalStrategyPage/</code></td>
+<td>技術指標回測實驗室</td>
+</tr>
+<tr>
+<td><strong>F-Index Strategy</strong></td>
+<td><code>/strategies/f-index</code></td>
+<td><code>/pages/FIndexStrategyPage/</code></td>
+<td>F-Index 策略（每週）</td>
+</tr>
+<tr>
+<td><strong>Dual Momentum</strong></td>
+<td><code>/dual-momentum</code></td>
+<td><code>/pages/DualMomentumPage/index.jsx</code></td>
+<td>雙重動量策略</td>
+</tr>
+<tr>
+<td><strong>Backtest History</strong></td>
+<td><code>/backtest-history</code></td>
+<td><code>/pages/BacktestHistoryPage/</code></td>
+<td>回測歷史記錄</td>
+</tr>
+<tr>
+<td><strong>Laboratory</strong></td>
+<td><code>/laboratory</code></td>
+<td><code>/pages/LaboratoryPage/index.jsx</code></td>
+<td>實驗室頁面</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 市場分析頁面<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Market Heatmap</strong></td>
+<td><code>/market-heatmap</code></td>
+<td><code>/pages/MarketHeatmapPage/</code></td>
+<td>市場熱力圖</td>
+</tr>
+<tr>
+<td><strong>Market Indices</strong></td>
+<td><code>/market-indices</code></td>
+<td><code>/pages/MarketIndicesPage/</code></td>
+<td>市場指數</td>
+</tr>
+<tr>
+<td><strong>Market Breadth</strong></td>
+<td><code>/market-breadth</code></td>
+<td><code>/pages/MarketBreadthPage/</code></td>
+<td>市場廣度</td>
+</tr>
+<tr>
+<td><strong>Sector Flow</strong></td>
+<td><code>/sector-rotation</code></td>
+<td><code>/pages/SectorFlowPage/</code></td>
+<td>板塊流動</td>
+</tr>
+<tr>
+<td><strong>RRG</strong></td>
+<td><code>/rrg</code></td>
+<td><code>/pages/RRGPage/</code></td>
+<td>動態相對強度圖（Relative Rotation Graph）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">1.4 篩選器頁面<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MACD Screener</strong></td>
+<td><code>/screener/macd</code></td>
+<td><code>/pages/MacdScreenerPage/</code></td>
+<td>MACD 篩選器</td>
+</tr>
+<tr>
+<td><strong>RSI Screener</strong></td>
+<td><code>/screener/rsi</code></td>
+<td><code>/pages/RsiScreenerPage/</code></td>
+<td>RSI 篩選器</td>
+</tr>
+<tr>
+<td><strong>SuperTrend Screener</strong></td>
+<td><code>/screener/supertrend</code></td>
+<td><code>/pages/SuperTrendScreenerPage/</code></td>
+<td>SuperTrend 篩選器</td>
+</tr>
+<tr>
+<td><strong>Extremes Screener</strong></td>
+<td><code>/screener/extremes</code></td>
+<td><code>/pages/ExtremesScreenerPage/</code></td>
+<td>極值篩選器</td>
+</tr>
+<tr>
+<td><strong>F-Index Screener</strong></td>
+<td><code>/screener/f-index</code></td>
+<td><code>/pages/FIndexScreenerPage/</code></td>
+<td>F-Index 篩選器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="15">1.5 期貨與預測頁面<a class="headerlink" href="#15" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Futures Composite</strong></td>
+<td><code>/futures</code></td>
+<td><code>/pages/FuturesCompPage/</code></td>
+<td>期貨複合分析</td>
+</tr>
+<tr>
+<td><strong>Futures Backtest</strong></td>
+<td><code>/futures-backtest</code></td>
+<td><code>/pages/FuturesBacktestPage/index.jsx</code></td>
+<td>期貨多策略回測系統</td>
+</tr>
+<tr>
+<td><strong>Prediction Momentum</strong></td>
+<td><code>/prediction-momentum</code></td>
+<td><code>/pages/PredictionMomentumPage/index.jsx</code></td>
+<td>預測動量</td>
+</tr>
+<tr>
+<td><strong>Prediction Momentum (Type 2)</strong></td>
+<td><code>/prediction-momentum-type2</code></td>
+<td><code>/pages/PredictionMomentumType2Page/index.jsx</code></td>
+<td>預測動量（梯次型）</td>
+</tr>
+<tr>
+<td><strong>Prediction Momentum (Hedged)</strong></td>
+<td><code>/prediction-momentum-hedged</code></td>
+<td><code>/pages/PredictionMomentumHedgedPage/index.jsx</code></td>
+<td>預測動量（對沖型）</td>
+</tr>
+<tr>
+<td><strong>Prediction Momentum (Futures)</strong></td>
+<td><code>/prediction-momentum-futures</code></td>
+<td><code>/pages/PredictionMomentumFuturesPage/index.jsx</code></td>
+<td>預測動量（期貨）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="16">1.6 台灣市場頁面<a class="headerlink" href="#16" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Taiwan Market</strong></td>
+<td><code>/taiwan-market</code></td>
+<td><code>/pages/TaiwanMarketPage/</code></td>
+<td>台灣市場脈搏</td>
+</tr>
+<tr>
+<td><strong>TW Stock Detail</strong></td>
+<td><code>/tw-stock/:symbol</code></td>
+<td><code>/pages/TaiwanStockDetailPage/</code></td>
+<td>台灣個股詳情</td>
+</tr>
+</tbody>
+</table>
+<h3 id="17">1.7 市場評分頁面<a class="headerlink" href="#17" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Market Score</strong></td>
+<td><code>/market-score</code></td>
+<td><code>/pages/MarketScorePage/</code></td>
+<td>市場評分詳情</td>
+</tr>
+<tr>
+<td><strong>Market Score Monitor</strong></td>
+<td><code>/market-score-monitor</code></td>
+<td><code>/pages/MarketScoreMonitorPage/</code></td>
+<td>市場評分監控</td>
+</tr>
+</tbody>
+</table>
+<h3 id="18">1.8 分析與評估頁面<a class="headerlink" href="#18" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stock Detail</strong></td>
+<td><code>/stock/:symbol</code></td>
+<td><code>/pages/StockDetailPage/</code></td>
+<td>個股分析頁面</td>
+</tr>
+<tr>
+<td><strong>Stock History Pulse</strong></td>
+<td><code>/stock-pulse/:symbol</code></td>
+<td><code>/pages/StockHistoryPulsePage/</code></td>
+<td>個股歷史脈衝（免費用戶轉化）</td>
+</tr>
+<tr>
+<td><strong>Portfolio Mixer</strong></td>
+<td><code>/portfolio-mixer</code></td>
+<td><code>/pages/PortfolioMixerPage/index.jsx</code></td>
+<td>投資組合混音器</td>
+</tr>
+<tr>
+<td><strong>Rebalance Sensitivity</strong></td>
+<td><code>/rebalance-sensitivity</code></td>
+<td><code>/pages/RebalanceSensitivityPage/</code></td>
+<td>再平衡敏感度分析</td>
+</tr>
+<tr>
+<td><strong>Performance Attribution</strong></td>
+<td><code>/performance-attribution</code></td>
+<td><code>/pages/PerformanceAttributionPage/</code></td>
+<td>績效歸因分析</td>
+</tr>
+</tbody>
+</table>
+<h3 id="19-ai">1.9 AI 與宏觀頁面<a class="headerlink" href="#19-ai" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AI Model Calculation</strong></td>
+<td><code>/ai-model-calculation</code></td>
+<td><code>/pages/AIModelCalculationPage/index.jsx</code></td>
+<td>AI 模型計算</td>
+</tr>
+<tr>
+<td><strong>Macro Dashboard</strong></td>
+<td><code>/macro</code></td>
+<td><code>/pages/MacroDashboardPage/index.jsx</code></td>
+<td>宏觀儀表板</td>
+</tr>
+</tbody>
+</table>
+<h3 id="110">1.10 系統與管理頁面<a class="headerlink" href="#110" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>System Operations</strong></td>
+<td><code>/system-operations</code></td>
+<td><code>/pages/SystemOperationsPage/index.jsx</code></td>
+<td>系統操作</td>
+</tr>
+<tr>
+<td><strong>Admin Analytics</strong></td>
+<td><code>/admin/analytics</code></td>
+<td><code>/pages/AdminAnalyticsPage/index.jsx</code></td>
+<td>管理員分析儀表板</td>
+</tr>
+<tr>
+<td><strong>Dashboard Analytics (Old)</strong></td>
+<td><code>/dashboard-analytics</code></td>
+<td><code>/pages/DashboardPage.jsx</code></td>
+<td>舊版主頁（管理員）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="111">1.11 驗證與測試頁面<a class="headerlink" href="#111" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shadow Trading</strong></td>
+<td><code>/shadow-trading</code></td>
+<td><code>/pages/ShadowTradingPage/</code></td>
+<td>影子交易分析（P0-1 驗證）</td>
+</tr>
+<tr>
+<td><strong>Scenario Analysis</strong></td>
+<td><code>/scenario-analysis</code></td>
+<td><code>/pages/ScenarioAnalysisPage/</code></td>
+<td>情境分析（P2-6）</td>
+</tr>
+<tr>
+<td><strong>Strategy Analysis Dashboard</strong></td>
+<td><code>/analysis/strategies/:runId</code></td>
+<td><code>/pages/StrategyAnalysisDashboard/index.jsx</code></td>
+<td>策略分析儀表板</td>
+</tr>
+</tbody>
+</table>
+<h3 id="112">1.12 開發與測試頁面<a class="headerlink" href="#112" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>頁面名稱</th>
+<th>路由</th>
+<th>檔案路徑</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UI Test Page</strong></td>
+<td><code>/ui-test</code></td>
+<td><code>/pages/UITestPage/</code></td>
+<td>共用元件展示（Task #13）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_2">二、頁面路由結構圖<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<pre><code>/ (根目錄)
+├── /                           → MarketScanner (市場掃描儀)
+│   └── 無參數，顯示市場總覽
+│
+├── /ui-test                    → UITestPage (UI 測試，管理員專用)
+│
+├── /dashboard-analytics        → DashboardPage (舊版主頁，管理員專用)
+│
+├── /strategy-showcase          → StrategyShowcasePage (公開策略展示)
+│   └── ?strategy={slug}        → 顯示特定策略詳情
+│
+├── /performance-attribution    → PerformanceAttributionPage (績效歸因)
+│
+├── /stock-pulse/:symbol        → StockHistoryPulsePage (個股脈衝，免費轉化)
+│
+├── /signals                    → SignalDashboardPage (信號儀表板，管理員專用)
+│
+├── /alerts                     → 重定向至 /system-operations
+│
+├── /strategy-comparison        → StrategyComparisonPage (策略實驗室，管理員專用)
+│
+├── /strategy-studio            → 重定向至 /strategies/builder
+│
+├── /strategies                 → 重定向至 /strategies/builder
+│
+├── /strategies/:tab            → StrategyPage (統一策略頁面)
+│   ├── /strategies/builder     → Builder Tab (策略構建器)
+│   ├── /strategies/backtest    → Backtest Tab (回測)
+│   └── /strategies/history     → History Tab (歷史)
+│
+├── /admin/analytics            → AdminAnalyticsPage (管理員分析)
+│
+├── /market-heatmap             → MarketHeatmapPage (市場熱力圖)
+│
+├── /taiwan-market              → TaiwanMarketPage (台灣市場)
+│
+├── /tw-stock/:symbol           → TaiwanStockDetailPage (台股詳情)
+│
+├── /allocation                 → AllocationPage (配置策略)
+│   ├── /strategy/6040          → 重定向至 /allocation
+│   ├── /strategy/all-weather   → 重定向至 /allocation
+│   └── /strategy/golden-butterfly → 重定向至 /allocation
+│
+├── /momentum                   → MomentumPage (動量策略)
+│   ├── /momentum-index         → 重定向至 /momentum?market=US&amp;type=classic
+│   ├── /tw-momentum-index      → 重定向至 /momentum?market=TW&amp;type=classic
+│   ├── /v2/momentum            → 重定向至 /momentum
+│   └── /strategy/momentum_tw   → 重定向至 /momentum?market=TW&amp;type=classic
+│
+├── /strategies/technical-lab   → TechnicalStrategyPage (技術策略實驗室)
+│   └── /strategies/technical   → 重定向至 /strategies/technical-lab
+│
+├── /futures                    → FuturesCompPage (期貨複合分析)
+│
+├── /futures-backtest           → FuturesBacktestPage (期貨回測)
+│
+├── /prediction-momentum        → PredictionMomentumPage (預測動量)
+│
+├── /prediction-momentum-type2  → PredictionMomentumType2Page (預測動量 Type 2)
+│
+├── /prediction-momentum-hedged  → PredictionMomentumHedgedPage (預測動量對沖)
+│
+├── /prediction-momentum-futures → PredictionMomentumFuturesPage (預測動量期貨)
+│
+├── /ai-model-calculation       → AIModelCalculationPage (AI 模型計算)
+│
+├── /strategies/f-index         → FIndexStrategyPage (F-Index 策略)
+│
+├── /dual-momentum              → DualMomentumPage (雙重動量)
+│
+├── /backtest-history           → BacktestHistoryPage (回測歷史)
+│
+├── /laboratory                 → LaboratoryPage (實驗室)
+│
+├── /macro                      → MacroDashboardPage (宏觀儀表板)
+│
+├── /system-operations          → SystemOperationsPage (系統操作)
+│
+├── /market-indices             → MarketIndicesPage (市場指數)
+│
+├── /market-breadth             → MarketBreadthPage (市場廣度)
+│
+├── /screener/macd              → MacdScreenerPage (MACD 篩選器)
+│
+├── /screener/rsi               → RsiScreenerPage (RSI 篩選器)
+│
+├── /screener/supertrend        → SuperTrendScreenerPage (SuperTrend 篩選器)
+│
+├── /screener/extremes          → ExtremesScreenerPage (極值篩選器)
+│
+├── /screener/f-index           → FIndexScreenerPage (F-Index 篩選器)
+│
+├── /sector-rotation            → SectorFlowPage (板塊流動)
+│
+├── /rrg                        → RRGPage (相對強度圖)
+│
+├── /shadow-trading             → ShadowTradingPage (影子交易分析)
+│
+├── /scenario-analysis          → ScenarioAnalysisPage (情境分析)
+│
+├── /analysis/strategies/:runId  → StrategyAnalysisDashboard (策略分析儀表板)
+│
+├── /stock/:symbol              → StockDetailPage (個股詳情)
+│
+├── /market-score               → MarketScorePage (市場評分)
+│
+├── /market-score-monitor       → MarketScoreMonitorPage (市場評分監控)
+│
+├── /portfolio-mixer            → PortfolioMixerPage (投資組合混音器)
+│
+└── /rebalance-sensitivity      → RebalanceSensitivityPage (再平衡敏感度)
+</code></pre>
+<hr />
+<h2 id="_3">三、導航流程說明<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 導航架構<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<p>Dashboard 使用 <strong>側邊導航欄（Sidebar）</strong> + <strong>頂部標題欄（Header）</strong> 的經典佈局：</p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  [側邊欄]  │  [頂部標題欄 - Page Title | 截圖 | 收合 | 語言]    │
+├────────────┼──────────────────────────────────────────────────┤
+│            │                                                  │
+│  [導航選項] │                                                  │
+│  - Overview │                                                  │
+│  - Decision │              [主內容區域]                          │
+│    Funnel   │              (Page Content)                       │
+│  - Showcase │                                                  │
+│  - Data     │                                                  │
+│    Maintain │                                                  │
+│  - Old      │                                                  │
+│    Version  │                                                  │
+│            │                                                  │
+└────────────┴──────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="32">3.2 側邊欄分組結構<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<p>側邊欄導航分為 5 個主要群組：</p>
+<h4 id="1-overview"><strong>群組 1: Overview（總覽）</strong><a class="headerlink" href="#1-overview" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Market Scanner</strong> (<code>/</code>) - 市場掃描儀</li>
+<li>顯示市場溫度</li>
+<li>高共鳴度股票列表</li>
+<li>策略信號網格</li>
+</ul>
+<h4 id="2-decision-funnel"><strong>群組 2: Decision Funnel（決策漏斗）</strong> [管理員專用]<a class="headerlink" href="#2-decision-funnel" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Signal Dashboard</strong> (<code>/signals</code>) - 信號儀表板</li>
+<li>決策漏斗入口點</li>
+<li>多策略信號匯總</li>
+<li><strong>Strategy Lab</strong> (<code>/strategy-comparison</code>) - 策略比較實驗室</li>
+<li>策略績效對比</li>
+<li>策略選擇工具</li>
+</ul>
+<h4 id="3-showcase"><strong>群組 3: Showcase（展示）</strong><a class="headerlink" href="#3-showcase" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>動態策略連結</strong></li>
+<li>從 API 載入已發布策略</li>
+<li>按市場（US/TW）分組</li>
+<li>每個策略連結至 <code>/strategy-showcase?strategy={slug}</code></li>
+</ul>
+<h4 id="4-data-maintain"><strong>群組 4: Data Maintain（資料維護）</strong> [管理員專用]<a class="headerlink" href="#4-data-maintain" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Strategy Studio</strong> (<code>/strategies/builder</code>) - 策略工作室</li>
+<li>策略構建與編輯</li>
+<li>參數配置</li>
+<li><strong>Strategy Lab (Tech)</strong> (<code>/strategies/technical-lab</code>) - 技術策略實驗室</li>
+<li>技術指標回測</li>
+<li><strong>Momentum</strong> (<code>/momentum</code>) - 動量策略</li>
+<li>US/TW 市場動量</li>
+<li><strong>System Ops</strong> (<code>/system-operations</code>) - 系統操作</li>
+<li>告警與通知</li>
+<li>系統設定</li>
+<li><strong>Platform Analytics</strong> (<code>/admin/analytics</code>) - 平台分析</li>
+<li>使用者行為分析</li>
+<li>系統績效監控</li>
+</ul>
+<h4 id="5-old-version"><strong>群組 5: Old Version（舊版）</strong> [管理員專用，預設折疊]<a class="headerlink" href="#5-old-version" title="連結到此標題">&para;</a></h4>
+<p>包含所有舊版頁面，按類別分組：
+- 市場分析類（Heatmap, Indices, Breadth, Sector, RRG）
+- 策略類（Allocation, Futures, Prediction, AI Model, F-Index）
+- 台股類（Taiwan Market, Market Score）
+- 實驗室類（Portfolio Mixer, Rebalance Sensitivity, Dual Momentum, Backtest History）
+- 驗證類（Shadow Trading, Scenario Analysis）</p>
+<h3 id="33">3.3 導航交互模式<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="331">3.3.1 頁面切換<a class="headerlink" href="#331" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>使用 React Router <code>NavLink</code> 進行路由導航</li>
+<li>主動路由自動高亮（<code>active</code> class）</li>
+<li>路由變更時自動關閉移動端側邊欄</li>
+</ul>
+<h4 id="332">3.3.2 側邊欄折疊/展開<a class="headerlink" href="#332" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>桌面模式</strong>：</li>
+<li>點擊收合圖標切換窄版/寬版</li>
+<li>窄版只顯示圖標，隱藏文字</li>
+<li><strong>移動/平板模式</strong>：</li>
+<li>點擊漢堡選單顯示覆蓋式側邊欄</li>
+<li>點擊遮罩層或關閉按鈕收起側邊欄</li>
+</ul>
+<h4 id="333">3.3.3 群組折疊<a class="headerlink" href="#333" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>每個群組可獨立折疊/展開</li>
+<li>使用狀態管理各群組開關（<code>groupsOpen</code>）</li>
+<li>預設：Overview, Decision Funnel, Showcase, Maintain 展開；Old Version 折疊</li>
+</ul>
+<h4 id="334">3.3.4 動態導航<a class="headerlink" href="#334" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>Showcase 群組的策略連結動態載入</li>
+<li>從 <code>/api/resonance/strategies</code> API 獲取已發布策略</li>
+<li>過濾條件：<code>catalog_enabled = true</code></li>
+<li>按市場分組（US/TW）並按名稱排序</li>
+</ul>
+<h3 id="34">3.4 路由跳轉模式<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<h4 id="341-market-scanner">3.4.1 卡片點擊跳轉（Market Scanner）<a class="headerlink" href="#341-market-scanner" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">handleCardClick(cardType, payload) {
+  if (cardType === 'resonance') {
+    // 高共鳴度卡片 → 個股脈衝頁面
+    navigate(`/stock-pulse/${symbol}`);
+  } else if (cardType === 'signal') {
+    // 信號卡片 → 策略展示頁面
+    navigate(`/strategy-showcase?strategy=${strategyType}`);
+  }
+}
+</code></pre>
+<h4 id="342">3.4.2 查看全部跳轉<a class="headerlink" href="#342" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 查看特定類型策略的所有信號
+navigate(`/strategy-showcase?strategy=${strategyType}`);
+</code></pre>
+<h4 id="343">3.4.3 頁面重定向模式<a class="headerlink" href="#343" title="連結到此標題">&para;</a></h4>
+<p>多處使用重定向以簡化路由或保持向後兼容：</p>
+<table>
+<thead>
+<tr>
+<th>舊路由</th>
+<th>新路由</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/strategy/6040</code></td>
+<td><code>/allocation</code></td>
+<td>統一配置頁面</td>
+</tr>
+<tr>
+<td><code>/momentum-index</code></td>
+<td><code>/momentum?market=US&amp;type=classic</code></td>
+<td>統一動量頁面，參數化</td>
+</tr>
+<tr>
+<td><code>/strategy-studio</code></td>
+<td><code>/strategies/builder</code></td>
+<td>整合到統一策略頁</td>
+</tr>
+<tr>
+<td><code>/alerts</code></td>
+<td><code>/system-operations</code></td>
+<td>功能整合</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35">3.5 權限控制<a class="headerlink" href="#35" title="連結到此標題">&para;</a></h3>
+<h4 id="351-adminroute">3.5.1 AdminRoute（管理員專用路由）<a class="headerlink" href="#351-adminroute" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;AdminRoute isEnabled={pageConfig.xxx} configLoaded={configLoaded}&gt;
+  &lt;ProtectedPage /&gt;
+&lt;/AdminRoute&gt;
+</code></pre>
+<ul>
+<li>檢查條件：<code>isEnabled</code> (頁面配置) + <code>isAdmin()</code> (使用者角色)</li>
+<li>不符合條件：重定向至 <code>/</code></li>
+</ul>
+<h4 id="352-protectedroute">3.5.2 ProtectedRoute（保護路由）<a class="headerlink" href="#352-protectedroute" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;ProtectedRoute isEnabled={pageConfig.xxx} configLoaded={configLoaded}&gt;
+  &lt;Page /&gt;
+&lt;/ProtectedRoute&gt;
+</code></pre>
+<ul>
+<li>只檢查 <code>isEnabled</code></li>
+<li>不檢查使用者角色（適合一般用戶可訪問但需配置開啟的頁面）</li>
+</ul>
+<h4 id="353">3.5.3 權限檢查工具<a class="headerlink" href="#353" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><code>isAdmin()</code> - 檢查是否為管理員</li>
+<li><code>getUserRole()</code> - 獲取使用者角色</li>
+</ul>
+<h3 id="36">3.6 頁面配置動態載入<a class="headerlink" href="#36" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">useEffect(() =&gt; {
+  const fetchConfig = async () =&gt; {
+    const response = await apiClient.get('/config');
+    if (response.data &amp;&amp; response.data.page_visibility) {
+      setPageConfig(prev =&gt; ({ ...prev, ...response.data.page_visibility }));
+    }
+  };
+  fetchConfig();
+}, []);
+</code></pre>
+<ul>
+<li>從後端 API 動態載入頁面可見性配置</li>
+<li>配置項目：</li>
+<li><code>dashboard</code>, <code>momentum_index</code>, <code>market_indices</code>, <code>market_heatmap</code>, <code>market_breadth</code></li>
+<li><code>screener_macd</code>, <code>screener_rsi</code>, <code>screener_supertrend</code>, <code>screener_extremes</code>, <code>screener_f_index</code></li>
+<li>等等...</li>
+</ul>
+<hr />
+<h2 id="_4">四、關鍵頁面的功能和交互<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="41-marketscanner">4.1 MarketScanner（市場掃描儀）<a class="headerlink" href="#41-marketscanner" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/</code>（首頁）</p>
+<p><strong>核心功能：</strong>
+1. <strong>市場溫度顯示</strong>
+   - 顯示當前市場狀態（US/TW）
+   - 溫度指示器（熱/溫/冷）</p>
+<ol>
+<li><strong>高共鳴度股票區塊</strong></li>
+<li>顯示近期高共鳴度個股</li>
+<li>每張卡片可點擊跳轉至 <code>/stock-pulse/{symbol}</code></li>
+<li>
+<p>顯示策略數量</p>
+</li>
+<li>
+<p><strong>策略信號網格</strong></p>
+</li>
+<li>按策略類型分組顯示信號</li>
+<li>每個策略顯示：<ul>
+<li>勝率（WR）</li>
+<li>期望報酬（EV 6M）</li>
+</ul>
+</li>
+<li>
+<p>"View All" 按鈕跳轉至策略展示頁</p>
+</li>
+<li>
+<p><strong>市場切換</strong></p>
+</li>
+<li>US Market ↔ TW Market</li>
+<li>
+<p>信號模式切換（entry/exit）</p>
+</li>
+<li>
+<p><strong>本地存儲</strong></p>
+</li>
+<li>記住使用者選擇的市場和信號模式</li>
+<li>下次訪問自動恢復</li>
+</ol>
+<p><strong>組件結構：</strong></p>
+<pre><code>MarketScanner
+├── ScannerHeader (標題 + 市場/信號模式切換器)
+├── MarketTemperatureSection (市場溫度)
+├── SummaryStats (統計總覽)
+├── HighResonanceSection (高共鳴度股票卡片網格)
+└── StrategyGridSection (策略信號網格)
+</code></pre>
+<p><strong>狀態管理：</strong>
+- <code>loading</code>: 加載狀態
+- <code>error</code>: 錯誤信息
+- <code>summary</code>: API 回傳的數據
+- <code>selectedMarket</code>: 當前選擇市場（'US' | 'TW'）
+- <code>signalMode</code>: 信號模式（'entry' | 'exit'）</p>
+<p><strong>數據來源：</strong></p>
+<pre><code class="language-javascript">GET /api/resonance/home?market={market}&amp;target_date={today}&amp;lookback_years=0.5&amp;signal_mode={signalMode}
+</code></pre>
+<p><strong>交互流程：</strong></p>
+<pre><code>1. 頁面載入
+   ↓
+2. 從 localStorage 讀取上一次的市場和信號模式
+   ↓
+3. 調用 API 獲取數據
+   ↓
+4. 顯示市場溫度區塊（始終顯示）
+   ↓
+5. 顯示統計總覽（如有數據）
+   ↓
+6. 顯示高共鳴度股票（如有數據）
+   ↓
+7. 顯示策略信號網格（如有數據）
+   ↓
+8. 點擊卡片 → 跳轉至對應詳情頁
+</code></pre>
+<hr />
+<h3 id="42-strategypage">4.2 StrategyPage（統一策略頁面）<a class="headerlink" href="#42-strategypage" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/strategies/:tab</code></p>
+<p><strong>標籤頁結構：</strong></p>
+<h4 id="tab-1-builder"><strong>Tab 1: Builder（策略構建器）</strong><a class="headerlink" href="#tab-1-builder" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>功能：</li>
+<li>創建新策略</li>
+<li>編輯現有策略</li>
+<li>配置策略參數</li>
+<li>保存/刪除策略</li>
+<li>組件：<code>BuilderTab</code></li>
+</ul>
+<h4 id="tab-2-backtest"><strong>Tab 2: Backtest（回測）</strong><a class="headerlink" href="#tab-2-backtest" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>功能：</li>
+<li>選擇策略進行回測</li>
+<li>設置回測參數</li>
+<li>查看回測結果</li>
+<li>組件：<code>BacktestTab</code></li>
+</ul>
+<h4 id="tab-3-history"><strong>Tab 3: History（歷史）</strong><a class="headerlink" href="#tab-3-history" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>功能：</li>
+<li>查看回測歷史記錄</li>
+<li>過濾與排序</li>
+<li>組件：<code>HistoryTab</code></li>
+</ul>
+<p><strong>URL 參數處理：</strong></p>
+<pre><code class="language-javascript">// 載入特定策略進行編輯
+?instance_id={instanceId} → 自動載入該策略至 Builder Tab
+</code></pre>
+<p><strong>狀態管理：</strong>
+- <code>activeTab</code>: 當前標籤（'builder' | 'backtest' | 'history'）
+- <code>editStrategy</code>: 編輯中的策略對象
+- <code>refreshKey</code>: 刷新鍵（觸發子組件重新載入）</p>
+<p><strong>API Hook：</strong>
+- <code>useStrategyAPI()</code> - 封裝策略相關 API 調用</p>
+<p><strong>交互流程：</strong></p>
+<pre><code>1. 載入頁面
+   ↓
+2. 檢查 URL 中的 instance_id
+   ↓
+3. 有 instance_id → 載入策略 → 顯示 Builder Tab
+   ↓
+4. 無 instance_id → 顯示當前 Tab
+   ↓
+5. 切換 Tab → 更新 URL
+   ↓
+6. 保存/刪除 → 刷新列表
+</code></pre>
+<hr />
+<h3 id="43-momentumpage">4.3 MomentumPage（動量策略頁面）<a class="headerlink" href="#43-momentumpage" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/momentum</code></p>
+<p><strong>核心功能：</strong>
+1. <strong>市場切換</strong>
+   - US Market (S&amp;P 500)
+   - TW Market (Top 50, Mid 51-100)</p>
+<ol>
+<li><strong>預設配置</strong></li>
+<li>Classic（經典模式）</li>
+<li>Defensive（防禦模式）</li>
+<li>
+<p>Aggressive（進攻模式）</p>
+</li>
+<li>
+<p><strong>回測數據顯示</strong></p>
+</li>
+<li>總報酬率</li>
+<li>年化報酬率（CAGR）</li>
+<li>最大回撤（MDD）</li>
+<li>夏普比率</li>
+<li>
+<p>勝率</p>
+</li>
+<li>
+<p><strong>持倉表格</strong></p>
+</li>
+<li>當前持倉列表</li>
+<li>可排序</li>
+<li>
+<p>點擊跳轉至個股詳情</p>
+</li>
+<li>
+<p><strong>板塊配置</strong></p>
+</li>
+<li>板塊曝露度分析</li>
+<li>
+<p>板塊績效</p>
+</li>
+<li>
+<p><strong>績效圖表</strong></p>
+</li>
+<li>策略 vs 基準指數對比</li>
+<li>
+<p>可選擇多個基準指數</p>
+</li>
+<li>
+<p><strong>月度報酬表</strong></p>
+</li>
+<li>
+<p>按月顯示報酬</p>
+</li>
+<li>
+<p><strong>再平衡歷史</strong></p>
+</li>
+<li>再平衡記錄</li>
+<li>交易日誌（可展開）</li>
+</ol>
+<p><strong>組件結構：</strong></p>
+<pre><code>MomentumPage
+├── StrategyConfigCard (策略配置卡)
+├── MetricCard (多個指標卡片)
+├── HoldingsTable (持倉表格)
+├── SectorExposure (板塊配置)
+├── PerformanceChart (績效圖表)
+├── MonthlyReturnsTable (月度報酬表)
+└── RebalanceHistory (再平衡歷史)
+</code></pre>
+<p><strong>自定義 Hook：</strong>
+- <code>useMomentum()</code> - 管理動量策略的所有狀態和邏輯</p>
+<p><strong>狀態管理：</strong>
+- <code>market</code>: 市場（'US' | 'TW'）
+- <code>universe</code>: 股票池（'sp500' | 'tw_1_50' | 'tw_51_100'）
+- <code>presetType</code>: 預設類型
+- <code>years</code>: 回測年數
+- <code>config</code>: 策略配置
+- <code>activeConfig</code>: 活動配置
+- <code>data</code>: API 回傳數據
+- <code>loading</code>: 加載狀態
+- <code>error</code>: 錯誤信息
+- <code>sortConfig</code>: 排序配置
+- <code>showTradeLog</code>: 顯示交易日誌
+- <code>availableBenchmarks</code>: 可用基準指數
+- <code>activeBenchmarks</code>: 活動基準指數</p>
+<p><strong>圖表輔助函數：</strong>
+- <code>useBenchmarkDatasets()</code> - 處理基準指數數據集
+- <code>useReturnChartData()</code> - 準備回報率圖表數據</p>
+<p><strong>常量：</strong>
+- <code>PRESETS</code> - 預設配置定義</p>
+<hr />
+<h3 id="44-dashboardlayout">4.4 DashboardLayout（佈局組件）<a class="headerlink" href="#44-dashboardlayout" title="連結到此標題">&para;</a></h3>
+<p><strong>核心功能：</strong></p>
+<h4 id="441">4.4.1 響應式側邊欄<a class="headerlink" href="#441" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>桌面模式</strong>：固定顯示，可折疊</li>
+<li><strong>移動/平板模式</strong>：覆蓋式顯示，點擊遮罩關閉</li>
+</ul>
+<h4 id="442">4.4.2 群組導航<a class="headerlink" href="#442" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>5 個主要群組</li>
+<li>每個群組可獨立折疊</li>
+<li>動態載入 Showcase 策略連結</li>
+</ul>
+<h4 id="443">4.4.3 頁面標題<a class="headerlink" href="#443" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>根據當前路由動態顯示頁面標題</li>
+<li>函數：<code>getPageTitle(path)</code></li>
+</ul>
+<h4 id="444">4.4.4 截圖功能<a class="headerlink" href="#444" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>使用 <code>html2canvas</code> 截取全頁面</li>
+<li>截圖時隱藏側邊欄</li>
+<li>支援滾動內容完整截取</li>
+<li>自動下載 PNG 文件</li>
+</ul>
+<h4 id="445">4.4.5 語言切換<a class="headerlink" href="#445" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>英文 ↔ 繁體中文</li>
+<li>使用 <code>i18next</code> 管理翻譯</li>
+</ul>
+<h4 id="446">4.4.6 管理員登錄<a class="headerlink" href="#446" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>點擊盾牌圖標觸發登入模態框</li>
+<li>使用 <code>onOpenLogin</code> 回調</li>
+</ul>
+<h4 id="447-persona">4.4.7 Persona 切換器<a class="headerlink" href="#447-persona" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>僅在 <code>personaEnabled</code> 時顯示</li>
+<li>右上角顯示</li>
+</ul>
+<p><strong>子組件：</strong>
+- <code>SidebarGroup</code> - 側邊欄群組
+- <code>SplashScreen</code> - 開屏動畫
+- <code>PersonaSwitcher</code> - Persona 切換器</p>
+<p><strong>狀態管理：</strong></p>
+<pre><code class="language-javascript">const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+const [isCapturing, setIsCapturing] = useState(false);
+const [publishedStrategies, setPublishedStrategies] = useState({});
+const [strategiesLoading, setStrategiesLoading] = useState(true);
+const [groupsOpen, setGroupsOpen] = useState({
+  overview: true,
+  decision_funnel: true,
+  showcase: true,
+  maintenance: true,
+  old_version: false,
+});
+</code></pre>
+<hr />
+<h2 id="_5">五、頁面設計模式<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 頁面架構模式<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<h4 id="511-main-container-pattern">5.1.1 主容器模式（Main Container Pattern）<a class="headerlink" href="#511-main-container-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code>DashboardLayout (容器)
+├── Sidebar (側邊導航)
+└── MainWrapper (主內容區)
+    ├── Header (頂部標題欄)
+    └── Main Content (頁面內容)
+        └── {children}
+</code></pre>
+<p><strong>特點：</strong>
+- 所有頁面都包裹在 <code>DashboardLayout</code> 中
+- 統一的側邊欄和標題欄
+- 只需實現 <code>{children}</code> 部分的頁面邏輯</p>
+<h4 id="512-tabs-pattern">5.1.2 標籤頁模式（Tabs Pattern）<a class="headerlink" href="#512-tabs-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code>StrategyPage
+├── Tabs
+│   ├── Builder Tab
+│   ├── Backtest Tab
+│   └── History Tab
+└── {activeTabContent}
+</code></pre>
+<p><strong>特點：</strong>
+- 適合相關功能集中在同一頁面
+- 狀態在各標籤間共享
+- URL 反映當前標籤狀態</p>
+<hr />
+<h3 id="52">5.2 數據獲取模式<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="521-hook">5.2.1 自定義 Hook 模式<a class="headerlink" href="#521-hook" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 頁面組件
+const Page = () =&gt; {
+  const { data, loading, error, refetch } = useCustomHook();
+  // ... UI 邏輯
+};
+
+// 自定義 Hook
+const useCustomHook = () =&gt; {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+    fetchData();
+  }, []);
+
+  const fetchData = async () =&gt; {
+    // ... 數據獲取邏輯
+  };
+
+  return { data, loading, error, refetch: fetchData };
+};
+</code></pre>
+<p><strong>示例：</strong>
+- <code>useMomentum()</code> - 動量策略頁面
+- <code>useStrategyAPI()</code> - 策略 API</p>
+<h4 id="522-tanstack-query">5.2.2 TanStack Query 模式<a class="headerlink" href="#522-tanstack-query" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: CONFIG.refetchOnWindowFocus,
+      retry: 1,
+      staleTime: CONFIG.staleTime,
+      gcTime: CONFIG.cacheTime,
+      refetchOnMount: CONFIG.refetchOnMount,
+    },
+  },
+});
+</code></pre>
+<p><strong>特點：</strong>
+- 自動緩存管理
+- 自動重試
+- 背景刷新
+- 視窗聚焦刷新（可配置）</p>
+<hr />
+<h3 id="53">5.3 加載狀態模式<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="531-skeleton-loading">5.3.1 Skeleton Loading（骨架屏）<a class="headerlink" href="#531-skeleton-loading" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;
+&lt;Skeleton.Card /&gt;
+&lt;Skeleton.Table rows={5} /&gt;
+&lt;Skeleton.Text lines={3} /&gt;
+</code></pre>
+<p><strong>組件位置：</strong> <code>/components/shared/Skeleton.jsx</code></p>
+<h4 id="532-loading-spinner">5.3.2 Loading Spinner<a class="headerlink" href="#532-loading-spinner" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">{loading &amp;&amp; !data &amp;&amp; (
+  &lt;div className=&quot;spinner-border text-primary&quot; role=&quot;status&quot;&gt;&lt;/div&gt;
+)}
+</code></pre>
+<h4 id="533-empty-states">5.3.3 Empty States（空狀態）<a class="headerlink" href="#533-empty-states" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;EmptyStatePresets.LoadError /&gt;
+&lt;EmptyStatePresets.NoSignals /&gt;
+&lt;EmptyStatePresets.NoData /&gt;
+</code></pre>
+<hr />
+<h3 id="54">5.4 錯誤處理模式<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<h4 id="541-error-boundary">5.4.1 Error Boundary<a class="headerlink" href="#541-error-boundary" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;ErrorBoundary&gt;
+  &lt;ToastProvider&gt;
+    &lt;Router&gt;
+      {/* 應用內容 */}
+    &lt;/Router&gt;
+  &lt;/ToastProvider&gt;
+&lt;/ErrorBoundary&gt;
+</code></pre>
+<h4 id="542">5.4.2 頁面級別錯誤<a class="headerlink" href="#542" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">if (error) {
+  return (
+    &lt;div className=&quot;alert alert-danger&quot;&gt;
+      &lt;h5&gt;Error Loading Strategy&lt;/h5&gt;
+      &lt;p&gt;{error}&lt;/p&gt;
+      &lt;button onClick={() =&gt; window.location.reload()}&gt;
+        Retry
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></pre>
+<hr />
+<h3 id="55">5.5 狀態管理模式<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<h4 id="551-local-state">5.5.1 Local State（本地狀態）<a class="headerlink" href="#551-local-state" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const [state, setState] = useState(initialValue);
+</code></pre>
+<p><strong>使用場景：</strong>
+- UI 狀態（展開/折疊、切換器等）
+- 臨時表單數據
+- 頁面級別的加載/錯誤狀態</p>
+<h4 id="552-zustand-store">5.5.2 Zustand Store（全局狀態）<a class="headerlink" href="#552-zustand-store" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { fetchStage1Overview, marketScore, stockDetails } = useStore();
+</code></pre>
+<p><strong>使用場景：</strong>
+- 跨頁面共享的數據
+- 複雜的狀態邏輯
+- 需要持久化的狀態</p>
+<h4 id="553-context-api">5.5.3 Context API（上下文）<a class="headerlink" href="#553-context-api" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { featureEnabled: personaEnabled } = usePersona();
+</code></pre>
+<p><strong>使用場景：</strong>
+- 主題切換
+- 語言設置
+- 使用者角色
+- 功能開關</p>
+<hr />
+<h3 id="56">5.6 組件復用模式<a class="headerlink" href="#56" title="連結到此標題">&para;</a></h3>
+<h4 id="561-shared-components">5.6.1 共享組件庫（Shared Components）<a class="headerlink" href="#561-shared-components" title="連結到此標題">&para;</a></h4>
+<p><strong>位置：</strong> <code>/components/shared/</code></p>
+<p><strong>主要組件：</strong>
+- <code>Skeleton.jsx</code> - 骨架屏加載
+- <code>EmptyState.jsx</code> - 空狀態
+- <code>ErrorBoundary.jsx</code> - 錯誤邊界
+- <code>ToastProvider.jsx</code> - 消息提示
+- <code>Modal.jsx</code> - 模態框
+- <code>Card.jsx</code> - 卡片容器
+- <code>Button.jsx</code> - 按鈕</p>
+<h4 id="562">5.6.2 業務組件<a class="headerlink" href="#562" title="連結到此標題">&para;</a></h4>
+<p><strong>位置：</strong> <code>/components/</code></p>
+<p><strong>主要組件：</strong>
+- <code>DashboardLayout.jsx</code> - 佈局容器
+- <code>MetricCard.jsx</code> - 指標卡片
+- <code>Sparkline.jsx</code> - 迷你圖表
+- <code>MarketScoreMeter.jsx</code> - 市場評分儀表
+- <code>SectorHeatmap.jsx</code> - 板塊熱力圖</p>
+<hr />
+<h3 id="57">5.7 路由保護模式<a class="headerlink" href="#57" title="連結到此標題">&para;</a></h3>
+<h4 id="571-adminroute">5.7.1 AdminRoute（管理員路由）<a class="headerlink" href="#571-adminroute" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const AdminRoute = ({ isEnabled, configLoaded, children }) =&gt; {
+  if (!configLoaded) return null;
+  const hasAdminAccess = isAdmin();
+  if (!isEnabled || !hasAdminAccess) {
+    return &lt;Navigate to=&quot;/&quot; replace /&gt;;
+  }
+  return children;
+};
+</code></pre>
+<p><strong>使用場景：</strong>
+- 管理員專用頁面
+- 需要特定功能開關的頁面</p>
+<h4 id="572-protectedroute">5.7.2 ProtectedRoute（保護路由）<a class="headerlink" href="#572-protectedroute" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const ProtectedRoute = ({ isEnabled, configLoaded, children }) =&gt; {
+  if (!configLoaded) return null;
+  return isEnabled ? children : &lt;Navigate to=&quot;/&quot; replace /&gt;;
+};
+</code></pre>
+<p><strong>使用場景：</strong>
+- 需要功能開關但不需要權限的頁面</p>
+<hr />
+<h3 id="58">5.8 代碼分割模式<a class="headerlink" href="#58" title="連結到此標題">&para;</a></h3>
+<h4 id="581-lazy-loading">5.8.1 Lazy Loading（懶加載）<a class="headerlink" href="#581-lazy-loading" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const MarketScanner = React.lazy(() =&gt; import('./pages/market-scanner'));
+const MomentumPage = React.lazy(() =&gt; import('./pages/MomentumPage/index.jsx'));
+// ... 其他頁面
+</code></pre>
+<p><strong>特點：</strong>
+- 按需加載，減少初始包大小
+- 使用 <code>Suspense</code> 包裹懶加載組件
+- 統一的加載回退 UI</p>
+<h4 id="582-loading-fallback">5.8.2 Loading Fallback<a class="headerlink" href="#582-loading-fallback" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">&lt;Suspense fallback={&lt;LoadingFallback /&gt;}&gt;
+  &lt;Routes&gt;
+    {/* 懶加載的路由 */}
+  &lt;/Routes&gt;
+&lt;/Suspense&gt;
+</code></pre>
+<hr />
+<h3 id="59">5.9 圖表組件模式<a class="headerlink" href="#59" title="連結到此標題">&para;</a></h3>
+<h4 id="591-chartjs">5.9.1 Chart.js<a class="headerlink" href="#591-chartjs" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {
+  Chart as ChartJS, CategoryScale, LinearScale,
+  PointElement, LineElement, Title, Tooltip, Legend,
+  Filler, ArcElement
+} from 'chart.js';
+
+ChartJS.register(...);
+</code></pre>
+<h4 id="592-echarts">5.9.2 ECharts<a class="headerlink" href="#592-echarts" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import ReactECharts from 'echarts-for-react';
+</code></pre>
+<h4 id="593-recharts">5.9.3 Recharts<a class="headerlink" href="#593-recharts" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { LineChart, BarChart, PieChart } from 'recharts';
+</code></pre>
+<p><strong>選擇標準：</strong>
+- <strong>Chart.js</strong>: 簡單到中等複雜度圖表
+- <strong>ECharts</strong>: 高度可定製、互動性強的圖表
+- <strong>Recharts</strong>: React 原生、簡單配置</p>
+<hr />
+<h3 id="510">5.10 樣式模式<a class="headerlink" href="#510" title="連結到此標題">&para;</a></h3>
+<h4 id="5101-bootstrap-css">5.10.1 Bootstrap + 自定義 CSS<a class="headerlink" href="#5101-bootstrap-css" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import 'bootstrap/dist/css/bootstrap.min.css';
+import './DashboardLayout.module.css';
+</code></pre>
+<h4 id="5102-css-modules">5.10.2 CSS Modules<a class="headerlink" href="#5102-css-modules" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import styles from './DashboardLayout.module.css';
+
+&lt;div className={styles['app-container']}&gt;
+  &lt;aside className={styles['dashboard-sidebar']}&gt;
+</code></pre>
+<h4 id="5103-utility-classes">5.10.3 工具類（Utility Classes）<a class="headerlink" href="#5103-utility-classes" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">className=&quot;d-flex justify-content-between align-items-center mb-4&quot;
+className=&quot;container-fluid p-4 animate-fade-in&quot;
+</code></pre>
+<hr />
+<h3 id="511">5.11 本地存儲模式<a class="headerlink" href="#511" title="連結到此標題">&para;</a></h3>
+<h4 id="5111-localstorage">5.11.1 localStorage<a class="headerlink" href="#5111-localstorage" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 讀取
+const saved = localStorage.getItem('marketScanner_market');
+
+// 保存
+localStorage.setItem('marketScanner_market', market);
+</code></pre>
+<p><strong>使用場景：</strong>
+- 用戶偏好設置
+- 頁面狀態持久化
+- 臨時緩存</p>
+<hr />
+<h3 id="512">5.12 國際化模式<a class="headerlink" href="#512" title="連結到此標題">&para;</a></h3>
+<h4 id="5121-i18next">5.12.1 i18next 配置<a class="headerlink" href="#5121-i18next" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { useTranslation } from 'react-i18next';
+
+const { t, i18n } = useTranslation();
+
+// 翻譯
+&lt;h4&gt;{t('header.pro_terminal')}&lt;/h4&gt;
+
+// 切換語言
+i18n.changeLanguage('zh-TW');
+</code></pre>
+<p><strong>支持語言：</strong>
+- 英文（en）
+- 繁體中文（zh-TW）</p>
+<hr />
+<h2 id="programmer-sub-agent">六、頁面開發指南（Programmer Sub-Agent）<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 創建新頁面<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<h4 id="611">6.1.1 基本頁面結構<a class="headerlink" href="#611" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import React, { useState, useEffect } from 'react';
+
+const NewPage = () =&gt; {
+  // 1. 狀態定義
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 2. 數據獲取
+  useEffect(() =&gt; {
+    fetchData();
+  }, []);
+
+  const fetchData = async () =&gt; {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/endpoint');
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. 加載狀態
+  if (loading &amp;&amp; !data) {
+    return &lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;;
+  }
+
+  // 4. 錯誤狀態
+  if (error) {
+    return (
+      &lt;EmptyStatePresets.LoadError
+        message={`Error: ${error}`}
+        action={&lt;button onClick={fetchData}&gt;Retry&lt;/button&gt;}
+      /&gt;
+    );
+  }
+
+  // 5. 主內容
+  return (
+    &lt;div className=&quot;container-fluid p-4 animate-fade-in&quot;&gt;
+      {/* 頁面內容 */}
+    &lt;/div&gt;
+  );
+};
+
+export default NewPage;
+</code></pre>
+<h4 id="612">6.1.2 添加路由<a class="headerlink" href="#612" title="連結到此標題">&para;</a></h4>
+<p><strong>步驟 1：在 App.jsx 中引入頁面</strong></p>
+<pre><code class="language-javascript">const NewPage = React.lazy(() =&gt; import('./pages/NewPage/index.jsx'));
+</code></pre>
+<p><strong>步驟 2：添加路由定義</strong></p>
+<pre><code class="language-javascript">&lt;Route path=&quot;/new-page&quot; element={
+  &lt;AdminRoute isEnabled={true} configLoaded={configLoaded}&gt;
+    &lt;NewPage /&gt;
+  &lt;/AdminRoute&gt;
+} /&gt;
+</code></pre>
+<p><strong>步驟 3：在 DashboardLayout 中添加導航</strong></p>
+<pre><code class="language-javascript">&lt;SidebarGroup title=&quot;Category&quot; icon=&quot;bi-icon&quot; isOpen={true}&gt;
+  &lt;li className={styles['nav-item']}&gt;
+    &lt;NavLink to=&quot;/new-page&quot; className={({ isActive }) =&gt; `${styles['nav-link']} ${isActive ? styles['active'] : ''}`}&gt;
+      &lt;i className=&quot;bi bi-icon me-2&quot;&gt;&lt;/i&gt; &lt;span&gt;New Page&lt;/span&gt;
+    &lt;/NavLink&gt;
+  &lt;/li&gt;
+&lt;/SidebarGroup&gt;
+</code></pre>
+<p><strong>步驟 4：添加頁面標題</strong></p>
+<pre><code class="language-javascript">const getPageTitle = (path) =&gt; {
+  if (path === '/new-page') return 'New Page Title';
+  // ...
+};
+</code></pre>
+<hr />
+<h3 id="62">6.2 頁面組件劃分原則<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<h4 id="621">6.2.1 單一職責<a class="headerlink" href="#621" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>每個組件只負責一個功能</li>
+<li>避免組件過大</li>
+</ul>
+<h4 id="622">6.2.2 可復用性<a class="headerlink" href="#622" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>提取共同邏輯到共享組件</li>
+<li>使用 props 進行配置</li>
+</ul>
+<h4 id="623">6.2.3 組件大小建議<a class="headerlink" href="#623" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 主頁面組件：300-500 行
+const Page = () =&gt; { /* ... */ };
+
+// 子組件：100-200 行
+const Section = () =&gt; { /* ... */ };
+
+// UI 組件：50-100 行
+const Card = () =&gt; { /* ... */ };
+</code></pre>
+<hr />
+<h3 id="63-api">6.3 API 調用模式<a class="headerlink" href="#63-api" title="連結到此標題">&para;</a></h3>
+<h4 id="631-apiclient">6.3.1 使用 apiClient<a class="headerlink" href="#631-apiclient" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import apiClient from './services/api';
+
+const response = await apiClient.get('/endpoint');
+const data = response.data;
+</code></pre>
+<h4 id="632-fetch">6.3.2 使用原生 fetch<a class="headerlink" href="#632-fetch" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const response = await fetch('/api/endpoint');
+if (response.ok) {
+  const data = await response.json();
+}
+</code></pre>
+<hr />
+<h3 id="64">6.4 圖表集成指南<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<h4 id="641-chartjs">6.4.1 Chart.js 示例<a class="headerlink" href="#641-chartjs" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { Line } from 'react-chartjs-2';
+
+&lt;Line
+  data={chartData}
+  options={{
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: { mode: 'index', intersect: false }
+    }
+  }}
+/&gt;
+</code></pre>
+<h4 id="642-echarts">6.4.2 ECharts 示例<a class="headerlink" href="#642-echarts" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import ReactECharts from 'echarts-for-react';
+
+&lt;ReactECharts
+  option={option}
+  style={{ height: 400 }}
+/&gt;
+</code></pre>
+<hr />
+<h3 id="65">6.5 測試建議<a class="headerlink" href="#65" title="連結到此標題">&para;</a></h3>
+<h4 id="651">6.5.1 單元測試<a class="headerlink" href="#651" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">import { render, screen } from '@testing-library/react';
+import NewPage from './NewPage';
+
+test('renders loading state', () =&gt; {
+  render(&lt;NewPage /&gt;);
+  expect(screen.getByText('Loading...')).toBeInTheDocument();
+});
+</code></pre>
+<h4 id="652-e2e">6.5.2 E2E 測試<a class="headerlink" href="#652-e2e" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">describe('New Page', () =&gt; {
+  it('displays data correctly', () =&gt; {
+    cy.visit('/new-page');
+    cy.get('[data-testid=&quot;data-display&quot;]').should('be.visible');
+  });
+});
+</code></pre>
+<hr />
+<h2 id="_6">七、總結<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="71-dashboard">7.1 Dashboard 頁面特點<a class="headerlink" href="#71-dashboard" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>模組化設計</strong> - 頁面按功能分組，職責清晰</li>
+<li><strong>響應式佈局</strong> - 支援桌面、平板、移動端</li>
+<li><strong>代碼分割</strong> - 懶加載優化性能</li>
+<li><strong>權限控制</strong> - 多層級路由保護</li>
+<li><strong>狀態管理</strong> - 結合 useState, Zustand, Context</li>
+<li><strong>錯誤處理</strong> - Error Boundary + 頁面級別錯誤處理</li>
+<li><strong>加載優化</strong> - Skeleton + Empty States</li>
+<li><strong>國際化</strong> - 支援多語言</li>
+<li><strong>組件復用</strong> - 共享組件庫 + 業務組件</li>
+<li><strong>圖表豐富</strong> - Chart.js, ECharts, Recharts</li>
+</ol>
+<h3 id="72-programmer-sub-agent">7.2 Programmer Sub-Agent 開發要點<a class="headerlink" href="#72-programmer-sub-agent" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>遵循現有模式</strong> - 參考現有頁面結構和代碼風格</li>
+<li><strong>使用共享組件</strong> - 優先使用 <code>/components/shared</code> 中的組件</li>
+<li><strong>錯誤處理</strong> - 始終處理 loading 和 error 狀態</li>
+<li><strong>路由保護</strong> - 根據需求選擇 AdminRoute 或 ProtectedRoute</li>
+<li><strong>本地存儲</strong> - 合理使用 localStorage 保存用戶偏好</li>
+<li><strong>API 調用</strong> - 使用 apiClient 以獲得統一錯誤處理和攔截器</li>
+<li><strong>樣式規範</strong> - Bootstrap 類名 + CSS Modules</li>
+<li><strong>代碼分割</strong> - 使用 React.lazy 進行頁面懶加載</li>
+<li><strong>測試覆蓋</strong> - 編寫單元測試和 E2E 測試</li>
+<li><strong>文檔更新</strong> - 更新路由、導航和頁面標題映射</li>
+</ol>
+<h3 id="73">7.3 常見陷阱<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>忘記路由保護</strong> - 導致未授權訪問</li>
+<li><strong>硬編碼數據</strong> - 未從 API 或 props 獲取</li>
+<li><strong>忽略錯誤狀態</strong> - 用戶體驗差</li>
+<li><strong>過大組件</strong> - 難以維護和測試</li>
+<li><strong>缺少本地存儲</strong> - 用戶偏好丟失</li>
+<li><strong>未處理懶加載</strong> - 首屏加載慢</li>
+<li><strong>缺少國際化</strong> - 只支援一種語言</li>
+</ol>
+<hr />
+<h2 id="_7">附錄：關鍵文件路徑<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<h3 id="_8">頁面目錄<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<pre><code>/Users/charlie/Dashboard/frontend/src/pages/
+├── market-scanner/           ← 市場掃描儀
+├── StrategyPage/             ← 統一策略頁面
+├── MomentumPage/             ← 動量策略
+├── AllocationPage/           ← 配置策略
+├── StockDetailPage.jsx       ← 個股詳情
+├── DashboardPage.jsx          ← 舊版主頁
+├── TaiwanMarketPage/          ← 台灣市場
+├── ... (其他頁面)
+</code></pre>
+<h3 id="_9">組件目錄<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<pre><code>/Users/charlie/Dashboard/frontend/src/components/
+├── DashboardLayout.jsx       ← 主佈局
+├── shared/                   ← 共享組件庫
+│   ├── Skeleton.jsx          ← 骨架屏
+│   ├── EmptyState.jsx        ← 空狀態
+│   ├── ErrorBoundary.jsx     ← 錯誤邊界
+│   └── ... (其他共享組件)
+├── MetricCard.jsx            ← 指標卡片
+├── Sparkline.jsx             ← 迷你圖表
+└── ... (其他業務組件)
+</code></pre>
+<h3 id="_10">核心配置文件<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<pre><code>/Users/charlie/Dashboard/frontend/src/
+├── App.jsx                   ← 路由配置
+├── main.jsx                  ← 應用入口
+├── config.jsx                ← 全局配置
+├── store.jsx                 ← Zustand store
+└── i18n.js                  ← 國際化配置
+</code></pre>
+<hr />
+<p><strong>分析完成</strong></p>
+<p>本文件為 Dashboard 前端頁面結構的完整分析，涵蓋：
+- 50+ 頁面清單（按功能分類）
+- 完整路由結構圖
+- 詳細導航流程說明
+- 關鍵頁面功能和交互分析
+- 12 種頁面設計模式
+- Programmer Sub-Agent 開發指南</p>
+<p>可作為開發新頁面或修改現有頁面的參考文檔。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

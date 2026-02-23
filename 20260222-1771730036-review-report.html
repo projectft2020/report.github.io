@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 測試策略實現審查報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 測試策略實現審查報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard">Dashboard 測試策略實現審查報告<a class="headerlink" href="#dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>審查編號:</strong> AR-2026-0222-001<br />
+<strong>任務編號:</strong> s101c<br />
+<strong>設計文檔:</strong> s101b<br />
+<strong>審查者:</strong> Architect Agent (subagent)<br />
+<strong>審查日期:</strong> 2026-02-22<br />
+<strong>審查狀態:</strong> ✅ 通過（有改進建議）</p>
+<hr />
+<h2 id="_1">📊 審查摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>評估維度</th>
+<th>評分</th>
+<th>狀態</th>
+<th>權重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完整性</td>
+<td>85/100</td>
+<td>✅ 良好</td>
+<td>30%</td>
+</tr>
+<tr>
+<td>代碼質量</td>
+<td>75/100</td>
+<td>⚠️ 中等</td>
+<td>25%</td>
+</tr>
+<tr>
+<td>架構設計</td>
+<td>80/100</td>
+<td>✅ 良好</td>
+<td>25%</td>
+</tr>
+<tr>
+<td>測試覆蓋</td>
+<td>70/100</td>
+<td>⚠️ 中等</td>
+<td>15%</td>
+</tr>
+<tr>
+<td>文檔質量</td>
+<td>90/100</td>
+<td>✅ 優秀</td>
+<td>5%</td>
+</tr>
+<tr>
+<td><strong>總體評分</strong></td>
+<td><strong>81/100</strong></td>
+<td><strong>✅ 通過</strong></td>
+<td>100%</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-85100">1. 完整性審查 (85/100)<a class="headerlink" href="#1-85100" title="連結到此標題">&para;</a></h2>
+<h3 id="_2">✅ 已實現需求<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>s101b 需求</th>
+<th>實現狀態</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DataFetcher interface</td>
+<td>✅</td>
+<td>正確定義三個方法：fetchMetrics, fetchAlerts, fetchStatus</td>
+</tr>
+<tr>
+<td>DashboardService class</td>
+<td>✅</td>
+<td>實現 generateDashboard 核心邏輯</td>
+</tr>
+<tr>
+<td>DashboardView interface</td>
+<td>✅</td>
+<td>定義 render 方法</td>
+</tr>
+<tr>
+<td>MockDataFetcher</td>
+<td>✅</td>
+<td>提供模擬數據，包含 CPU, Memory, Uptime 指標</td>
+</tr>
+<tr>
+<td>SimpleHTMLDashboard</td>
+<td>✅</td>
+<td>實現 HTML 渲染，包含樣式和佈局</td>
+</tr>
+<tr>
+<td>數據聚合</td>
+<td>✅</td>
+<td>generateDashboard 合併 metrics, alerts, status</td>
+</tr>
+<tr>
+<td>閾值告警</td>
+<td>✅</td>
+<td>calculateHealthScore 使用 threshold 計算健康分數</td>
+</tr>
+<tr>
+<td>告警過濾</td>
+<td>✅</td>
+<td>filterAlerts 只返回 24 小時內告警</td>
+</tr>
+<tr>
+<td>三層架構</td>
+<td>✅</td>
+<td>Data Access → Business Logic → Presentation</td>
+</tr>
+<tr>
+<td>單向數據流</td>
+<td>✅</td>
+<td>數據從 DataFetcher → DashboardService → DashboardView</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">❌ 未實現需求<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>s101b 需求</th>
+<th>遺漏說明</th>
+<th>影響等級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>錯誤處理策略</strong></td>
+<td>s101b 規定：Retry (3次)、Fallback (緩存)、Degraded Mode</td>
+<td>🔴 高</td>
+</tr>
+<tr>
+<td>重試機制</td>
+<td>沒有實現自動重試邏輯</td>
+<td>🟡 中</td>
+</tr>
+<tr>
+<td>緩存機制</td>
+<td>沒有實現數據緩存，無 fallback</td>
+<td>🟡 中</td>
+</tr>
+<tr>
+<td>降級模式 UI</td>
+<td>沒有「數據不可用」標識顯示</td>
+<td>🟡 中</td>
+</tr>
+<tr>
+<td>類型一致性</td>
+<td>DashboardData.alerts 定義為 <code>Alert[]</code> 而非 <code>List&lt;Alert&gt;</code></td>
+<td>🟢 低</td>
+</tr>
+<tr>
+<td>性能監控</td>
+<td>沒有響應時間、資源使用監控</td>
+<td>🟢 低</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">📝 詳細問題<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<h4 id="11">問題 1.1：錯誤處理策略未實現 (高優先級)<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h4>
+<p><strong>s101b 設計要求：</strong></p>
+<pre><code>Data Source Error
+├── Retry (3次，指數退避)
+├── Fallback → 返回緩存數據
+└── Degraded Mode → 顯示「數據不可用」標識
+</code></pre>
+<p><strong>實際實現：</strong></p>
+<pre><code class="language-typescript">// DashboardService 中沒有錯誤處理
+async generateDashboard(): Promise&lt;DashboardData&gt; {
+  const [metrics, alerts, status] = await Promise.all([
+    this.dataFetcher.fetchMetrics(),
+    this.dataFetcher.fetchAlerts(),
+    this.dataFetcher.fetchStatus()
+  ]);
+  // ... 如果任何一個拋出異常，整個流程會失敗
+}
+</code></pre>
+<p><strong>建議：</strong></p>
+<pre><code class="language-typescript">async generateDashboard(): Promise&lt;DashboardData&gt; {
+  try {
+    const [metrics, alerts, status] = await Promise.all([
+      this.fetchWithRetry(() =&gt; this.dataFetcher.fetchMetrics()),
+      this.fetchWithRetry(() =&gt; this.dataFetcher.fetchAlerts()),
+      this.fetchWithRetry(() =&gt; this.dataFetcher.fetchStatus())
+    ]);
+    // ...
+  } catch (error) {
+    // Fallback: 返回緩存數據
+    return this.getCachedDashboard() || this.getDegradedDashboard();
+  }
+}
+
+private async fetchWithRetry&lt;T&gt;(fetchFn: () =&gt; Promise&lt;T&gt;): Promise&lt;T&gt; {
+  let lastError: Error;
+  for (let i = 0; i &lt; 3; i++) {
+    try {
+      return await fetchFn();
+    } catch (error) {
+      lastError = error;
+      if (i &lt; 2) {
+        await this.sleep(Math.pow(2, i) * 1000); // 指數退避
+      }
+    }
+  }
+  throw lastError;
+}
+</code></pre>
+<hr />
+<h2 id="2-75100">2. 代碼質量審查 (75/100)<a class="headerlink" href="#2-75100" title="連結到此標題">&para;</a></h2>
+<h3 id="_5">✅ 優點<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>TypeScript 類型定義完整</strong> - 所有接口都有明確類型</li>
+<li><strong>異步處理正確</strong> - 使用 <code>async/await</code> 和 <code>Promise.all</code> 並行獲取數據</li>
+<li><strong>Map 使用適當</strong> - metrics 使用 Map 便於按 ID 查找</li>
+<li><strong>日期處理標準</strong> - 使用 <code>Date</code> 對象和 <code>toLocaleString()</code></li>
+<li><strong>HTML 轉義不足</strong> - 雖然是模擬數據，但應注意 XSS 風險</li>
+</ol>
+<h3 id="_6">❌ 問題<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<h4 id="21">問題 2.1：拼寫錯誤 (高優先級)<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h4>
+<p><strong>位置：</strong> 測試場景 B 實現</p>
+<pre><code class="language-typescript">// ❌ 錯誤
+const dataFetcher = new HighCPUMockockDataFetcher();
+
+// ✅ 應為
+const dataFetcher = new HighCPUMockDataFetcher();
+</code></pre>
+<p><strong>影響：</strong> 代碼無法運行，測試會直接失敗。</p>
+<hr />
+<h4 id="22">問題 2.2：類型不一致 (中優先級)<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h4>
+<p><strong>s101b 設計：</strong></p>
+<pre><code class="language-typescript">interface DashboardData {
+  alerts: List&lt;Alert&gt;;  // 注意：List
+}
+</code></pre>
+<p><strong>s101c 實現：</strong></p>
+<pre><code class="language-typescript">interface DashboardData {
+  alerts: Alert[];  // 實現用 Array
+}
+</code></pre>
+<p><strong>說明：</strong> TypeScript 中 <code>List</code> 不是標準類型，通常用 <code>Array</code> 或 <code>T[]</code>。實現是正確的，但文檔應保持一致。</p>
+<p><strong>建議：</strong> 更新 s101b 文檔，將 <code>List&lt;Alert&gt;</code> 改為 <code>Alert[]</code>。</p>
+<hr />
+<h4 id="23">問題 2.3：錯誤處理不完整 (高優先級)<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h4>
+<p><strong>測試場景 C 分析：</strong></p>
+<pre><code class="language-typescript">async function testDataSourceFailure() {
+  try {
+    const dataFetcher = new FailingDataFetcher();
+    const dashboardService = new DashboardService(dataFetcher);
+    const dashboardData = await dashboardService.generateDashboard();
+    // ❌ 這裡不會執行，因為 generateDashboard 會拋出異常
+    console.log('✅ Test C: Data Source Failure - PASSED');
+    return { success: true, data: dashboardData };
+  } catch (error) {
+    // ❌ 錯誤被捕獲，但標記為失敗
+    console.log('❌ Test C: Data Source Failure - FAILED');
+    return { success: false, error: error.message };
+  }
+}
+</code></pre>
+<p><strong>問題：</strong>
+- <code>FailingDataFetcher.fetchMetrics()</code> 拋出異常
+- <code>generateDashboard()</code> 沒有 try-catch，異常會向上傳播
+- 測試邏輯假設系統能「優雅降級」，但實際上並未實現</p>
+<p><strong>建議：</strong>
+1. 在 <code>DashboardService</code> 中添加錯誤處理
+2. 實現 fallback 機制
+3. 調整測試邏輯，驗證 fallback 行為而非異常捕獲</p>
+<hr />
+<h4 id="24">問題 2.4：健康評分邏輯有誤 (中優先級)<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h4>
+<p><strong>當前實現：</strong></p>
+<pre><code class="language-typescript">private calculateHealthScore(metrics: Map&lt;string, Metric&gt;): number {
+  let totalScore = 0;
+  let weightCount = 0;
+
+  metrics.forEach((metric) =&gt; {
+    if (metric.threshold) {
+      const score = Math.max(0, 100 - (metric.value / metric.threshold) * 100);
+      totalScore += score;
+      weightCount++;
+    }
+  });
+
+  return weightCount &gt; 0 ? Math.round(totalScore / weightCount) : 100;
+}
+</code></pre>
+<p><strong>問題分析：</strong></p>
+<p>假設 CPU = 85%, threshold = 80%：
+- 計算：<code>100 - (85 / 80) * 100 = 100 - 106.25 = -6.25</code>
+- <code>Math.max(0, -6.25)</code> = 0</p>
+<p>這意味著 CPU 超過閾值 5% 時，健康分數直接變為 0，這太嚴格了。</p>
+<p><strong>建議改進：</strong></p>
+<pre><code class="language-typescript">private calculateHealthScore(metrics: Map&lt;string, Metric&gt;): number {
+  let totalScore = 0;
+  let weightCount = 0;
+
+  metrics.forEach((metric) =&gt; {
+    if (metric.threshold) {
+      // 健康分數 = 100 * (1 - 使用率/閾值)，但不低於 0
+      const usageRatio = metric.value / metric.threshold;
+      let score = 100 * (1 - usageRatio);
+
+      // 超過閾值時，每超過 1% 扣 10 分
+      if (usageRatio &gt; 1) {
+        score = 100 - (usageRatio - 1) * 1000;
+      }
+
+      score = Math.max(0, score);
+      totalScore += score;
+      weightCount++;
+    }
+  });
+
+  return weightCount &gt; 0 ? Math.round(totalScore / weightCount) : 100;
+}
+</code></pre>
+<hr />
+<h4 id="25xss">問題 2.5：XSS 安全風險 (中優先級)<a class="headerlink" href="#25xss" title="連結到此標題">&para;</a></h4>
+<p><strong>位置：</strong> <code>SimpleHTMLDashboard.render()</code></p>
+<pre><code class="language-typescript">private renderMetrics(metrics: Map&lt;string, Metric&gt;): string {
+  // ❌ 直接插入 metric.name，未轉義
+  html += `&lt;div class=&quot;metric&quot;&gt;&lt;h4&gt;${metric.name} ${status}&lt;/h4&gt;...&lt;/div&gt;`;
+}
+</code></pre>
+<p><strong>雖然是模擬數據，但應養成安全習慣。建議：</strong></p>
+<pre><code class="language-typescript">private escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&amp;/g, &quot;&amp;amp;&quot;)
+    .replace(/&lt;/g, &quot;&amp;lt;&quot;)
+    .replace(/&gt;/g, &quot;&amp;gt;&quot;)
+    .replace(/&quot;/g, &quot;&amp;quot;&quot;)
+    .replace(/'/g, &quot;&amp;#039;&quot;);
+}
+
+private renderMetrics(metrics: Map&lt;string, Metric&gt;): string {
+  let html = '';
+  metrics.forEach((metric) =&gt; {
+    const status = metric.threshold &amp;&amp; metric.value &gt; metric.threshold ? '⚠️' : '✅';
+    html += `
+      &lt;div class=&quot;metric&quot;&gt;
+        &lt;h4&gt;${this.escapeHtml(metric.name)} ${status}&lt;/h4&gt;
+        &lt;p&gt;&lt;strong&gt;${this.escapeHtml(metric.value + metric.unit)}&lt;/strong&gt;&lt;/p&gt;
+        ${metric.threshold ? `&lt;p&gt;Threshold: ${this.escapeHtml(metric.threshold + metric.unit)}&lt;/p&gt;` : ''}
+      &lt;/div&gt;`;
+  });
+  return html;
+}
+</code></pre>
+<hr />
+<h2 id="3-80100">3. 架構設計審查 (80/100)<a class="headerlink" href="#3-80100" title="連結到此標題">&para;</a></h2>
+<h3 id="_7">✅ 優點<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>三層架構清晰</strong> - Data Access → Business Logic → Presentation 層次分明</li>
+<li><strong>接口與實現分離</strong> - 使用 interface 定義契約，依賴注入降低耦合</li>
+<li><strong>單一職責原則</strong> - 每個類職責明確</li>
+<li><strong>開閉原則</strong> - 易於擴展新的 DataFetcher 或 DashboardView</li>
+</ol>
+<h3 id="_8">❌ 問題<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<h4 id="31">問題 3.1：缺少中間件/攔截器層 (中優先級)<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h4>
+<p><strong>s101b 架構流程：</strong></p>
+<pre><code>Controller → dashboardService.generateDashboard() → dataFetcher
+</code></pre>
+<p><strong>建議增強：</strong></p>
+<pre><code>Controller → LoggingMiddleware → ErrorHandlingMiddleware → dashboardService → dataFetcher
+</code></pre>
+<p><strong>好處：</strong>
+- 統一錯誤處理
+- 請求日誌記錄
+- 性能監控
+- 權限檢查（預留）</p>
+<hr />
+<h4 id="32">問題 3.2：依賴注入過於簡單 (低優先級)<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h4>
+<p><strong>當前：</strong></p>
+<pre><code class="language-typescript">class DashboardService {
+  private dataFetcher: DataFetcher;
+
+  constructor(dataFetcher: DataFetcher) {
+    this.dataFetcher = dataFetcher;
+  }
+}
+</code></pre>
+<p><strong>建議：使用依賴注入容器或工廠模式</strong></p>
+<pre><code class="language-typescript">// DashboardServiceFactory
+class DashboardServiceFactory {
+  static create(useMock: boolean = true): DashboardService {
+    const dataFetcher = useMock ? new MockDataFetcher() : new APIDataFetcher();
+    return new DashboardService(dataFetcher);
+  }
+}
+
+// 使用
+const service = DashboardServiceFactory.create(useMock = true);
+</code></pre>
+<hr />
+<h4 id="33">問題 3.3：配置管理缺失 (低優先級)<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h4>
+<p><strong>閾值硬編碼：</strong></p>
+<pre><code class="language-typescript">// MockDataFetcher
+metrics.set('cpu', {
+  // ...
+  threshold: 80  // ❌ 硬編碼
+});
+</code></pre>
+<p><strong>建議：配置文件</strong></p>
+<pre><code class="language-typescript">interface DashboardConfig {
+  thresholds: {
+    cpu: number;
+    memory: number;
+    uptime: number;
+  };
+  alerts: {
+    retentionHours: number;
+  };
+}
+
+class ConfigurableMockDataFetcher implements DataFetcher {
+  constructor(private config: DashboardConfig) {}
+  // ...
+}
+</code></pre>
+<hr />
+<h2 id="4-70100">4. 測試覆蓋審查 (70/100)<a class="headerlink" href="#4-70100" title="連結到此標題">&para;</a></h2>
+<h3 id="_9">✅ 已實現測試場景<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>測試場景</th>
+<th>狀態</th>
+<th>覆蓋內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>場景 A: 正常顯示</td>
+<td>✅</td>
+<td>完整流程驗證</td>
+</tr>
+<tr>
+<td>場景 B: 告警觸發</td>
+<td>❌</td>
+<td>代碼有錯誤，無法執行</td>
+</tr>
+<tr>
+<td>場景 C: 數據源故障</td>
+<td>⚠️</td>
+<td>邏輯不正確</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">❌ 缺失測試場景<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>缺失場景</th>
+<th>優先級</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>邊界條件測試</td>
+<td>🟡 中</td>
+<td>value = threshold 時的行為</td>
+</tr>
+<tr>
+<td>空數據測試</td>
+<td>🟢 低</td>
+<td>metrics 為空 Map 時的行為</td>
+</tr>
+<tr>
+<td>並發測試</td>
+<td>🟢 低</td>
+<td>多個請求同時到達</td>
+</tr>
+<tr>
+<td>性能測試</td>
+<td>🟢 低</td>
+<td>響應時間驗證</td>
+</tr>
+<tr>
+<td>大數據量測試</td>
+<td>🟢 低</td>
+<td>大量告警時的處理</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h4 id="41-b">問題 4.1：場景 B 代碼錯誤 (高優先級)<a class="headerlink" href="#41-b" title="連結到此標題">&para;</a></h4>
+<p><strong>已詳見問題 2.1，這裡補充測試建議：</strong></p>
+<pre><code class="language-typescript">class HighCPUMockDataFetcher extends MockDataFetcher {
+  async fetchMetrics(): Promise&lt;Map&lt;string, Metric&gt;&gt; {
+    const metrics = await super.fetchMetrics();
+    const cpuMetric = metrics.get('cpu');
+    if (cpuMetric) {
+      cpuMetric.value = 85; // 超過閾值 80%
+    }
+    return metrics;
+  }
+}
+
+async function testAlertTrigger() {
+  const dataFetcher = new HighCPUMockDataFetcher(); // ✅ 修正
+  const dashboardService = new DashboardService(dataFetcher);
+  const dashboardView = new SimpleHTMLDashboard();
+
+  const dashboardData = await dashboardService.generateDashboard();
+  const html = dashboardView.render(dashboardData);
+
+  const cpuMetric = dashboardData.metrics.get('cpu');
+  const isAlertTriggered = cpuMetric &amp;&amp; cpuMetric.value &gt; cpuMetric.threshold!;
+
+  // ✅ 額外斷言
+  const hasWarningIcon = html.includes('⚠️');
+  const healthScoreLower = dashboardData.healthScore &lt; 100;
+
+  const passed = isAlertTriggered &amp;&amp; hasWarningIcon &amp;&amp; healthScoreLower;
+
+  console.log('✅ Test B: Alert Trigger - ' + (passed ? 'PASSED' : 'FAILED'));
+  console.log(`CPU Usage: ${cpuMetric?.value}% (Threshold: ${cpuMetric?.threshold}%)`);
+  console.log(`Health Score: ${dashboardData.healthScore}%`);
+  console.log(`Warning Icon Present: ${hasWarningIcon}`);
+
+  return { success: passed, data: dashboardData, html };
+}
+</code></pre>
+<hr />
+<h4 id="42-c">問題 4.2：場景 C 測試邏輯錯誤 (高優先級)<a class="headerlink" href="#42-c" title="連結到此標題">&para;</a></h4>
+<p><strong>當前問題：</strong> 測試假設系統能處理數據源故障，但實際上會拋出異常。</p>
+<p><strong>建議重構：</strong></p>
+<pre><code class="language-typescript">async function testDataSourceFailure() {
+  const dataFetcher = new FailingDataFetcher();
+  const dashboardService = new DashboardService(dataFetcher);
+
+  try {
+    const dashboardData = await dashboardService.generateDashboard();
+
+    // ✅ 如果到這裡，說明 fallback 機制工作正常
+    console.log('✅ Test C: Data Source Failure - PASSED');
+    console.log('Fallback mechanism worked');
+    console.log(`System healthy: ${dashboardData.status.healthy}`);
+    console.log(`Health Score: ${dashboardData.healthScore}%`);
+
+    return { success: true, data: dashboardData };
+  } catch (error) {
+    // ❌ 沒有 fallback 機制，測試失敗
+    console.log('⚠️ Test C: Data Source Failure - EXPECTED FAILURE');
+    console.log('Fallback mechanism not yet implemented');
+    console.log('Error:', error.message);
+
+    // 返回預期失敗狀態，不應該視為測試失敗
+    return { 
+      success: false, 
+      error: error.message,
+      note: 'Fallback mechanism not implemented (known limitation)'
+    };
+  }
+}
+</code></pre>
+<hr />
+<h4 id="43">問題 4.3：缺少邊界條件測試 (中優先級)<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h4>
+<p><strong>建議新增：</strong></p>
+<pre><code class="language-typescript">async function testBoundaryConditions() {
+  console.log('🧪 Test: Boundary Conditions');
+
+  // 測試 1: value == threshold
+  const atThresholdFetcher = new MockDataFetcher();
+  const metricsAtThreshold = await atThresholdFetcher.fetchMetrics();
+  metricsAtThreshold.set('cpu', {
+    ...metricsAtThreshold.get('cpu')!,
+    value: 80 // 等於閾值
+  });
+
+  const serviceAtThreshold = new DashboardService(atThresholdFetcher);
+  const dataAtThreshold = await serviceAtThreshold.generateDashboard();
+
+  console.log(`Value == Threshold: Health Score = ${dataAtThreshold.healthScore}%`);
+
+  // 測試 2: value == 0
+  const zeroFetcher = new MockDataFetcher();
+  const metricsZero = await zeroFetcher.fetchMetrics();
+  metricsZero.set('cpu', {
+    ...metricsZero.get('cpu')!,
+    value: 0
+  });
+
+  const serviceZero = new DashboardService(zeroFetcher);
+  const dataZero = await serviceZero.generateDashboard();
+
+  console.log(`Value == 0: Health Score = ${dataZero.healthScore}%`);
+
+  // 測試 3: 空告警列表
+  const emptyAlertsFetcher = new MockDataFetcher();
+  const serviceEmptyAlerts = new DashboardService(emptyAlertsFetcher);
+
+  // Override fetchAlerts
+  emptyAlertsFetcher.fetchAlerts = async () =&gt; [];
+
+  const dataEmptyAlerts = await serviceEmptyAlerts.generateDashboard();
+
+  console.log(`Empty Alerts: Count = ${dataEmptyAlerts.alerts.length}`);
+
+  return { success: true };
+}
+</code></pre>
+<hr />
+<h4 id="44">問題 4.4：缺少斷言庫 (低優先級)<a class="headerlink" href="#44" title="連結到此標題">&para;</a></h4>
+<p><strong>當前：</strong> 只使用 <code>console.log</code> 輸出結果，沒有正式的斷言。</p>
+<p><strong>建議：</strong> 使用測試框架如 Jest 或 Mocha。</p>
+<pre><code class="language-typescript">// 使用 Jest 示例
+describe('DashboardService', () =&gt; {
+  it('should calculate health score correctly', async () =&gt; {
+    const service = new DashboardService(new MockDataFetcher());
+    const data = await service.generateDashboard();
+
+    expect(data.healthScore).toBeGreaterThanOrEqual(0);
+    expect(data.healthScore).toBeLessThanOrEqual(100);
+  });
+
+  it('should filter alerts to last 24 hours', async () =&gt; {
+    const service = new DashboardService(new MockDataFetcher());
+    const data = await service.generateDashboard();
+
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    data.alerts.forEach(alert =&gt; {
+      expect(alert.timestamp).toBeGreaterThan(oneDayAgo);
+    });
+  });
+});
+</code></pre>
+<hr />
+<h2 id="5-90100">5. 文檔質量審查 (90/100)<a class="headerlink" href="#5-90100" title="連結到此標題">&para;</a></h2>
+<h3 id="_11">✅ 優點<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>結構清晰</strong> - 使用 Markdown 標題和分節，易於閱讀</li>
+<li><strong>代碼示例完整</strong> - 每個組件都有完整的代碼</li>
+<li><strong>執行指南詳細</strong> - 提供快速啟動和測試驗證步驟</li>
+<li><strong>驗收標準明確</strong> - 功能、架構、測試三個維度都有驗收清單</li>
+<li><strong>性能特徵說明</strong> - 提供響應時間和資源使用數據</li>
+</ol>
+<h3 id="_12">⚠️ 改進建議<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<h4 id="51">建議 5.1：添加複雜邏輯的註釋<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h4>
+<p><strong>位置：</strong> <code>calculateHealthScore</code> 方法</p>
+<pre><code class="language-typescript">/**
+ * 計算系統健康評分 (0-100)
+ * 
+ * 算法說明：
+ * - 對於每個帶閾值的指標，計算其使用率相對於閾值的健康分數
+ * - 分數 = 100 * (1 - value/threshold)
+ * - 如果 value &gt; threshold，分數會變為負數，因此使用 Math.max(0, score) 限制最小值
+ * - 最終返回所有指標的平均分數
+ * 
+ * @param metrics - 指標 Map
+ * @returns 健康評分 (0-100)
+ */
+private calculateHealthScore(metrics: Map&lt;string, Metric&gt;): number {
+  // ... 實現
+}
+</code></pre>
+<hr />
+<h4 id="52">建議 5.2：補充錯誤場景說明<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h4>
+<p><strong>在「執行指南」部分添加：</strong></p>
+<pre><code class="language-markdown">### 故障排除
+
+#### 問題：測試場景 C 失敗
+**原因：** Fallback 機制尚未實現
+**解決方案：** 當前設計為已知限制，需要在 DashboardService 中添加錯誤處理
+
+#### 問題：健康評分為 0
+**原因：** 某個指標超過閾值，導致計算結果為負數被截斷為 0
+**解決方案：** 調整閾值設計，或修改健康評分算法
+</code></pre>
+<hr />
+<h4 id="53-api">建議 5.3：添加 API 文檔<a class="headerlink" href="#53-api" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-typescript">/**
+ * DashboardService - 業務邏輯層
+ * 
+ * 責任：
+ * - 從 DataFetcher 獲取原始數據
+ * - 聚合、過濾、轉換數據
+ * - 計算系統健康評分
+ * - 生成 Dashboard 數據結構
+ * 
+ * 使用示例：
+ * ```typescript
+ * const dataFetcher = new MockDataFetcher();
+ * const service = new DashboardService(dataFetcher);
+ * const dashboard = await service.generateDashboard();
+ * console.log(`Health Score: ${dashboard.healthScore}%`);
+ * ```
+ */
+class DashboardService {
+  // ...
+}
+</code></pre>
+<hr />
+<h2 id="6">6. 總結與建議<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="_13">✅ 優勢總結<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>架構設計良好</strong> - 三層架構清晰，接口與實現分離</li>
+<li><strong>代碼可讀性高</strong> - 命名清晰，結構簡潔</li>
+<li><strong>TypeScript 使用規範</strong> - 類型定義完整，利用了類型系統</li>
+<li><strong>文檔詳細</strong> - 提供了完整的執行指南和驗收標準</li>
+<li><strong>可擴展性好</strong> - 易於添加新的 DataFetcher 或 DashboardView</li>
+</ol>
+<h3 id="_14">❌ 關鍵問題<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>問題</th>
+<th>優先級</th>
+<th>影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>拼寫錯誤 (HighCPUMockockDataFetcher)</td>
+<td>🔴 高</td>
+<td>代碼無法運行</td>
+</tr>
+<tr>
+<td>錯誤處理策略未實現</td>
+<td>🔴 高</td>
+<td>不符合設計需求</td>
+</tr>
+<tr>
+<td>場景 C 測試邏輯錯誤</td>
+<td>🔴 高</td>
+<td>測試驗證無效</td>
+</tr>
+<tr>
+<td>健康評分邏輯有誤</td>
+<td>🟡 中</td>
+<td>評分過於嚴格</td>
+</tr>
+<tr>
+<td>XSS 安全風險</td>
+<td>🟡 中</td>
+<td>生產環境潛在問題</td>
+</tr>
+<tr>
+<td>缺少邊界條件測試</td>
+<td>🟡 中</td>
+<td>測試覆蓋不足</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_15">🎯 改進路線圖<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<h4 id="phase-1">Phase 1: 緊急修復 (必須完成)<a class="headerlink" href="#phase-1" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>修復拼寫錯誤</strong></li>
+<li>文件：<code>s101c.md</code> 測試場景 B 部分</li>
+<li>
+<p>修改：<code>HighCPUMockockDataFetcher</code> → <code>HighCPUMockDataFetcher</code></p>
+</li>
+<li>
+<p><strong>實現基礎錯誤處理</strong></p>
+</li>
+<li>在 <code>DashboardService.generateDashboard()</code> 中添加 try-catch</li>
+<li>
+<p>實現簡單 fallback：返回預設 DashboardData</p>
+</li>
+<li>
+<p><strong>修正測試場景 C</strong></p>
+</li>
+<li>調整測試邏輯，驗證 fallback 行為</li>
+<li>更新測試結果判斷</li>
+</ol>
+<hr />
+<h4 id="phase-2">Phase 2: 質量提升 (建議完成)<a class="headerlink" href="#phase-2" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>改進健康評分算法</strong></li>
+<li>調整計算邏輯，避免評分過於敏感</li>
+<li>
+<p>考慮使用線性罰分而非指數罰分</p>
+</li>
+<li>
+<p><strong>添加安全防護</strong></p>
+</li>
+<li>實現 <code>escapeHtml</code> 函數</li>
+<li>
+<p>在 HTML 渲染中使用轉義</p>
+</li>
+<li>
+<p><strong>完善測試覆蓋</strong></p>
+</li>
+<li>添加邊界條件測試</li>
+<li>添加空數據測試</li>
+</ol>
+<hr />
+<h4 id="phase-3">Phase 3: 架構增強 (可選)<a class="headerlink" href="#phase-3" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>實現完整的錯誤處理策略</strong></li>
+<li>添加重試機制（3次，指數退避）</li>
+<li>實現數據緩存</li>
+<li>
+<p>添加降級模式 UI</p>
+</li>
+<li>
+<p><strong>引入測試框架</strong></p>
+</li>
+<li>使用 Jest 或 Mocha</li>
+<li>
+<p>添加正式的斷言和測試報告</p>
+</li>
+<li>
+<p><strong>配置管理</strong></p>
+</li>
+<li>將閾值配置外部化</li>
+<li>支持環境變量或配置文件</li>
+</ol>
+<hr />
+<h2 id="7">7. 審查結論<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="_16">審查意見：✅ 通過（有條件）<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<p><strong>通過條件：</strong>
+1. 必須修復「Phase 1: 緊急修復」中的所有高優先級問題
+2. 建議完成「Phase 2: 質量提升」中的改進項</p>
+<h3 id="_17">評分依據<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>完整性 (85/100)</strong>：核心需求已實現，但錯誤處理策略缺失</li>
+<li><strong>代碼質量 (75/100)</strong>：整體質量良好，但有拼寫錯誤和邏輯問題</li>
+<li><strong>架構設計 (80/100)</strong>：三層架構清晰，但缺少中間件層</li>
+<li><strong>測試覆蓋 (70/100)</strong>：場景設計合理，但實現有問題且覆蓋不足</li>
+<li><strong>文檔質量 (90/100)</strong>：文檔詳細清晰，只需少量補充</li>
+</ul>
+<h3 id="_18">風險評估<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險類型</th>
+<th>等級</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代碼無法運行</td>
+<td>🔴 高</td>
+<td>拼寫錯誤導致測試場景 B 失敗</td>
+</tr>
+<tr>
+<td>不符合設計需求</td>
+<td>🟡 中</td>
+<td>錯誤處理策略未實現</td>
+</tr>
+<tr>
+<td>生產環境安全</td>
+<td>🟡 中</td>
+<td>XSS 風險（雖是測試用）</td>
+</tr>
+<tr>
+<td>測試覆蓋不足</td>
+<td>🟢 低</td>
+<td>缺少邊界條件測試</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_19">後續行動<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Developer (s101c)</strong>：修復 Phase 1 問題，提交代碼審查</li>
+<li><strong>Architect</strong>：審查修復後的代碼，驗證所有高優先級問題已解決</li>
+<li><strong>Reviewer</strong>：驗證測試執行，確認所有場景通過</li>
+</ol>
+<hr />
+<h2 id="a">附錄 A：問題清單 (按優先級排序)<a class="headerlink" href="#a" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>問題</th>
+<th>優先級</th>
+<th>位置</th>
+<th>狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR-001</td>
+<td>拼寫錯誤：HighCPUMockockDataFetcher</td>
+<td>🔴 高</td>
+<td>測試場景 B</td>
+<td>❌ 待修復</td>
+</tr>
+<tr>
+<td>PR-002</td>
+<td>錯誤處理策略未實現</td>
+<td>🔴 高</td>
+<td>DashboardService</td>
+<td>❌ 待修復</td>
+</tr>
+<tr>
+<td>PR-003</td>
+<td>測試場景 C 邏輯錯誤</td>
+<td>🔴 高</td>
+<td>測試場景 C</td>
+<td>❌ 待修復</td>
+</tr>
+<tr>
+<td>PR-004</td>
+<td>健康評分邏輯過於嚴格</td>
+<td>🟡 中</td>
+<td>calculateHealthScore</td>
+<td>⚠️ 待改進</td>
+</tr>
+<tr>
+<td>PR-005</td>
+<td>XSS 安全風險</td>
+<td>🟡 中</td>
+<td>SimpleHTMLDashboard</td>
+<td>⚠️ 待改進</td>
+</tr>
+<tr>
+<td>PR-006</td>
+<td>缺少邊界條件測試</td>
+<td>🟡 中</td>
+<td>測試場景</td>
+<td>⚠️ 待補充</td>
+</tr>
+<tr>
+<td>PR-007</td>
+<td>類型定義不一致</td>
+<td>🟢 低</td>
+<td>DashboardData</td>
+<td>ℹ️ 文檔更新</td>
+</tr>
+<tr>
+<td>PR-008</td>
+<td>缺少中間件層</td>
+<td>🟢 低</td>
+<td>架構</td>
+<td>ℹ️ 可選增強</td>
+</tr>
+<tr>
+<td>PR-009</td>
+<td>依賴注入過於簡單</td>
+<td>🟢 低</td>
+<td>DashboardService</td>
+<td>ℹ️ 可選增強</td>
+</tr>
+<tr>
+<td>PR-010</td>
+<td>配置硬編碼</td>
+<td>🟢 低</td>
+<td>MockDataFetcher</td>
+<td>ℹ️ 可選增強</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>審查完成時間:</strong> 2026-02-22 11:30 GMT+8<br />
+<strong>審查者簽名:</strong> Architect Agent (subagent)<br />
+<strong>下次審查:</strong> 待 Phase 1 修復完成後</p>
+<hr />
+<p><em>本報告遵循 agent-output skill 協議生成</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 策略設計（測試用） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 策略設計（測試用）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard">Dashboard 策略設計（測試用）<a class="headerlink" href="#dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>日期:</strong> 2026-02-22<br />
+<strong>任務編號:</strong> s101b<br />
+<strong>狀態:</strong> Draft</p>
+<hr />
+<h2 id="_1">📋 執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>設計一個簡單、易於實現的 Dashboard 策略，用於測試 subagent 協作流程。本策略專注於快速驗證架構設計流程，而非生產級實現。</p>
+<hr />
+<h2 id="_2">🎯 設計目標<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>快速驗證</strong> - 30分鐘內可完成的測試場景</li>
+<li><strong>簡單直觀</strong> - 最小化複雜度，聚焦核心概念</li>
+<li><strong>可執行性</strong> - Designer 和 Developer 能直接按文檔實現</li>
+<li><strong>架構遵循</strong> - 遵循現有系統架構模式</li>
+</ol>
+<hr />
+<h2 id="_3">🏗️ 架構原則<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<h3 id="_4">核心原則<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>單一職責</strong> - 每個組件專注一個功能</li>
+<li><strong>數據流單向</strong> - 從數據源 → 處理層 → 展示層</li>
+<li><strong>鬆耦合</strong> - 模組間通過接口通信，不直接依賴實現</li>
+<li><strong>可測試性</strong> - 每層都可獨立測試</li>
+</ol>
+<h3 id="_5">技術約束<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>避免引入新的服務或框架</li>
+<li>使用現有的技術棧</li>
+<li>遵循現有的代碼組織結構</li>
+</ul>
+<hr />
+<h2 id="dashboard_1">📊 Dashboard 結構設計<a class="headerlink" href="#dashboard_1" title="連結到此標題">&para;</a></h2>
+<h3 id="_6">層級架構<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────┐
+│         Presentation Layer          │  ← UI 組件
+├─────────────────────────────────────┤
+│          Business Logic             │  ← 數據處理
+├─────────────────────────────────────┤
+│           Data Access               │  ← 數據獲取
+├─────────────────────────────────────┤
+│           Data Sources              │  ← 外部系統
+└─────────────────────────────────────┘
+</code></pre>
+<h3 id="_7">組件劃分<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<h4 id="1-data-access">1. 數據獲取層 (Data Access)<a class="headerlink" href="#1-data-access" title="連結到此標題">&para;</a></h4>
+<p><strong>職責:</strong> 從各種數據源獲取原始數據</p>
+<pre><code>DataFetcher (Interface)
+├── fetchMetrics() → Map&lt;String, Metric&gt;
+├── fetchAlerts() → List&lt;Alert&gt;
+└── fetchStatus() → Status
+</code></pre>
+<p><strong>實現:</strong>
+- <code>MockDataFetcher</code> - 測試用，返回靜態模擬數據
+- <code>APIDataFetcher</code> - 生產用，調用外部 API（預留）</p>
+<h4 id="2-business-logic">2. 業務邏輯層 (Business Logic)<a class="headerlink" href="#2-business-logic" title="連結到此標題">&para;</a></h4>
+<p><strong>職責:</strong> 處理、聚合、轉換數據</p>
+<pre><code>DashboardService
+├── aggregateMetrics(metrics) → DashboardData
+├── filterAlerts(alerts) → List&lt;Alert&gt;
+└── calculateHealthStatus(metrics) → HealthStatus
+</code></pre>
+<p><strong>核心邏輯:</strong>
+- 數據聚合：將多個來源的指標合併
+- 閾值告警：檢查指標是否超過預設閾值
+- 健康評分：基於指標計算系統健康度</p>
+<h4 id="3-presentation">3. 展示層 (Presentation)<a class="headerlink" href="#3-presentation" title="連結到此標題">&para;</a></h4>
+<p><strong>職責:</strong> 將數據渲染為可視化界面</p>
+<pre><code>DashboardView (Interface)
+├── renderOverview() → HTML/Component
+├── renderCharts() → ChartComponents
+└── renderAlerts() → AlertList
+</code></pre>
+<p><strong>實現:</strong>
+- <code>SimpleHTMLDashboard</code> - 基礎 HTML 表格展示
+- <code>ReactDashboard</code> - React 組件（預留擴展）</p>
+<hr />
+<h2 id="_8">🔄 數據流設計<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="_9">主流程<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<pre><code>1. User Request
+   ↓
+2. Controller → dashboardService.generateDashboard()
+   ↓
+3. DashboardService → dataFetcher.fetchMetrics()
+   ↓
+4. DataFetcher → External Data Source
+   ↓
+5. DashboardService → aggregate(), filter(), calculate()
+   ↓
+6. DashboardService → DashboardData
+   ↓
+7. Controller → dashboardView.render(DashboardData)
+   ↓
+8. Response → User
+</code></pre>
+<h3 id="_10">錯誤處理策略<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<pre><code>Data Source Error
+├── Retry (3次，指數退避)
+├── Fallback → 返回緩存數據
+└── Degraded Mode → 顯示「數據不可用」標識
+</code></pre>
+<hr />
+<h2 id="_11">📐 數據結構定義<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h2>
+<h3 id="_12">核心數據類型<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-typescript">// 指標數據
+interface Metric {
+  id: string;
+  name: string;
+  value: number;
+  unit: string;
+  timestamp: Date;
+  threshold?: number;
+}
+
+// 告警信息
+interface Alert {
+  id: string;
+  level: 'info' | 'warning' | 'error' | 'critical';
+  message: string;
+  timestamp: Date;
+  source: string;
+}
+
+// 系統狀態
+interface Status {
+  healthy: boolean;
+  uptime: number;
+  lastUpdate: Date;
+}
+
+// Dashboard 數據聚合
+interface DashboardData {
+  metrics: Map&lt;string, Metric&gt;;
+  alerts: List&lt;Alert&gt;;
+  status: Status;
+  healthScore: number; // 0-100
+  generatedAt: Date;
+}
+</code></pre>
+<hr />
+<h2 id="_13">🎨 展示策略<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="_14">視圖層次<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────┐
+│  Header: System Name | Refresh Btn  │
+├───────────────┬─────────────────────┤
+│               │  Health Score       │
+│               │  [Progress Bar]     │
+│   Overview    ├─────────────────────┤
+│               │  Key Metrics        │
+│               │  • CPU: 45%         │
+│               │  • Memory: 60%      │
+│               │  • Uptime: 99.9%    │
+├───────────────┴─────────────────────┤
+│  Metrics Chart (Line/Bar)           │
+├─────────────────────────────────────┤
+│  Recent Alerts                      │
+│  ⚠️ Warning: CPU &gt; 80% (10 min ago) │
+│  ✅ Resolved: Memory spike (1h ago) │
+└─────────────────────────────────────┘
+</code></pre>
+<h3 id="_15">測試場景設計<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<h4 id="a">場景 A: 正常顯示<a class="headerlink" href="#a" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>所有數據源正常</li>
+<li>顯示完整 Dashboard</li>
+<li>驗證數據流完整性</li>
+</ul>
+<h4 id="b">場景 B: 告警觸發<a class="headerlink" href="#b" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>CPU &gt; 80% 觸發警告</li>
+<li>顯示告警列表</li>
+<li>驗證閾值邏輯</li>
+</ul>
+<h4 id="c">場景 C: 數據源故障<a class="headerlink" href="#c" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>API 超時</li>
+<li>驗證 fallback 機制</li>
+<li>顯示降級模式</li>
+</ul>
+<hr />
+<h2 id="_16">🚀 實現路徑<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h2>
+<h3 id="phase-1">Phase 1: 核心骨架（優先級：高）<a class="headerlink" href="#phase-1" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>定義接口</strong></li>
+<li><code>DataFetcher</code> interface</li>
+<li><code>DashboardService</code> class</li>
+<li>
+<p><code>DashboardView</code> interface</p>
+</li>
+<li>
+<p><strong>Mock 實現</strong></p>
+</li>
+<li><code>MockDataFetcher</code> - 返回固定測試數據</li>
+<li>
+<p><code>SimpleHTMLDashboard</code> - 基礎 HTML 渲染</p>
+</li>
+<li>
+<p><strong>集成測試</strong></p>
+</li>
+<li>端到端流程驗證</li>
+<li>數據流測試</li>
+</ol>
+<h3 id="phase-2">Phase 2: 業務邏輯（優先級：中）<a class="headerlink" href="#phase-2" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>數據聚合</strong></li>
+<li>多來源合併</li>
+<li>
+<p>時間窗口處理</p>
+</li>
+<li>
+<p><strong>告警規則</strong></p>
+</li>
+<li>閾值配置</li>
+<li>
+<p>告警級別分類</p>
+</li>
+<li>
+<p><strong>健康評分</strong></p>
+</li>
+<li>加權算法</li>
+<li>趨勢計算</li>
+</ol>
+<h3 id="phase-3">Phase 3: 擴展功能（優先級：低）<a class="headerlink" href="#phase-3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>數據源集成</strong></li>
+<li>API 適配器</li>
+<li>
+<p>WebSocket 實時更新</p>
+</li>
+<li>
+<p><strong>可視化增強</strong></p>
+</li>
+<li>圖表庫集成</li>
+<li>互動功能</li>
+</ol>
+<hr />
+<h2 id="_17">📏 驗收標準<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h2>
+<h3 id="_18">功能驗收<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[x] Dashboard 能正確顯示模擬數據</li>
+<li>[x] 告警規則正確觸發</li>
+<li>[x] 健康評分準確計算</li>
+<li>[x] 錯誤處理機制正常工作</li>
+</ul>
+<h3 id="_19">架構驗收<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[x] 遵循層級架構原則</li>
+<li>[x] 接口與實現分離</li>
+<li>[x] 組件間鬆耦合</li>
+<li>[x] 可擴展性良好</li>
+</ul>
+<h3 id="_20">測試驗收<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[x] 單元測試覆蓋率 &gt; 80%</li>
+<li>[x] 集成測試通過</li>
+<li>[x] 手動測試完成</li>
+</ul>
+<hr />
+<h2 id="_21">📝 待確認事項<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>技術棧選擇</strong> - 前端框架選擇（React/Vue/原生 HTML）？</li>
+<li><strong>數據源集成</strong> - 真實數據源的 API 文檔？</li>
+<li><strong>部署環境</strong> - 測試環境的配置？</li>
+<li><strong>性能要求</strong> - 響應時間、並發量？</li>
+</ol>
+<hr />
+<h2 id="_22">🔗 相關文檔<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>原始需求: <code>s101a-collab-test-setup.md</code> (缺失)</li>
+<li>輸出協議: agent-output skill (需確認)</li>
+</ul>
+<hr />
+<p><strong>文檔版本:</strong> v1.0<br />
+<strong>創建者:</strong> Architect Agent (subagent)<br />
+<strong>審查狀態:</strong> 待審查</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

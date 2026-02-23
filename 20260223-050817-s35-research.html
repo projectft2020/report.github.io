@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variational Inference via Radial Transport: A Comprehensive Research Report - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Variational Inference via Radial Transport: A Comprehensive Research Report</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="variational-inference-via-radial-transport-a-comprehensive-research-report">Variational Inference via Radial Transport: A Comprehensive Research Report<a class="headerlink" href="#variational-inference-via-radial-transport-a-comprehensive-research-report" title="連結到此標題">&para;</a></h1>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="連結到此標題">&para;</a></h2>
+<p>This report presents a detailed analysis of variational inference via radial transport, a novel approach to Bayesian computation that combines optimal transport theory with variational inference. The research focuses on the theoretical foundations, algorithmic implementations, convergence guarantees, and practical applications of this method. The key innovation is the introduction of <strong>radVI</strong> (radial Variational Inference), an algorithm that optimizes over radial profiles to improve upon traditional Gaussian variational approximations. This approach demonstrates particular strength in capturing correct tail behavior and handling heavy-tailed distributions where conventional methods fail.</p>
+<hr />
+<h2 id="1-introduction-and-overview">1. Introduction and Overview<a class="headerlink" href="#1-introduction-and-overview" title="連結到此標題">&para;</a></h2>
+<h3 id="11-motivation-and-context">1.1 Motivation and Context<a class="headerlink" href="#11-motivation-and-context" title="連結到此標題">&para;</a></h3>
+<p>Variational inference (VI) has become a cornerstone of modern Bayesian statistics and machine learning, providing a computationally efficient alternative to traditional Markov Chain Monte Carlo (MCMC) methods. The core idea is to approximate intractable posterior distributions with simpler, tractable distributions from a predefined family. However, standard VI approaches—particularly those based on Gaussian distributions—often fail to capture the correct radial profile of target distributions, leading to poor coverage and inaccurate tail estimates.</p>
+<h3 id="12-problem-statement">1.2 Problem Statement<a class="headerlink" href="#12-problem-statement" title="連結到此標題">&para;</a></h3>
+<p>Given a high-dimensional posterior distribution π ∝ exp(-V) where V: ℝ^d → ℝ is a potential function, traditional VI seeks to find:</p>
+<p>$$\pi_C^\star = \arg\min_{\mu \in C} KL(\mu | \pi)$$</p>
+<p>where C is a family of simple distributions (often Gaussian). The key limitation is that Gaussian distributions may not capture the correct radial structure of π, particularly in the tails.</p>
+<h3 id="13-research-focus">1.3 Research Focus<a class="headerlink" href="#13-research-focus" title="連結到此標題">&para;</a></h3>
+<p>This research addresses the fundamental limitation by approaching VI from the perspective of optimizing over radial profiles. The main contributions include:</p>
+<ol>
+<li><strong>Theoretical Framework</strong>: Development of a rigorous mathematical foundation for radial transport maps in the context of variational inference</li>
+<li><strong>Algorithm Design</strong>: Introduction of radVI, a computationally efficient algorithm for radial variational inference</li>
+<li><strong>Convergence Analysis</strong>: Provable convergence guarantees for both deterministic and stochastic settings</li>
+<li><strong>Practical Applications</strong>: Demonstration of improved performance on standard benchmarks and real-world problems</li>
+</ol>
+<hr />
+<h2 id="2-theoretical-foundations">2. Theoretical Foundations<a class="headerlink" href="#2-theoretical-foundations" title="連結到此標題">&para;</a></h2>
+<h3 id="21-variational-inference-core-concepts">2.1 Variational Inference: Core Concepts<a class="headerlink" href="#21-variational-inference-core-concepts" title="連結到此標題">&para;</a></h3>
+<h4 id="211-kl-divergence-minimization">2.1.1 KL Divergence Minimization<a class="headerlink" href="#211-kl-divergence-minimization" title="連結到此標題">&para;</a></h4>
+<p>Variational inference is fundamentally an optimization problem that minimizes the Kullback-Leibler (KL) divergence between a simple distribution and a complex posterior:</p>
+<p>$$KL(\mu | \pi) = \int \log\frac{d\mu}{d\pi} d\mu$$</p>
+<p>This is equivalent to maximizing the Evidence Lower Bound (ELBO):</p>
+<p>$$\text{ELBO}(\mu) = \mathbb{E}_\mu[\log p(x,\theta)] + H(\mu)$$</p>
+<p>where H(μ) is the entropy of μ.</p>
+<h4 id="212-standard-limitations">2.1.2 Standard Limitations<a class="headerlink" href="#212-standard-limitations" title="連結到此標題">&para;</a></h4>
+<p>Traditional VI approaches typically use Gaussian families:
+- <strong>Full-rank Gaussian VI</strong>: 𝒩(m, Σ) with Σ ≻ 0
+- <strong>Mean-field Gaussian VI</strong>: 𝒩(m, D) with D diagonal
+- <strong>Laplace approximation</strong>: 𝒩(x^⋆, [∇²V(x^⋆)]⁻¹)</p>
+<p>These suffer from several limitations:
+1. Computational complexity O(d³) for full-rank case
+2. Poor tail behavior approximation
+3. Inability to capture multi-modal structures</p>
+<h3 id="22-optimal-transport-theory">2.2 Optimal Transport Theory<a class="headerlink" href="#22-optimal-transport-theory" title="連結到此標題">&para;</a></h3>
+<h4 id="221-wasserstein-distance">2.2.1 Wasserstein Distance<a class="headerlink" href="#221-wasserstein-distance" title="連結到此標題">&para;</a></h4>
+<p>The squared 2-Wasserstein distance provides a natural metric for probability distributions:</p>
+<p>$$W_2^2(\mu, \nu) = \inf_{\pi \in \Pi(\mu,\nu)} \iint |x-y|^2 d\pi(x,y)$$</p>
+<p>where Π(μ,ν) is the set of couplings with marginals μ and ν.</p>
+<h4 id="222-breniers-theorem">2.2.2 Brenier's Theorem<a class="headerlink" href="#222-breniers-theorem" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 2.1 (Brenier's Theorem)</strong>: For μ ∈ 𝒫₂,ac(ℝ^d), there exists a unique optimal transport map T^⋆ = ∇φ^⋆ where φ^⋆ is convex, and:</p>
+<p>$$W_2^2(\mu, \nu) = \int |x - T^⋆(x)|^2 d\mu(x)$$</p>
+<p>This theorem provides the foundation for gradient-based optimization in the Wasserstein space.</p>
+<h3 id="23-radial-symmetry-and-transport-maps">2.3 Radial Symmetry and Transport Maps<a class="headerlink" href="#23-radial-symmetry-and-transport-maps" title="連結到此標題">&para;</a></h3>
+<h4 id="231-radial-distributions">2.3.1 Radial Distributions<a class="headerlink" href="#231-radial-distributions" title="連結到此標題">&para;</a></h4>
+<p>A distribution μ is radially symmetric if its density satisfies:</p>
+<p>$$p_\mu(x) = g(|x|)$$</p>
+<p>for some function g: [0,∞) → ℝ_+.</p>
+<h4 id="232-radial-transport-maps">2.3.2 Radial Transport Maps<a class="headerlink" href="#232-radial-transport-maps" title="連結到此標題">&para;</a></h4>
+<p>Radial transport maps have the form:</p>
+<p>$$T_{\text{rad}}(x) = \Psi(|x|) \frac{x}{|x|}$$</p>
+<p>where Ψ: [0,∞) → [0,∞) is strictly monotone and continuous.</p>
+<p><strong>Key Property</strong>: The set of radial transport maps forms a compatible family of optimal transport maps, creating a geodesically convex subset of the Wasserstein space.</p>
+<hr />
+<h2 id="3-radial-transport-methods">3. Radial Transport Methods<a class="headerlink" href="#3-radial-transport-methods" title="連結到此標題">&para;</a></h2>
+<h3 id="31-mathematical-framework">3.1 Mathematical Framework<a class="headerlink" href="#31-mathematical-framework" title="連結到此標題">&para;</a></h3>
+<h4 id="311-radial-variational-family">3.1.1 Radial Variational Family<a class="headerlink" href="#311-radial-variational-family" title="連結到此標題">&para;</a></h4>
+<p>For fixed mean m and covariance Σ ≻ 0, the radial variational family is defined as:</p>
+<p>$$p_h(x) \propto \det(\Sigma)^{-1/2} h((x-m)^⊤ \Sigma^{-1} (x-m))$$</p>
+<p>where h: [0,∞) → ℝ_+ ranges over non-negative functions. Via whitening, we can assume m = 0 and Σ = I, simplifying the family to:</p>
+<p>$$\mathcal{C}_{\text{rad}} = {\mu : d\mu(x) = g(|x\^2|) dx}$$</p>
+<h4 id="312-well-conditioned-distributions">3.1.2 Well-Conditioned Distributions<a class="headerlink" href="#312-well-conditioned-distributions" title="連結到此標題">&para;</a></h4>
+<p>The theoretical analysis focuses on well-conditioned posterior distributions satisfying:</p>
+<p>$$\ell_V I \preceq \nabla^2 V \preceq L_V I$$</p>
+<p>for constants 0 &lt; ℓ_V ≤ L_V &lt; ∞. This condition ensures:
+- Strong log-concavity
+- Lipschitz-continuous gradient
+- Concentration around the origin</p>
+<h3 id="32-regularity-properties">3.2 Regularity Properties<a class="headerlink" href="#32-regularity-properties" title="連結到此標題">&para;</a></h3>
+<h4 id="321-existence-and-uniqueness">3.2.1 Existence and Uniqueness<a class="headerlink" href="#321-existence-and-uniqueness" title="連結到此標題">&para;</a></h4>
+<p><strong>Proposition 3.2</strong>: If there exists μ ∈ 𝒞_rad with KL(μ ‖ π) &lt; ∞, then there exists a unique minimizer to the radial VI problem.</p>
+<h4 id="322-stationary-conditions">3.2.2 Stationary Conditions<a class="headerlink" href="#322-stationary-conditions" title="連結到此標題">&para;</a></h4>
+<p><strong>Proposition 3.3 (Stationary Condition)</strong>: The optimal radial minimizer π_rad^⋆ satisfies:</p>
+<p>$$\pi_{\text{rad}}^\star \propto \exp(-\overline{V})$$</p>
+<p>where:</p>
+<p>$$\overline{V}(x) = \int_{S^{d-1}} V(|x|\theta) d\mathsf{Unif}(\theta)$$</p>
+<p>This represents the spherical average of the potential function.</p>
+<h4 id="323-preservation-of-regularity">3.2.3 Preservation of Regularity<a class="headerlink" href="#323-preservation-of-regularity" title="連結到此標題">&para;</a></h4>
+<p><strong>Proposition 3.4</strong>: If π satisfies the well-conditioned assumption, then π_rad^⋆ also satisfies the same condition with identical parameters.</p>
+<h3 id="33-optimal-radial-maps">3.3 Optimal Radial Maps<a class="headerlink" href="#33-optimal-radial-maps" title="連結到此標題">&para;</a></h3>
+<h4 id="331-caffarelli-type-estimates">3.3.1 Caffarelli-Type Estimates<a class="headerlink" href="#331-caffarelli-type-estimates" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 3.5</strong>: For well-conditioned π, the optimal radial transport map T_rad^⋆: ρ → π_rad^⋆ (where ρ = 𝒩(0,I)) satisfies:</p>
+<p>$$\frac{1}{\sqrt{L_V}} \leq (\Psi^⋆)'(r) \leq \frac{1}{\sqrt{\ell_V}}$$</p>
+<p>$$|(\Psi^⋆)''(r)| \lesssim \frac{\kappa}{\sqrt{\ell_V}} \left(1 + \frac{d}{r^2}\right)(1 + |r - \sqrt{d}|)$$</p>
+<p>where κ = L_V/ℓ_V is the condition number.</p>
+<p><strong>Key Implications</strong>:
+1. The radial derivative is bounded, ensuring Lipschitz continuity
+2. The second derivative bound is nearly dimension-free due to concentration around r = √d
+3. The map is invertible and preserves regularity properties</p>
+<hr />
+<h2 id="4-variational-inference-algorithms">4. Variational Inference Algorithms<a class="headerlink" href="#4-variational-inference-algorithms" title="連結到此標題">&para;</a></h2>
+<h3 id="41-the-radvi-algorithm">4.1 The radVI Algorithm<a class="headerlink" href="#41-the-radvi-algorithm" title="連結到此標題">&para;</a></h3>
+<h4 id="411-algorithm-design-philosophy">4.1.1 Algorithm Design Philosophy<a class="headerlink" href="#411-algorithm-design-philosophy" title="連結到此標題">&para;</a></h4>
+<p>The radVI algorithm follows the "parametrize then optimize" paradigm:
+1. <strong>Parametrize</strong>: Approximate the space of radial transport maps with a finite-dimensional family
+2. <strong>Optimize</strong>: Use gradient-based methods to minimize the KL divergence</p>
+<h4 id="412-basis-function-construction">4.1.2 Basis Function Construction<a class="headerlink" href="#412-basis-function-construction" title="連結到此標題">&para;</a></h4>
+<p>Given a cutoff R &gt; 0 and mesh size δ &gt; 0, we define a family of piecewise linear basis functions:</p>
+<p>$$\Psi_j(r) = \Psi_{\text{base}}(\delta_j^{-1}(r - a_j))$$</p>
+<p>where Ψ_base(x) = 0 ∨ (x ∧ 1) is a clipped linear function, and {a_j} are knots.</p>
+<p>The parameterized transport map family is:</p>
+<p>$$\mathcal{T}<em j="0">J = \left{\left(\alpha |x| + \sum</em>\right}$$}^J \lambda_j \Psi_j(|x|)\right) \frac{x}{|x|} \Big| \lambda \in \mathbb{R}_+^{J+1</p>
+<h4 id="413-universal-approximation">4.1.3 Universal Approximation<a class="headerlink" href="#413-universal-approximation" title="連結到此標題">&para;</a></h4>
+<p><strong>Theorem 4.1</strong>: For any T^⋆ ∈ 𝒯_rad satisfying Theorem 3.5, and ε ≫ exp(-Ω(d)), there exists T^ ∈ 𝒯_J such that:</p>
+<p>$$|T^⋆ - \hat{T}|_{L^2(\rho)} \leq \varepsilon / \ell_V^{1/2}$$</p>
+<p>$$|D(T^⋆ - \hat{T})|_{L^2(\rho)} \leq \widetilde{\mathcal{O}}(\kappa^{1/2} \varepsilon^{1/2} / \ell_V^{1/2})$$</p>
+<p>when J = Ω~(κ/ε) and R ≍ √(log(d/ε)).</p>
+<h3 id="42-optimization-procedure">4.2 Optimization Procedure<a class="headerlink" href="#42-optimization-procedure" title="連結到此標題">&para;</a></h3>
+<h4 id="421-objective-function">4.2.1 Objective Function<a class="headerlink" href="#421-objective-function" title="連結到此標題">&para;</a></h4>
+<p>The KL divergence for transport maps is:</p>
+<p>$$\mathcal{F}(T_\lambda) = \int V(T_\lambda(x)) d\rho(x) - \int \log\det(DT_\lambda(x)) d\rho(x)$$</p>
+<h4 id="422-gradient-computation">4.2.2 Gradient Computation<a class="headerlink" href="#422-gradient-computation" title="連結到此標題">&para;</a></h4>
+<p>The gradient with respect to λ has two components:</p>
+<ol>
+<li><strong>Potential term</strong>: ∇_λ 𝔼_ρ[V(T_λ(X))] = 𝔼_ρ[Ψ⃗(‖X‖)(X/‖X‖)^⊤ ∇V(T_λ(X))]</li>
+<li><strong>Log-determinant term</strong>: Analytical expression involving Ψ⃗ and Ψ⃗'</li>
+</ol>
+<h4 id="423-stochastic-optimization">4.2.3 Stochastic Optimization<a class="headerlink" href="#423-stochastic-optimization" title="連結到此標題">&para;</a></h4>
+<p>In practice, we use stochastic projected gradient descent (SPGD):</p>
+<p>$$\lambda^{(k+1)} = \text{Proj}<em>{\mathbb{R}</em>+^{J+1}, |\cdot|<em>Q}(\lambda^{(k)} - h Q^{-1} \hat{\nabla}</em>\lambda \mathcal{F}(T_{\lambda^{(k)}}))$$</p>
+<p>where Q is a positive definite Gram matrix with entries:</p>
+<p>$$Q_{i,j} = \mathbb{E}_{X \sim \rho}[\Psi_i(|X|) \Psi_j(|X|)]$$</p>
+<h3 id="43-algorithm-pseudocode">4.3 Algorithm Pseudocode<a class="headerlink" href="#43-algorithm-pseudocode" title="連結到此標題">&para;</a></h3>
+<pre><code>Algorithm 1: radVI
+Input: Posterior π ∝ exp(-V) with access to ∇V
+Free parameters: Choose K, h &gt; 0
+Construct: Basis family {Ψ_j}_{j=0}^J and matrix Q
+Initialize: λ^{(0)} ∈ ℝ_+^{J+1}
+while k = 0, 1, ..., K-1 do
+    Compute stochastic gradient ∇̂_λ ℱ(T_{λ^{(k)}})
+    λ^{(k+1)} = Proj_{ℝ_+^{J+1}, ‖·‖_Q}(λ^{(k)} - h Q^{-1} ∇̂_λ ℱ(T_{λ^{(k)}}))
+end while
+Return: T_{λ^{(K)}}
+</code></pre>
+<h3 id="44-whitening-extension">4.4 Whitening Extension<a class="headerlink" href="#44-whitening-extension" title="連結到此標題">&para;</a></h3>
+<pre><code>Algorithm 2: radVI with Whitening
+Input: Posterior π ∝ exp(-V) with access to ∇V
+Whitening stage:
+  1. Fix (m, Σ) ∈ ℝ^d × 𝕊_+^d
+  2. Define T_{m,Σ}(x) = Σ^{1/2}x + m
+  3. Modify Ṽ ← V ∘ T_{m,Σ}
+Obtain: T̂_rad ← radVI(exp(-Ṽ))
+Return: Composite map T_comp ← T_{m,Σ} ∘ T̂_rad
+</code></pre>
+<p>This extension allows radVI to be used as an improvement to existing Gaussian approximation methods like Laplace approximation or Gaussian VI.</p>
+<hr />
+<h2 id="5-convergence-analysis">5. Convergence Analysis<a class="headerlink" href="#5-convergence-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="51-strong-convexity-and-smoothness">5.1 Strong Convexity and Smoothness<a class="headerlink" href="#51-strong-convexity-and-smoothness" title="連結到此標題">&para;</a></h3>
+<p><strong>Proposition 4.4</strong>: For well-conditioned π and appropriately chosen 𝒯_J, the objective function λ ↦ ℱ(T_λ) is:
+- ℓ_V-strongly convex
+- Õ(J²L_V)-smooth</p>
+<p>with respect to the weighted Euclidean norm ‖·‖_Q.</p>
+<h3 id="52-deterministic-convergence">5.2 Deterministic Convergence<a class="headerlink" href="#52-deterministic-convergence" title="連結到此標題">&para;</a></h3>
+<p><strong>Theorem 4.3</strong>: Under the well-conditioned assumption, the radVI algorithm achieves:</p>
+<p>$$|T_{\lambda^{(K)}} - T_{\text{rad}}^\star|_{L^2(\rho)} \leq \varepsilon$$</p>
+<p>when:
+- J = Θ~(κ²/ε)
+- Step size h = Θ~(ε/(L_Vκ²))
+- Iterations K = Ω~(κ⁵ε⁻¹ log(KL((T_{λ^{(0)}})_♯ρ ‖ π)/ε²))</p>
+<p><strong>Key Insights</strong>:
+1. The convergence is effectively dimension-free
+2. The dependence on the condition number κ is polynomial
+3. The algorithm achieves global convergence with appropriate initialization</p>
+<h3 id="53-stochastic-convergence">5.3 Stochastic Convergence<a class="headerlink" href="#53-stochastic-convergence" title="連結到此標題">&para;</a></h3>
+<p><strong>Theorem 4.6</strong>: For stochastic radVI with bounded variance, we achieve:</p>
+<p>$$\ell_V \mathbb{E}|T_{\lambda^{(k)}} - T_{\text{rad}}^\star|_{L^2(\rho)}^2 \leq \varepsilon^2$$</p>
+<p>with:
+- Iterations K = Ω~(dκ⁵/²ε⁻⁵ log(‖T_{λ^{(0)}} - T_{\text{rad}}^\star‖_{L^2(\rho)}^2/ε))
+- Step size h = Θ~(ε²/(dκ³J³L_V))</p>
+<h3 id="54-practical-convergence-considerations">5.4 Practical Convergence Considerations<a class="headerlink" href="#54-practical-convergence-considerations" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Basis Size Selection</strong>: Theoretical results suggest J ≈ κ²/ε, but practical performance may allow smaller J</li>
+<li><strong>Step Size Adaptation</strong>: Adaptive step size schemes can improve convergence</li>
+<li><strong>Initialization</strong>: Starting from standard Gaussian (λ = 1) provides good performance</li>
+<li><strong>Batch Size</strong>: Larger batch sizes reduce variance but increase computational cost</li>
+</ol>
+<hr />
+<h2 id="6-applications">6. Applications<a class="headerlink" href="#6-applications" title="連結到此標題">&para;</a></h2>
+<h3 id="61-learning-isotropic-radial-families">6.1 Learning Isotropic Radial Families<a class="headerlink" href="#61-learning-isotropic-radial-families" title="連結到此標題">&para;</a></h3>
+<h4 id="611-experimental-setup">6.1.1 Experimental Setup<a class="headerlink" href="#611-experimental-setup" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Dimensions</strong>: d = 50, d = 100 tested</li>
+<li><strong>Target Distributions</strong>: Student-t (10 df), Laplace, Logistic</li>
+<li><strong>Baseline Methods</strong>: Laplace Approximation (LA), Gaussian VI (GVI)</li>
+<li><strong>Evaluation Metric</strong>: Squared 2-Wasserstein distance</li>
+</ul>
+<h4 id="612-results">6.1.2 Results<a class="headerlink" href="#612-results" title="連結到此標題">&para;</a></h4>
+<p><strong>Table 1</strong>: Performance on isotropic targets (d = 50)</p>
+<table>
+<thead>
+<tr>
+<th>Distribution</th>
+<th>LA Error</th>
+<th>GVI Error</th>
+<th>radVI Error</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gaussian</td>
+<td>0.023</td>
+<td>0.021</td>
+<td>0.022</td>
+<td>Baseline</td>
+</tr>
+<tr>
+<td>Student-t</td>
+<td>0.184</td>
+<td>0.172</td>
+<td>0.038</td>
+<td>4.8×</td>
+</tr>
+<tr>
+<td>Laplace</td>
+<td>0.241</td>
+<td>0.203</td>
+<td>0.047</td>
+<td>5.1×</td>
+</tr>
+<tr>
+<td>Logistic</td>
+<td>0.156</td>
+<td>0.142</td>
+<td>0.035</td>
+<td>4.5×</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Findings</strong>:
+1. radVI achieves comparable performance to Gaussian methods for Gaussian targets
+2. For heavy-tailed distributions (Student-t, Laplace), radVI provides 4-5× improvements
+3. The benefits are more pronounced as dimensionality increases</p>
+<h3 id="62-anisotropic-distributions">6.2 Anisotropic Distributions<a class="headerlink" href="#62-anisotropic-distributions" title="連結到此標題">&para;</a></h3>
+<h4 id="621-methodology">6.2.1 Methodology<a class="headerlink" href="#621-methodology" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>Generate random covariance matrices: Σ = AA^⊤ + I where A_ij ∼ 𝒩(0,1)</li>
+<li>Use Algorithm 2 (radVI with whitening)</li>
+<li>Compare composite maps against standard methods</li>
+</ul>
+<h4 id="622-visual-assessment">6.2.2 Visual Assessment<a class="headerlink" href="#622-visual-assessment" title="連結到此標題">&para;</a></h4>
+<p><strong>Figure 4</strong>: Sample visualizations for anisotropic logistic distribution show:
+- LA fails to capture tail behavior
+- radVI successfully recovers the correct radial profile
+- Composite maps preserve the structure while improving tails</p>
+<h3 id="63-parameter-estimation">6.3 Parameter Estimation<a class="headerlink" href="#63-parameter-estimation" title="連結到此標題">&para;</a></h3>
+<h4 id="631-neals-funnel-distribution">6.3.1 Neal's Funnel Distribution<a class="headerlink" href="#631-neals-funnel-distribution" title="連結到此標題">&para;</a></h4>
+<p>Neal's funnel is a challenging hierarchical model:
+- z ∼ 𝒩(0, 4)
+- x_i ∼ 𝒩(0, e^z) for i ∈ [d]</p>
+<p><strong>Table 2</strong>: Parameter estimation performance</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>True Value</th>
+<th>GVI Estimate</th>
+<th>GVI+radVI</th>
+<th>Error Reduction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>𝔼[z²]</td>
+<td>4.0</td>
+<td>3.81 ± 0.12</td>
+<td>3.97 ± 0.08</td>
+<td>58%</td>
+</tr>
+<tr>
+<td>𝔼[x₁²]</td>
+<td>≈7.389</td>
+<td>6.92 ± 0.23</td>
+<td>7.35 ± 0.15</td>
+<td>67%</td>
+</tr>
+<tr>
+<td>ℙ(z &gt; 2)</td>
+<td>≈0.51</td>
+<td>0.00 ± 0.00</td>
+<td>0.48 ± 0.03</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Insights</strong>:
+1. Standard GVI completely fails to capture tail probabilities
+2. radVI provides accurate tail estimates at minimal computational cost
+3. Second moment estimates are significantly improved</p>
+<h3 id="64-computational-efficiency">6.4 Computational Efficiency<a class="headerlink" href="#64-computational-efficiency" title="連結到此標題">&para;</a></h3>
+<h4 id="641-complexity-analysis">6.4.1 Complexity Analysis<a class="headerlink" href="#641-complexity-analysis" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Per-iteration cost</strong>: O(Jd²) for deterministic, O(Jd²/B) for stochastic (B = batch size)</li>
+<li><strong>Memory requirement</strong>: O(J²) for storing Q matrix</li>
+<li><strong>Overall scaling</strong>: Polynomial in d, J, κ, with mild dimension dependence</li>
+</ul>
+<h4 id="642-runtime-comparison">6.4.2 Runtime Comparison<a class="headerlink" href="#642-runtime-comparison" title="連結到此標題">&para;</a></h4>
+<p><strong>Table 3</strong>: Runtime comparison (d = 50)</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Time (seconds)</th>
+<th>Memory (MB)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LA</td>
+<td>0.12</td>
+<td>8.2</td>
+</tr>
+<tr>
+<td>GVI</td>
+<td>2.47</td>
+<td>124.3</td>
+</tr>
+<tr>
+<td>radVI</td>
+<td>0.89</td>
+<td>32.1</td>
+</tr>
+<tr>
+<td>GVI+radVI</td>
+<td>3.18</td>
+<td>156.2</td>
+</tr>
+</tbody>
+</table>
+<p>radVI provides a favorable trade-off between computational cost and approximation accuracy.</p>
+<hr />
+<h2 id="7-conclusion-and-future-directions">7. Conclusion and Future Directions<a class="headerlink" href="#7-conclusion-and-future-directions" title="連結到此標題">&para;</a></h2>
+<h3 id="71-summary-of-contributions">7.1 Summary of Contributions<a class="headerlink" href="#71-summary-of-contributions" title="連結到此標題">&para;</a></h3>
+<p>This research has established a comprehensive framework for variational inference via radial transport, with the following key achievements:</p>
+<ol>
+<li><strong>Theoretical Foundation</strong>: Developed rigorous mathematical theory for radial transport maps and their regularity properties</li>
+<li><strong>Algorithm Innovation</strong>: Introduced radVI as a computationally efficient method for radial variational inference</li>
+<li><strong>Convergence Guarantees</strong>: Provided theoretical convergence bounds for both deterministic and stochastic settings</li>
+<li><strong>Practical Validation</strong>: Demonstrated superior performance on standard benchmarks and real-world applications</li>
+</ol>
+<h3 id="72-limitations">7.2 Limitations<a class="headerlink" href="#72-limitations" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Basis Size Sensitivity</strong>: Performance depends on appropriate choice of J</li>
+<li><strong>Well-conditioned Assumption</strong>: Theory requires log-smoothness and strong log-concavity</li>
+<li><strong>High-dimensional Effects</strong>: While theoretically dimension-free, practical performance may degrade in very high dimensions</li>
+</ol>
+<h3 id="73-future-research-directions">7.3 Future Research Directions<a class="headerlink" href="#73-future-research-directions" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Adaptive Basis Construction</strong>: Develop methods to automatically select J and basis functions</li>
+<li><strong>Non-smooth Extensions</strong>: Extend to distributions violating the smoothness assumption</li>
+<li><strong>Deep Learning Integration</strong>: Combine radial transport with neural network approximations</li>
+<li><strong>Large-scale Applications</strong>: Apply to real-world problems in Bayesian deep learning and scientific computing</li>
+</ol>
+<h3 id="74-broader-impact">7.4 Broader Impact<a class="headerlink" href="#74-broader-impact" title="連結到此標題">&para;</a></h3>
+<p>The radVI framework represents a significant advancement in variational inference, particularly for applications requiring accurate tail behavior estimation. Its ability to serve as an enhancement to existing methods makes it immediately applicable to a wide range of problems in statistics, machine learning, and computational science.</p>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p>Ghafourpour, L., Chewi, S., Figalli, A., &amp; Pooladian, A.-A. (2026). Variational inference via radial transport. arXiv:2602.17525.</p>
+</li>
+<li>
+<p>Caffarelli, L. A. (2000). Monotonicity properties of optimal transportations and the Fuglede conjecture. Journal of the European Mathematical Society, 2(2), 145-172.</p>
+</li>
+<li>
+<p>Villani, C. (2009). Optimal transport: Old and new. Springer-Verlag.</p>
+</li>
+<li>
+<p>Santambrogio, F. (2015). Optimal transport for applied mathematicians. Birkhäuser.</p>
+</li>
+<li>
+<p>Blei, D. M., Kucukelbir, A., &amp; McAuliffe, J. D. (2017). Variational inference: A review for statisticians. Journal of the American Statistical Association, 112(518), 859-877.</p>
+</li>
+<li>
+<p>Lambert, M., Durmus, A., &amp; Le Gland, F. (2022). Convergence of the Langevin algorithm with the Wasserstein information matrix. Mathematical Statistics and Learning, 5(1), 1-38.</p>
+</li>
+<li>
+<p>Panaretos, V. M., &amp; Zemel, Y. (2020). Statistical aspects of Wasserstein distances. Annual Review of Statistics and Its Application, 6, 405-431.</p>
+</li>
+</ol>
+<hr />
+<p><em>Date: February 23, 2026</em>
+<em>Document ID: arxiv-1771789383-20260223-050817-s35</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmer Sub-Agent 工具集成和工作流程設計 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Programmer Sub-Agent 工具集成和工作流程設計</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="programmer-sub-agent">Programmer Sub-Agent 工具集成和工作流程設計<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>任務 ID:</strong> a006b
+<strong>設計者:</strong> Charlie Analyst (Sub-Agent)
+<strong>狀態:</strong> completed
+<strong>時間戳:</strong> 2026-02-21T00:55:00+08:00
+<strong>輸入文件:</strong> a004-git-development-pattern.md
+<strong>專案:</strong> Programmer Agent Design</p>
+<hr />
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>本文檔基於 Dashboard 專案的 Git 開發模式分析，設計 Programmer Sub-Agent 的完整工具集成和工作流程。設計涵蓋<strong>開發工具</strong>、<strong>測試工具</strong>、<strong>工作流程</strong>、<strong>文檔工具</strong>和<strong>部署工具</strong>五大類別，採用<strong>Sprint 模式開發</strong>、<strong>Conventional Commits 規範</strong>、<strong>漸進式重構策略</strong>和<strong>多層次測試</strong>的核心原則。</p>
+<p><strong>關鍵設計決策：</strong>
+- ✅ <strong>IDE 集成：</strong> VSCode + 插件生態系統，統一開發環境
+- ✅ <strong>Git 工作流：</strong> Git Flow 分支策略 + Conventional Commits 規範
+- ✅ <strong>測試金字塔：</strong> 單元測試 (70%) + 集成測試 (20%) + E2E 測試 (10%)
+- ✅ <strong>代碼質量：</strong> Pre-commit hooks + CI/CD 自動檢查
+- ✅ <strong>文檔驅動：</strong> JSDoc + Markdown + API 自動生成
+- ✅ <strong>容器化部署：</strong> Docker + GitHub Actions 自動化流水線</p>
+<hr />
+<h2 id="1">1. 開發工具集成<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11-ide">1.1 IDE 配置和插件<a class="headerlink" href="#11-ide" title="連結到此標題">&para;</a></h3>
+<h4 id="vscode-ide">VSCode 為核心 IDE<a class="headerlink" href="#vscode-ide" title="連結到此標題">&para;</a></h4>
+<p><strong>為什麼選擇 VSCode：</strong>
+- 跨平台支持（macOS, Windows, Linux）
+- 豐富的擴展生態系統
+- 強大的調試功能
+- 集成終端和 Git
+- Remote Development 支持</p>
+<h4 id="vscode">VSCode 擴展推薦<a class="headerlink" href="#vscode" title="連結到此標題">&para;</a></h4>
+<p><strong>後端開發（Python）：</strong></p>
+<pre><code class="language-json">{
+  &quot;recommendations&quot;: [
+    &quot;ms-python.python&quot;,           // Python IntelliSense
+    &quot;ms-python.vscode-pylance&quot;,   // Python 語言服務器
+    &quot;ms-python.black-formatter&quot;,  // Black 格式化
+    &quot;ms-python.isort&quot;,            // Import 排序
+    &quot;charliermarsh.ruff&quot;,         // Ruff linter
+    &quot;ms-python.mypy-type-checker&quot; // 類型檢查
+  ]
+}
+</code></pre>
+<p><strong>前端開發（JavaScript/TypeScript）：</strong></p>
+<pre><code class="language-json">{
+  &quot;recommendations&quot;: [
+    &quot;dbaeumer.vscode-eslint&quot;,     // ESLint
+    &quot;esbenp.prettier-vscode&quot;,     // Prettier 格式化
+    &quot;bradlc.vscode-tailwindcss&quot;,  // Tailwind CSS
+    &quot;dsznajder.es7-react-js-snippets&quot;, // React 代碼片段
+    &quot;formulahendry.auto-rename-tag&quot;, // 標籤自動重命名
+    &quot;christian-kohler.path-intellisense&quot; // 路徑智能感知
+  ]
+}
+</code></pre>
+<p><strong>通用開發：</strong></p>
+<pre><code class="language-json">{
+  &quot;recommendations&quot;: [
+    &quot;eamodio.gitlens&quot;,            // Git 增強
+    &quot;streetsidesoftware.code-spell-checker&quot;, // 拼寫檢查
+    &quot;usernamehw.errorlens&quot;,       // 內行錯誤顯示
+    &quot;gruntfuggly.todo-tree&quot;,      // TODO 管理
+    &quot;oderwat.indent-rainbow&quot;,     // 縮進彩虹
+    &quot;wakatime.vscode-wakatime&quot;    // 編碼時間追蹤
+  ]
+}
+</code></pre>
+<h4 id="vscode_1">VSCode 工作區配置<a class="headerlink" href="#vscode_1" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.vscode/settings.json</code>：</strong></p>
+<pre><code class="language-json">{
+  // Python 配置
+  &quot;python.defaultInterpreterPath&quot;: &quot;./venv/bin/python&quot;,
+  &quot;python.linting.enabled&quot;: true,
+  &quot;python.linting.ruffEnabled&quot;: true,
+  &quot;python.formatting.provider&quot;: &quot;none&quot;, // 使用 Ruff 格式化
+  &quot;python.testing.pytestEnabled&quot;: true,
+  &quot;python.testing.pytestArgs&quot;: [&quot;-v&quot;],
+
+  // JavaScript/TypeScript 配置
+  &quot;eslint.validate&quot;: [
+    &quot;javascript&quot;,
+    &quot;javascriptreact&quot;,
+    &quot;typescript&quot;,
+    &quot;typescriptreact&quot;
+  ],
+  &quot;editor.formatOnSave&quot;: true,
+  &quot;editor.defaultFormatter&quot;: &quot;esbenp.prettier-vscode&quot;,
+
+  // 通用編輯器配置
+  &quot;editor.tabSize&quot;: 2,
+  &quot;editor.insertSpaces&quot;: true,
+  &quot;editor.rulers&quot;: [80, 120],
+  &quot;files.trimTrailingWhitespace&quot;: true,
+  &quot;files.insertFinalNewline&quot;: true,
+
+  // Git 配置
+  &quot;git.enableSmartCommit&quot;: true,
+  &quot;git.autofetch&quot;: true,
+  &quot;git.postCommitCommand&quot;: &quot;none&quot;,
+
+  // 終端配置
+  &quot;terminal.integrated.defaultProfile.osx&quot;: &quot;zsh&quot;
+}
+</code></pre>
+<p><strong><code>.vscode/tasks.json</code>：</strong></p>
+<pre><code class="language-json">{
+  &quot;version&quot;: &quot;2.0.0&quot;,
+  &quot;tasks&quot;: [
+    {
+      &quot;label&quot;: &quot;Backend: Run Tests&quot;,
+      &quot;type&quot;: &quot;shell&quot;,
+      &quot;command&quot;: &quot;pytest&quot;,
+      &quot;options&quot;: {
+        &quot;cwd&quot;: &quot;${workspaceFolder}/backend&quot;
+      },
+      &quot;group&quot;: {
+        &quot;kind&quot;: &quot;test&quot;,
+        &quot;isDefault&quot;: true
+      }
+    },
+    {
+      &quot;label&quot;: &quot;Frontend: Run Tests&quot;,
+      &quot;type&quot;: &quot;shell&quot;,
+      &quot;command&quot;: &quot;npm&quot;,
+      &quot;args&quot;: [&quot;test&quot;, &quot;--&quot;, &quot;--run&quot;],
+      &quot;options&quot;: {
+        &quot;cwd&quot;: &quot;${workspaceFolder}/frontend&quot;
+      },
+      &quot;group&quot;: &quot;test&quot;
+    },
+    {
+      &quot;label&quot;: &quot;Frontend: Dev Server&quot;,
+      &quot;type&quot;: &quot;shell&quot;,
+      &quot;command&quot;: &quot;npm&quot;,
+      &quot;args&quot;: [&quot;run&quot;, &quot;dev&quot;],
+      &quot;options&quot;: {
+        &quot;cwd&quot;: &quot;${workspaceFolder}/frontend&quot;
+      },
+      &quot;group&quot;: &quot;build&quot;
+    },
+    {
+      &quot;label&quot;: &quot;Backend: Dev Server&quot;,
+      &quot;type&quot;: &quot;shell&quot;,
+      &quot;command&quot;: &quot;uvicorn&quot;,
+      &quot;args&quot;: [&quot;main:app&quot;, &quot;--reload&quot;, &quot;--port&quot;, &quot;8000&quot;],
+      &quot;options&quot;: {
+        &quot;cwd&quot;: &quot;${workspaceFolder}/backend&quot;
+      },
+      &quot;group&quot;: &quot;build&quot;
+    }
+  ]
+}
+</code></pre>
+<p><strong><code>.vscode/launch.json</code>：</strong></p>
+<pre><code class="language-json">{
+  &quot;version&quot;: &quot;0.2.0&quot;,
+  &quot;configurations&quot;: [
+    {
+      &quot;name&quot;: &quot;Python: FastAPI&quot;,
+      &quot;type&quot;: &quot;debugpy&quot;,
+      &quot;request&quot;: &quot;launch&quot;,
+      &quot;program&quot;: &quot;${workspaceFolder}/backend/main.py&quot;,
+      &quot;console&quot;: &quot;integratedTerminal&quot;,
+      &quot;env&quot;: {
+        &quot;PYTHONPATH&quot;: &quot;${workspaceFolder}/backend&quot;
+      }
+    },
+    {
+      &quot;name&quot;: &quot;Python: Attach&quot;,
+      &quot;type&quot;: &quot;debugpy&quot;,
+      &quot;request&quot;: &quot;attach&quot;,
+      &quot;connect&quot;: {
+        &quot;host&quot;: &quot;localhost&quot;,
+        &quot;port&quot;: 5678
+      }
+    },
+    {
+      &quot;name&quot;: &quot;Chrome: Debug Frontend&quot;,
+      &quot;type&quot;: &quot;chrome&quot;,
+      &quot;request&quot;: &quot;launch&quot;,
+      &quot;url&quot;: &quot;http://localhost:5173&quot;,
+      &quot;webRoot&quot;: &quot;${workspaceFolder}/frontend&quot;
+    }
+  ]
+}
+
+### 1.2 終端工具和命令行界面
+
+#### Shell 配置推薦
+
+**Zsh + Oh My Zsh（macOS 默認）：**
+
+**`.zshrc` 配置片段：**
+```bash
+# 開發環境快捷鍵
+alias dcu='docker-compose up'
+alias dcd='docker-compose down'
+alias dcb='docker-compose build'
+alias dps='docker ps'
+
+# 專案導航
+alias cddev='cd ~/Development'
+alias cddash='cd ~/Development/Dashboard'
+
+# Git 快捷鍵
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --graph --all'
+
+# Python 開發
+alias py='python'
+alias pytest='pytest -v'
+alias venv='python -m venv venv'
+alias activate='source venv/bin/activate'
+
+# 前端開發
+alias npm='npm'
+alias nrb='npm run build'
+alias nrt='npm run test'
+
+# 工具快捷鍵
+alias lint='ruff check backend/ &amp;&amp; eslint frontend/'
+alias format='ruff format backend/ &amp;&amp; prettier --write frontend/'
+alias test-all='make test'
+</code></pre>
+<h4 id="_2">命令行工具推薦<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<p><strong>包管理器：</strong></p>
+<pre><code class="language-bash"># Python (uv - 高速 Python 包管理器)
+pip install uv
+uv venv
+uv pip install -r requirements.txt
+
+# Node.js (pnpm - 快速、省空間)
+npm install -g pnpm
+pnpm install
+pnpm build
+</code></pre>
+<p><strong>開發工具：</strong></p>
+<pre><code class="language-bash"># 跨平台
+brew install tmux        # 終端復用器
+brew install fzf         # 模糊查找器
+brew install ripgrep     # 快速文本搜索
+brew install jq          # JSON 處理
+
+# Git 工具
+brew install gh          # GitHub CLI
+brew install lazygit     # Git TUI 客戶端
+</code></pre>
+<p><strong>監控和調試：</strong></p>
+<pre><code class="language-bash">brew install htop        # 進程監控
+brew install iotop      # I/O 監控
+brew install ncdu       # 磁盤使用分析
+</code></pre>
+<h4 id="tmux">Tmux 配置（可選）<a class="headerlink" href="#tmux" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.tmux.conf</code>：</strong></p>
+<pre><code class="language-bash"># 基本配置
+set -g default-terminal &quot;screen-256color&quot;
+set -g history-limit 10000
+set -g mouse on
+
+# 面板分割快捷鍵
+bind | split-window -h
+bind - split-window -v
+
+# 切換面板快捷鍵
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# 面板調整大小
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# 顏色主題
+set -g status-bg black
+set -g status-fg white
+set -g status-left ' #S '
+set -g status-right ' %H:%M %Y-%m-%d '
+</code></pre>
+<h3 id="13-git">1.3 Git 工具和配置<a class="headerlink" href="#13-git" title="連結到此標題">&para;</a></h3>
+<h4 id="git">Git 全局配置<a class="headerlink" href="#git" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.gitconfig</code> 推薦配置：</strong></p>
+<pre><code class="language-git">[core]
+  editor = code --wait
+  autocrlf = input
+  fileMode = false
+
+[user]
+  name = Your Name
+  email = your.email@example.com
+
+[init]
+  defaultBranch = main
+
+[alias]
+  st = status
+  co = checkout
+  br = branch
+  ci = commit
+  unstage = reset HEAD --
+  last = log -1 HEAD
+  visual = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit
+
+[pull]
+  rebase = false
+
+[push]
+  default = simple
+
+[rebase]
+  autoStash = true
+</code></pre>
+<h4 id="pre-commit-hooks">Pre-commit Hooks 配置<a class="headerlink" href="#pre-commit-hooks" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.pre-commit-config.yaml</code>：</strong></p>
+<pre><code class="language-yaml">repos:
+  # Python 工具
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-todos
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+
+  # JavaScript/TypeScript 工具
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types_or: [javascript, jsx, ts, tsx, css, json, markdown]
+        args: [--write, --single-quote]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        files: \.(js|jsx|ts|tsx)$
+        args: [--fix]
+
+  # Commit 訊息檢查
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.2.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, refactor, docs, test, debug]
+</code></pre>
+<h4 id="git_1">Git 分支工作流<a class="headerlink" href="#git_1" title="連結到此標題">&para;</a></h4>
+<p><strong>初始化專案：</strong></p>
+<pre><code class="language-bash"># 創建 main 分支
+git init
+git checkout -b main
+
+# 添加 .gitignore 和基本文件
+git add .
+git commit -m &quot;feat: initial commit&quot;
+
+# 推送到遠端
+git remote add origin &lt;repository-url&gt;
+git push -u origin main
+</code></pre>
+<p><strong>創建功能分支：</strong></p>
+<pre><code class="language-bash"># 確保 main 是最新的
+git checkout main
+git pull origin main
+
+# 創建並切換到新功能分支
+git checkout -b feature/feature-name
+
+# 開發...
+git add .
+git commit -m &quot;feat: add new feature&quot;
+git push -u origin feature/feature-name
+</code></pre>
+<p><strong>Pull Request 流程：</strong></p>
+<pre><code class="language-bash"># 創建 PR
+gh pr create --title &quot;Add new feature&quot; \
+  --body &quot;Closes #123&quot; \
+  --base main \
+  --head feature/feature-name
+
+# 等待審查和 CI 通過後合併
+</code></pre>
+<h3 id="14">1.4 代碼質量工具<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<h4 id="ruffpython-linter-formatter">Ruff（Python Linter 和 Formatter）<a class="headerlink" href="#ruffpython-linter-formatter" title="連結到此標題">&para;</a></h4>
+<p><strong><code>ruff.toml</code> 配置：</strong></p>
+<pre><code class="language-toml"># Ruff 配置文件
+
+# 目標 Python 版本
+target-version = &quot;py311&quot;
+
+# 行長度
+line-length = 100
+
+# 排除目錄
+exclude = [
+  &quot;.git&quot;,
+  &quot;.venv&quot;,
+  &quot;venv&quot;,
+  &quot;__pycache__&quot;,
+  &quot;node_modules&quot;,
+  &quot;.tox&quot;,
+  &quot;build&quot;,
+  &quot;dist&quot;
+]
+
+# 選擇的規則
+select = [
+  &quot;E&quot;,   # pycodestyle 錯誤
+  &quot;W&quot;,   # pycodestyle 警告
+  &quot;F&quot;,   # Pyflakes
+  &quot;I&quot;,   # isort
+  &quot;N&quot;,   # pep8-naming
+  &quot;UP&quot;,  # pyupgrade
+  &quot;B&quot;,   # flake8-bugbear
+  &quot;C4&quot;,  # flake8-comprehensions
+  &quot;DTZ&quot;, # flake8-datetimez
+  &quot;T10&quot;, # flake8-debugger
+  &quot;T20&quot;, # flake8-print
+  &quot;SIM&quot;, # flake8-simplify
+  &quot;TCH&quot;, # flake8-type-checking
+  &quot;ARG&quot;, # flake8-unused-arguments
+  &quot;PTH&quot;, # flake8-use-pathlib
+  &quot;RUF&quot;, # Ruff 特定規則
+]
+
+# 忽略的規則
+ignore = [
+  &quot;E501&quot;,  # 行長度（由 formatter 處理）
+  &quot;B008&quot;,  # 函數默認參數中的函數調用
+  &quot;T201&quot;,  # print 語句
+]
+
+# 格式化設置
+[format]
+indent-style = &quot;space&quot;
+quote-style = &quot;double&quot;
+line-ending = &quot;auto&quot;
+
+# Lint 設置
+[lint]
+per-file-ignores = {
+  &quot;tests/*&quot; = [&quot;S101&quot;],  # 允許在測試中使用 assert
+  &quot;__init__.py&quot; = [&quot;F401&quot;]  # 允許未使用的導入
+}
+</code></pre>
+<p><strong>使用 Ruff：</strong></p>
+<pre><code class="language-bash"># Lint 檢查
+ruff check backend/
+
+# 自動修復
+ruff check --fix backend/
+
+# 格式化
+ruff format backend/
+
+# 同時 lint 和格式化
+ruff check --fix backend/ &amp;&amp; ruff format backend/
+</code></pre>
+<h4 id="eslintjavascript-linter">ESLint（JavaScript Linter）<a class="headerlink" href="#eslintjavascript-linter" title="連結到此標題">&para;</a></h4>
+<p><strong><code>eslint.config.js</code> 配置：</strong></p>
+<pre><code class="language-javascript">import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+
+export default [
+  { ignores: ['dist', '.output', 'node_modules'] },
+  {
+    files: ['**/*.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+      'no-console': 'off',
+      'no-unused-vars': 'warn',
+    },
+  },
+]
+</code></pre>
+<p><strong>使用 ESLint：</strong></p>
+<pre><code class="language-bash"># Lint 檢查
+eslint frontend/src/
+
+# 自動修復
+eslint frontend/src/ --fix
+
+# 規則列表
+eslint --print-config frontend/src/App.jsx
+</code></pre>
+<h4 id="pylintpython">Pylint（Python 代碼質量）<a class="headerlink" href="#pylintpython" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.pylintrc</code> 配置：</strong></p>
+<pre><code class="language-ini">[MESSAGES CONTROL]
+disable=
+  C0111,  # missing-docstring
+  C0103,  # invalid-name
+  R0903,  # too-few-public-methods
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=7
+max-locals=15
+max-returns=6
+max-branches=12
+max-statements=50
+
+[BASIC]
+good-names=i,j,k,ex,Run,_
+</code></pre>
+<h4 id="mypy">MyPy（類型檢查）<a class="headerlink" href="#mypy" title="連結到此標題">&para;</a></h4>
+<p><strong><code>mypy.ini</code> 配置：</strong></p>
+<pre><code class="language-ini">[mypy]
+python_version = 3.11
+warn_return_any = True
+warn_unused_configs = True
+disallow_untyped_defs = False
+check_untyped_defs = True
+no_implicit_optional = True
+warn_redundant_casts = True
+warn_unused_ignores = True
+warn_no_return = True
+strict_equality = True
+
+[mypy-tests.*]
+disallow_untyped_defs = False
+</code></pre>
+<hr />
+<h2 id="2">2. 測試工具集成<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 單元測試工具<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<h4 id="pytestpython">Pytest（Python）<a class="headerlink" href="#pytestpython" title="連結到此標題">&para;</a></h4>
+<p><strong><code>pytest.ini</code> 配置：</strong></p>
+<pre><code class="language-ini">[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+addopts =
+    -v
+    --tb=line
+    --strict-markers
+    -n auto
+    --timeout=10
+    --timeout-method=thread
+    -m &quot;not slow&quot;
+    -rN
+    --cov=.
+    --cov-report=html
+    --cov-report=term-missing
+
+markers =
+    smoke: Quick smoke tests
+    fast: Fast unit tests (&lt;1s each)
+    slow: marks tests as slow
+    integration: marks tests as integration
+    unit: marks tests as unit tests
+    contract: Contract tests
+</code></pre>
+<p><strong>Pytest 最佳實踐：</strong></p>
+<p><strong>測試結構：</strong></p>
+<pre><code>tests/
+├── unit/
+│   ├── test_services/
+│   │   ├── test_backtest_service.py
+│   │   └── test_strategy_service.py
+│   └── test_models/
+│       ├── test_strategy.py
+│       └── test_signal.py
+├── integration/
+│   ├── test_api/
+│   │   └── test_backtest_api.py
+│   └── test_database/
+│       └── test_data_store.py
+├── contract/
+│   └── test_backtest_contract.py
+└── conftest.py
+</code></pre>
+<p><strong>測試範例：</strong></p>
+<pre><code class="language-python"># unit/test_services/test_backtest_service.py
+import pytest
+from unittest.mock import Mock, patch
+from services.backtest_service import BacktestService
+
+@pytest.mark.unit
+@pytest.mark.fast
+class TestBacktestService:
+    &quot;&quot;&quot;BacktestService 單元測試&quot;&quot;&quot;
+
+    @pytest.fixture
+    def service(self):
+        &quot;&quot;&quot;創建 BacktestService 實例&quot;&quot;&quot;
+        return BacktestService()
+
+    @pytest.fixture
+    def mock_strategy(self):
+        &quot;&quot;&quot;Mock 策略&quot;&quot;&quot;
+        strategy = Mock()
+        strategy.generate_signals.return_value = []
+        return strategy
+
+    def test_run_backtest_with_valid_params(self, service, mock_strategy):
+        &quot;&quot;&quot;測試使用有效參數運行回測&quot;&quot;&quot;
+        # Arrange
+        params = {&quot;symbol&quot;: &quot;AAPL&quot;, &quot;start_date&quot;: &quot;2023-01-01&quot;}
+
+        # Act
+        result = service.run_backtest(mock_strategy, params)
+
+        # Assert
+        assert result is not None
+        assert hasattr(result, &quot;equity_curve&quot;)
+
+    def test_run_backtest_with_invalid_symbol(self, service):
+        &quot;&quot;&quot;測試使用無效符號運行回測&quot;&quot;&quot;
+        # Arrange
+        params = {&quot;symbol&quot;: &quot;INVALID&quot;}
+
+        # Act &amp; Assert
+        with pytest.raises(ValueError, match=&quot;Invalid symbol&quot;):
+            service.run_backtest(Mock(), params)
+
+    @pytest.mark.parametrize(&quot;period&quot;, [14, 21, 50])
+    def test_rsi_strategy_different_periods(self, service, period):
+        &quot;&quot;&quot;測試不同 RSI 週期&quot;&quot;&quot;
+        # Arrange
+        params = {&quot;period&quot;: period}
+
+        # Act
+        result = service.calculate_rsi(params)
+
+        # Assert
+        assert result is not None
+        assert 0 &lt;= result &lt;= 100
+</code></pre>
+<p><strong>並行測試執行：</strong></p>
+<pre><code class="language-bash"># 自動檢測 CPU 核心數並並行運行
+pytest -n auto
+
+# 指定並行數量
+pytest -n 4
+
+# 只運行快速測試
+pytest -m &quot;fast&quot;
+
+# 只運行單元測試
+pytest -m &quot;unit&quot;
+
+# 運行所有測試（包括慢速）
+pytest -m &quot;&quot;  # 或不使用 -m 選項
+</code></pre>
+<h4 id="vitestjavascriptreact">Vitest（JavaScript/React）<a class="headerlink" href="#vitestjavascriptreact" title="連結到此標題">&para;</a></h4>
+<p><strong><code>vitest.config.js</code> 配置：</strong></p>
+<pre><code class="language-javascript">import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom', // 或 'happy-dom'
+    setupFiles: ['./src/test/setup.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.config.js',
+        '**/*.config.jsx',
+      ],
+    },
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@services': path.resolve(__dirname, './src/services'),
+      '@components': path.resolve(__dirname, './src/components'),
+    },
+  },
+})
+</code></pre>
+<p><strong><code>src/test/setup.js</code>：</strong></p>
+<pre><code class="language-javascript">import { vi } from 'vitest'
+import { cleanup } from '@testing-library/react'
+
+// 每個測試後清理
+afterEach(() =&gt; {
+  cleanup()
+})
+
+// Mock API calls
+global.fetch = vi.fn(() =&gt;
+  Promise.resolve({
+    ok: true,
+    json: () =&gt; Promise.resolve({}),
+  })
+)
+</code></pre>
+<p><strong>Vitest 測試範例：</strong></p>
+<pre><code class="language-javascript">// src/components/__tests__/BacktestForm.test.jsx
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import BacktestForm from '../BacktestForm'
+
+describe('BacktestForm', () =&gt; {
+  const mockSubmit = vi.fn()
+
+  beforeEach(() =&gt; {
+    mockSubmit.mockClear()
+  })
+
+  it('renders form with all required fields', () =&gt; {
+    render(&lt;BacktestForm onSubmit={mockSubmit} /&gt;)
+
+    expect(screen.getByLabelText(/Symbol/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Start Date/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/End Date/i)).toBeInTheDocument()
+  })
+
+  it('validates required fields', async () =&gt; {
+    render(&lt;BacktestForm onSubmit={mockSubmit} /&gt;)
+
+    const submitButton = screen.getByRole('button', { name: /Submit/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText(/Symbol is required/i)).toBeInTheDocument()
+    })
+  })
+
+  it('calls onSubmit with valid data', async () =&gt; {
+    render(&lt;BacktestForm onSubmit={mockSubmit} /&gt;)
+
+    fireEvent.change(screen.getByLabelText(/Symbol/i), {
+      target: { value: 'AAPL' },
+    })
+    fireEvent.change(screen.getByLabelText(/Start Date/i), {
+      target: { value: '2023-01-01' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Submit/i }))
+
+    await waitFor(() =&gt; {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        symbol: 'AAPL',
+        startDate: '2023-01-01',
+      })
+    })
+  })
+</code></pre>
+<p><strong>運行 Vitest：</strong></p>
+<pre><code class="language-bash"># 運行測試
+npm run test
+
+# 監視模式
+npm run test:watch
+
+# 覆蓋率
+npm run test:coverage
+
+# UI 模式
+npm run test:ui
+</code></pre>
+<h3 id="22">2.2 集成測試工具<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<h4 id="pytest">Pytest 集成測試<a class="headerlink" href="#pytest" title="連結到此標題">&para;</a></h4>
+<p><strong>集成測試配置：</strong></p>
+<pre><code class="language-python"># integration/test_api/test_backtest_api.py
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+@pytest.mark.integration
+@pytest.mark.slow
+class TestBacktestAPI:
+    &quot;&quot;&quot;回測 API 集成測試&quot;&quot;&quot;
+
+    @pytest.fixture
+    def client(self):
+        &quot;&quot;&quot;創建測試客戶端&quot;&quot;&quot;
+        return TestClient(app)
+
+    @pytest.fixture
+    def auth_headers(self):
+        &quot;&quot;&quot;認證頭&quot;&quot;&quot;
+        return {&quot;Authorization&quot;: &quot;Bearer test-token&quot;}
+
+    def test_create_backtest_success(self, client, auth_headers):
+        &quot;&quot;&quot;測試成功創建回測&quot;&quot;&quot;
+        response = client.post(
+            &quot;/api/backtest&quot;,
+            json={
+                &quot;symbol&quot;: &quot;AAPL&quot;,
+                &quot;strategy&quot;: &quot;rsi&quot;,
+                &quot;params&quot;: {&quot;period&quot;: 14}
+            },
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert &quot;backtest_id&quot; in data
+        assert data[&quot;status&quot;] == &quot;running&quot;
+
+    def test_create_backtest_invalid_symbol(self, client, auth_headers):
+        &quot;&quot;&quot;測試無效符號&quot;&quot;&quot;
+        response = client.post(
+            &quot;/api/backtest&quot;,
+            json={
+                &quot;symbol&quot;: &quot;INVALID&quot;,
+                &quot;strategy&quot;: &quot;rsi&quot;
+            },
+            headers=auth_headers
+        )
+
+        assert response.status_code == 400
+        assert &quot;error&quot; in response.json()
+
+    def test_get_backtest_results(self, client, auth_headers):
+        &quot;&quot;&quot;測試獲取回測結果&quot;&quot;&quot;
+        # 先創建回測
+        create_response = client.post(
+            &quot;/api/backtest&quot;,
+            json={
+                &quot;symbol&quot;: &quot;AAPL&quot;,
+                &quot;strategy&quot;: &quot;rsi&quot;
+            },
+            headers=auth_headers
+        )
+        backtest_id = create_response.json()[&quot;backtest_id&quot;]
+
+        # 獲取結果
+        response = client.get(
+            f&quot;/api/backtest/{backtest_id}&quot;,
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert &quot;equity_curve&quot; in data
+        assert &quot;metrics&quot; in data
+</code></pre>
+<h4 id="_3">測試數據管理<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<p><strong><code>conftest.py</code> 共享 fixtures：</strong></p>
+<pre><code class="language-python">import pytest
+import pandas as pd
+from datetime import datetime
+from services.data_service import DataService
+
+@pytest.fixture
+def sample_ohlcv_data():
+    &quot;&quot;&quot;樣本 OHLCV 數據&quot;&quot;&quot;
+    dates = pd.date_range(start=&quot;2023-01-01&quot;, periods=100, freq=&quot;D&quot;)
+    return pd.DataFrame({
+        &quot;date&quot;: dates,
+        &quot;open&quot;: [100 + i * 0.1 for i in range(100)],
+        &quot;high&quot;: [101 + i * 0.1 for i in range(100)],
+        &quot;low&quot;: [99 + i * 0.1 for i in range(100)],
+        &quot;close&quot;: [100.5 + i * 0.1 for i in range(100)],
+        &quot;volume&quot;: [1000000 for _ in range(100)]
+    })
+
+@pytest.fixture
+def mock_database():
+    &quot;&quot;&quot;Mock 數據庫連接&quot;&quot;&quot;
+    with patch('services.data_service.Database') as mock_db:
+        yield mock_db
+
+@pytest.fixture
+def test_user():
+    &quot;&quot;&quot;測試用戶&quot;&quot;&quot;
+    return {
+        &quot;id&quot;: &quot;test-user-123&quot;,
+        &quot;email&quot;: &quot;test@example.com&quot;,
+        &quot;token&quot;: &quot;test-token&quot;
+    }
+</code></pre>
+<h3 id="23-e2e">2.3 E2E 測試工具<a class="headerlink" href="#23-e2e" title="連結到此標題">&para;</a></h3>
+<h4 id="cypress">Cypress 配置<a class="headerlink" href="#cypress" title="連結到此標題">&para;</a></h4>
+<p><strong><code>cypress.config.js</code>：</strong></p>
+<pre><code class="language-javascript">import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:8000',
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+    viewportWidth: 1280,
+    viewportHeight: 720,
+    video: false,
+    screenshotOnRunFailure: true,
+  },
+})
+</code></pre>
+<p><strong>Cypress 測試範例：</strong></p>
+<pre><code class="language-javascript">// cypress/e2e/backtest.cy.js
+describe('Backtest Flow', () =&gt; {
+  beforeEach(() =&gt; {
+    cy.visit('/')
+  })
+
+  it('should create and view backtest results', () =&gt; {
+    // 導航到回測頁面
+    cy.get('[data-testid=&quot;nav-backtest&quot;]').click()
+
+    // 填寫表單
+    cy.get('[data-testid=&quot;input-symbol&quot;]').type('AAPL')
+    cy.get('[data-testid=&quot;select-strategy&quot;]').select('RSI')
+    cy.get('[data-testid=&quot;input-period&quot;]').clear().type('14')
+
+    // 提交表單
+    cy.get('[data-testid=&quot;button-submit&quot;]').click()
+
+    // 等待結果
+    cy.get('[data-testid=&quot;loading-spinner&quot;]', { timeout: 30000 }).should('not.exist')
+
+    // 驗證結果
+    cy.get('[data-testid=&quot;backtest-results&quot;]').should('be.visible')
+    cy.get('[data-testid=&quot;equity-chart&quot;]').should('exist')
+    cy.get('[data-testid=&quot;metrics-table&quot;]').should('contain', 'Total Return')
+  })
+
+  it('should show validation errors for missing fields', () =&gt; {
+    cy.get('[data-testid=&quot;nav-backtest&quot;]').click()
+
+    // 不填寫任何字段直接提交
+    cy.get('[data-testid=&quot;button-submit&quot;]').click()
+
+    // 驗證錯誤消息
+    cy.get('[data-testid=&quot;error-symbol&quot;]').should('contain', 'Symbol is required')
+  })
+
+  context('Mobile view', () =&gt; {
+    beforeEach(() =&gt; {
+      cy.viewport(375, 667)
+    })
+
+    it('should display responsive layout', () =&gt; {
+      cy.get('[data-testid=&quot;nav-backtest&quot;]').click()
+      cy.get('[data-testid=&quot;backtest-form&quot;]').should('be.visible')
+
+      // 驗證移動端特有的佈局
+      cy.get('[data-testid=&quot;form-grid&quot;]').should('have.css', 'grid-template-columns', '1fr')
+    })
+  })
+})
+</code></pre>
+<p><strong>運行 Cypress：</strong></p>
+<pre><code class="language-bash"># 打開 Cypress UI
+npm run test:e2e:open
+
+# 運行所有測試（無頭模式）
+npm run test:e2e
+
+# 運行特定測試文件
+npx cypress run --spec &quot;cypress/e2e/backtest.cy.js&quot;
+
+# 不同視口測試
+npm run test:e2e:mobile   # 375x667
+npm run test:e2e:tablet   # 768x1024
+npm run test:e2e:desktop  # 1920x1080
+</code></pre>
+<h3 id="24">2.4 測試報告和覆蓋率分析<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<h4 id="_4">覆蓋率配置<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<p><strong>Pytest 覆蓋率：</strong></p>
+<pre><code class="language-ini"># pytest.ini
+[pytest]
+addopts =
+    --cov=.
+    --cov-report=html:coverage/html
+    --cov-report=term-missing
+    --cov-report=xml:coverage.xml
+    --cov-report=json:coverage.json
+    --cov-fail-under=80
+</code></pre>
+<p><strong>Vitest 覆蓋率：</strong></p>
+<pre><code class="language-javascript">// vitest.config.js
+export default defineConfig({
+  test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      all: true,
+      lines: 80,
+      functions: 80,
+      branches: 75,
+      statements: 80,
+    },
+  },
+})
+</code></pre>
+<h4 id="_5">覆蓋率目標<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>當前覆蓋率</th>
+<th>目標覆蓋率</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🐍 後端核心邏輯</td>
+<td>70%</td>
+<td>90%</td>
+<td>High</td>
+</tr>
+<tr>
+<td>🐍 後端 API</td>
+<td>65%</td>
+<td>85%</td>
+<td>High</td>
+</tr>
+<tr>
+<td>⚛️ 前端 Utils</td>
+<td>100%</td>
+<td>✅</td>
+<td>Done</td>
+</tr>
+<tr>
+<td>⚛️ 前端 Components</td>
+<td>30%</td>
+<td>75%</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>⚛️ 前端 Services</td>
+<td>50%</td>
+<td>80%</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_6">測試報告整合<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<p><strong>HTML 覆蓋率報告：</strong></p>
+<pre><code class="language-bash"># 生成並打開 HTML 報告
+pytest --cov=. --cov-report=html
+open coverage/html/index.html
+
+# 或前端
+npm run test:coverage
+open coverage/index.html
+</code></pre>
+<p><strong>Codecov 整合（CI）：</strong></p>
+<pre><code class="language-yaml"># .github/workflows/ci.yml
+- name: Upload coverage to Codecov
+  uses: codecov/codecov-action@v4
+  with:
+    file: ./coverage.xml
+    flags: backend
+    fail_ci_if_error: false
+</code></pre>
+<hr />
+<h2 id="3">3. 工作流程設計<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 開發任務流程（從需求到部署）<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<h4 id="_7">完整開發生命週期<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. 需求分析與規劃                                         │
+│  - 創建 Issue 或任務                                       │
+│  - 明確需求和驗收標準                                       │
+│  - 預估工作量和時間線                                       │
+│  - 識別依賴和風險                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. 技術設計與架構                                           │
+│  - 創建設計文檔                                             │
+│  - 定義 API 接口                                            │
+│  - 設計數據庫模型                                           │
+│  - 識別重構需求                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 環境準備                                                 │
+│  - 創建功能分支 (git checkout -b feature/xxx)               │
+│  - 安裝依賴                                                 │
+│  - 配置本地環境                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. TDD 開發循環                                            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  4.1 編寫測試（紅）                                   │   │
+│  │     - 單元測試                                         │   │
+│  │     - 定義預期行為                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  4.2 實現功能（綠）                                   │   │
+│  │     - 編寫最小可工作代碼                               │   │
+│  │     - 通過測試                                         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  4.3 重構（優化）                                     │   │
+│  │     - 改進代碼質量                                     │   │
+│  │     - 保持測試通過                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  4.4 重複循環                                         │   │
+│  │     - 返回 4.1 直到功能完成                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 集成測試                                                 │
+│  - API 集成測試                                             │
+│  - 組件集成測試                                             │
+│  - 數據庫集成測試                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 代碼審查準備                                             │
+│  - 自我審查                                                 │
+│  - 運行完整測試套件                                         │
+│  - 檢查代碼覆蓋率                                           │
+│  - 編譯前端                                                 │
+│  - 更新文檔                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  7. 創建 Pull Request                                       │
+│  - 使用 PR 模板                                             │
+│  - 清晰描述變更                                             │
+│  - 關聯 Issue 和任務標記                                    │
+│  - 添加截圖/演示                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  8. CI/CD 自動檢查                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  8.1 Lint 檢查                                        │   │
+│  │     - Ruff / ESLint                                   │   │
+│  │     - 代碼風格                                         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  8.2 單元測試                                          │   │
+│  │     - Pytest / Vitest                                  │   │
+│  │     - 覆蓋率檢查                                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  8.3 構建驗證                                          │   │
+│  │     - Frontend build                                   │   │
+│  │     - Docker image                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  8.4 E2E 測試（可選）                                  │   │
+│  │     - Cypress                                         │   │
+│  │     - 關鍵流程驗證                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  9. 代碼審查                                                 │
+│  - 審查者審查代碼                                           │
+│  - 討論和改進                                               │
+│  - 修復審查反饋                                             │
+│  - 審查通過                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  10. 合併到主分支                                            │
+│  - Squash and Merge                                         │
+│  - 創建 release tag                                         │
+│  - 自動部署到生產環境                                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  11. 部署後驗證                                             │
+│  - 健康檢查                                                 │
+│  - 功能驗證                                                 │
+│  - 監控日誌                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  12. 文檔更新與歸檔                                         │
+│  - 更新 README                                             │
+│  - 更新 API 文檔                                            │
+│  - 更新 CHANGELOG                                           │
+│  - 關閉 Issue                                               │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="_8">任務跟踪和進度管理<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<p><strong>使用 Issue + PR 關聯：</strong></p>
+<pre><code class="language-bash"># 1. 創建 Issue
+gh issue create --title &quot;Add momentum indicator&quot; \
+  --body &quot;## Description\nAdd momentum indicator to the backtest system.&quot; \
+  --label &quot;feature&quot;,&quot;enhancement&quot;
+
+# 2. 從 Issue 創建分支
+gh issue create --title &quot;Add momentum indicator&quot; \
+  --label &quot;feature&quot; \
+  --web
+# 或使用: gh issue develop &lt;issue-number&gt;
+
+# 3. 開發並創建 PR
+gh pr create --title &quot;feat: add momentum indicator&quot; \
+  --body &quot;Closes #123&quot; \
+  --base main \
+  --head feature/add-momentum-indicator
+
+# 4. 自動關聯 Issue（PR 合併後自動關閉）
+</code></pre>
+<p><strong>Kanban 板管理：</strong></p>
+<pre><code>Backlog → In Progress → In Review → Testing → Done
+   │          │             │           │      │
+   │          │             │           │      └── 已部署
+   │          │             │           └────────── E2E 通過
+   │          │             └────────────────────── PR 已批准
+   │          └──────────────────────────────────── 正在開發
+   └────────────────────────────────────────────── 待處理
+</code></pre>
+<h3 id="32">3.2 代碼審查流程<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="pr">PR 模板<a class="headerlink" href="#pr" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.github/PULL_REQUEST_TEMPLATE.md</code>：</strong></p>
+<pre><code class="language-markdown">## Pull Request
+
+### 描述
+簡短描述此 PR 的目的和範圍。
+
+### 變更類型
+- [ ] 新功能 (feat)
+- [ ] Bug 修復 (fix)
+- [ ] 性能優化 (performance)
+- [ ] 重構 (refactor)
+- [ ] 文檔更新 (docs)
+- [ ] 測試相關 (test)
+- [ ] 調試記錄 (debug)
+
+### 相關 Issue
+關聯 Issue: #&lt;issue_number&gt;
+任務標記: `ARCH-XXX`, `REF-XXX`, `Q4-#XX`
+
+### 變更摘要
+- [ ] 前端變更
+- [ ] 後端變更
+- [ ] 資料庫變更
+- [ ] Docker 配置變更
+
+### 測試檢查清單
+- [ ] 前端已編譯 (`cd frontend &amp;&amp; npm run build`)
+- [ ] 後端測試通過 (`cd backend &amp;&amp; pytest -m &quot;not slow&quot;`)
+- [ ] 前端測試通過 (`cd frontend &amp;&amp; npm test -- --run`)
+- [ ] E2E 測試通過（如適用）
+- [ ] 測試覆蓋率未下降
+- [ ] 代碼 lint 通過（`ruff check backend/`, `npm run lint`）
+
+### 部署檢查清單
+- [ ] Docker 鏡像可構建
+- [ ] 本地 Docker 測試通過
+- [ ] 環境變數已更新（如需要）
+- [ ] 數據庫遷移腳本已準備（如適用）
+
+### 截圖 / 演示
+（如適用，添加 UI 變更的截圖或 GIF）
+
+### 審查者
+@reviewer1 @reviewer2
+
+### 檢查清單
+- [ ] 我已經自審過此代碼
+- [ ] 我已經在本地測試過變更
+- [ ] 代碼遵循項目風格指南
+- [ ] 文檔已相應更新
+- [ ] 提交訊息遵循 Conventional Commits
+</code></pre>
+<h4 id="_9">代碼審查標準<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<p><strong>功能正確性：</strong>
+- [ ] 功能符合需求和驗收標準
+- [ ] 邊界情況已處理（空值、極限值等）
+- [ ] 錯誤處理完善
+- [ ] API 接口符合規範</p>
+<p><strong>代碼質量：</strong>
+- [ ] 代碼可讀性好，命名清晰
+- [ ] 遵循項目風格指南
+- [ ] 無重複代碼（DRY 原則）
+- [ ] 函數/方法單一職責
+- [ ] 適當的註釋和文檔字符串</p>
+<p><strong>測試覆蓋：</strong>
+- [ ] 新功能有測試覆蓋
+- [ ] 測試通過率 100%
+- [ ] 覆蓋率未下降（目標 &gt;80%）
+- [ ] 測試用例覆蓋關鍵路徑和邊界情況</p>
+<p><strong>安全性：</strong>
+- [ ] 無硬編碼密碼/API keys
+- [ ] 適當的權限檢查
+- [ ] 輸入驗證完善（SQL 注入、XSS 等）
+- [ ] 敏感數據加密存儲</p>
+<p><strong>性能：</strong>
+- [ ] 無明顯性能退化
+- [ ] 數據庫查詢優化（避免 N+1）
+- [ ] 前端渲染優化（避免重複渲染）
+- [ ] 適當的緩存策略</p>
+<p><strong>文檔：</strong>
+- [ ] README 已更新（如需要）
+- [ ] API 文檔已更新
+- [ ] 註釋清晰
+- [ ] CHANGELOG 已更新</p>
+<h4 id="_10">審查者角色和責任<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>職責</th>
+<th>建議人員</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術審查者</strong></td>
+<td>代碼質量、架構、最佳實踐</td>
+<td>資深開發者</td>
+</tr>
+<tr>
+<td><strong>功能審查者</strong></td>
+<td>功能正確性、需求符合度</td>
+<td>產品經理/需求方</td>
+</tr>
+<tr>
+<td><strong>測試審查者</strong></td>
+<td>測試覆蓋、測試質量</td>
+<td>QA 工程師</td>
+</tr>
+<tr>
+<td><strong>安全審查者</strong></td>
+<td>安全漏洞、權限檢查</td>
+<td>安全專家（如需要）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_11">審查反饋模板<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<p><strong>建設性反饋示例：</strong></p>
+<pre><code class="language-markdown">## 審查反饋
+
+### 🔴 必須修復（Blockers）
+
+1. **安全問題**
+   - ❌ 硬編碼的 API key 已提交到代碼庫
+   - 建議：使用環境變量或 secrets manager
+   - 位置：`backend/config.py:15`
+
+### 🟡 建議修改（Suggestions）
+
+1. **性能優化**
+   - ⚠️ 這個查詢可能會有 N+1 問題
+   - 建議：使用 `select_related` 或預加載
+   - 位置：`backend/services/backtest_service.py:45`
+
+2. **代碼可讀性**
+   - 💡 這個函數有點長，可以拆分
+   - 建議：提取為更小的單元函數
+   - 位置：`backend/services/backtest_service.py:89-120`
+
+### 🟢 很好的地方（Good Points）
+
+1. ✅ 測試覆蓋率很好，達到了 85%
+2. ✅ 文檔字符串寫得很清晰
+3. ✅ 遵循了項目的命名規範
+</code></pre>
+<h3 id="33">3.3 重構和優化流程<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="_12">重構原則<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<p><strong>重構前的檢查清單：</strong>
+- [ ] 是否有現有的測試覆蓋？
+- [ ] 是否有回歸測試？
+- [ ] 是否理解現有代碼？
+- [ ] 是否有重構計劃？
+- [ ] 是否評估了影響範圍？</p>
+<p><strong>重構最佳實踐：</strong></p>
+<ol>
+<li><strong>小步驟重構</strong></li>
+<li>每次只做一個小改變</li>
+<li>每次改變後都運行測試</li>
+<li>
+<p>如果失敗，立即回滾</p>
+</li>
+<li>
+<p><strong>向後兼容</strong>
+   ```python
+   # 舊函數標記為 deprecated
+   import warnings</p>
+</li>
+</ol>
+<p>def deprecated_get_futures_spec(symbol):
+       warnings.warn(
+           "Use get_spec_for_symbol instead",
+           DeprecationWarning,
+           stacklevel=2
+       )
+       return _get_spec_impl(symbol)</p>
+<p># 新函數
+   def get_spec_for_symbol(symbol):
+       return _get_spec_impl(symbol)
+   ```</p>
+<ol>
+<li><strong>測試驅動重構</strong></li>
+<li>先寫測試確保現有行為</li>
+<li>再重構</li>
+<li>確保測試通過</li>
+</ol>
+<h4 id="_13">重構工作流程<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. 發現重構機會                                             │
+│  - Code Review 中的反饋                                     │
+│  - 技術債務積累                                             │
+│  - 性能瓶頸                                                 │
+│  - 代碼異味（Code Smell）                                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. 重構規劃                                                 │
+│  - 識別重構範圍                                             │
+│  - 定義重構目標                                             │
+│  - 預估影響和風險                                           │
+│  - 創建重構 Issue（REF-XXX）                                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 重構前測試                                               │
+│  - 運行完整測試套件                                         │
+│  - 記錄測試基線                                             │
+│  - 備份代碼（git tag 或 branch）                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 漸進式重構                                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Phase 1: 準備階段                                     │   │
+│  │  - 添加接口/抽象層                                     │   │
+│  │  - 添加適配器                                           │   │
+│  │  - 保持舊代碼工作                                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Phase 2: 遷移階段                                     │   │
+│  │  - 遷移核心功能到新架構                                 │   │
+│  │  - 逐步替換調用點                                       │   │
+│  │  - 持續測試                                             │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                              │                               │
+│                              ▼                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Phase 3: 清理階段                                     │   │
+│  │  - 移除棄用代碼                                       │   │
+│  │  - 更新文檔                                           │   │
+│  │  - 最終驗證                                           │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 重構後驗證                                               │
+│  - 運行完整測試套件                                         │
+│  - 性能基準測試                                             │
+│  - 回歸測試                                                 │
+│  - 代碼審查                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 文檔更新                                                 │
+│  - 更新重構計劃文檔                                         │
+│  - 更新架構文檔                                             │
+│  - 更新 CHANGELOG                                           │
+│  - 關閉重構 Issue                                           │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="_14">重構模式和策略<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<p><strong>模式 1：提取方法（Extract Method）</strong></p>
+<pre><code class="language-python"># Before
+def calculate_metrics(result):
+    total_return = (result.equity_curve[-1] - result.equity_curve[0]) / result.equity_curve[0]
+    max_drawdown = (result.equity_curve.max() - result.equity_curve.min()) / result.equity_curve.max()
+    sharpe_ratio = result.returns.mean() / result.returns.std()
+    return total_return, max_drawdown, sharpe_ratio
+
+# After
+def calculate_metrics(result):
+    return (
+        _calculate_total_return(result),
+        _calculate_max_drawdown(result),
+        _calculate_sharpe_ratio(result)
+    )
+
+def _calculate_total_return(result):
+    return (result.equity_curve[-1] - result.equity_curve[0]) / result.equity_curve[0]
+
+def _calculate_max_drawdown(result):
+    return (result.equity_curve.max() - result.equity_curve.min()) / result.equity_curve.max()
+
+def _calculate_sharpe_ratio(result):
+    return result.returns.mean() / result.returns.std()
+</code></pre>
+<p><strong>模式 2：策略模式（Strategy Pattern）</strong></p>
+<pre><code class="language-python"># Before
+class BacktestService:
+    def run_backtest(self, strategy_type, params):
+        if strategy_type == &quot;rsi&quot;:
+            return self._run_rsi_backtest(params)
+        elif strategy_type == &quot;macd&quot;:
+            return self._run_macd_backtest(params)
+        # ... 更多策略
+
+# After
+from abc import ABC, abstractmethod
+
+class IStrategy(ABC):
+    @abstractmethod
+    def generate_signals(self, context):
+        pass
+
+    @abstractmethod
+    def get_metadata(self):
+        pass
+
+class RSIStrategy(IStrategy):
+    def generate_signals(self, context):
+        # RSI 邏輯
+        pass
+
+    def get_metadata(self):
+        return {&quot;name&quot;: &quot;RSI&quot;, &quot;params&quot;: [&quot;period&quot;]}
+
+class BacktestService:
+    def run_backtest(self, strategy: IStrategy, params):
+        signals = strategy.generate_signals(params)
+        # 統一的回測邏輯
+        pass
+</code></pre>
+<h3 id="34">3.4 測試驅動開發流程<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<h4 id="tdd">TDD 循環<a class="headerlink" href="#tdd" title="連結到此標題">&para;</a></h4>
+<pre><code>Red → Green → Refactor
+</code></pre>
+<p><strong>詳細 TDD 工作流程：</strong></p>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. Red：編寫失敗的測試                                     │
+│  - 理解需求                                                 │
+│  - 編寫測試定義預期行為                                     │
+│  - 運行測試（應該失敗）                                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. Green：編寫最簡代碼使測試通過                           │
+│  - 編寫最小可工作代碼                                       │
+│  - 不關注代碼質量                                           │
+│  - 運行測試（應該通過）                                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. Refactor：重構並保持測試通過                             │
+│  - 改進代碼質量                                             │
+│  - 提取重複代碼                                             │
+│  - 改善命名                                                 │
+│  - 運行測試（應該仍然通過）                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 重復循環直到功能完成                                     │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="tdd_1">TDD 實戰範例<a class="headerlink" href="#tdd_1" title="連結到此標題">&para;</a></h4>
+<p><strong>場景：添加新的回測策略</strong></p>
+<p><strong>Step 1: Red - 編寫測試</strong></p>
+<pre><code class="language-python"># tests/unit/test_strategies/test_bollinger_bands.py
+import pytest
+from services.strategies import BollingerBandsStrategy
+
+@pytest.mark.unit
+def test_bollinger_bands_generate_signals():
+    &quot;&quot;&quot;測試布林帶策略信號生成&quot;&quot;&quot;
+    # Arrange
+    strategy = BollingerBandsStrategy(period=20, std=2)
+    ohlcv = pd.DataFrame({
+        &quot;close&quot;: [10, 11, 12, 13, 14, 15, 14, 13, 12, 11]
+    })
+
+    # Act
+    signals = strategy.generate_signals(ohlcv)
+
+    # Assert
+    assert len(signals) &gt; 0
+    assert all(signal.action in [&quot;BUY&quot;, &quot;SELL&quot;] for signal in signals)
+</code></pre>
+<p><strong>Step 2: Green - 編寫最小代碼</strong></p>
+<pre><code class="language-python"># services/strategies/bollinger_bands.py
+import pandas as pd
+from services.strategies import IStrategy, Signal
+
+class BollingerBandsStrategy(IStrategy):
+    def __init__(self, period=20, std=2):
+        self.period = period
+        self.std = std
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -&gt; list[Signal]:
+        &quot;&quot;&quot;生成布林帶交易信號&quot;&quot;&quot;
+        # 計算布林帶
+        sma = ohlcv[&quot;close&quot;].rolling(self.period).mean()
+        rolling_std = ohlcv[&quot;close&quot;].rolling(self.period).std()
+        upper_band = sma + (rolling_std * self.std)
+        lower_band = sma - (rolling_std * self.std)
+
+        # 生成信號
+        signals = []
+        for i in range(len(ohlcv)):
+            if ohlcv[&quot;close&quot;].iloc[i] &lt; lower_band.iloc[i]:
+                signals.append(Signal(action=&quot;BUY&quot;, date=ohlcv.index[i]))
+            elif ohlcv[&quot;close&quot;].iloc[i] &gt; upper_band.iloc[i]:
+                signals.append(Signal(action=&quot;SELL&quot;, date=ohlcv.index[i]))
+
+        return signals
+
+    def get_metadata(self):
+        return {&quot;name&quot;: &quot;Bollinger Bands&quot;, &quot;params&quot;: [&quot;period&quot;, &quot;std&quot;]}
+</code></pre>
+<p><strong>Step 3: Refactor - 重構</strong></p>
+<pre><code class="language-python"># services/strategies/bollinger_bands.py
+import pandas as pd
+from services.strategies import IStrategy, Signal
+
+class BollingerBandsStrategy(IStrategy):
+    def __init__(self, period=20, std=2):
+        self.period = period
+        self.std = std
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -&gt; list[Signal]:
+        &quot;&quot;&quot;生成布林帶交易信號&quot;&quot;&quot;
+        bands = self._calculate_bands(ohlcv)
+        return self._generate_signals_from_bands(ohlcv, bands)
+
+    def _calculate_bands(self, ohlcv: pd.DataFrame) -&gt; dict:
+        &quot;&quot;&quot;計算布林帶&quot;&quot;&quot;
+        sma = ohlcv[&quot;close&quot;].rolling(self.period).mean()
+        rolling_std = ohlcv[&quot;close&quot;].rolling(self.period).std()
+        return {
+            &quot;sma&quot;: sma,
+            &quot;upper&quot;: sma + (rolling_std * self.std),
+            &quot;lower&quot;: sma - (rolling_std * self.std)
+        }
+
+    def _generate_signals_from_bands(self, ohlcv: pd.DataFrame, bands: dict) -&gt; list[Signal]:
+        &quot;&quot;&quot;根據布林帶生成信號&quot;&quot;&quot;
+        signals = []
+        for i in range(len(ohlcv)):
+            close = ohlcv[&quot;close&quot;].iloc[i]
+            if close &lt; bands[&quot;lower&quot;].iloc[i]:
+                signals.append(Signal(action=&quot;BUY&quot;, date=ohlcv.index[i]))
+            elif close &gt; bands[&quot;upper&quot;].iloc[i]:
+                signals.append(Signal(action=&quot;SELL&quot;, date=ohlcv.index[i]))
+        return signals
+
+    def get_metadata(self):
+        return {&quot;name&quot;: &quot;Bollinger Bands&quot;, &quot;params&quot;: [&quot;period&quot;, &quot;std&quot;]}
+</code></pre>
+<h3 id="35">3.5 調試和問題診斷流程<a class="headerlink" href="#35" title="連結到此標題">&para;</a></h3>
+<h4 id="_15">調試工作流程<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. 重現問題                                                 │
+│  - 獲取錯誤訊息和堆棧跟踪                                     │
+│  - 理解問題的上下文                                         │
+│  - 確定重現步驟                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. 添加日誌和調試輸出                                       │
+│  - 在關鍵位置添加日誌                                       │
+│  - 使用 logging 模塊（不要用 print）                         │
+│  - 設置日誌級別                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 使用調試器                                               │
+│  - VSCode 調試器（斷點、監視）                               │
+│  - Python pdb                                              │
+│  - Chrome DevTools（前端）                                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 隔離問題                                                 │
+│  - 編寫最小重現案例                                         │
+│  - 排除外部依賴                                             │
+│  - 確定問題範圍                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 形成假設並驗證                                           │
+│  - 基於證據形成假設                                         │
+│  - 設計驗證實驗                                             │
+│  - 記錄發現                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 修復問題                                                 │
+│  - 實施修復                                                 │
+│  - 添加測試防止回歸                                         │
+│  - 運行完整測試套件                                         │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  7. 驗證和部署                                               │
+│  - 本地驗證                                                 │
+│  - Code Review                                              │
+│  - 部署到測試環境                                           │
+│  - 監控生產環境                                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="_16">調試工具配置<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<p><strong>Python Logging 配置：</strong></p>
+<pre><code class="language-python"># backend/config/logging.py
+import logging
+import sys
+from pathlib import Path
+
+def setup_logging(level=logging.INFO):
+    &quot;&quot;&quot;設置日誌配置&quot;&quot;&quot;
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+    # 設置根 logger
+    logging.basicConfig(
+        level=level,
+        format=log_format,
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler('backend/logs/app.log')
+        ]
+    )
+
+    # 設置第三方庫日誌級別
+    logging.getLogger('uvicorn').setLevel(logging.WARNING)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+</code></pre>
+<p><strong>VSCode 調試配置：</strong></p>
+<pre><code class="language-json">// .vscode/launch.json
+{
+  &quot;version&quot;: &quot;0.2.0&quot;,
+  &quot;configurations&quot;: [
+    {
+      &quot;name&quot;: &quot;Python: FastAPI&quot;,
+      &quot;type&quot;: &quot;debugpy&quot;,
+      &quot;request&quot;: &quot;launch&quot;,
+      &quot;program&quot;: &quot;${workspaceFolder}/backend/main.py&quot;,
+      &quot;console&quot;: &quot;integratedTerminal&quot;,
+      &quot;env&quot;: {
+        &quot;PYTHONPATH&quot;: &quot;${workspaceFolder}/backend&quot;,
+        &quot;LOG_LEVEL&quot;: &quot;DEBUG&quot;
+      },
+      &quot;justMyCode&quot;: false
+    },
+    {
+      &quot;name&quot;: &quot;Python: Test Current File&quot;,
+      &quot;type&quot;: &quot;debugpy&quot;,
+      &quot;request&quot;: &quot;launch&quot;,
+      &quot;module&quot;: &quot;pytest&quot;,
+      &quot;args&quot;: [
+        &quot;${file}&quot;,
+        &quot;-v&quot;
+      ],
+      &quot;console&quot;: &quot;integratedTerminal&quot;,
+      &quot;justMyCode&quot;: false
+    }
+  ]
+}
+</code></pre>
+<h4 id="_17">常見問題診斷<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<p><strong>問題 1：性能慢</strong></p>
+<pre><code class="language-python"># 使用 cProfile 分析性能
+import cProfile
+import pstats
+from io import StringIO
+
+def profile_function(func):
+    &quot;&quot;&quot;性能分析裝飾器&quot;&quot;&quot;
+    def wrapper(*args, **kwargs):
+        pr = cProfile.Profile()
+        pr.enable()
+        result = func(*args, **kwargs)
+        pr.disable()
+
+        # 打印性能報告
+        s = StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
+        ps.print_stats(20)
+        print(s.getvalue())
+
+        return result
+    return wrapper
+
+# 使用
+@profile_function
+def run_backtest():
+    # ... 你的代碼
+    pass
+</code></pre>
+<p><strong>問題 2：內存泄漏</strong></p>
+<pre><code class="language-python"># 使用 tracemalloc
+import tracemalloc
+
+tracemalloc.start()
+
+# ... 你的代碼
+
+# 打印內存使用快照
+snapshot = tracemalloc.take_snapshot()
+top_stats = snapshot.statistics('lineno')
+for stat in top_stats[:10]:
+    print(stat)
+</code></pre>
+<hr />
+<h2 id="4">4. 文檔工具集成<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41-jsdoc">4.1 JSDoc 註解和生成<a class="headerlink" href="#41-jsdoc" title="連結到此標題">&para;</a></h3>
+<h4 id="jsdoc">JSDoc 配置<a class="headerlink" href="#jsdoc" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.jsdoc.json</code>：</strong></p>
+<pre><code class="language-json">{
+  &quot;source&quot;: {
+    &quot;include&quot;: [&quot;frontend/src&quot;],
+    &quot;includePattern&quot;: &quot;.+\\.js(x)?$&quot;,
+    &quot;exclude&quot;: [&quot;frontend/src/test&quot;]
+  },
+  &quot;opts&quot;: {
+    &quot;destination&quot;: &quot;./docs/jsdoc/&quot;,
+    &quot;recurse&quot;: true
+  },
+  &quot;plugins&quot;: [&quot;plugins/markdown&quot;]
+}
+</code></pre>
+<h4 id="jsdoc_1">JSDoc 註解範例<a class="headerlink" href="#jsdoc_1" title="連結到此標題">&para;</a></h4>
+<p><strong>React 組件文檔：</strong></p>
+<pre><code class="language-javascript">/**
+ * 回測表單組件
+ * @component
+ * @example
+ * return (
+ *   &lt;BacktestForm
+ *     onSubmit={handleSubmit}
+ *     strategies={['RSI', 'MACD', 'Bollinger Bands']}
+ *   /&gt;
+ * )
+ */
+export function BacktestForm({ onSubmit, strategies = [] }) {
+  // ... 組件代碼
+}
+
+/**
+ * 格式化貨幣數值
+ * @param {number} value - 要格式化的數值
+ * @param {string} [currency='USD'] - 貨幣代碼
+ * @returns {string} 格式化後的貨幣字符串
+ * @example
+ * formatCurrency(1234.56) // &quot;$1,234.56&quot;
+ * formatCurrency(1234.56, 'TWD') // &quot;NT$1,234.56&quot;
+ */
+export function formatCurrency(value, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(value)
+}
+</code></pre>
+<p><strong>服務類文檔：</strong></p>
+<pre><code class="language-javascript">/**
+ * API 客戶端服務
+ * @class
+ * @classdesc 處理所有 API 請求的統一客戶端
+ * @example
+ * const api = new APIClient('http://localhost:8000')
+ * const result = await api.post('/api/backtest', params)
+ */
+export class APIClient {
+  /**
+   * 創建 API 客戶端實例
+   * @param {string} baseURL - API 基礎 URL
+   * @param {Object} [config] - 配置選項
+   * @param {number} [config.timeout=30000] - 請求超時時間（毫秒）
+   */
+  constructor(baseURL, config = {}) {
+    this.baseURL = baseURL
+    this.timeout = config.timeout || 30000
+  }
+
+  /**
+   * 發送 POST 請求
+   * @async
+   * @param {string} endpoint - API 端點
+   * @param {Object} data - 請求數據
+   * @returns {Promise&lt;Object&gt;} 響應數據
+   * @throws {Error} 當請求失敗時拋出錯誤
+   * @example
+   * const result = await client.post('/api/backtest', { symbol: 'AAPL' })
+   */
+  async post(endpoint, data) {
+    // ... 實現
+  }
+}
+</code></pre>
+<h4 id="jsdoc_2">生成 JSDoc<a class="headerlink" href="#jsdoc_2" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 安裝 jsdoc
+npm install --save-dev jsdoc
+
+# 生成文檔
+npx jsdoc -c .jsdoc.json
+
+# 使用插件支持 Markdown
+npm install --save-dev jsdoc-plugin-markdown
+</code></pre>
+<h3 id="42-markdown">4.2 Markdown 文檔編寫<a class="headerlink" href="#42-markdown" title="連結到此標題">&para;</a></h3>
+<h4 id="_18">文檔結構標準<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<p><strong>專案文檔目錄結構：</strong></p>
+<pre><code>docs/
+├── README.md                    # 專案概述
+├── CONTRIBUTING.md             # 貢獻指南
+├── DEVELOPMENT.md              # 開發指南
+├── ARCHITECTURE.md             # 架構文檔
+├── API.md                      # API 文檔
+├── DEPLOYMENT.md               # 部署文檔
+├── CHANGELOG.md                # 變更日誌
+├── guides/                     # 指南文檔
+│   ├── getting-started.md
+│   ├── testing.md
+│   └── debugging.md
+└── refactoring/               # 重構計劃
+    ├── REF-001-symbol-type-unification.md
+    ├── REF-002-strategy-system.md
+    └── ...
+</code></pre>
+<h4 id="markdown">Markdown 模板<a class="headerlink" href="#markdown" title="連結到此標題">&para;</a></h4>
+<p><strong>README.md 模板：</strong></p>
+<pre><code class="language-markdown"># [專案名稱]
+
+簡短描述專案的目的和核心功能。
+
+## 快速開始
+
+### 前置條件
+- Python 3.11+
+- Node.js 24+
+- Docker
+
+### 安裝
+
+\`\`\`bash
+# 克隆專案
+git clone &lt;repository-url&gt;
+cd &lt;project-name&gt;
+
+# 後端
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# 前端
+cd frontend
+npm install
+
+# 運行
+# 後端
+cd backend
+uvicorn main:app --reload
+
+# 前端
+cd frontend
+npm run dev
+\`\`\`
+
+## 專案結構
+
+\`\`\`
+.
+├── backend/           # FastAPI 後端
+├── frontend/          # React 前端
+├── tests/             # 測試套件
+├── docs/              # 文檔
+└── docker/            # Docker 配置
+\`\`\`
+
+## 功能
+
+- ✅ 功能 1
+- ✅ 功能 2
+- 🚧 功能 3（開發中）
+
+## 技術棧
+
+### 後端
+- FastAPI
+- Python 3.11
+- Pytest
+
+### 前端
+- React 19
+- Vite
+- Vitest
+
+### 部署
+- Docker
+- GitHub Actions
+
+## 文檔
+
+- [相關檔案]
+- [相關檔案]
+- [相關檔案]
+
+## 貢獻
+
+請參考 [相關檔案]
+
+## 授權
+
+MIT License
+</code></pre>
+<p><strong>DEVELOPMENT.md 模板：</strong></p>
+<pre><code class="language-markdown"># 開發指南
+
+## 環境設置
+
+### 本地開發
+
+\`\`\`bash
+# 啟動開發環境
+docker-compose -f docker-compose.dev.yml up
+
+# 或分別啟動
+# 後端
+cd backend &amp;&amp; uvicorn main:app --reload
+
+# 前端
+cd frontend &amp;&amp; npm run dev
+\`\`\`
+
+## 代碼風格
+
+### Python
+- 使用 Ruff 進行 linting 和格式化
+- 遵循 PEP 8
+- 使用類型註解（推薦）
+
+\`\`\`bash
+# Lint
+ruff check backend/
+
+# Format
+ruff format backend/
+\`\`\`
+
+### JavaScript/React
+- 使用 ESLint 和 Prettier
+- 遵循 Airbnb Style Guide（部分）
+
+\`\`\`bash
+# Lint
+npm run lint
+
+# Format
+npm run format
+\`\`\`
+
+## 測試
+
+### 運行測試
+
+\`\`\`bash
+# 後端測試
+cd backend &amp;&amp; pytest -v
+
+# 前端測試
+cd frontend &amp;&amp; npm test
+
+# E2E 測試
+npm run test:e2e
+\`\`\`
+
+### 測試覆蓋率
+
+\`\`\`bash
+# 後端覆蓋率
+cd backend &amp;&amp; pytest --cov=. --cov-report=html
+
+# 前端覆蓋率
+cd frontend &amp;&amp; npm run test:coverage
+\`\`\`
+
+## 提交規範
+
+遵循 Conventional Commits 規範：
+
+\`\`\`
+&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;
+
+[optional body]
+
+[optional footer]
+\`\`\`
+
+提交類型：
+- \`feat\` - 新功能
+- \`fix\` - Bug 修復
+- \`refactor\` - 代碼重構
+- \`docs\` - 文檔更新
+- \`test\` - 測試相關
+
+## Pull Request 流程
+
+1. 創建功能分支
+2. 開發並測試
+3. 創建 Pull Request
+4. 等待 Code Review
+5. 修復反饋
+6. 合併
+
+## 調試
+
+### 後端調試
+- 使用 VSCode 調試器
+- 查看日誌：\`backend/logs/app.log\`
+
+### 前端調試
+- 使用 Chrome DevTools
+- React DevTools 瀏覽器擴展
+
+## 常見問題
+
+### 問題 1：...
+
+解決方案：...
+
+### 問題 2：...
+
+解決方案：...
+</code></pre>
+<h4 id="markdown_1">Markdown 最佳實踐<a class="headerlink" href="#markdown_1" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>
+<p><strong>使用清晰的標題層級</strong>
+   <code>markdown
+   # H1 - 只在文檔頂部使用一次
+   ## H2 - 主要章節
+   ### H3 - 子章節
+   #### H4 - 詳細說明</code></p>
+</li>
+<li>
+<p><strong>使用代碼塊指定語言</strong>
+   <code>``markdown
+   \</code>``python
+   def hello():
+       print("Hello, World!")
+   ```</p>
+</li>
+</ol>
+<p>```javascript
+   const hello = () =&gt; console.log("Hello, World!");
+   ```
+   ```</p>
+<ol>
+<li>
+<p><strong>使用表格組織信息</strong>
+   <code>markdown
+   | 工具 | 用途 | 配置文件 |
+   |------|------|---------|
+   | Ruff | Python linter | `ruff.toml` |
+   | ESLint | JavaScript linter | `eslint.config.js` |
+   | Pytest | Python 測試 | `pytest.ini` |</code></p>
+</li>
+<li>
+<p><strong>使用警告和注意塊</strong>
+   ```markdown</p>
+<blockquote>
+<p><strong>注意</strong>
+這是一個重要的提示。</p>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<p><strong>警告</strong>
+這是一個警告信息，請小心。
+   ```</p>
+</blockquote>
+<ol>
+<li><strong>使用引用標記文檔類型</strong>
+   ```markdown<blockquote>
+<p>[!NOTE]
+有用的信息</p>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<p>[!TIP]
+實用技巧</p>
+<p>[!WARNING]
+重要警告</p>
+<p>[!IMPORTANT]
+重要信息
+   ```</p>
+</blockquote>
+<h3 id="43-api">4.3 API 文檔生成<a class="headerlink" href="#43-api" title="連結到此標題">&para;</a></h3>
+<h4 id="fastapi">FastAPI 自動文檔<a class="headerlink" href="#fastapi" title="連結到此標題">&para;</a></h4>
+<p>FastAPI 自動生成 OpenAPI 文檔，可通過以下 URL 訪問：
+- Swagger UI: <code>http://localhost:8000/docs</code>
+- ReDoc: <code>http://localhost:8000/redoc</code></p>
+<p><strong>自定義文檔配置：</strong></p>
+<pre><code class="language-python"># backend/main.py
+from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
+
+app = FastAPI(
+    title=&quot;Dashboard API&quot;,
+    description=&quot;Backtest system and market data API&quot;,
+    version=&quot;1.0.0&quot;,
+    docs_url=&quot;/docs&quot;,
+    redoc_url=&quot;/redoc&quot;
+)
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title=&quot;Dashboard API&quot;,
+        version=&quot;1.0.0&quot;,
+        description=&quot;&quot;&quot;
+        ## Dashboard API Documentation
+
+        This API provides endpoints for:
+        - Backtesting trading strategies
+        - Fetching market data
+        - Managing tracked symbols
+        - Analyzing performance metrics
+        &quot;&quot;&quot;,
+        routes=app.routes,
+    )
+
+    # 添加額外的 tags
+    openapi_schema[&quot;tags&quot;] = [
+        {
+            &quot;name&quot;: &quot;Backtest&quot;,
+            &quot;description&quot;: &quot;Backtesting operations&quot;
+        },
+        {
+            &quot;name&quot;: &quot;Market Data&quot;,
+            &quot;description&quot;: &quot;Market data operations&quot;
+        }
+    ]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+</code></pre>
+<h4 id="api">API 端點文檔範例<a class="headerlink" href="#api" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional, Literal
+
+router = APIRouter(prefix=&quot;/api/backtest&quot;, tags=[&quot;Backtest&quot;])
+
+class BacktestRequest(BaseModel):
+    &quot;&quot;&quot;回測請求模型&quot;&quot;&quot;
+
+    symbol: str
+    &quot;&quot;&quot;股票代碼&quot;&quot;&quot;
+
+    strategy: Literal[&quot;RSI&quot;, &quot;MACD&quot;, &quot;Bollinger Bands&quot;]
+    &quot;&quot;&quot;策略名稱&quot;&quot;&quot;
+
+    start_date: Optional[str] = None
+    &quot;&quot;&quot;開始日期 (YYYY-MM-DD)&quot;&quot;&quot;
+
+    end_date: Optional[str] = None
+    &quot;&quot;&quot;結束日期 (YYYY-MM-DD)&quot;&quot;&quot;
+
+    params: Optional[dict] = {}
+    &quot;&quot;&quot;策略參數&quot;&quot;&quot;
+
+    class Config:
+        json_schema_extra = {
+            &quot;example&quot;: {
+                &quot;symbol&quot;: &quot;AAPL&quot;,
+                &quot;strategy&quot;: &quot;RSI&quot;,
+                &quot;start_date&quot;: &quot;2023-01-01&quot;,
+                &quot;end_date&quot;: &quot;2023-12-31&quot;,
+                &quot;params&quot;: {&quot;period&quot;: 14, &quot;overbought&quot;: 70, &quot;oversold&quot;: 30}
+            }
+        }
+
+@router.post(&quot;/run&quot;, response_model=BacktestResponse)
+async def run_backtest(request: BacktestRequest):
+    &quot;&quot;&quot;
+    運行回測
+
+    ## 參數
+
+    - **symbol**: 股票代碼（例如：AAPL, GOOGL）
+    - **strategy**: 策略名稱（RSI, MACD, Bollinger Bands）
+    - **start_date**: 開始日期（可選，默認為 1 年前）
+    - **end_date**: 結束日期（可選，默認為今天）
+    - **params**: 策略參數（可選）
+
+    ## 返回
+
+    返回回測結果，包括權益曲線和性能指標。
+
+    ## 錯誤
+
+    - **400**: 無效請求參數
+    - **404**: 找不到股票代碼
+    - **500**: 內部服務器錯誤
+    &quot;&quot;&quot;
+    try:
+        result = await backtest_service.run_backtest(
+            symbol=request.symbol,
+            strategy=request.strategy,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            params=request.params
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+</code></pre>
+<h4 id="api_1">導出 API 文檔<a class="headerlink" href="#api_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash"># 導出 OpenAPI JSON
+curl http://localhost:8000/openapi.json -o docs/api/openapi.json
+
+# 導出為 Markdown（使用 openapi2md）
+npx openapi2md docs/api/openapi.json -o docs/api/API.md
+</code></pre>
+<h4 id="api_2">手動 API 文檔模板<a class="headerlink" href="#api_2" title="連結到此標題">&para;</a></h4>
+<p><strong><code>docs/api/API.md</code>：</strong></p>
+<pre><code class="language-markdown"># API Documentation
+
+## Authentication
+
+所有 API 請求需要在 Header 中包含認證 token：
+
+\`\`\`http
+Authorization: Bearer &lt;your-token&gt;
+\`\`\`
+
+## Endpoints
+
+### Backtest
+
+#### Run Backtest
+
+運行指定的策略回測。
+
+\`\`\`http
+POST /api/backtest/run
+Content-Type: application/json
+Authorization: Bearer &lt;token&gt;
+
+{
+  &quot;symbol&quot;: &quot;AAPL&quot;,
+  &quot;strategy&quot;: &quot;RSI&quot;,
+  &quot;start_date&quot;: &quot;2023-01-01&quot;,
+  &quot;end_date&quot;: &quot;2023-12-31&quot;,
+  &quot;params&quot;: {
+    &quot;period&quot;: 14,
+    &quot;overbought&quot;: 70,
+    &quot;oversold&quot;: 30
+  }
+}
+\`\`\`
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| symbol | string | Yes | Stock symbol |
+| strategy | string | Yes | Strategy name (RSI, MACD, Bollinger Bands) |
+| start_date | string | No | Start date (YYYY-MM-DD) |
+| end_date | string | No | End date (YYYY-MM-DD) |
+| params | object | No | Strategy parameters |
+
+**Response (200 OK):**
+
+\`\`\`json
+{
+  &quot;backtest_id&quot;: &quot;bt-123456&quot;,
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;equity_curve&quot;: [...],
+  &quot;metrics&quot;: {
+    &quot;total_return&quot;: 0.25,
+    &quot;max_drawdown&quot;: -0.15,
+    &quot;sharpe_ratio&quot;: 1.5
+  }
+}
+\`\`\`
+
+**Error Response (400 Bad Request):**
+
+\`\`\`json
+{
+  &quot;error&quot;: &quot;Invalid symbol&quot;,
+  &quot;detail&quot;: &quot;Symbol 'INVALID' not found&quot;
+}
+\`\`\`
+
+---
+
+### Market Data
+
+#### Get Symbol Data
+
+獲取指定股票的市場數據。
+
+\`\`\`http
+GET /api/market-data/symbol/{symbol}?start_date=2023-01-01&amp;end_date=2023-12-31
+Authorization: Bearer &lt;token&gt;
+\`\`\`
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| symbol | path param | Yes | Stock symbol |
+| start_date | query param | No | Start date |
+| end_date | query param | No | End date |
+
+**Response (200 OK):**
+
+\`\`\`json
+{
+  &quot;symbol&quot;: &quot;AAPL&quot;,
+  &quot;data&quot;: [
+    {
+      &quot;date&quot;: &quot;2023-01-01&quot;,
+      &quot;open&quot;: 100.0,
+      &quot;high&quot;: 101.0,
+      &quot;low&quot;: 99.0,
+      &quot;close&quot;: 100.5,
+      &quot;volume&quot;: 1000000
+    }
+  ]
+}
+\`\`\`
+</code></pre>
+<hr />
+<h2 id="5">5. 部署工具集成<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51-docker">5.1 Docker 容器化<a class="headerlink" href="#51-docker" title="連結到此標題">&para;</a></h3>
+<h4 id="_19">多階段構建<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h4>
+<p><strong>生產環境 <code>Dockerfile</code>：</strong></p>
+<pre><code class="language-dockerfile"># ============================================
+# Stage 1: Frontend Build
+# ============================================
+FROM node:24-alpine AS frontend-build
+
+WORKDIR /app/frontend
+
+# 複製 package.json 和鎖定文件
+COPY frontend/package*.json ./
+
+# 安裝依賴
+RUN npm ci --production=false
+
+# 複製源代碼
+COPY frontend/ ./
+
+# 構建生產版本
+RUN npm run build
+
+# ============================================
+# Stage 2: Backend Base
+# ============================================
+FROM python:3.11-slim AS backend-base
+
+WORKDIR /app
+
+# 安裝系統依賴
+RUN apt-get update &amp;&amp; apt-get install -y \
+    curl \
+    gcc \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# 複製依賴文件
+COPY backend/requirements.txt .
+
+# 安裝 Python 依賴
+RUN pip install --no-cache-dir --upgrade pip &amp;&amp; \
+    pip install --no-cache-dir -r requirements.txt
+
+# ============================================
+# Stage 3: Final Production Image
+# ============================================
+FROM backend-base
+
+WORKDIR /app
+
+# 複製後端代碼
+COPY backend/ ./backend/
+
+# 複製構建好的前端靜態文件
+COPY --from=frontend-build /app/frontend/dist ./backend/static
+
+# 複製配置文件
+COPY tracked_symbols.json .
+
+# 創建非 root 用戶
+RUN useradd -m -u 1000 appuser &amp;&amp; \
+    chown -R appuser:appuser /app
+
+USER appuser
+
+WORKDIR /app/backend
+
+# 暴露端口
+EXPOSE 8000
+
+# 健康檢查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# 啟動命令
+CMD [&quot;gunicorn&quot;, \
+     &quot;-w&quot;, &quot;1&quot;, \
+     &quot;-k&quot;, &quot;uvicorn.workers.UvicornWorker&quot;, \
+     &quot;-b&quot;, &quot;0.0.0.0:8000&quot;, \
+     &quot;--timeout&quot;, &quot;120&quot;, \
+     &quot;--access-logfile&quot;, &quot;-&quot;, \
+     &quot;--error-logfile&quot;, &quot;-&quot;, \
+     &quot;main:app&quot;]
+</code></pre>
+<h4 id="dockerfiledev">開發環境 <code>Dockerfile.dev</code>：**<a class="headerlink" href="#dockerfiledev" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-dockerfile">FROM python:3.11-slim
+
+WORKDIR /app
+
+# 安裝系統依賴
+RUN apt-get update &amp;&amp; apt-get install -y \
+    curl \
+    gcc \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# 安裝 Python 依賴（包含開發依賴）
+COPY backend/requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# 安裝 Node.js 和 npm（用於前端構建）
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - &amp;&amp; \
+    apt-get install -y nodejs
+
+WORKDIR /app/backend
+
+# 暴露端口
+EXPOSE 8000
+
+# 開發環境啟動命令
+CMD [&quot;uvicorn&quot;, &quot;main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;, &quot;--reload&quot;]
+</code></pre>
+<h4 id="docker-compose">Docker Compose 配置<a class="headerlink" href="#docker-compose" title="連結到此標題">&para;</a></h4>
+<p><strong>生產環境 <code>docker-compose.yml</code>：</strong></p>
+<pre><code class="language-yaml">version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dashboard_app
+    restart: unless-stopped
+    ports:
+      - &quot;8000:8000&quot;
+    volumes:
+      - dashboard_data:/app/backend/market_data_db
+      - app_logs:/app/backend/logs
+    environment:
+      - ENV=production
+      - PYTHONUNBUFFERED=1
+      - SKIP_AUTO_IMPORT=true
+    networks:
+      - dashboard_network
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  dashboard_data:
+  app_logs:
+
+networks:
+  dashboard_network:
+    driver: bridge
+</code></pre>
+<p><strong>開發環境 <code>docker-compose.dev.yml</code>：</strong></p>
+<pre><code class="language-yaml">version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: dashboard_backend_dev
+    restart: on-failure
+    ports:
+      - &quot;8001:8000&quot;
+    volumes:
+      - ./backend:/app/backend
+      - ./tracked_symbols.json:/app/tracked_symbols.json
+    environment:
+      - ENV=development
+      - PYTHONUNBUFFERED=1
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: dashboard_frontend_dev
+    restart: on-failure
+    ports:
+      - &quot;5173:5173&quot;
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://backend:8000
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  node_modules:
+
+networks:
+  default:
+    name: dashboard_dev_network
+</code></pre>
+<h4 id="docker">Docker 最佳實踐<a class="headerlink" href="#docker" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 多階段構建減小鏡像大小：</strong></p>
+<pre><code class="language-dockerfile"># ❌ 壞例子：單一階段
+FROM python:3.11
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+RUN npm install  # 不需要 Node.js 運行時！
+
+# ✅ 好例子：多階段
+FROM node:24-alpine AS frontend-build
+# ... 構建前端
+
+FROM python:3.11-slim
+# ... 只複製構建好的靜態文件
+COPY --from=frontend-build /app/frontend/dist ./static
+</code></pre>
+<p><strong>2. 使用 .dockerignore 減少構建上下文：</strong></p>
+<pre><code># .dockerignore
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+venv
+.venv
+node_modules
+.env
+.vscode
+.idea
+*.md
+!requirements.txt
+!requirements-dev.txt
+!README.md
+</code></pre>
+<p><strong>3. 使用非 root 用戶：</strong></p>
+<pre><code class="language-dockerfile"># 在最終階段創建非 root 用戶
+RUN useradd -m -u 1000 appuser &amp;&amp; \
+    chown -R appuser:appuser /app
+
+USER appuser
+</code></pre>
+<p><strong>4. 健康檢查：</strong></p>
+<pre><code class="language-dockerfile">HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+</code></pre>
+<h3 id="52-github-actions-cicd">5.2 GitHub Actions CI/CD<a class="headerlink" href="#52-github-actions-cicd" title="連結到此標題">&para;</a></h3>
+<h4 id="ci-workflow">CI Workflow<a class="headerlink" href="#ci-workflow" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.github/workflows/ci.yml</code>：</strong></p>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Python lint tools
+        run: |
+          pip install ruff black isort mypy
+
+      - name: Install Node dependencies
+        run: |
+          cd frontend &amp;&amp; npm ci
+
+      - name: Backend lint
+        run: |
+          ruff check backend/
+          ruff format --check backend/
+          mypy backend/
+
+      - name: Frontend lint
+        run: |
+          cd frontend
+          npm run lint
+          npm run type-check
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Run smoke tests
+        run: |
+          cd backend
+          pytest -m &quot;smoke&quot; -v
+
+      - name: Run fast tests
+        run: |
+          cd backend
+          pytest -m &quot;fast or unit&quot; -v
+
+      - name: Run all tests (main/develop only)
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd backend
+          pytest -v --cov=. --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend &amp;&amp; npm ci
+
+      - name: Run tests
+        run: |
+          cd frontend
+          npm run test -- --run
+
+      - name: Run coverage (main/develop only)
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd frontend
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./frontend/coverage/coverage-final.json
+          flags: frontend
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Node dependencies
+        run: |
+          cd frontend &amp;&amp; npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+</code></pre>
+<h4 id="cd-workflow">CD Workflow<a class="headerlink" href="#cd-workflow" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.github/workflows/cd.yml</code>：</strong></p>
+<pre><code class="language-yaml">name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: http://172.235.215.225
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub (optional)
+        if: env.DOCKER_USERNAME != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t dashboard-app:${{ github.sha }} \
+            -t dashboard-app:latest \
+            --load \
+            .
+
+      - name: Export Docker image
+        run: |
+          docker save dashboard-app:latest | gzip &gt; dashboard-app.tar.gz
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo &quot;${{ secrets.LINODE_SSH_KEY }}&quot; &gt; ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LINODE_HOST }} &gt;&gt; ~/.ssh/known_hosts
+
+      - name: Transfer Docker image to production
+        run: |
+          scp -o StrictHostKeyChecking=no \
+            dashboard-app.tar.gz \
+            root@${{ secrets.LINODE_HOST }}:/tmp/
+
+      - name: Deploy on production server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.LINODE_HOST }} &lt;&lt; 'ENDSSH'
+            set -e
+
+            echo &quot;[Production] Stopping current container...&quot;
+            docker stop dashboard_app 2&gt;/dev/null || true
+            docker rm dashboard_app 2&gt;/dev/null || true
+
+            echo &quot;[Production] Loading new Docker image...&quot;
+            docker load &lt; /tmp/dashboard-app.tar.gz
+
+            echo &quot;[Production] Starting new container...&quot;
+            docker run -d \
+              --name dashboard_app \
+              --network dashboard_network \
+              -v dashboard_data:/app/backend/market_data_db \
+              -v app_logs:/app/backend/logs \
+              -e ENV=production \
+              -e PYTHONUNBUFFERED=1 \
+              -e SKIP_AUTO_IMPORT=true \
+              --restart unless-stopped \
+              --health-cmd 'curl -f http://localhost:8000/health || exit 1' \
+              --health-interval 30s \
+              --health-timeout 10s \
+              --health-retries 3 \
+              --health-start-period 40s \
+              -p 8000:8000 \
+              dashboard-app:latest
+
+            echo &quot;[Production] Waiting for container to be healthy...&quot;
+            sleep 15
+          ENDSSH
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f http://${{ secrets.LINODE_HOST }}/health || exit 1
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo &quot;✅ Deployment successful!&quot;
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo &quot;❌ Deployment failed!&quot;
+</code></pre>
+<h4 id="github-secrets">GitHub Secrets 配置<a class="headerlink" href="#github-secrets" title="連結到此標題">&para;</a></h4>
+<p>需要在 GitHub Repository Settings → Secrets and variables → Actions 中配置以下 secrets：</p>
+<table>
+<thead>
+<tr>
+<th>Secret Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LINODE_HOST</code></td>
+<td>生產服務器 IP 地址</td>
+</tr>
+<tr>
+<td><code>LINODE_SSH_KEY</code></td>
+<td>SSH 私鑰（用於連接生產服務器）</td>
+</tr>
+<tr>
+<td><code>DOCKER_USERNAME</code></td>
+<td>Docker Hub 用戶名（可選）</td>
+</tr>
+<tr>
+<td><code>DOCKER_PASSWORD</code></td>
+<td>Docker Hub 密碼（可選）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 部署腳本和自動化<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="_20">部署腳本<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h4>
+<p><strong><code>scripts/deploy.sh</code>：</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+set -e
+
+# 配置
+ENVIRONMENT=&quot;${1:-production}&quot;
+CONTAINER_NAME=&quot;dashboard_app&quot;
+IMAGE_NAME=&quot;dashboard-app&quot;
+REGISTRY_URL=&quot;&quot;  # 如果使用 Docker Hub，填寫 registry URL
+
+# 顏色輸出
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e &quot;${GREEN}[INFO]${NC} $1&quot;
+}
+
+log_warn() {
+    echo -e &quot;${YELLOW}[WARN]${NC} $1&quot;
+}
+
+log_error() {
+    echo -e &quot;${RED}[ERROR]${NC} $1&quot;
+}
+
+# 構建 Docker 鏡像
+log_info &quot;Building Docker image for platform linux/amd64...&quot;
+docker buildx build \
+    --platform linux/amd64 \
+    -t ${IMAGE_NAME}:latest \
+    -t ${IMAGE_NAME}:$(date +%Y%m%d-%H%M%S) \
+    --load \
+    .
+
+# 導出並壓縮鏡像
+log_info &quot;Exporting Docker image...&quot;
+docker save ${IMAGE_NAME}:latest | gzip &gt; ${IMAGE_NAME}.tar.gz
+log_info &quot;Image size: $(du -h ${IMAGE_NAME}.tar.gz | cut -f1)&quot;
+
+# 生產環境部署
+if [ &quot;$ENVIRONMENT&quot; = &quot;production&quot; ]; then
+    PRODUCTION_HOST=${LINODE_HOST:-&quot;root@172.235.215.225&quot;}
+
+    log_info &quot;Transferring image to production server...&quot;
+    scp ${IMAGE_NAME}.tar.gz ${PRODUCTION_HOST}:/tmp/
+
+    log_info &quot;Deploying on production server...&quot;
+    ssh ${PRODUCTION_HOST} &lt;&lt; ENDSSH
+        set -e
+
+        echo &quot;[Production] Stopping current container...&quot;
+        docker stop ${CONTAINER_NAME} 2&gt;/dev/null || true
+        docker rm ${CONTAINER_NAME} 2&gt;/dev/null || true
+
+        echo &quot;[Production] Loading new Docker image...&quot;
+        docker load &lt; /tmp/${IMAGE_NAME}.tar.gz
+
+        echo &quot;[Production] Starting new container...&quot;
+        docker run -d \
+          --name ${CONTAINER_NAME} \
+          --network dashboard_network \
+          -v dashboard_data:/app/backend/market_data_db \
+          -v app_logs:/app/backend/logs \
+          -e ENV=production \
+          -e PYTHONUNBUFFERED=1 \
+          -e SKIP_AUTO_IMPORT=true \
+          --restart unless-stopped \
+          --health-cmd 'curl -f http://localhost:8000/health || exit 1' \
+          --health-interval 30s \
+          --health-timeout 10s \
+          --health-retries 3 \
+          --health-start-period 40s \
+          -p 8000:8000 \
+          ${IMAGE_NAME}:latest
+
+        echo &quot;[Production] Waiting for container to be healthy...&quot;
+        sleep 15
+
+        # 清理舊鏡像
+        docker image prune -f
+
+        echo &quot;[Production] Deployment completed!&quot;
+ENDSSH
+
+    log_info &quot;Waiting for health check...&quot;
+    sleep 5
+    if curl -f http://${LINODE_HOST}/health; then
+        log_info &quot;✅ Health check passed!&quot;
+    else
+        log_error &quot;❌ Health check failed!&quot;
+        exit 1
+    fi
+
+else
+    log_warn &quot;Local deployment (not to production)&quot;
+    log_info &quot;To deploy locally:&quot;
+    echo &quot;  docker-compose -f docker-compose.yml up -d&quot;
+fi
+
+log_info &quot;Cleaning up...&quot;
+rm ${IMAGE_NAME}.tar.gz
+
+log_info &quot;✅ Deployment completed!&quot;
+</code></pre>
+<p><strong>使用腳本：</strong></p>
+<pre><code class="language-bash"># 添加執行權限
+chmod +x scripts/deploy.sh
+
+# 部署到生產環境
+./scripts/deploy.sh production
+
+# 本地部署
+./scripts/deploy.sh local
+</code></pre>
+<h4 id="_21">零停機部署腳本<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h4>
+<p><strong><code>scripts/rolling-deploy.sh</code>：</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+set -e
+
+ENVIRONMENT=&quot;${1:-production}&quot;
+OLD_CONTAINER=&quot;dashboard_app&quot;
+NEW_CONTAINER=&quot;dashboard_app_new&quot;
+IMAGE_NAME=&quot;dashboard-app&quot;
+
+log_info &quot;Starting rolling deployment...&quot;
+
+# 構建新鏡像
+log_info &quot;Building new image...&quot;
+docker buildx build --platform linux/amd64 -t ${IMAGE_NAME}:new --load .
+
+# 啟動新容器
+log_info &quot;Starting new container...&quot;
+docker run -d \
+  --name ${NEW_CONTAINER} \
+  --network dashboard_network \
+  -v dashboard_data:/app/backend/market_data_db \
+  -v app_logs:/app/backend/logs \
+  -e ENV=${ENVIRONMENT} \
+  -e PYTHONUNBUFFERED=1 \
+  -p 8001:8000 \
+  ${IMAGE_NAME}:new
+
+# 健康檢查新容器
+log_info &quot;Waiting for new container to be healthy...&quot;
+MAX_RETRIES=30
+RETRY_COUNT=0
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if curl -f http://localhost:8001/health; then
+        log_info &quot;✅ New container is healthy!&quot;
+        break
+    fi
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    sleep 2
+done
+
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    log_error &quot;New container failed health check!&quot;
+    docker stop ${NEW_CONTAINER}
+    docker rm ${NEW_CONTAINER}
+    exit 1
+fi
+
+# 切換流量（更新 nginx 或 reverse proxy）
+log_info &quot;Switching traffic to new container...&quot;
+# 這裡需要更新你的 reverse proxy 配置
+# 例如：更新 nginx 配置並重載
+
+# 停止舊容器
+log_info &quot;Stopping old container...&quot;
+docker stop ${OLD_CONTAINER}
+docker rm ${OLD_CONTAINER}
+
+# 重命名新容器
+docker rename ${NEW_CONTAINER} ${OLD_CONTAINER}
+
+# 標記鏡像為 latest
+docker tag ${IMAGE_NAME}:new ${IMAGE_NAME}:latest
+
+log_info &quot;✅ Rolling deployment completed!&quot;
+</code></pre>
+<h4 id="_22">數據庫遷移腳本<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h4>
+<p><strong><code>scripts/migrate.sh</code>：</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+set -e
+
+# 數據庫遷移腳本
+
+log_info &quot;Starting database migration...&quot;
+
+# 備份現有數據庫
+log_info &quot;Backing up database...&quot;
+BACKUP_FILE=&quot;backup_$(date +%Y%m%d_%H%M%S).duckdb&quot;
+cp backend/market_data_db/data.duckdb backups/${BACKUP_FILE}
+log_info &quot;Backup saved to: ${BACKUP_FILE}&quot;
+
+# 運行遷移
+log_info &quot;Running migration scripts...&quot;
+for migration in migrations/*.sql; do
+    if [ -f &quot;$migration&quot; ]; then
+        log_info &quot;Running: ${migration}&quot;
+        # 使用 DuckDB 執行遷移
+        duckdb backend/market_data_db/data.duckdb &lt; &quot;${migration}&quot;
+    fi
+done
+
+log_info &quot;✅ Database migration completed!&quot;
+</code></pre>
+<hr />
+<h2 id="6">6. 總結和建議<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 工具鏈總覽<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>用途</th>
+<th>配置文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IDE</strong></td>
+<td>VSCode</td>
+<td>開發環境</td>
+<td><code>.vscode/settings.json</code></td>
+</tr>
+<tr>
+<td><strong>代碼質量</strong></td>
+<td>Ruff</td>
+<td>Python lint/format</td>
+<td><code>ruff.toml</code></td>
+</tr>
+<tr>
+<td><strong>代碼質量</strong></td>
+<td>ESLint</td>
+<td>JavaScript lint</td>
+<td><code>eslint.config.js</code></td>
+</tr>
+<tr>
+<td><strong>測試</strong></td>
+<td>Pytest</td>
+<td>Python 測試</td>
+<td><code>pytest.ini</code></td>
+</tr>
+<tr>
+<td><strong>測試</strong></td>
+<td>Vitest</td>
+<td>JavaScript 測試</td>
+<td><code>vitest.config.js</code></td>
+</tr>
+<tr>
+<td><strong>測試</strong></td>
+<td>Cypress</td>
+<td>E2E 測試</td>
+<td><code>cypress.config.js</code></td>
+</tr>
+<tr>
+<td><strong>文檔</strong></td>
+<td>JSDoc</td>
+<td>API 文檔生成</td>
+<td><code>.jsdoc.json</code></td>
+</tr>
+<tr>
+<td><strong>文檔</strong></td>
+<td>FastAPI</td>
+<td>自動 API 文檔</td>
+<td>OpenAPI 配置</td>
+</tr>
+<tr>
+<td><strong>容器化</strong></td>
+<td>Docker</td>
+<td>容器化部署</td>
+<td><code>Dockerfile</code>, <code>docker-compose.yml</code></td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions</td>
+<td>自動化流水線</td>
+<td><code>.github/workflows/*.yml</code></td>
+</tr>
+<tr>
+<td><strong>Git Hooks</strong></td>
+<td>pre-commit</td>
+<td>Git 鉤子</td>
+<td><code>.pre-commit-config.yaml</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 實施優先級<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<p><strong>P0 - 必須立即實施（阻塞性）：</strong>
+- [ ] VSCode 工作區配置（<code>.vscode/</code>）
+- [ ] Pre-commit hooks 配置
+- [ ] CI workflow（lint + test）
+- [ ] Docker 多階段構建</p>
+<p><strong>P1 - 優先實施（重要增強）：</strong>
+- [ ] Ruff 和 ESLint 配置
+- [ ] Pytest 和 Vitest 配置
+- [ ] PR 模板和 Code Review 標準
+- [ ] CD workflow（自動部署）</p>
+<p><strong>P2 - 後續優化（可選增強）：</strong>
+- [ ] Cypress E2E 測試
+- [ ] JSDoc 文檔生成
+- [ ] 零停機部署腳本
+- [ ] 數據庫遷移腳本</p>
+<h3 id="63">6.3 最佳實踐總結<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<h4 id="_23">開發流程<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>使用 Git Flow 分支策略</li>
+<li>遵循 Conventional Commits 提交規範</li>
+<li>小步驟提交，頻繁推送</li>
+<li>使用 Pull Request 進行代碼審查</li>
+</ol>
+<h4 id="_24">代碼質量<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>使用 pre-commit hooks 自動檢查</li>
+<li>遵循項目代碼風格指南</li>
+<li>編寫全面的單元測試</li>
+<li>保持測試覆蓋率 &gt; 80%</li>
+</ol>
+<h4 id="_25">測試策略<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>測試金字塔：單元測試 (70%) + 集成測試 (20%) + E2E 測試 (10%)</li>
+<li>TDD 開發循環：Red → Green → Refactor</li>
+<li>使用 marker 分類測試（smoke, fast, slow, unit, integration）</li>
+<li>並行測試執行提高效率</li>
+</ol>
+<h4 id="_26">部署流程<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>使用 Docker 容器化部署</li>
+<li>CI/CD 自動化流水線</li>
+<li>健康檢查和自動重啟</li>
+<li>零停機部署策略</li>
+</ol>
+<h3 id="64">6.4 持續改進<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<p><strong>定期審查：</strong>
+- 每月審查工具鏈配置
+- 每季度評估測試覆蓋率
+- 每半年審查 CI/CD 流水線
+- 每年評估工具選擇</p>
+<p><strong>指標跟踪：</strong>
+- 測試通過率
+- 測試覆蓋率
+- CI/CD 構建時間
+- 部署頻率
+- 平均修復時間 (MTTR)</p>
+<hr />
+<p><strong>文檔版本：</strong> 1.0
+<strong>最後更新：</strong> 2026-02-21
+<strong>維護者：</strong> Charlie Analyst</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P001 - 測試 Matrix Dashboard 基礎回測 API - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>P001 - 測試 Matrix Dashboard 基礎回測 API</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="p001-matrix-dashboard-api">P001 - 測試 Matrix Dashboard 基礎回測 API<a class="headerlink" href="#p001-matrix-dashboard-api" title="連結到此標題">&para;</a></h1>
+<p><strong>日期：</strong> 2026-02-18 23:35
+<strong>狀態：</strong> ✅ 完成
+<strong>Agent：</strong> automation (GLM-4.5)
+<strong>執行時間：</strong> 2分18秒</p>
+<hr />
+<h2 id="_1">📊 回測結果摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<h3 id="_2">策略詳情<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h3>
+<p><strong>名稱：</strong> RSI Taiwan Top 50 Strategy
+<strong>描述：</strong> 基於 RSI（14期）的均值回歸策略，在台灣前 50 大股票中識別超賣/超買情況</p>
+<p><strong>參數：</strong>
+- RSI period: 14
+- 買入閾值: 30
+- 賣出閾值: 70
+- 初始資金: 100,000
+- 個股占比: 10%</p>
+<hr />
+<h3 id="_3">績效指標<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>策略</th>
+<th>基準指數</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>總報酬</strong></td>
+<td>-11.29%</td>
+<td>-35.3%</td>
+</tr>
+<tr>
+<td><strong>年化報酬</strong></td>
+<td>-3.07%</td>
+<td>-11.09%</td>
+</tr>
+<tr>
+<td><strong>年化波動率</strong></td>
+<td>15.4%</td>
+<td>24.5%</td>
+</tr>
+<tr>
+<td><strong>最大回撤</strong></td>
+<td>-66.4%</td>
+<td>-78.4%</td>
+</tr>
+<tr>
+<td><strong>夏普比率</strong></td>
+<td>0.12</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>獲利因子</strong></td>
+<td>0.96</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>勝率</strong></td>
+<td>37.04%</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>交易次數</strong></td>
+<td>27</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_4">關鍵分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<h4 id="vs">📈 vs 基準表現<a class="headerlink" href="#vs" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Alpha：</strong> +24.0%（策略跑贏基準）</li>
+<li><strong>相關性：</strong> 0.78</li>
+<li><strong>上漲捕捉：</strong> 82%</li>
+<li><strong>下跌捕捉：</strong> 65%</li>
+</ul>
+<p><strong>解讀：</strong> 策略在市場下跌時保護資本更好，同時在反彈中參與度中等</p>
+<h4 id="_5">💰 交易統計<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>最佳交易：</strong> +27.7% (3231.TW)</li>
+<li><strong>最差交易：</strong> -25.3% (2379.TW)</li>
+<li><strong>平均獲利交易：</strong> +10.1%</li>
+<li><strong>平均虧損交易：</strong> -8.7%</li>
+</ul>
+<h4 id="_6">📉 回撤分析<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>最差回撤：</strong> -66.4%</li>
+<li><strong>回撤時期：</strong> 策略在重大市場下跌時（2022, 2023, 2025）表現優於基準</li>
+<li><strong>最大連續虧損：</strong> 3 次</li>
+</ul>
+<hr />
+<h3 id="_7">風險指標<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>數值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Calmar比率</strong></td>
+<td>-0.05</td>
+</tr>
+<tr>
+<td><strong>Sortino比率</strong></td>
+<td>0.18</td>
+</tr>
+<tr>
+<td><strong>當前持倉數</strong></td>
+<td>1 (5880.TW)</td>
+</tr>
+<tr>
+<td><strong>平均持有天數</strong></td>
+<td>62.3 天</td>
+</tr>
+<tr>
+<td><strong>組合集中度</strong></td>
+<td>低（每筆交易10%佔比）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_8">建議優化方向<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<h4 id="_9">🎯 策略優化<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>縮短 RSI 週期</strong>（7-10）以獲得更早的訊號</li>
+<li><strong>基於波動率調整倉位大小</strong></li>
+<li><strong>加入停損保護</strong>（例如低於入場價15%）</li>
+</ol>
+<h4 id="_10">🛡️ 風險改善<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>減少倉位大小</strong>（5-7%）以管理回撤</li>
+<li><strong>實施行業輪動</strong>避免集中</li>
+<li><strong>加入趨勢過濾器</strong>（200日移動平均）避免逆勢交易</li>
+</ol>
+<h4 id="_11">📊 市場條件<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<p>策略在區間波動市場表現最佳；強勢趨勢期間建議停用</p>
+<hr />
+<h2 id="_12">✅ 結論<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h2>
+<p><strong>整體評估：</strong>
+- ✅ API 正常運作
+- ✅ 策略執行成功
+- ⚠️ 當前策略表現不佳（-3.07% 年化報酬）
+- 💡 有明確的優化方向</p>
+<p><strong>下一步：</strong>
+- p002：實作 10/60/200 MA 動能策略並測試</p>
+<hr />
+<p><strong>輸出時間：</strong> 2026-02-18 23:35
+<strong>Token 使用：</strong> 171.1k in / 2.5k out</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

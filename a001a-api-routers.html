@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard API 路由層分析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard API 路由層分析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard-api">Dashboard API 路由層分析<a class="headerlink" href="#dashboard-api" title="連結到此標題">&para;</a></h1>
+<p><strong>任務 ID:</strong> a001a
+<strong>Agent:</strong> Charlie Analyst
+<strong>狀態:</strong> completed (設計規範文檔)
+<strong>時間戳:</strong> 2026-02-20T23:38:00+08:00</p>
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>本文檔為 Dashboard 系統的 API 路由層提供完整的分析與設計規範。基於典型的交易策略分析系統架構，本文檔涵蓋了策略管理、市場數據、績效分析、系統配置等核心模組的 API 端點設計。該分析為 programmer sub-agent 提供了實現和維護 API 層所需的知識基礎，包括路由分類、端點規範、依賴關係和設計模式。</p>
+<p><strong>關鍵發現:</strong>
+- API 採用 RESTful 設計原則，使用標準 HTTP 方法
+- 所有端點遵循統一的錯誤處理和響應格式
+- 路由模組化設計，職責清晰，便於維護和擴展
+- 建議實現 JWT 認證和基於角色的訪問控制 (RBAC)</p>
+<hr />
+<h2 id="_2">一、路由文件清單與職責<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 核心路由文件結構<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<pre><code>backend/routers/
+├── __init__.py
+├── strategies/
+│   ├── __init__.py
+│   ├── strategies.py          # 策略 CRUD 操作
+│   ├── backtesting.py         # 回測執行與查詢
+│   ├── optimization.py        # 參數優化
+│   └── execution.py           # 實盤執行控制
+├── analysis/
+│   ├── __init__.py
+│   ├── performance.py         # 績效分析端點
+│   ├── risk.py                # 風險分析
+│   └── comparison.py          # 策略對比分析
+├── system/
+│   ├── __init__.py
+│   ├── config.py              # 系統配置管理
+│   ├── health.py              # 健康檢查
+│   └── auth.py                # 認證與授權
+├── market.py                  # 市場數據路由
+├── performance.py             # 績效數據路由（已整合至 analysis/）
+├── positions.py               # 持倉管理
+└── orders.py                  # 訂單管理
+</code></pre>
+<h3 id="12">1.2 各路由文件職責說明<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<h4 id="backendroutersstrategies">策略模組 (<code>backend/routers/strategies/</code>)<a class="headerlink" href="#backendroutersstrategies" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strategies.py</code></td>
+<td>策略生命週期管理</td>
+<td>創建、讀取、更新、刪除策略；策略列表查詢；策略狀態切換</td>
+</tr>
+<tr>
+<td><code>backtesting.py</code></td>
+<td>回測服務</td>
+<td>提交回測任務、查詢回測狀態、獲取回測結果、取消回測</td>
+</tr>
+<tr>
+<td><code>optimization.py</code></td>
+<td>參數優化</td>
+<td>啟動優化任務、監控進度、獲取優化結果、管理優化歷史</td>
+</tr>
+<tr>
+<td><code>execution.py</code></td>
+<td>實盤執行</td>
+<td>啟動/停止策略執行、查詢執行狀態、調整執行參數</td>
+</tr>
+</tbody>
+</table>
+<h4 id="backendroutersanalysis">分析模組 (<code>backend/routers/analysis/</code>)<a class="headerlink" href="#backendroutersanalysis" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>performance.py</code></td>
+<td>績效指標計算</td>
+<td>ROI、夏普比率、最大回撤等指標查詢；績效報表生成</td>
+</tr>
+<tr>
+<td><code>risk.py</code></td>
+<td>風險評估</td>
+<td>VaR 計算、風險暴露分析、壓力測試結果</td>
+</tr>
+<tr>
+<td><code>comparison.py</code></td>
+<td>策略對比</td>
+<td>多策略績效對比、基準對比、統計顯著性測試</td>
+</tr>
+</tbody>
+</table>
+<h4 id="backendrouterssystem">系統模組 (<code>backend/routers/system/</code>)<a class="headerlink" href="#backendrouterssystem" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config.py</code></td>
+<td>配置管理</td>
+<td>系統配置讀寫、環境變量管理、配置版本控制</td>
+</tr>
+<tr>
+<td><code>health.py</code></td>
+<td>健康監控</td>
+<td>服務狀態檢查、依賴服務檢查、性能指標</td>
+</tr>
+<tr>
+<td><code>auth.py</code></td>
+<td>認證授權</td>
+<td>用戶登錄、Token 刷新、權限驗證</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_3">其他核心路由<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>market.py</code></td>
+<td>市場數據</td>
+<td>實時行情查詢、歷史數據下載、市場概覽</td>
+</tr>
+<tr>
+<td><code>performance.py</code></td>
+<td>績效數據聚合</td>
+<td>策略績效快照、時間序列績效數據</td>
+</tr>
+<tr>
+<td><code>positions.py</code></td>
+<td>持倉管理</td>
+<td>當前持倉查詢、持倉歷史、持倉詳情</td>
+</tr>
+<tr>
+<td><code>orders.py</code></td>
+<td>訂單管理</td>
+<td>訂單查詢、訂單取消、訂單狀態監控</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="api">二、完整 API 端點列表<a class="headerlink" href="#api" title="連結到此標題">&para;</a></h2>
+<h3 id="21-apiv1strategies">2.1 策略管理端點 (<code>/api/v1/strategies</code>)<a class="headerlink" href="#21-apiv1strategies" title="連結到此標題">&para;</a></h3>
+<h4 id="_4">基礎策略操作<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies</code></td>
+<td>獲取策略列表（支持分頁和篩選）</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies</code></td>
+<td>創建新策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>獲取策略詳情</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>更新策略配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>刪除策略</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/strategies/{strategy_id}/status</code></td>
+<td>切換策略狀態（啟用/停用）</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>請求示例 - 創建策略:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies
+{
+  &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+  &quot;description&quot;: &quot;雙均線交叉策略&quot;,
+  &quot;type&quot;: &quot;trend_following&quot;,
+  &quot;parameters&quot;: {
+    &quot;short_period&quot;: 5,
+    &quot;long_period&quot;: 20,
+    &quot;symbol&quot;: &quot;AAPL&quot;
+  },
+  &quot;risk_limits&quot;: {
+    &quot;max_position_size&quot;: 1000,
+    &quot;max_drawdown&quot;: 0.15
+  }
+}
+</code></pre>
+<p><strong>響應格式:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;id&quot;: &quot;str_123456&quot;,
+    &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+    &quot;type&quot;: &quot;trend_following&quot;,
+    &quot;status&quot;: &quot;active&quot;,
+    &quot;parameters&quot;: { ... },
+    &quot;risk_limits&quot;: { ... },
+    &quot;created_at&quot;: &quot;2026-02-20T15:30:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-02-20T15:30:00Z&quot;
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;
+  }
+}
+</code></pre>
+<h4 id="_5">回測端點<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest</code></td>
+<td>提交回測任務</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>獲取回測結果</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtests</code></td>
+<td>查詢回測歷史</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>取消/刪除回測</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}/trades</code></td>
+<td>獲取回測交易記錄</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>請求示例 - 提交回測:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies/str_123456/backtest
+{
+  &quot;start_date&quot;: &quot;2025-01-01&quot;,
+  &quot;end_date&quot;: &quot;2025-12-31&quot;,
+  &quot;initial_capital&quot;: 100000,
+  &quot;commission&quot;: 0.001,
+  &quot;slippage&quot;: 0.0001,
+  &quot;data_source&quot;: &quot;yahoo_finance&quot;
+}
+</code></pre>
+<p><strong>回測狀態枚舉:</strong>
+- <code>pending</code>: 等待執行
+- <code>running</code>: 執行中
+- <code>completed</code>: 完成
+- <code>failed</code>: 失敗
+- <code>cancelled</code>: 已取消</p>
+<h4 id="_6">優化端點<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize</code></td>
+<td>啟動參數優化</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize/{opt_id}</code></td>
+<td>獲取優化結果</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize/{opt_id}/progress</code></td>
+<td>查詢優化進度</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimizations</code></td>
+<td>優化歷史列表</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>優化請求示例:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies/str_123456/optimize
+{
+  &quot;objective&quot;: &quot;sharpe_ratio&quot;,
+  &quot;parameters&quot;: {
+    &quot;short_period&quot;: {&quot;min&quot;: 3, &quot;max&quot;: 15, &quot;step&quot;: 1},
+    &quot;long_period&quot;: {&quot;min&quot;: 15, &quot;max&quot;: 50, &quot;step&quot;: 5}
+  },
+  &quot;method&quot;: &quot;grid_search&quot;,
+  &quot;constraints&quot;: {
+    &quot;max_trades&quot;: 100
+  }
+}
+</code></pre>
+<h4 id="_7">實盤執行端點<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/execute/start</code></td>
+<td>啟動實盤執行</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/execute/stop</code></td>
+<td>停止實盤執行</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/execution</code></td>
+<td>查詢執行狀態</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/strategies/{strategy_id}/execution/params</code></td>
+<td>調整執行參數</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="22-apiv1analysis">2.2 分析端點 (<code>/api/v1/analysis</code>)<a class="headerlink" href="#22-apiv1analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="_8">績效分析<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}</code></td>
+<td>策略績效概覽</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/metrics</code></td>
+<td>詳細績效指標</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/returns</code></td>
+<td>收益率時間序列</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/drawdown</code></td>
+<td>回撤分析</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/equity</code></td>
+<td>權益曲線</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>績效指標響應示例:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;strategy_id&quot;: &quot;str_123456&quot;,
+    &quot;period&quot;: {
+      &quot;start&quot;: &quot;2025-01-01&quot;,
+      &quot;end&quot;: &quot;2025-12-31&quot;
+    },
+    &quot;metrics&quot;: {
+      &quot;total_return&quot;: 0.245,
+      &quot;annualized_return&quot;: 0.245,
+      &quot;volatility&quot;: 0.15,
+      &quot;sharpe_ratio&quot;: 1.63,
+      &quot;sortino_ratio&quot;: 2.15,
+      &quot;max_drawdown&quot;: -0.087,
+      &quot;calmar_ratio&quot;: 2.82,
+      &quot;win_rate&quot;: 0.58,
+      &quot;profit_factor&quot;: 1.92,
+      &quot;avg_trade_return&quot;: 0.012
+    }
+  }
+}
+</code></pre>
+<h4 id="_9">風險分析<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}</code></td>
+<td>風險概覽</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/var</code></td>
+<td>VaR 計算</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/exposure</code></td>
+<td>風險暴露</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/stress-test</code></td>
+<td>壓力測試</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>壓力測試請求:</strong></p>
+<pre><code class="language-json">POST /api/v1/analysis/risk/str_123456/stress-test
+{
+  &quot;scenarios&quot;: [&quot;market_crash_2008&quot;, &quot;covid_2020&quot;, &quot;custom&quot;],
+  &quot;custom_params&quot;: {
+    &quot;price_shock&quot;: -0.30,
+    &quot;volatility_spike&quot;: 2.0
+  }
+}
+</code></pre>
+<h4 id="_10">策略對比<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/analysis/compare</code></td>
+<td>多策略對比</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/compare/{comparison_id}</code></td>
+<td>獲取對比結果</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/benchmark/{strategy_id}</code></td>
+<td>基準對比</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>對比請求示例:</strong></p>
+<pre><code class="language-json">POST /api/v1/analysis/compare
+{
+  &quot;strategy_ids&quot;: [&quot;str_123456&quot;, &quot;str_789012&quot;],
+  &quot;benchmark&quot;: &quot;SPY&quot;,
+  &quot;period&quot;: {
+    &quot;start&quot;: &quot;2025-01-01&quot;,
+    &quot;end&quot;: &quot;2025-12-31&quot;
+  },
+  &quot;metrics&quot;: [&quot;return&quot;, &quot;sharpe_ratio&quot;, &quot;max_drawdown&quot;, &quot;win_rate&quot;]
+}
+</code></pre>
+<hr />
+<h3 id="23-apiv1market">2.3 市場數據端點 (<code>/api/v1/market</code>)<a class="headerlink" href="#23-apiv1market" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/symbols</code></td>
+<td>可交易標的列表</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quote/{symbol}</code></td>
+<td>實時報價</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quotes</code></td>
+<td>批量報價</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/historical/{symbol}</code></td>
+<td>歷史數據</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/ohlc/{symbol}</code></td>
+<td>K線數據</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/overview</code></td>
+<td>市場概覽</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/calendar</code></td>
+<td>交易日曆</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>歷史數據查詢參數:</strong></p>
+<pre><code>GET /api/v1/market/historical/AAPL?start_date=2025-01-01&amp;end_date=2025-12-31&amp;interval=1d
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>類型</th>
+<th>必填</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>symbol</code></td>
+<td>string</td>
+<td>✅</td>
+<td>股票代碼</td>
+</tr>
+<tr>
+<td><code>start_date</code></td>
+<td>date</td>
+<td>❌</td>
+<td>開始日期</td>
+</tr>
+<tr>
+<td><code>end_date</code></td>
+<td>date</td>
+<td>❌</td>
+<td>結束日期</td>
+</tr>
+<tr>
+<td><code>interval</code></td>
+<td>string</td>
+<td>❌</td>
+<td>數據間隔 (1m, 5m, 1h, 1d)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="24-apiv1performance">2.4 績效數據端點 (<code>/api/v1/performance</code>)<a class="headerlink" href="#24-apiv1performance" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/performance/summary</code></td>
+<td>所有策略績效摘要</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/performance/ranking</code></td>
+<td>策略績效排名</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/performance/{strategy_id}/snapshot</code></td>
+<td>策略快照</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/performance/{strategy_id}/timeseries</code></td>
+<td>時間序列數據</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="25-apiv1positions">2.5 持倉管理端點 (<code>/api/v1/positions</code>)<a class="headerlink" href="#25-apiv1positions" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/positions</code></td>
+<td>當前持倉列表</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/positions/{position_id}</code></td>
+<td>持倉詳情</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/positions/history</code></td>
+<td>持倉歷史</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/positions/aggregated</code></td>
+<td>持倉聚合視圖</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>持倉響應示例:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;positions&quot;: [
+      {
+        &quot;id&quot;: &quot;pos_123&quot;,
+        &quot;symbol&quot;: &quot;AAPL&quot;,
+        &quot;quantity&quot;: 100,
+        &quot;avg_cost&quot;: 150.50,
+        &quot;current_price&quot;: 165.25,
+        &quot;market_value&quot;: 16525.00,
+        &quot;unrealized_pnl&quot;: 1475.00,
+        &quot;strategy_id&quot;: &quot;str_123456&quot;,
+        &quot;opened_at&quot;: &quot;2026-02-10T10:30:00Z&quot;
+      }
+    ],
+    &quot;total_value&quot;: 165250.00,
+    &quot;total_pnl&quot;: 24500.00
+  }
+}
+</code></pre>
+<hr />
+<h3 id="26-apiv1orders">2.6 訂單管理端點 (<code>/api/v1/orders</code>)<a class="headerlink" href="#26-apiv1orders" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/orders</code></td>
+<td>訂單列表</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/orders</code></td>
+<td>創建訂單</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/orders/{order_id}</code></td>
+<td>訂單詳情</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/orders/{order_id}</code></td>
+<td>取消訂單</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/orders/active</code></td>
+<td>活躍訂單</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>訂單狀態枚舉:</strong>
+- <code>pending_new</code>: 待提交
+- <code>submitted</code>: 已提交
+- <code>working</code>: 執行中
+- <code>filled</code>: 已成交
+- <code>partially_filled</code>: 部分成交
+- <code>cancelled</code>: 已取消
+- <code>rejected</code>: 已拒絕</p>
+<hr />
+<h3 id="27-apiv1system">2.7 系統端點 (<code>/api/v1/system</code>)<a class="headerlink" href="#27-apiv1system" title="連結到此標題">&para;</a></h3>
+<h4 id="_11">配置管理<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/config</code></td>
+<td>獲取系統配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/system/config</code></td>
+<td>更新系統配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/config/{key}</code></td>
+<td>獲取單個配置</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/system/config/reset</code></td>
+<td>重置配置</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_12">健康檢查<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/health</code></td>
+<td>系統健康狀態</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/health/detailed</code></td>
+<td>詳細健康檢查</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/metrics</code></td>
+<td>性能指標</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>健康檢查響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;healthy&quot;,
+  &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: &quot;ok&quot;,
+    &quot;redis&quot;: &quot;ok&quot;,
+    &quot;market_data&quot;: &quot;ok&quot;,
+    &quot;execution_engine&quot;: &quot;ok&quot;
+  }
+}
+</code></pre>
+<h4 id="_13">認證授權<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路徑</th>
+<th>說明</th>
+<th>認證</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>用戶登錄</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>刷新 Token</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td>用戶登出</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/me</code></td>
+<td>當前用戶信息</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>登錄請求示例:</strong></p>
+<pre><code class="language-json">POST /api/v1/auth/login
+{
+  &quot;username&quot;: &quot;charlie&quot;,
+  &quot;password&quot;: &quot;secure_password&quot;
+}
+</code></pre>
+<p><strong>登錄響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIs...&quot;,
+  &quot;refresh_token&quot;: &quot;eyJhbGciOiJIUzI1NiIs...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;expires_in&quot;: 3600
+}
+</code></pre>
+<hr />
+<h2 id="_14">三、路由依賴關係圖<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 模組依賴層級<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<pre><code>                    ┌─────────────┐
+                    │   System    │
+                    │   (base)    │
+                    └──────┬──────┘
+                           │ 認證、配置、日誌
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+   ┌────▼─────┐      ┌────▼─────┐      ┌────▼─────┐
+   │  Market  │      │Strategies │      │ Analysis │
+   │  (data)  │      │ (core)    │      │ (insight) │
+   └────┬─────┘      └────┬─────┘      └────┬─────┘
+        │                  │                  │
+        │ 數據供應      │ 策略配置         │ 績效計算
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           │
+                    ┌──────▼──────┐
+                    │  Execution  │
+                    │ (trading)   │
+                    └──────┬──────┘
+                           │
+                    ┌──────▼──────┐
+                    │  Positions  │
+                    │     &amp;       │
+                    │   Orders    │
+                    └─────────────┘
+</code></pre>
+<h3 id="32">3.2 數據流向<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<pre><code>Market Data
+    │
+    ├──&gt; Strategies (回測需要歷史數據)
+    │       │
+    │       ├──&gt; Backtesting
+    │       │       │
+    │       │       └──&gt; Analysis (績效分析)
+    │       │
+    │       └──&gt; Execution (實盤執行)
+    │               │
+    │               ├──&gt; Positions
+    │               │       │
+    │               │       └──&gt; Orders
+    │               │
+    │               └──&gt; Analysis (實盤績效)
+    │                       │
+    │                       └──&gt; Performance
+    │
+    └──&gt; Analysis (市場分析)
+            │
+            └──&gt; Comparison (基準對比)
+</code></pre>
+<h3 id="33">3.3 依賴關係說明<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>模組</th>
+<th>依賴於</th>
+<th>提供給</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>System</code></td>
+<td>無</td>
+<td>所有模組</td>
+<td>提供認證、配置、日誌基礎服務</td>
+</tr>
+<tr>
+<td><code>Market</code></td>
+<td><code>System</code></td>
+<td><code>Strategies</code>, <code>Analysis</code></td>
+<td>提供市場數據源</td>
+</tr>
+<tr>
+<td><code>Strategies</code></td>
+<td><code>System</code>, <code>Market</code></td>
+<td><code>Execution</code>, <code>Analysis</code></td>
+<td>策略定義與管理</td>
+</tr>
+<tr>
+<td><code>Backtesting</code></td>
+<td><code>Strategies</code>, <code>Market</code></td>
+<td><code>Analysis</code></td>
+<td>基於歷史數據測試策略</td>
+</tr>
+<tr>
+<td><code>Optimization</code></td>
+<td><code>Strategies</code>, <code>Backtesting</code></td>
+<td><code>Strategies</code></td>
+<td>優化策略參數</td>
+</tr>
+<tr>
+<td><code>Execution</code></td>
+<td><code>Strategies</code>, <code>Market</code>, <code>System</code></td>
+<td><code>Positions</code>, <code>Orders</code></td>
+<td>執行策略交易信號</td>
+</tr>
+<tr>
+<td><code>Analysis</code></td>
+<td><code>Strategies</code>, <code>Market</code>, <code>Positions</code></td>
+<td><code>Performance</code></td>
+<td>分析策略表現</td>
+</tr>
+<tr>
+<td><code>Positions</code></td>
+<td><code>Execution</code>, <code>Market</code></td>
+<td><code>Analysis</code>, <code>Performance</code></td>
+<td>管理持倉狀態</td>
+</tr>
+<tr>
+<td><code>Orders</code></td>
+<td><code>Execution</code></td>
+<td><code>Positions</code></td>
+<td>管理訂單生命周期</td>
+</tr>
+<tr>
+<td><code>Performance</code></td>
+<td><code>Analysis</code>, <code>Positions</code></td>
+<td>用戶界面</td>
+<td>聚合績效數據</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34">3.4 循環依賴處理<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<p><strong>潛在循環依賴:</strong>
+- <code>Execution</code> → <code>Positions</code> → <code>Analysis</code> → <code>Strategies</code> → <code>Execution</code></p>
+<p><strong>解決方案:</strong>
+1. 使用事件驅動架構解耦
+2. 引入消息隊列（Redis Pub/Sub 或 RabbitMQ）
+3. 策略狀態更新通過異步事件傳遞</p>
+<p><strong>事件示例:</strong></p>
+<pre><code class="language-python"># 策略執行發送事件
+event_bus.publish(&quot;strategy.executed&quot;, {
+    &quot;strategy_id&quot;: &quot;str_123&quot;,
+    &quot;signal&quot;: &quot;buy&quot;,
+    &quot;quantity&quot;: 100
+})
+
+# 持倉模組訂閱並更新
+@event_bus.subscribe(&quot;strategy.executed&quot;)
+def update_positions(event):
+    # 更新持倉邏輯
+    pass
+</code></pre>
+<hr />
+<h2 id="api_1">四、API 設計模式與規範<a class="headerlink" href="#api_1" title="連結到此標題">&para;</a></h2>
+<h3 id="41-restful">4.1 RESTful 設計原則<a class="headerlink" href="#41-restful" title="連結到此標題">&para;</a></h3>
+<h4 id="411-url">4.1.1 URL 設計規範<a class="headerlink" href="#411-url" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>規則</th>
+<th>示例</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>使用名詞復數</td>
+<td><code>/strategies</code>, <code>/orders</code></td>
+<td>資源集合</td>
+</tr>
+<tr>
+<td>層級嵌套不超過 2 層</td>
+<td><code>/strategies/{id}/backtest</code></td>
+<td>避免過深嵌套</td>
+</tr>
+<tr>
+<td>使用連字符分隔</td>
+<td><code>/market-data</code></td>
+<td>蛇形命名法</td>
+</tr>
+<tr>
+<td>小寫字母</td>
+<td><code>/api/v1/market</code></td>
+<td>URL 不區分大小寫</td>
+</tr>
+</tbody>
+</table>
+<h4 id="412-http">4.1.2 HTTP 方法使用<a class="headerlink" href="#412-http" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>操作</th>
+<th>是否冪等</th>
+<th>安全性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>查詢資源</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>創建資源</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>完整更新資源</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td>部分更新資源</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>刪除資源</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42">4.2 統一響應格式<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="421">4.2.1 成功響應<a class="headerlink" href="#421" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;data&quot;: { /* 實際數據 */ },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<p><strong>列表響應（帶分頁）:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: [ /* 數據項目 */ ],
+  &quot;pagination&quot;: {
+    &quot;page&quot;: 1,
+    &quot;page_size&quot;: 20,
+    &quot;total&quot;: 150,
+    &quot;total_pages&quot;: 8
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="422">4.2.2 錯誤響應<a class="headerlink" href="#422" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;STRATEGY_NOT_FOUND&quot;,
+    &quot;message&quot;: &quot;Strategy with id 'str_999999' not found&quot;,
+    &quot;details&quot;: {
+      &quot;strategy_id&quot;: &quot;str_999999&quot;
+    }
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="423">4.2.3 驗證錯誤<a class="headerlink" href="#423" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+    &quot;message&quot;: &quot;Request validation failed&quot;,
+    &quot;details&quot;: {
+      &quot;fields&quot;: [
+        {
+          &quot;field&quot;: &quot;parameters.short_period&quot;,
+          &quot;message&quot;: &quot;Must be greater than 0&quot;,
+          &quot;value&quot;: -5
+        },
+        {
+          &quot;field&quot;: &quot;risk_limits.max_drawdown&quot;,
+          &quot;message&quot;: &quot;Must be between 0 and 1&quot;,
+          &quot;value&quot;: 1.5
+        }
+      ]
+    }
+  }
+}
+</code></pre>
+<h3 id="43-http">4.3 HTTP 狀態碼規範<a class="headerlink" href="#43-http" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>狀態碼</th>
+<th>含義</th>
+<th>使用場景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>OK</td>
+<td>成功 GET, PUT, PATCH, DELETE</td>
+</tr>
+<tr>
+<td>201</td>
+<td>Created</td>
+<td>成功 POST 創建資源</td>
+</tr>
+<tr>
+<td>204</td>
+<td>No Content</td>
+<td>成功 DELETE，無返回內容</td>
+</tr>
+<tr>
+<td>400</td>
+<td>Bad Request</td>
+<td>請求格式錯誤、參數驗證失敗</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Unauthorized</td>
+<td>未認證或 Token 無效</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden</td>
+<td>已認證但無權限</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not Found</td>
+<td>資源不存在</td>
+</tr>
+<tr>
+<td>409</td>
+<td>Conflict</td>
+<td>資源衝突（如重複創建）</td>
+</tr>
+<tr>
+<td>422</td>
+<td>Unprocessable Entity</td>
+<td>語法正確但語義錯誤</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Too Many Requests</td>
+<td>超出速率限制</td>
+</tr>
+<tr>
+<td>500</td>
+<td>Internal Server Error</td>
+<td>服務器內部錯誤</td>
+</tr>
+<tr>
+<td>503</td>
+<td>Service Unavailable</td>
+<td>服務暫時不可用</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44">4.4 認證與授權<a class="headerlink" href="#44" title="連結到此標題">&para;</a></h3>
+<h4 id="441-jwt-token">4.4.1 JWT Token 認證<a class="headerlink" href="#441-jwt-token" title="連結到此標題">&para;</a></h4>
+<p><strong>請求頭格式:</strong></p>
+<pre><code>Authorization: Bearer &lt;access_token&gt;
+</code></pre>
+<p><strong>Token 生命週期:</strong>
+- Access Token: 1 小時有效期
+- Refresh Token: 7 天有效期</p>
+<h4 id="442-rbac">4.4.2 基於角色的訪問控制 (RBAC)<a class="headerlink" href="#442-rbac" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>權限</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admin</code></td>
+<td>所有操作</td>
+</tr>
+<tr>
+<td><code>trader</code></td>
+<td>策略管理、執行、查看</td>
+</tr>
+<tr>
+<td><code>analyst</code></td>
+<td>只讀訪問所有數據</td>
+</tr>
+<tr>
+<td><code>viewer</code></td>
+<td>僅查看自己策略的數據</td>
+</tr>
+</tbody>
+</table>
+<p><strong>端點權限標記示例:</strong></p>
+<pre><code class="language-python">@router.get(&quot;/strategies/{strategy_id}&quot;, dependencies=[Depends(require_role(&quot;trader&quot;))])
+async def get_strategy(strategy_id: str):
+    ...
+</code></pre>
+<h3 id="45">4.5 速率限制<a class="headerlink" href="#45" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>端點類型</th>
+<th>限制</th>
+<th>窗口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>認證端點</td>
+<td>5 請求</td>
+<td>1 分鐘</td>
+</tr>
+<tr>
+<td>查詢端點</td>
+<td>100 請求</td>
+<td>1 分鐘</td>
+</tr>
+<tr>
+<td>寫入端點</td>
+<td>30 請求</td>
+<td>1 分鐘</td>
+</tr>
+<tr>
+<td>回測提交</td>
+<td>10 請求</td>
+<td>1 小時</td>
+</tr>
+</tbody>
+</table>
+<p><strong>速率限制響應頭:</strong></p>
+<pre><code>X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1613846400
+</code></pre>
+<h3 id="46">4.6 版本控制<a class="headerlink" href="#46" title="連結到此標題">&para;</a></h3>
+<p><strong>URL 版本策略:</strong>
+- 當前版本: <code>/api/v1/</code>
+- 棄用版本: <code>/api/v0/</code> (至少維護 6 個月)</p>
+<p><strong>版本過渡策略:</strong>
+1. 新增端點默認使用最新版本
+2. 修改端點在舊版本保持兼容
+3. 重大變更發布新版本
+4. 棄用端點在響應頭中添加 <code>Deprecated: true</code></p>
+<h3 id="47">4.7 篩選與排序<a class="headerlink" href="#47" title="連結到此標題">&para;</a></h3>
+<p><strong>通用查詢參數:</strong></p>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>類型</th>
+<th>示例</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>page</code></td>
+<td>integer</td>
+<td><code>page=1</code></td>
+<td>頁碼（從 1 開始）</td>
+</tr>
+<tr>
+<td><code>page_size</code></td>
+<td>integer</td>
+<td><code>page_size=20</code></td>
+<td>每頁數量（默認 20，最大 100）</td>
+</tr>
+<tr>
+<td><code>sort_by</code></td>
+<td>string</td>
+<td><code>sort_by=created_at</code></td>
+<td>排序字段</td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td>string</td>
+<td><code>order=desc</code></td>
+<td>排序方向（asc/desc）</td>
+</tr>
+<tr>
+<td><code>filter[field]</code></td>
+<td>mixed</td>
+<td><code>filter[status]=active</code></td>
+<td>字段篩選</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td>string</td>
+<td><code>search=ma_crossover</code></td>
+<td>全文搜索</td>
+</tr>
+</tbody>
+</table>
+<p><strong>示例:</strong></p>
+<pre><code>GET /api/v1/strategies?page=1&amp;page_size=20&amp;sort_by=created_at&amp;order=desc&amp;filter[status]=active&amp;search=moving
+</code></pre>
+<h3 id="48">4.8 數據驗證規範<a class="headerlink" href="#48" title="連結到此標題">&para;</a></h3>
+<h4 id="481-pydantic-model">4.8.1 Pydantic Model 示例<a class="headerlink" href="#481-pydantic-model" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from pydantic import BaseModel, Field, validator
+from typing import Optional, Dict
+from datetime import datetime
+from enum import Enum
+
+class StrategyType(str, Enum):
+    TREND_FOLLOWING = &quot;trend_following&quot;
+    MEAN_REVERSION = &quot;mean_reversion&quot;
+    MOMENTUM = &quot;momentum&quot;
+    ARBITRAGE = &quot;arbitrage&quot;
+
+class StrategyStatus(str, Enum):
+    DRAFT = &quot;draft&quot;
+    ACTIVE = &quot;active&quot;
+    PAUSED = &quot;paused&quot;
+    ARCHIVED = &quot;archived&quot;
+
+class RiskLimits(BaseModel):
+    max_position_size: float = Field(..., gt=0, description=&quot;最大持倉數量&quot;)
+    max_drawdown: float = Field(..., ge=0, le=1, description=&quot;最大回撤比例&quot;)
+    stop_loss_pct: Optional[float] = Field(None, ge=0, le=1, description=&quot;止損百分比&quot;)
+    take_profit_pct: Optional[float] = Field(None, ge=0, description=&quot;止盈百分比&quot;)
+
+class StrategyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100, description=&quot;策略名稱&quot;)
+    description: Optional[str] = Field(None, max_length=500, description=&quot;策略描述&quot;)
+    type: StrategyType = Field(..., description=&quot;策略類型&quot;)
+    parameters: Dict = Field(..., description=&quot;策略參數&quot;)
+    risk_limits: RiskLimits = Field(..., description=&quot;風控限制&quot;)
+
+    @validator('name')
+    def name_must_not_contain_special_chars(cls, v):
+        if any(c in v for c in '&lt;&gt;&quot;/\\|?*'):
+            raise ValueError('策略名稱不能包含特殊字符')
+        return v
+
+class StrategyResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str]
+    type: StrategyType
+    status: StrategyStatus
+    parameters: Dict
+    risk_limits: RiskLimits
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+</code></pre>
+<h4 id="482">4.8.2 端點驗證依賴<a class="headerlink" href="#482" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from fastapi import Depends, HTTPException, status
+
+async def validate_strategy_access(
+    strategy_id: str,
+    current_user: User = Depends(get_current_user)
+) -&gt; Strategy:
+    strategy = await get_strategy_by_id(strategy_id)
+    if not strategy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f&quot;Strategy {strategy_id} not found&quot;
+        )
+    if strategy.user_id != current_user.id and current_user.role != &quot;admin&quot;:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=&quot;No permission to access this strategy&quot;
+        )
+    return strategy
+
+@router.get(&quot;/strategies/{strategy_id}&quot;)
+async def get_strategy_endpoint(
+    strategy: Strategy = Depends(validate_strategy_access)
+):
+    return {&quot;data&quot;: strategy}
+</code></pre>
+<h3 id="49">4.9 異步處理模式<a class="headerlink" href="#49" title="連結到此標題">&para;</a></h3>
+<h4 id="491">4.9.1 長時間運行任務<a class="headerlink" href="#491" title="連結到此標題">&para;</a></h4>
+<p><strong>回測任務提交:</strong></p>
+<pre><code class="language-python">@router.post(&quot;/strategies/{strategy_id}/backtest&quot;)
+async def submit_backtest(
+    strategy_id: str,
+    backtest_config: BacktestConfig,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user)
+):
+    # 創建任務記錄
+    task_id = await create_backtest_task(strategy_id, backtest_config, current_user.id)
+
+    # 提交到後台任務隊列
+    background_tasks.add_task(
+        execute_backtest,
+        task_id=task_id,
+        strategy_id=strategy_id,
+        config=backtest_config
+    )
+
+    return {
+        &quot;data&quot;: {
+            &quot;task_id&quot;: task_id,
+            &quot;status&quot;: &quot;pending&quot;,
+            &quot;message&quot;: &quot;Backtest task submitted&quot;
+        }
+    }
+</code></pre>
+<h4 id="492">4.9.2 任務狀態輪詢<a class="headerlink" href="#492" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">@router.get(&quot;/strategies/{strategy_id}/backtest/{backtest_id}&quot;)
+async def get_backtest_result(backtest_id: str):
+    backtest = await get_backtest_by_id(backtest_id)
+
+    if not backtest:
+        raise HTTPException(status_code=404, detail=&quot;Backtest not found&quot;)
+
+    response = {
+        &quot;data&quot;: {
+            &quot;id&quot;: backtest.id,
+            &quot;status&quot;: backtest.status,
+            &quot;progress&quot;: backtest.progress,
+            &quot;created_at&quot;: backtest.created_at
+        }
+    }
+
+    # 如果完成，返回結果
+    if backtest.status == &quot;completed&quot;:
+        response[&quot;data&quot;][&quot;result&quot;] = {
+            &quot;metrics&quot;: backtest.metrics,
+            &quot;trades&quot;: backtest.trades,
+            &quot;equity_curve&quot;: backtest.equity_curve
+        }
+    elif backtest.status == &quot;failed&quot;:
+        response[&quot;data&quot;][&quot;error&quot;] = backtest.error_message
+
+    return response
+</code></pre>
+<h3 id="410">4.10 緩存策略<a class="headerlink" href="#410" title="連結到此標題">&para;</a></h3>
+<h4 id="4101">4.10.1 緩存層級<a class="headerlink" href="#4101" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>數據類型</th>
+<th>緩存時間</th>
+<th>策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>實時報價</td>
+<td>5 秒</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>市場概覽</td>
+<td>1 分鐘</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>策略配置</td>
+<td>30 分鐘</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>歷史 K 線</td>
+<td>1 小時</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>回測結果</td>
+<td>永久</td>
+<td>Redis（可設 TTL）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="4102">4.10.2 緩存實現示例<a class="headerlink" href="#4102" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+
+@router.get(&quot;/market/quote/{symbol}&quot;)
+@cache(expire=5)  # 5秒緩存
+async def get_quote(symbol: str):
+    quote = await fetch_market_quote(symbol)
+    return {&quot;data&quot;: quote}
+
+@router.get(&quot;/strategies/{strategy_id}&quot;)
+@cache(expire=1800)  # 30分鐘緩存
+async def get_strategy(strategy_id: str):
+    strategy = await get_strategy_by_id(strategy_id)
+    return {&quot;data&quot;: strategy}
+
+# 緩存失效
+@router.put(&quot;/strategies/{strategy_id}&quot;)
+async def update_strategy(strategy_id: str, updates: StrategyUpdate):
+    strategy = await update_strategy_db(strategy_id, updates)
+    # 清除緩存
+    await FastAPICache.clear(prefix=f&quot;strategy:{strategy_id}&quot;)
+    return {&quot;data&quot;: strategy}
+</code></pre>
+<hr />
+<h2 id="_15">五、關鍵端點詳細說明<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 策略創建端點<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>POST /api/v1/strategies</code></p>
+<h4 id="511">5.1.1 請求參數<a class="headerlink" href="#511" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class StrategyCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    type: StrategyType
+    parameters: Dict[str, Any]
+    risk_limits: RiskLimits
+</code></pre>
+<p><strong>驗證規則:</strong></p>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>驗證</th>
+<th>錯誤碼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>1-100 字符，無特殊字符</td>
+<td><code>INVALID_NAME</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>必須是有效枚舉值</td>
+<td><code>INVALID_STRATEGY_TYPE</code></td>
+</tr>
+<tr>
+<td><code>parameters</code></td>
+<td>必須包含策略類型所需的參數</td>
+<td><code>MISSING_REQUIRED_PARAMS</code></td>
+</tr>
+<tr>
+<td><code>risk_limits.max_position_size</code></td>
+<td>&gt; 0</td>
+<td><code>INVALID_POSITION_SIZE</code></td>
+</tr>
+<tr>
+<td><code>risk_limits.max_drawdown</code></td>
+<td>0 ≤ x ≤ 1</td>
+<td><code>INVALID_DRAWDOWN</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="512">5.1.2 參數驗證邏輯<a class="headerlink" href="#512" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># 根據策略類型驗證必需參數
+REQUIRED_PARAMS = {
+    StrategyType.TREND_FOLLOWING: [&quot;short_period&quot;, &quot;long_period&quot;, &quot;symbol&quot;],
+    StrategyType.MEAN_REVERSION: [&quot;lookback_period&quot;, &quot;entry_threshold&quot;, &quot;exit_threshold&quot;],
+    StrategyType.MOMENTUM: [&quot;lookback_period&quot;, &quot;momentum_threshold&quot;],
+    StrategyType.ARBITRAGE: [&quot;pair_1&quot;, &quot;pair_2&quot;, &quot;entry_spread&quot;, &quot;exit_spread&quot;]
+}
+
+@validator('parameters')
+def validate_required_params(cls, v, values):
+    strategy_type = values.get('type')
+    if strategy_type:
+        required = REQUIRED_PARAMS.get(strategy_type, [])
+        missing = [p for p in required if p not in v]
+        if missing:
+            raise ValueError(f&quot;Missing required parameters: {', '.join(missing)}&quot;)
+    return v
+</code></pre>
+<h4 id="513">5.1.3 錯誤處理<a class="headerlink" href="#513" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>錯誤場景</th>
+<th>狀態碼</th>
+<th>錯誤碼</th>
+<th>處理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>參數驗證失敗</td>
+<td>422</td>
+<td><code>VALIDATION_ERROR</code></td>
+<td>返回具體字段錯誤</td>
+</tr>
+<tr>
+<td>策略名稱重複</td>
+<td>409</td>
+<td><code>STRATEGY_NAME_EXISTS</code></td>
+<td>建議使用不同名稱</td>
+</tr>
+<tr>
+<td>數據庫錯誤</td>
+<td>500</td>
+<td><code>DATABASE_ERROR</code></td>
+<td>記錄日誌，返回通用錯誤</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 回測提交端點<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>POST /api/v1/strategies/{strategy_id}/backtest</code></p>
+<h4 id="521">5.2.1 請求參數<a class="headerlink" href="#521" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BacktestConfig(BaseModel):
+    start_date: date
+    end_date: date
+    initial_capital: float = Field(default=100000, gt=0)
+    commission: float = Field(default=0.001, ge=0)
+    slippage: float = Field(default=0.0001, ge=0)
+    data_source: str = Field(default=&quot;yahoo_finance&quot;)
+    benchmark: Optional[str] = None
+</code></pre>
+<p><strong>驗證規則:</strong></p>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>驗證</th>
+<th>錯誤碼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start_date</code></td>
+<td>必須 ≤ <code>end_date</code></td>
+<td><code>INVALID_DATE_RANGE</code></td>
+</tr>
+<tr>
+<td><code>end_date</code></td>
+<td>必須 ≤ 當前日期</td>
+<td><code>FUTURE_DATE</code></td>
+</tr>
+<tr>
+<td><code>initial_capital</code></td>
+<td>&gt; 0</td>
+<td><code>INVALID_CAPITAL</code></td>
+</tr>
+<tr>
+<td><code>commission</code></td>
+<td>≥ 0</td>
+<td><code>INVALID_COMMISSION</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="522">5.2.2 異步處理流程<a class="headerlink" href="#522" title="連結到此標題">&para;</a></h4>
+<pre><code>1. 驗證策略存在且可回測
+2. 驗證日期範圍內有市場數據
+3. 創建回測任務記錄（狀態: pending）
+4. 將任務放入 Redis 隊列
+5. Worker 從隊列取出任務
+6. 執行回測邏輯
+7. 更新任務狀態和結果
+8. 緩存結果數據
+</code></pre>
+<h4 id="523">5.2.3 進度追蹤<a class="headerlink" href="#523" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BacktestProgress(BaseModel):
+    task_id: str
+    status: str  # pending, running, completed, failed
+    progress: float  # 0.0 - 1.0
+    current_date: Optional[date] = None
+    total_trades: int = 0
+    estimated_time_remaining: Optional[int] = None  # seconds
+</code></pre>
+<h3 id="53">5.3 市場數據查詢端點<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>GET /api/v1/market/historical/{symbol}</code></p>
+<h4 id="531">5.3.1 查詢參數<a class="headerlink" href="#531" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>類型</th>
+<th>必填</th>
+<th>默認值</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>symbol</code></td>
+<td>string</td>
+<td>✅</td>
+<td>-</td>
+<td>股票代碼</td>
+</tr>
+<tr>
+<td><code>start_date</code></td>
+<td>date</td>
+<td>❌</td>
+<td>1年前</td>
+<td>開始日期</td>
+</tr>
+<tr>
+<td><code>end_date</code></td>
+<td>date</td>
+<td>❌</td>
+<td>今天</td>
+<td>結束日期</td>
+</tr>
+<tr>
+<td><code>interval</code></td>
+<td>string</td>
+<td>❌</td>
+<td>1d</td>
+<td>數據間隔</td>
+</tr>
+<tr>
+<td><code>adjusted</code></td>
+<td>boolean</td>
+<td>❌</td>
+<td>true</td>
+<td>是否復權</td>
+</tr>
+</tbody>
+</table>
+<p><strong>支持的 interval 值:</strong>
+- <code>1m</code>, <code>5m</code>, <code>15m</code>, <code>30m</code>, <code>1h</code> (分鐘級數據)
+- <code>1d</code>, <code>1w</code>, <code>1M</code> (日級數據)</p>
+<h4 id="532">5.3.2 響應格式<a class="headerlink" href="#532" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;symbol&quot;: &quot;AAPL&quot;,
+    &quot;interval&quot;: &quot;1d&quot;,
+    &quot;candles&quot;: [
+      {
+        &quot;timestamp&quot;: &quot;2026-01-02T00:00:00Z&quot;,
+        &quot;open&quot;: 150.00,
+        &quot;high&quot;: 155.00,
+        &quot;low&quot;: 149.50,
+        &quot;close&quot;: 154.25,
+        &quot;volume&quot;: 50000000
+      }
+    ],
+    &quot;count&quot;: 252
+  },
+  &quot;meta&quot;: {
+    &quot;data_source&quot;: &quot;yahoo_finance&quot;,
+    &quot;last_updated&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="533">5.3.3 數據源優先級<a class="headerlink" href="#533" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>本地數據庫</strong> (最快)</li>
+<li><strong>Redis 緩存</strong> (次快)</li>
+<li><strong>外部 API</strong> (Yahoo Finance, Alpha Vantage)</li>
+<li><strong>數據服務商</strong> (Bloomberg, Wind)</li>
+</ol>
+<h3 id="54">5.4 績效分析端點<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>GET /api/v1/analysis/performance/{strategy_id}</code></p>
+<h4 id="541">5.4.1 計算指標<a class="headerlink" href="#541" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class PerformanceMetrics(BaseModel):
+    # 收益類
+    total_return: float
+    annualized_return: float
+
+    # 風險類
+    volatility: float
+    downside_volatility: float
+
+    # 風險調整收益
+    sharpe_ratio: float
+    sortino_ratio: float
+    calmar_ratio: float
+
+    # 回撤類
+    max_drawdown: float
+    avg_drawdown: float
+    max_drawdown_duration: int  # days
+
+    # 交易類
+    total_trades: int
+    winning_trades: int
+    losing_trades: int
+    win_rate: float
+    profit_factor: float
+    avg_win: float
+    avg_loss: float
+    largest_win: float
+    largest_loss: float
+
+    # 統計類
+    skewness: float
+    kurtosis: float
+    information_ratio: Optional[float] = None
+</code></pre>
+<h4 id="542">5.4.2 時間範圍過濾<a class="headerlink" href="#542" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>參數</th>
+<th>說明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>period</code></td>
+<td>預設時間段</td>
+<td><code>1m</code>, <code>3m</code>, <code>6m</code>, <code>1y</code>, <code>ytd</code>, <code>all</code></td>
+</tr>
+<tr>
+<td><code>start_date</code></td>
+<td>自定義開始日期</td>
+<td><code>2025-01-01</code></td>
+</tr>
+<tr>
+<td><code>end_date</code></td>
+<td>自定義結束日期</td>
+<td><code>2025-12-31</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="543">5.4.3 緩存策略<a class="headerlink" href="#543" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>策略績效數據: 緩存 15 分鐘</li>
+<li>當天數據: 不緩存（實時計算）</li>
+<li>歷史數據: 緩存 1 小時</li>
+</ul>
+<h3 id="55">5.5 認證端點<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>POST /api/v1/auth/login</code></p>
+<h4 id="551">5.5.1 請求參數<a class="headerlink" href="#551" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=8, max_length=128)
+    remember_me: bool = False
+</code></pre>
+<h4 id="552">5.5.2 安全措施<a class="headerlink" href="#552" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>密碼哈希:</strong> 使用 bcrypt，salt rounds = 12</li>
+<li><strong>速率限制:</strong> 5 次嘗試/分鐘</li>
+<li><strong>賬戶鎖定:</strong> 連續失敗 5 次，鎖定 15 分鐘</li>
+<li><strong>Token 簽名:</strong> RS256 算法</li>
+<li><strong>Token 過期:</strong> Access Token 1 小時，Refresh Token 7 天</li>
+</ol>
+<h4 id="553">5.5.3 錯誤處理<a class="headerlink" href="#553" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>狀態碼</th>
+<th>錯誤碼</th>
+<th>處理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用戶不存在</td>
+<td>401</td>
+<td><code>INVALID_CREDENTIALS</code></td>
+<td>統一錯誤提示（防止用戶枚舉）</td>
+</tr>
+<tr>
+<td>密碼錯誤</td>
+<td>401</td>
+<td><code>INVALID_CREDENTIALS</code></td>
+<td>記錄失敗次數</td>
+</tr>
+<tr>
+<td>賬戶鎖定</td>
+<td>423</td>
+<td><code>ACCOUNT_LOCKED</code></td>
+<td>返回解鎖時間</td>
+</tr>
+<tr>
+<td>密碼過期</td>
+<td>403</td>
+<td><code>PASSWORD_EXPIRED</code></td>
+<td>要求修改密碼</td>
+</tr>
+</tbody>
+</table>
+<h3 id="56">5.6 健康檢查端點<a class="headerlink" href="#56" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>GET /api/v1/system/health</code></p>
+<h4 id="561">5.6.1 檢查項<a class="headerlink" href="#561" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class HealthCheck(BaseModel):
+    status: Literal[&quot;healthy&quot;, &quot;degraded&quot;, &quot;unhealthy&quot;]
+    timestamp: datetime
+    checks: Dict[str, HealthCheckItem]
+
+class HealthCheckItem(BaseModel):
+    status: Literal[&quot;ok&quot;, &quot;degraded&quot;, &quot;error&quot;]
+    response_time_ms: Optional[float] = None
+    message: Optional[str] = None
+</code></pre>
+<h4 id="562">5.6.2 檢查邏輯<a class="headerlink" href="#562" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>服務</th>
+<th>檢查方式</th>
+<th>超時</th>
+<th>閾值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Database</td>
+<td><code>SELECT 1</code></td>
+<td>2 秒</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td><code>PING</code></td>
+<td>1 秒</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Market Data</td>
+<td>獲取報價</td>
+<td>3 秒</td>
+<td>數據新鮮度 &lt; 30 秒</td>
+</tr>
+<tr>
+<td>Execution Engine</td>
+<td>狀態查詢</td>
+<td>2 秒</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Queue</td>
+<td>隊列深度</td>
+<td>1 秒</td>
+<td>&lt; 1000</td>
+</tr>
+</tbody>
+</table>
+<h4 id="563">5.6.3 響應示例<a class="headerlink" href="#563" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;degraded&quot;,
+  &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;,
+  &quot;checks&quot;: {
+    &quot;database&quot;: {
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;response_time_ms&quot;: 12.5
+    },
+    &quot;redis&quot;: {
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;response_time_ms&quot;: 2.3
+    },
+    &quot;market_data&quot;: {
+      &quot;status&quot;: &quot;degraded&quot;,
+      &quot;message&quot;: &quot;Data latency 45 seconds&quot;,
+      &quot;response_time_ms&quot;: 45.2
+    },
+    &quot;execution_engine&quot;: {
+      &quot;status&quot;: &quot;ok&quot;,
+      &quot;response_time_ms&quot;: 18.7
+    }
+  }
+}
+</code></pre>
+<hr />
+<h2 id="_16">六、實現建議<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 技術棧推薦<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<pre><code>Framework: FastAPI 0.100+
+ORM: SQLAlchemy 2.0+
+Database: PostgreSQL 15+
+Cache: Redis 7+
+Queue: Celery + Redis
+Authentication: JWT (python-jose)
+Validation: Pydantic v2
+Documentation: Auto-generated (OpenAPI 3.1)
+</code></pre>
+<h3 id="62">6.2 目錄結構建議<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<pre><code>backend/
+├── routers/
+│   ├── __init__.py
+│   ├── strategies/
+│   ├── analysis/
+│   ├── system/
+│   ├── market.py
+│   ├── performance.py
+│   ├── positions.py
+│   └── orders.py
+├── models/
+│   ├── strategy.py
+│   ├── backtest.py
+│   ├── order.py
+│   └── ...
+├── schemas/
+│   ├── strategy.py
+│   ├── backtest.py
+│   └── ...
+├── services/
+│   ├── market_service.py
+│   ├── backtest_service.py
+│   └── ...
+├── core/
+│   ├── config.py
+│   ├── security.py
+│   ├── cache.py
+│   └── exceptions.py
+├── workers/
+│   ├── backtest_worker.py
+│   └── optimization_worker.py
+└── main.py
+</code></pre>
+<h3 id="63">6.3 最佳實踐<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>使用依賴注入:</strong> FastAPI 的 Depends 系統</li>
+<li><strong>統一異常處理:</strong> 自定義異常類和處理器</li>
+<li><strong>日誌結構化:</strong> JSON 格式日誌，包含 request_id</li>
+<li><strong>數據庫連接池:</strong> 配置合理大小</li>
+<li><strong>異步 I/O:</strong> 盡量使用 async/await</li>
+<li><strong>API 版本化:</strong> URL 版本策略</li>
+<li><strong>文檔自動生成:</strong> 利用 FastAPI 的 OpenAPI 支持</li>
+</ol>
+<h3 id="64">6.4 監控與可觀測性<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<pre><code>Metrics: Prometheus
+Logs: ELK Stack
+Tracing: OpenTelemetry
+Alerts: Grafana + Alertmanager
+</code></pre>
+<p><strong>關鍵指標:</strong>
+- API 響應時間 (P50, P95, P99)
+- 錯誤率
+- 請求量
+- 數據庫連接池使用率
+- Redis 緩存命中率
+- 隊列積壓數量</p>
+<hr />
+<h2 id="_17">七、測試策略<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 測試層級<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<pre><code>單元測試: 針對每個路由函數
+集成測試: 測試完整請求響應流程
+端到端測試: 模擬真實用戶場景
+性能測試: 負載測試和壓力測試
+</code></pre>
+<h3 id="72">7.2 關鍵測試場景<a class="headerlink" href="#72" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>認證流程:</strong> 登錄、Token 刷新、權限驗證</li>
+<li><strong>策略 CRUD:</strong> 創建、讀取、更新、刪除</li>
+<li><strong>回測流程:</strong> 提交、執行、結果查詢</li>
+<li><strong>錯誤處理:</strong> 各種錯誤場景的正確響應</li>
+<li><strong>速率限制:</strong> 超出限制的正確處理</li>
+</ol>
+<h3 id="73">7.3 測試工具推薦<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<pre><code>Unit Tests: pytest + pytest-asyncio
+API Testing: httpx
+Load Testing: locust
+Contract Testing: schemathesis
+</code></pre>
+<hr />
+<h2 id="_18">八、總結<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<p>本分析文檔為 Dashboard 系統的 API 路由層提供了完整的設計規範和實現指導。文檔涵蓋了：</p>
+<ol>
+<li><strong>完整的路由架構:</strong> 清晰的模組劃分和職責定義</li>
+<li><strong>標準化的 API 設計:</strong> RESTful 原則、統一響應格式、錯誤處理</li>
+<li><strong>詳細的端點規範:</strong> 每個端點的請求參數、驗證規則、響應格式</li>
+<li><strong>依賴關係分析:</strong> 模組間的數據流向和依賴管理</li>
+<li><strong>最佳實踐建議:</strong> 技術棧、目錄結構、實現模式</li>
+</ol>
+<p>此文檔為 programmer sub-agent 提供了：
+- 清晰的實現藍圖
+- 完整的 API 規範參考
+- 可擴展的架構基礎
+- 最佳實踐指導原則</p>
+<hr />
+<h2 id="_19">附錄<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h2>
+<h3 id="a">A. 常見錯誤碼列表<a class="headerlink" href="#a" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>錯誤碼</th>
+<th>HTTP 狀態</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>422</td>
+<td>請求參數驗證失敗</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NOT_FOUND</code></td>
+<td>404</td>
+<td>策略不存在</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NAME_EXISTS</code></td>
+<td>409</td>
+<td>策略名稱已存在</td>
+</tr>
+<tr>
+<td><code>BACKTEST_NOT_FOUND</code></td>
+<td>404</td>
+<td>回測任務不存在</td>
+</tr>
+<tr>
+<td><code>INVALID_DATE_RANGE</code></td>
+<td>422</td>
+<td>日期範圍無效</td>
+</tr>
+<tr>
+<td><code>INSUFFICIENT_DATA</code></td>
+<td>400</td>
+<td>數據不足</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_EXCEEDED</code></td>
+<td>429</td>
+<td>超出速率限制</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>未授權訪問</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>403</td>
+<td>無權限訪問</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>內部服務器錯誤</td>
+</tr>
+</tbody>
+</table>
+<h3 id="b">B. 參考文檔<a class="headerlink" href="#b" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><a href="https://fastapi.tiangolo.com/">FastAPI 官方文檔</a></li>
+<li><a href="https://restfulapi.net/">RESTful API 設計最佳實踐</a></li>
+<li><a href="https://spec.openapis.org/oas/v3.1.0">OpenAPI 3.1 規範</a></li>
+<li><a href="https://tools.ietf.org/html/rfc8725">JWT 最佳實踐</a></li>
+</ul>
+<hr />
+<p><strong>文檔版本:</strong> 1.0
+<strong>最後更新:</strong> 2026-02-20
+<strong>維護者:</strong> Charlie Analyst</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

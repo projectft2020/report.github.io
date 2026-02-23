@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Dashboard 策略對比功能測試報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Matrix Dashboard 策略對比功能測試報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="matrix-dashboard">Matrix Dashboard 策略對比功能測試報告<a class="headerlink" href="#matrix-dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>測試時間:</strong> 2026-02-20 18:05:00
+<strong>測試人員:</strong> Charlie Analyst
+<strong>測試環境:</strong> http://localhost:8001
+<strong>任務 ID:</strong> p003</p>
+<hr />
+<h2 id="_1">測試概況<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>測試項目</th>
+<th>狀態</th>
+<th>響應時間</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API 服務健康狀態</td>
+<td>✅ 通過</td>
+<td>9.60ms (來自 p002)</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td>策略模板端點</td>
+<td>✅ 通過</td>
+<td>34.80ms (來自 p002)</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td>策略對比端點格式</td>
+<td>⚠️ 待驗證</td>
+<td>待測試</td>
+<td>待確認</td>
+</tr>
+</tbody>
+</table>
+<p><strong>整體測試狀態:</strong> 部分完成 - API 基礎設施已驗證，對比端點需進一步測試</p>
+<hr />
+<h2 id="_2">執行摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">主要發現<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>API 基礎設施運作良好</strong></li>
+<li>健康檢查端點正常運行（9.60ms 響應時間）</li>
+<li>策略模板端點返回 6 個可用的策略模板</li>
+<li>
+<p>API 服務穩定且響應迅速</p>
+</li>
+<li>
+<p><strong>策略對比端點架構推斷</strong></p>
+</li>
+<li>端點路徑: <code>POST http://localhost:8001/api/strategies/comparison</code></li>
+<li>預期請求格式基於回測端點模式推斷</li>
+<li>
+<p>需要驗證實際的請求/響應格式</p>
+</li>
+<li>
+<p><strong>測試工具限制</strong></p>
+</li>
+<li>瀏覽器控制不可用（Chrome 擴展未連接）</li>
+<li>Canvas 需要節點配置</li>
+<li>無法直接執行 HTTP 請求進行實時測試</li>
+</ol>
+<h3 id="_4">建議優先事項<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>優先級</th>
+<th>行動項</th>
+<th>預期影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 高</td>
+<td>驗證策略對比端點實際格式</td>
+<td>確保功能正確實現</td>
+</tr>
+<tr>
+<td>🟡 中</td>
+<td>執行完整的端到端測試</td>
+<td>驗證數據準確性和性能</td>
+</tr>
+<tr>
+<td>🟢 低</td>
+<td>實施自動化測試腳本</td>
+<td>提升測試效率</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_5">測試環境與前提條件<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="_6">前序任務完成狀況<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<p>根據 p002 測試報告，以下功能已驗證：</p>
+<p>✅ <strong>已完成驗證:</strong>
+- API 服務運行正常
+- 策略模板查詢功能（6 個策略類型）
+- 回測端點路徑確認 (<code>/api/strategies/backtest/run</code>)
+- 回測請求格式確定</p>
+<h3 id="_7">可用策略模板<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略 ID</th>
+<th>策略名稱</th>
+<th>類型</th>
+<th>市場</th>
+<th>主要參數</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bollinger</td>
+<td>BOLLINGER Strategy</td>
+<td>bollinger</td>
+<td>TW</td>
+<td>param1 (float)</td>
+</tr>
+<tr>
+<td>macd</td>
+<td>MACD策略</td>
+<td>macd</td>
+<td>TW</td>
+<td>fast_period, slow_period, signal_period</td>
+</tr>
+<tr>
+<td>momentum</td>
+<td>動量策略</td>
+<td>momentum</td>
+<td>TW</td>
+<td>top_n, max_weight</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>RSI策略</td>
+<td>rsi</td>
+<td>TW</td>
+<td>rsi_period, rsi_threshold</td>
+</tr>
+<tr>
+<td>rsi_tw</td>
+<td>RSI_TW Strategy</td>
+<td>rsi</td>
+<td>TW</td>
+<td>param1</td>
+</tr>
+<tr>
+<td>supertrend</td>
+<td>SUPERTREND Strategy</td>
+<td>supertrend</td>
+<td>TW</td>
+<td>length, multiplier</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_8">策略對比端點分析<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<h3 id="_9">端點信息<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<p><strong>路徑:</strong> <code>POST http://localhost:8001/api/strategies/comparison</code></p>
+<h3 id="_10">預期請求格式推斷<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<p>基於回測端點的設計模式（來自 p002），策略對比端點的預期格式可能為：</p>
+<pre><code class="language-json">{
+  &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;, &quot;momentum&quot;],
+  &quot;symbols&quot;: [&quot;2330.TW&quot;, &quot;2317.TW&quot;],
+  &quot;start_date&quot;: &quot;2024-01-01&quot;,
+  &quot;end_date&quot;: &quot;2024-12-31&quot;
+}
+</code></pre>
+<h3 id="_11">預期欄位說明<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>類型</th>
+<th>必填</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strategies</td>
+<td>array</td>
+<td>✅</td>
+<td>要對比的策略 ID 列表（至少 2 個）</td>
+</tr>
+<tr>
+<td>symbols</td>
+<td>array</td>
+<td>✅</td>
+<td>股票代碼列表</td>
+</tr>
+<tr>
+<td>start_date</td>
+<td>string</td>
+<td>✅</td>
+<td>回測開始日期 (ISO 格式)</td>
+</tr>
+<tr>
+<td>end_date</td>
+<td>string</td>
+<td>✅</td>
+<td>回測結束日期 (ISO 格式)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_12">預期響應格式（推斷）<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<p>根據策略對比功能的常見設計，預期響應可能包含：</p>
+<pre><code class="language-json">{
+  &quot;comparison_id&quot;: &quot;uuid-string&quot;,
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;period&quot;: {
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  },
+  &quot;strategies&quot;: [
+    {
+      &quot;strategy_id&quot;: &quot;macd&quot;,
+      &quot;display_name&quot;: &quot;MACD策略&quot;,
+      &quot;performance&quot;: {
+        &quot;total_return&quot;: 0.25,
+        &quot;annualized_return&quot;: 0.25,
+        &quot;sharpe_ratio&quot;: 1.5,
+        &quot;max_drawdown&quot;: -0.15,
+        &quot;volatility&quot;: 0.20,
+        &quot;win_rate&quot;: 0.60
+      },
+      &quot;trades&quot;: {
+        &quot;total&quot;: 45,
+        &quot;winning&quot;: 27,
+        &quot;losing&quot;: 18
+      }
+    },
+    {
+      &quot;strategy_id&quot;: &quot;rsi&quot;,
+      &quot;display_name&quot;: &quot;RSI策略&quot;,
+      &quot;performance&quot;: {
+        &quot;total_return&quot;: 0.18,
+        &quot;annualized_return&quot;: 0.18,
+        &quot;sharpe_ratio&quot;: 1.2,
+        &quot;max_drawdown&quot;: -0.12,
+        &quot;volatility&quot;: 0.18,
+        &quot;win_rate&quot;: 0.55
+      },
+      &quot;trades&quot;: {
+        &quot;total&quot;: 32,
+        &quot;winning&quot;: 18,
+        &quot;losing&quot;: 14
+      }
+    }
+  ],
+  &quot;comparison_metrics&quot;: {
+    &quot;best_return&quot;: {
+      &quot;strategy_id&quot;: &quot;macd&quot;,
+      &quot;value&quot;: 0.25
+    },
+    &quot;best_sharpe&quot;: {
+      &quot;strategy_id&quot;: &quot;macd&quot;,
+      &quot;value&quot;: 1.5
+    },
+    &quot;lowest_drawdown&quot;: {
+      &quot;strategy_id&quot;: &quot;rsi&quot;,
+      &quot;value&quot;: -0.12
+    },
+    &quot;correlation_matrix&quot;: {
+      &quot;macd-rsi&quot;: 0.65,
+      &quot;macd-momentum&quot;: 0.45,
+      &quot;rsi-momentum&quot;: 0.55
+    }
+  },
+  &quot;charts&quot;: {
+    &quot;cumulative_returns&quot;: {
+      &quot;labels&quot;: [&quot;2024-01-01&quot;, &quot;2024-02-01&quot;, ...],
+      &quot;datasets&quot;: [
+        {
+          &quot;label&quot;: &quot;MACD&quot;,
+          &quot;data&quot;: [100, 105, ...]
+        },
+        {
+          &quot;label&quot;: &quot;RSI&quot;,
+          &quot;data&quot;: [100, 102, ...]
+        }
+      ]
+    },
+    &quot;drawdown_chart&quot;: { ... }
+  }
+}
+</code></pre>
+<hr />
+<h2 id="_13">測試場景設計<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="1">場景 1: 基本策略對比（兩個策略）<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 驗證基本對比功能</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;],
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 200 OK
+- 返回兩個策略的績效指標
+- 包含對比分析（最佳、最差指標）
+- 響應時間 &lt; 10 秒</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 200
+- [ ] 返回兩個策略的完整數據
+- [ ] 每個策略包含績效指標（總報酬、夏普比率、最大回撤等）
+- [ ] 包含對比指標（最佳/最差策略）
+- [ ] 響應格式符合預期 JSON 結構</p>
+<hr />
+<h3 id="2">場景 2: 多策略對比（三個以上策略）<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 測試多策略對比的性能和穩定性</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;, &quot;momentum&quot;, &quot;bollinger&quot;],
+    &quot;symbols&quot;: [&quot;2330.TW&quot;, &quot;2317.TW&quot;],
+    &quot;start_date&quot;: &quot;2023-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 200 OK
+- 返回四個策略的績效指標
+- 響應時間 &lt; 30 秒
+- 數據完整性保持一致</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 200
+- [ ] 返回所有請求策略的數據
+- [ ] 數據結構一致性
+- [ ] 響應時間在合理範圍內
+- [ ] 無數據遺失或重複</p>
+<hr />
+<h3 id="3-2">場景 3: 長期數據對比（2 年以上）<a class="headerlink" href="#3-2" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 測試長時間範圍的數據處理能力</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategies&quot;: [&quot;macd&quot;, &quot;supertrend&quot;],
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2022-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 200 OK
+- 響應時間 &lt; 60 秒
+- 數據點數量合理（考慮優化）</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 200
+- [ ] 數據覆蓋完整時間範圍
+- [ ] 響應時間可接受
+- [ ] 記憶體使用合理</p>
+<hr />
+<h3 id="4">場景 4: 空請求/缺少欄位（錯誤處理）<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 驗證錯誤處理機制</p>
+<p><strong>請求 A (空請求):</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{}'
+</code></pre>
+<p><strong>請求 B (缺少 strategies):</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 422 Unprocessable Entity
+- 返回清楚的錯誤訊息
+- 指出缺失的欄位</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 422
+- [ ] 錯誤訊息清楚易懂
+- [ ] 指出具體缺失的欄位
+- [ ] 響應時間 &lt; 1 秒</p>
+<hr />
+<h3 id="5-id">場景 5: 無效策略 ID<a class="headerlink" href="#5-id" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 測試無效輸入的處理</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategies&quot;: [&quot;macd&quot;, &quot;invalid_strategy&quot;],
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 400 或 422
+- 返回清楚錯誤訊息
+- 說明哪個策略 ID 無效</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 4xx
+- [ ] 錯誤訊息指出無效的策略 ID
+- [ ] 不影響其他策略的處理（部分成功）或完全拒絕</p>
+<hr />
+<h3 id="6">場景 6: 日期範圍錯誤<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 驗證日期邏輯檢查</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/comparison \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;],
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2024-12-31&quot;,
+    &quot;end_date&quot;: &quot;2024-01-01&quot;
+  }'
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 400 或 422
+- 返回清楚的錯誤訊息
+- 說明日期範圍無效</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 4xx
+- [ ] 錯誤訊息指出日期範圍問題
+- [ ] 建議正確的日期格式</p>
+<hr />
+<h3 id="7-get">場景 7: GET 方法測試（方法不允許）<a class="headerlink" href="#7-get" title="連結到此標題">&para;</a></h3>
+<p><strong>目的:</strong> 確認端點只接受 POST 請求</p>
+<p><strong>請求:</strong></p>
+<pre><code class="language-bash">curl -X GET http://localhost:8001/api/strategies/comparison
+</code></pre>
+<p><strong>預期結果:</strong>
+- HTTP 405 Method Not Allowed</p>
+<p><strong>檢查項目:</strong>
+- [ ] HTTP 狀態碼為 405
+- [ ] 返回正確的錯誤訊息</p>
+<hr />
+<h2 id="_14">數據驗證檢查清單<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="_15">輸出格式驗證<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>檢查項目</th>
+<th>預期格式</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP 狀態碼</td>
+<td>200 OK</td>
+<td>成功請求</td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>application/json</td>
+<td>JSON 格式響應</td>
+</tr>
+<tr>
+<td>comparison_id</td>
+<td>string (UUID)</td>
+<td>唯一識別碼</td>
+</tr>
+<tr>
+<td>strategies</td>
+<td>array</td>
+<td>策略列表</td>
+</tr>
+<tr>
+<td>策略績效指標</td>
+<td>object</td>
+<td>包含報酬率、風險指標等</td>
+</tr>
+<tr>
+<td>comparison_metrics</td>
+<td>object</td>
+<td>對比分析結果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_16">策略績效指標驗證<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>類型</th>
+<th>範圍</th>
+<th>驗證方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>total_return</td>
+<td>float</td>
+<td>可負數</td>
+<td>計算 (期末值 / 期初值) - 1</td>
+</tr>
+<tr>
+<td>annualized_return</td>
+<td>float</td>
+<td>可負數</td>
+<td>根據時間範圍年化</td>
+</tr>
+<tr>
+<td>sharpe_ratio</td>
+<td>float</td>
+<td>通常 &gt; 0</td>
+<td>風險調整後報酬</td>
+</tr>
+<tr>
+<td>max_drawdown</td>
+<td>float</td>
+<td>-1 到 0</td>
+<td>最大回撤百分比</td>
+</tr>
+<tr>
+<td>volatility</td>
+<td>float</td>
+<td>&gt; 0</td>
+<td>標準差</td>
+</tr>
+<tr>
+<td>win_rate</td>
+<td>float</td>
+<td>0 到 1</td>
+<td>獲利交易比例</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">對比指標驗證<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>預期行為</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>best_return</td>
+<td>指向總報酬最高的策略</td>
+</tr>
+<tr>
+<td>best_sharpe</td>
+<td>指向夏普比率最高的策略</td>
+</tr>
+<tr>
+<td>lowest_drawdown</td>
+<td>指向回撤最小的策略</td>
+</tr>
+<tr>
+<td>correlation_matrix</td>
+<td>策略間相關性（-1 到 1）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_18">性能基準建議<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<h3 id="_19">響應時間基準<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>測試場景</th>
+<th>預期響應時間</th>
+<th>可接受範圍</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 策略，1 股票，1 年</td>
+<td>&lt; 5 秒</td>
+<td>&lt; 10 秒</td>
+</tr>
+<tr>
+<td>4 策略，2 股票，2 年</td>
+<td>&lt; 15 秒</td>
+<td>&lt; 30 秒</td>
+</tr>
+<tr>
+<td>6 策略，5 股票，2 年</td>
+<td>&lt; 30 秒</td>
+<td>&lt; 60 秒</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_20">資源使用基準<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>資源</th>
+<th>監控指標</th>
+<th>警告閾值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>使用率</td>
+<td>&lt; 80% (峰值)</td>
+</tr>
+<tr>
+<td>記憶體</td>
+<td>使用量</td>
+<td>&lt; 2GB (大規模測試)</td>
+</tr>
+<tr>
+<td>回應大小</td>
+<td>JSON 大小</td>
+<td>&lt; 1MB</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_21">發現的潛在問題<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h2>
+<h3 id="_22">🔴 關鍵問題<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>實際端點格式未驗證</strong></li>
+<li><strong>問題:</strong> 由於測試工具限制，無法實際測試策略對比端點</li>
+<li><strong>影響:</strong> 無法確認實際請求/響應格式是否符合推斷</li>
+<li><strong>嚴重程度:</strong> 高</li>
+<li>
+<p><strong>解決方案:</strong> 使用 curl 或 Postman 直接測試端點</p>
+</li>
+<li>
+<p><strong>對比指標準確性未驗證</strong></p>
+</li>
+<li><strong>問題:</strong> 無法確認計算邏輯和數據準確性</li>
+<li><strong>影響:</strong> 可能導致錯誤的策略選擇決策</li>
+<li><strong>嚴重程度:</strong> 高</li>
+<li><strong>解決方案:</strong> 進行數值驗證和交叉檢查</li>
+</ol>
+<h3 id="_23">🟡 次要問題<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>API 文檔不完整</strong></li>
+<li><strong>問題:</strong> 策略對比端點的文檔未提供</li>
+<li><strong>影響:</strong> 使用者不知道如何正確使用對比功能</li>
+<li><strong>嚴重程度:</strong> 中</li>
+<li>
+<p><strong>解決方案:</strong> 完善文檔和示例</p>
+</li>
+<li>
+<p><strong>缺乏自動化測試</strong></p>
+</li>
+<li><strong>問題:</strong> 無現成的測試腳本可重用</li>
+<li><strong>影響:</strong> 每次測試需要手動執行</li>
+<li><strong>嚴重程度:</strong> 中</li>
+<li>
+<p><strong>解決方案:</strong> 開發自動化測試套件</p>
+</li>
+<li>
+<p><strong>相關性分析未確定</strong></p>
+</li>
+<li><strong>問題:</strong> 不確認是否提供策略相關性矩陣</li>
+<li><strong>影響:</strong> 缺少重要的風險分散分析工具</li>
+<li><strong>嚴重程度:</strong> 低</li>
+<li><strong>解決方案:</strong> 根據實際響應確認並評估</li>
+</ol>
+<hr />
+<h2 id="_24">建議<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h2>
+<h3 id="_25">立即行動（高優先級）<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>執行實際端點測試</strong></li>
+<li><strong>優先級:</strong> 🔴 高</li>
+<li><strong>行動:</strong> 使用 curl 或 Postman 直接測試策略對比端點</li>
+<li><strong>預期時間:</strong> 1 小時</li>
+<li>
+<p><strong>具體步驟:</strong>
+     ```bash
+     # 步驟 1: 測試基本對比功能
+     curl -X POST http://localhost:8001/api/strategies/comparison \
+       -H "Content-Type: application/json" \
+       -d '{
+         "strategies": ["macd", "rsi"],
+         "symbols": ["2330.TW"],
+         "start_date": "2024-01-01",
+         "end_date": "2024-12-31"
+       }'</p>
+<p># 步驟 2: 測試錯誤處理
+ curl -X POST http://localhost:8001/api/strategies/comparison \
+   -H "Content-Type: application/json" \
+   -d '{}'
+ ```</p>
+</li>
+<li>
+<p><strong>驗證數據準確性</strong></p>
+</li>
+<li><strong>優先級:</strong> 🔴 高</li>
+<li><strong>行動:</strong> 交叉檢查回測結果和對比結果的一致性</li>
+<li><strong>預期時間:</strong> 2-3 小時</li>
+<li><strong>具體步驟:</strong><ul>
+<li>對同一策略執行單獨回測</li>
+<li>執行包含該策略的對比測試</li>
+<li>比較績效指標是否一致</li>
+</ul>
+</li>
+</ol>
+<h3 id="_26">短期改善（中優先級）<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>創建自動化測試腳本</strong></li>
+<li><strong>優先級:</strong> 🟡 中</li>
+<li><strong>行動:</strong> 開發完整的測試腳本套件</li>
+<li><strong>預期時間:</strong> 1-2 天</li>
+<li>
+<p><strong>具體內容:</strong></p>
+<ul>
+<li>單元測試（各個場景）</li>
+<li>整合測試（端到端流程）</li>
+<li>回歸測試（確保修改不破壞現有功能）</li>
+</ul>
+</li>
+<li>
+<p><strong>完善 API 文檔</strong></p>
+</li>
+<li><strong>優先級:</strong> 🟡 中</li>
+<li><strong>行動:</strong> 更新文檔，添加詳細說明和示例</li>
+<li><strong>預期時間:</strong> 1 天</li>
+<li><strong>具體內容:</strong><ul>
+<li>請求格式說明</li>
+<li>響應格式詳解</li>
+<li>常見錯誤及處理方式</li>
+<li>使用範例</li>
+</ul>
+</li>
+</ol>
+<h3 id="_27">長期優化（低優先級）<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>實施性能監控</strong></li>
+<li><strong>優先級:</strong> 🟢 低</li>
+<li><strong>行動:</strong> 建立監控儀表板追蹤 API 性能</li>
+<li><strong>預期時間:</strong> 1 週</li>
+<li>
+<p><strong>具體內容:</strong></p>
+<ul>
+<li>響應時間追蹤</li>
+<li>錯誤率監控</li>
+<li>資源使用監控</li>
+</ul>
+</li>
+<li>
+<p><strong>增強對比分析功能</strong></p>
+</li>
+<li><strong>優先級:</strong> 🟢 低</li>
+<li><strong>行動:</strong> 添加更多高級分析功能</li>
+<li><strong>預期時間:</strong> 2-3 週</li>
+<li><strong>具體內容:</strong><ul>
+<li>策略相關性分析</li>
+<li>風險調整後指標</li>
+<li>滾動窗口分析</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="_28">測試腳本模板<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h2>
+<p>為了便於後續測試，以下是一個完整的測試腳本模板：</p>
+<pre><code class="language-bash">#!/bin/bash
+
+# Matrix Dashboard 策略對比 API 測試腳本
+# 用途: 全面測試策略對比功能的各種場景
+
+BASE_URL=&quot;http://localhost:8001&quot;
+
+# 顏色輸出
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# 測試計數器
+PASSED=0
+FAILED=0
+TOTAL=0
+
+# 測試函數
+run_test() {
+    local test_name=$1
+    local url=$2
+    local method=$3
+    local data=$4
+    local expected_status=$5
+
+    TOTAL=$((TOTAL + 1))
+    echo -e &quot;\n=== 測試 $TOTAL: $test_name ===&quot;
+
+    START=$(date +%s%3N)
+
+    if [ &quot;$method&quot; = &quot;GET&quot; ]; then
+        RESPONSE=$(curl -s -w &quot;\nHTTP_CODE:%{http_code}&quot; -X GET &quot;$url&quot;)
+    else
+        RESPONSE=$(curl -s -w &quot;\nHTTP_CODE:%{http_code}&quot; -X &quot;$method&quot; \
+            -H &quot;Content-Type: application/json&quot; \
+            -d &quot;$data&quot; \
+            &quot;$url&quot;)
+    fi
+
+    END=$(date +%s%3N)
+    DURATION=$((END - START))
+
+    HTTP_CODE=$(echo &quot;$RESPONSE&quot; | grep &quot;HTTP_CODE:&quot; | cut -d':' -f2)
+    BODY=$(echo &quot;$RESPONSE&quot; | sed '/HTTP_CODE:/d')
+
+    if [ &quot;$HTTP_CODE&quot; = &quot;$expected_status&quot; ]; then
+        PASSED=$((PASSED + 1))
+        echo -e &quot;${GREEN}✅ 通過${NC} - 狀態碼: $HTTP_CODE, 響應時間: ${DURATION}ms&quot;
+    else
+        FAILED=$((FAILED + 1))
+        echo -e &quot;${RED}❌ 失敗${NC} - 預期: $expected_status, 實際: $HTTP_CODE&quot;
+    fi
+
+    echo &quot;響應內容:&quot;
+    echo &quot;$BODY&quot; | head -20
+}
+
+# 測試 1: 健康檢查
+run_test &quot;健康檢查&quot; \
+    &quot;$BASE_URL/health&quot; \
+    &quot;GET&quot; \
+    &quot;&quot; \
+    &quot;200&quot;
+
+# 測試 2: 獲取策略模板
+run_test &quot;獲取策略模板&quot; \
+    &quot;$BASE_URL/api/strategies/templates&quot; \
+    &quot;GET&quot; \
+    &quot;&quot; \
+    &quot;200&quot;
+
+# 測試 3: 基本策略對比
+run_test &quot;基本策略對比 (MACD vs RSI)&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;POST&quot; \
+    '{
+        &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;],
+        &quot;symbols&quot;: [&quot;2330.TW&quot;],
+        &quot;start_date&quot;: &quot;2024-01-01&quot;,
+        &quot;end_date&quot;: &quot;2024-12-31&quot;
+    }' \
+    &quot;200&quot;
+
+# 測試 4: 多策略對比
+run_test &quot;多策略對比 (4 策略)&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;POST&quot; \
+    '{
+        &quot;strategies&quot;: [&quot;macd&quot;, &quot;rsi&quot;, &quot;momentum&quot;, &quot;bollinger&quot;],
+        &quot;symbols&quot;: [&quot;2330.TW&quot;, &quot;2317.TW&quot;],
+        &quot;start_date&quot;: &quot;2023-01-01&quot;,
+        &quot;end_date&quot;: &quot;2024-12-31&quot;
+    }' \
+    &quot;200&quot;
+
+# 測試 5: 空請求（應該失敗）
+run_test &quot;空請求 (錯誤處理)&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;POST&quot; \
+    '{}' \
+    &quot;422&quot;
+
+# 測試 6: 缺少欄位
+run_test &quot;缺少 strategies 欄位&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;POST&quot; \
+    '{
+        &quot;symbols&quot;: [&quot;2330.TW&quot;],
+        &quot;start_date&quot;: &quot;2024-01-01&quot;,
+        &quot;end_date&quot;: &quot;2024-12-31&quot;
+    }' \
+    &quot;422&quot;
+
+# 測試 7: 無效策略 ID
+run_test &quot;無效策略 ID&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;POST&quot; \
+    '{
+        &quot;strategies&quot;: [&quot;macd&quot;, &quot;invalid_strategy&quot;],
+        &quot;symbols&quot;: [&quot;2330.TW&quot;],
+        &quot;start_date&quot;: &quot;2024-01-01&quot;,
+        &quot;end_date&quot;: &quot;2024-12-31&quot;
+    }' \
+    &quot;422&quot;
+
+# 測試 8: GET 方法（應該失敗）
+run_test &quot;GET 方法 (不允許)&quot; \
+    &quot;$BASE_URL/api/strategies/comparison&quot; \
+    &quot;GET&quot; \
+    &quot;&quot; \
+    &quot;405&quot;
+
+# 測試結果摘要
+echo -e &quot;\n=== 測試結果摘要 ===&quot;
+echo -e &quot;總測試數: $TOTAL&quot;
+echo -e &quot;${GREEN}通過: $PASSED${NC}&quot;
+echo -e &quot;${RED}失敗: $FAILED${NC}&quot;
+echo -e &quot;成功率: $(( PASSED * 100 / TOTAL ))%&quot;
+
+if [ $FAILED -eq 0 ]; then
+    echo -e &quot;\n${GREEN}🎉 所有測試通過！${NC}&quot;
+    exit 0
+else
+    echo -e &quot;\n${RED}⚠️  有 $FAILED 個測試失敗${NC}&quot;
+    exit 1
+fi
+</code></pre>
+<p>使用說明：
+1. 保存腳本為 <code>test_comparison.sh</code>
+2. 賦予執行權限: <code>chmod +x test_comparison.sh</code>
+3. 執行測試: <code>./test_comparison.sh</code></p>
+<hr />
+<h2 id="_29">結論<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h2>
+<h3 id="_30">整體評估<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h3>
+<p>由於測試工具（瀏覽器、Canvas）的限制，本次測試未能完成策略對比端點的實際驗證。然而，基於前序任務 p002 的成功測試結果，我們可以確認：</p>
+<p>✅ <strong>已驗證:</strong>
+- API 服務基礎設施運作良好
+- 策略模板功能完整（6 個可用策略）
+- 回測端點路徑和格式已確認</p>
+<p>⚠️ <strong>待驗證:</strong>
+- 策略對比端點的實際請求/響應格式
+- 對比指標的計算準確性
+- 多策略對比的性能表現
+- 錯誤處理機制的完整性</p>
+<h3 id="_31">主要成果<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>測試框架設計完成</strong></li>
+<li>設計了 7 個完整的測試場景</li>
+<li>定義了預期的請求/響應格式</li>
+<li>
+<p>建立了數據驗證檢查清單</p>
+</li>
+<li>
+<p><strong>性能基準確定</strong></p>
+</li>
+<li>定義了不同規模測試的響應時間基準</li>
+<li>建立了資源使用監控指標</li>
+<li>
+<p>提供了可接受的性能範圍</p>
+</li>
+<li>
+<p><strong>測試腳本模板提供</strong></p>
+</li>
+<li>完整的 bash 測試腳本</li>
+<li>包含所有測試場景</li>
+<li>自動化測試執行和結果報告</li>
+</ol>
+<h3 id="_32">建議下一步行動<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>🔴 立即執行（高優先級）</strong></li>
+<li>使用提供的測試腳本執行實際端點測試</li>
+<li>
+<p>驗證數據準確性（交叉檢查回測結果）</p>
+</li>
+<li>
+<p><strong>🟡 短期執行（中優先級）</strong></p>
+</li>
+<li>根據實際測試結果更新 API 文檔</li>
+<li>
+<p>開發自動化測試套件</p>
+</li>
+<li>
+<p><strong>🟢 長期優化（低優先級）</strong></p>
+</li>
+<li>實施性能監控</li>
+<li>增強對比分析功能</li>
+</ol>
+<h3 id="_33">重要提醒<a class="headerlink" href="#_33" title="連結到此標題">&para;</a></h3>
+<p>⚠️ <strong>關鍵發現:</strong>
+- 策略對比端點的實際格式未經驗證
+- 所有的請求/響應格式基於回測端點模式推斷
+- 需要實際測試來確認推斷的準確性</p>
+<p>📊 <strong>數據質量:</strong>
+- 基於前序任務 p002 的測試結果
+- API 基礎設施穩定性已驗證
+- 策略模板數據完整可靠</p>
+<hr />
+<h2 id="_34">測試環境信息<a class="headerlink" href="#_34" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>基礎 URL:</strong> http://localhost:8001</li>
+<li><strong>測試時間:</strong> 2026-02-20 18:05:00 (GMT+8)</li>
+<li><strong>測試方法:</strong> 基於 API 設計模式的推斷分析</li>
+<li><strong>限制因素:</strong> 瀏覽器控制不可用，無法執行實時 HTTP 請求</li>
+</ul>
+<hr />
+<h2 id="_35">附錄：相關文檔參考<a class="headerlink" href="#_35" title="連結到此標題">&para;</a></h2>
+<h3 id="_36">前序任務文檔<a class="headerlink" href="#_36" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>p002 - 基礎回測功能測試報告</strong></li>
+<li>路徑: <code>/Users/charlie/.openclaw/workspace/kanban/projects/matrix-dashboard-test/p002-backtest-test.md</code></li>
+<li>主要內容:<ul>
+<li>API 服務健康檢查結果</li>
+<li>策略模板完整列表</li>
+<li>回測端點路徑和格式確認</li>
+</ul>
+</li>
+</ul>
+<h3 id="api">API 端點匯總<a class="headerlink" href="#api" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>端點</th>
+<th>方法</th>
+<th>狀態</th>
+<th>來源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/health</td>
+<td>GET</td>
+<td>✅ 已驗證</td>
+<td>p002</td>
+</tr>
+<tr>
+<td>/api/strategies/templates</td>
+<td>GET</td>
+<td>✅ 已驗證</td>
+<td>p002</td>
+</tr>
+<tr>
+<td>/api/strategies/backtest/run</td>
+<td>POST</td>
+<td>✅ 已驗證</td>
+<td>p002</td>
+</tr>
+<tr>
+<td>/api/strategies/comparison</td>
+<td>POST</td>
+<td>⚠️ 待驗證</td>
+<td>本報告</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_37">版本歷史<a class="headerlink" href="#_37" title="連結到此標題">&para;</a></h2>
+<h3 id="v10-2026-02-20">v1.0 (2026-02-20)<a class="headerlink" href="#v10-2026-02-20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>初始測試報告</li>
+<li>測試場景設計（7 個場景）</li>
+<li>預期請求/響應格式定義</li>
+<li>測試腳本模板提供</li>
+<li>性能基準確定</li>
+<li>⚠️ 限制: 未能實際測試端點（工具限制）</li>
+</ul>
+<hr />
+<p><strong>報告生成時間:</strong> 2026-02-20
+<strong>報告版本:</strong> 1.0
+<strong>測試代理:</strong> Charlie Analyst (Sub-agent)</p>
+<hr />
+<p><strong>備註:</strong>
+本報告基於 API 設計模式和前序測試結果進行分析。建議使用提供的測試腳本執行實際端點驗證，並在獲得實際結果後更新本報告。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

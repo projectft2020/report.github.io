@@ -1,0 +1,4368 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmer Sub-Agent 實施路徑框架 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Programmer Sub-Agent 實施路徑框架</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="programmer-sub-agent">Programmer Sub-Agent 實施路徑框架<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>文檔 ID:</strong> a006c-1
+<strong>版本:</strong> 1.0
+<strong>狀態:</strong> Active
+<strong>創建日期:</strong> 2026-02-21
+<strong>適用對象:</strong> Programmer Sub-Agent
+<strong>基於文件:</strong> a005-competencies.md, a006a-5.md</p>
+<hr />
+<h2 id="_1">目錄<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><a href="#1-實施路徑概述">實施路徑概述</a></li>
+<li><a href="#2-階段-1-初級開發者-0-3-個月">階段 1: 初級開發者 (0-3 個月)</a></li>
+<li><a href="#3-階段-2-中級開發者-3-6-個月">階段 2: 中級開發者 (3-6 個月)</a></li>
+<li><a href="#4-階段-3-高級開發者-6-12-個月">階段 3: 高級開發者 (6-12 個月)</a></li>
+<li><a href="#5-階段-4-高級架構師-12-個月">階段 4: 高級架構師 (12+ 個月)</a></li>
+<li><a href="#6-技能評估矩陣">技能評估矩陣</a></li>
+<li><a href="#7-學習資源推薦">學習資源推薦</a></li>
+<li><a href="#8-實踐項目清單">實踐項目清單</a></li>
+</ol>
+<hr />
+<h2 id="1">1. 實施路徑概述<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 路徑哲學<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p>本實施路徑基於 <strong>漸進式能力建設</strong> 原則，遵循以下核心哲學：</p>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>漸進式複雜度</strong></td>
+<td>從簡單的 CRUD 開始，逐步增加到複雜的策略架構</td>
+</tr>
+<tr>
+<td><strong>測試驅動</strong></td>
+<td>每個階段都強調 TDD，確保代碼質量</td>
+</tr>
+<tr>
+<td><strong>實踐優先</strong></td>
+<td>通過實際項目和代碼示例學習，而非理論堆砌</td>
+</tr>
+<tr>
+<td><strong>知識整合</strong></td>
+<td>前後端、策略引擎、數據庫知識逐步融合</td>
+</tr>
+<tr>
+<td><strong>反饋循環</strong></td>
+<td>每個階段都有明確的驗證標準和評估機制</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 技能優先級層級<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<p>基於高級架構師能力定義，技能優先級分為：</p>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│ P0 (必備) - 基礎生存技能                             │
+│ Python/FastAPI, React 19, 測試驅動開發, Git 提交規範 │
+├─────────────────────────────────────────────────────┤
+│ P1 (重要) - 核心開發技能                             │
+│ VectorBT/Backtrader, Zustand, React Query, 策略引擎  │
+├─────────────────────────────────────────────────────┤
+│ P2 (可選) - 進階技能                                 │
+│ Three.js, Celery, 高級圖表, 性能優化                 │
+├─────────────────────────────────────────────────────┤
+│ P3 (未來擴展) - 專家技能                             │
+│ 機器學習, 實時數據流, Kubernetes, 架構設計           │
+└─────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="13">1.3 階段間依賴關係<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<pre><code>階段 1: 初級 (0-3個月)
+   ↓ [必須完成]
+階段 2: 中級 (3-6個月)
+   ↓ [必須完成]
+階段 3: 高級 (6-12個月)
+   ↓ [必須完成]
+階段 4: 架構師 (12+個月)
+
+每個階段的驗證標準是下一階段的入門門檻
+</code></pre>
+<h3 id="14">1.4 能力模型總覽<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>代碼能力</th>
+<th>架構能力</th>
+<th>測試能力</th>
+<th>領域知識</th>
+<th>領導力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>初級</td>
+<td>P0 基礎</td>
+<td>理解分層</td>
+<td>TDD 基礎</td>
+<td>基礎概念</td>
+<td>無</td>
+</tr>
+<tr>
+<td>中級</td>
+<td>P0+P1</td>
+<td>設計 API</td>
+<td>集成測試</td>
+<td>技術指標</td>
+<td>代碼審查</td>
+</tr>
+<tr>
+<td>高級</td>
+<td>P0+P1+P2</td>
+<td>微服務</td>
+<td>E2E 測試</td>
+<td>策略引擎</td>
+<td>技術指導</td>
+</tr>
+<tr>
+<td>架構師</td>
+<td>P0-P3 全部</td>
+<td>架構演進</td>
+<td>測試策略</td>
+<td>跨領域</td>
+<td>技術領導</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-1-0-3">2. 階段 1: 初級開發者 (0-3 個月)<a class="headerlink" href="#2-1-0-3" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 核心學習目標<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>掌握全棧基礎技能</strong>：能夠獨立完成簡單的前後端功能</li>
+<li><strong>建立測試驅動開發習慣</strong>：TDD 成為開發的默認模式</li>
+<li><strong>理解系統架構</strong>：掌握分層架構和 API 設計基本概念</li>
+<li><strong>熟悉開發工作流</strong>：Git 提交規範、代碼審查流程</li>
+</ol>
+<h3 id="22">2.2 必備技能和能力<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<h4 id="p0">後端開發 (P0)<a class="headerlink" href="#p0" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python 基礎</strong></td>
+<td>數據類型、函數、類、異步編程</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>FastAPI 基礎</strong></td>
+<td>路由、依賴注入、請求/響應模型</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Pydantic 驗證</strong></td>
+<td>數據模型、驗證規則、錯誤處理</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>DuckDB 基礎</strong></td>
+<td>連接、查詢、CRUD 操作</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>錯誤處理</strong></td>
+<td>自定義異常、全局異常處理器</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p0_1">前端開發 (P0)<a class="headerlink" href="#p0_1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>React 19 基礎</strong></td>
+<td>函數組件、Hooks (useState, useEffect)</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Bootstrap 5</strong></td>
+<td>響應式佈局、組件使用</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Axios</strong></td>
+<td>HTTP 客戶端配置、GET/POST/PUT/DELETE</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>狀態管理基礎</strong></td>
+<td>useState, useContext</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>表單處理</strong></td>
+<td>受控組件、表單驗證</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p0_2">測試驅動開發 (P0)<a class="headerlink" href="#p0_2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pytest 基礎</strong></td>
+<td>測試編寫、fixture、mock</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>vitest 基礎</strong></td>
+<td>單元測試、組件測試</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>TDD 流程</strong></td>
+<td>Red-Green-Refactor</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>AAA 模式</strong></td>
+<td>Arrange-Act-Assert</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td>pytest-cov, vitest coverage</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="git-p0">Git 開發規範 (P0)<a class="headerlink" href="#git-p0" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>feat/fix/refactor/docs/chore</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>分支管理</strong></td>
+<td>feature 分支創建、合併</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>PR 流程</strong></td>
+<td>Pull Request 創建、審查</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23">2.3 可執行的實踐任務<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<h4 id="11-api-1">任務 1.1: 創建第一個 API 端點 (1 週)<a class="headerlink" href="#11-api-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 實現完整的 CRUD API</p>
+<p><strong>後端實現</strong>:</p>
+<pre><code class="language-python"># backend/routers/items.py
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from typing import List, Optional
+import duckdb
+
+router = APIRouter(prefix=&quot;/api/v1/items&quot;, tags=[&quot;Items&quot;])
+
+class ItemCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = None
+    price: float = Field(..., gt=0)
+
+class ItemResponse(ItemCreate):
+    id: int
+    created_at: str
+
+def get_db():
+    conn = duckdb.connect('data.duckdb')
+    try:
+        # 創建表
+        conn.execute(&quot;&quot;&quot;
+            CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY,
+                name VARCHAR(100),
+                description TEXT,
+                price FLOAT,
+                created_at TIMESTAMP
+            )
+        &quot;&quot;&quot;)
+        yield conn
+    finally:
+        conn.close()
+
+@router.post(&quot;/&quot;, response_model=ItemResponse)
+async def create_item(item: ItemCreate, db=Depends(get_db)):
+    &quot;&quot;&quot;創建新項目&quot;&quot;&quot;
+    result = db.execute(&quot;&quot;&quot;
+        INSERT INTO items (name, description, price, created_at)
+        VALUES (?, ?, ?, NOW())
+        RETURNING id, name, description, price, created_at
+    &quot;&quot;&quot;, (item.name, item.description, item.price)).fetchone()
+
+    return ItemResponse(
+        id=result[0],
+        name=result[1],
+        description=result[2],
+        price=result[3],
+        created_at=str(result[4])
+    )
+
+@router.get(&quot;/&quot;, response_model=List[ItemResponse])
+async def list_items(skip: int = 0, limit: int = 10, db=Depends(get_db)):
+    &quot;&quot;&quot;列出項目&quot;&quot;&quot;
+    results = db.execute(&quot;&quot;&quot;
+        SELECT id, name, description, price, created_at
+        FROM items
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?
+    &quot;&quot;&quot;, (limit, skip)).fetchall()
+
+    return [
+        ItemResponse(id=r[0], name=r[1], description=r[2],
+                     price=r[3], created_at=str(r[4]))
+        for r in results
+    ]
+
+@router.get(&quot;/{item_id}&quot;, response_model=ItemResponse)
+async def get_item(item_id: int, db=Depends(get_db)):
+    &quot;&quot;&quot;獲取單個項目&quot;&quot;&quot;
+    result = db.execute(&quot;&quot;&quot;
+        SELECT id, name, description, price, created_at
+        FROM items WHERE id = ?
+    &quot;&quot;&quot;, (item_id,)).fetchone()
+
+    if not result:
+        raise HTTPException(status_code=404, detail=&quot;Item not found&quot;)
+
+    return ItemResponse(id=result[0], name=result[1], description=result[2],
+                       price=result[3], created_at=str(result[4]))
+
+@router.put(&quot;/{item_id}&quot;, response_model=ItemResponse)
+async def update_item(item_id: int, item: ItemCreate, db=Depends(get_db)):
+    &quot;&quot;&quot;更新項目&quot;&quot;&quot;
+    result = db.execute(&quot;&quot;&quot;
+        UPDATE items
+        SET name = ?, description = ?, price = ?
+        WHERE id = ?
+        RETURNING id, name, description, price, created_at
+    &quot;&quot;&quot;, (item.name, item.description, item.price, item_id)).fetchone()
+
+    if not result:
+        raise HTTPException(status_code=404, detail=&quot;Item not found&quot;)
+
+    return ItemResponse(id=result[0], name=result[1], description=result[2],
+                       price=result[3], created_at=str(result[4]))
+
+@router.delete(&quot;/{item_id}&quot;)
+async def delete_item(item_id: int, db=Depends(get_db)):
+    &quot;&quot;&quot;刪除項目&quot;&quot;&quot;
+    db.execute(&quot;DELETE FROM items WHERE id = ?&quot;, (item_id,))
+    return {&quot;message&quot;: &quot;Item deleted&quot;}
+</code></pre>
+<p><strong>測試實現</strong>:</p>
+<pre><code class="language-python"># backend/tests/test_items.py
+import pytest
+from fastapi.testclient import TestClient
+from backend.main import app
+
+client = TestClient(app)
+
+def test_create_item():
+    &quot;&quot;&quot;測試創建項目&quot;&quot;&quot;
+    response = client.post(
+        &quot;/api/v1/items&quot;,
+        json={
+            &quot;name&quot;: &quot;Test Item&quot;,
+            &quot;description&quot;: &quot;A test item&quot;,
+            &quot;price&quot;: 99.99
+        }
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data[&quot;name&quot;] == &quot;Test Item&quot;
+    assert data[&quot;price&quot;] == 99.99
+    assert &quot;id&quot; in data
+
+def test_list_items():
+    &quot;&quot;&quot;測試列出項目&quot;&quot;&quot;
+    # 先創建項目
+    client.post(&quot;/api/v1/items&quot;, json={&quot;name&quot;: &quot;Item 1&quot;, &quot;price&quot;: 10.0})
+    client.post(&quot;/api/v1/items&quot;, json={&quot;name&quot;: &quot;Item 2&quot;, &quot;price&quot;: 20.0})
+
+    response = client.get(&quot;/api/v1/items&quot;)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) &gt;= 2
+
+def test_get_item():
+    &quot;&quot;&quot;測試獲取單個項目&quot;&quot;&quot;
+    # 創建項目
+    create_response = client.post(
+        &quot;/api/v1/items&quot;,
+        json={&quot;name&quot;: &quot;Test Item&quot;, &quot;price&quot;: 99.99}
+    )
+    item_id = create_response.json()[&quot;id&quot;]
+
+    # 獲取項目
+    response = client.get(f&quot;/api/v1/items/{item_id}&quot;)
+    assert response.status_code == 200
+    data = response.json()
+    assert data[&quot;id&quot;] == item_id
+
+def test_update_item():
+    &quot;&quot;&quot;測試更新項目&quot;&quot;&quot;
+    # 創建項目
+    create_response = client.post(
+        &quot;/api/v1/items&quot;,
+        json={&quot;name&quot;: &quot;Original Name&quot;, &quot;price&quot;: 10.0}
+    )
+    item_id = create_response.json()[&quot;id&quot;]
+
+    # 更新項目
+    response = client.put(
+        f&quot;/api/v1/items/{item_id}&quot;,
+        json={&quot;name&quot;: &quot;Updated Name&quot;, &quot;price&quot;: 20.0}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data[&quot;name&quot;] == &quot;Updated Name&quot;
+    assert data[&quot;price&quot;] == 20.0
+
+def test_delete_item():
+    &quot;&quot;&quot;測試刪除項目&quot;&quot;&quot;
+    # 創建項目
+    create_response = client.post(
+        &quot;/api/v1/items&quot;,
+        json={&quot;name&quot;: &quot;To Delete&quot;, &quot;price&quot;: 10.0}
+    )
+    item_id = create_response.json()[&quot;id&quot;]
+
+    # 刪除項目
+    response = client.delete(f&quot;/api/v1/items/{item_id}&quot;)
+    assert response.status_code == 200
+
+    # 驗證已刪除
+    get_response = client.get(f&quot;/api/v1/items/{item_id}&quot;)
+    assert get_response.status_code == 404
+</code></pre>
+<p><strong>前端實現</strong>:</p>
+<pre><code class="language-jsx">// frontend/src/pages/ItemsPage/index.jsx
+import React, { useState, useEffect } from 'react';
+import { useApiCache, useApiMutation } from '../../hooks/useApiCache';
+
+const ItemsPage = () =&gt; {
+  const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({ name: '', description: '', price: '' });
+
+  // 獲取項目列表
+  const { data: items, isLoading, error, refetch } = useApiCache(
+    ['items'],
+    () =&gt; fetch('/api/v1/items').then(r =&gt; r.json())
+  );
+
+  // 創建項目
+  const { mutate: createItem, isLoading: isCreating } = useApiMutation(
+    (data) =&gt; fetch('/api/v1/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(r =&gt; r.json()),
+    {
+      invalidateKeys: [['items']],
+      onSuccess: () =&gt; {
+        setShowModal(false);
+        setFormData({ name: '', description: '', price: '' });
+      }
+    }
+  );
+
+  // 更新項目
+  const { mutate: updateItem, isLoading: isUpdating } = useApiMutation(
+    ({ id, data }) =&gt; fetch(`/api/v1/items/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(r =&gt; r.json()),
+    {
+      invalidateKeys: [['items']],
+      onSuccess: () =&gt; {
+        setShowModal(false);
+        setEditingItem(null);
+        setFormData({ name: '', description: '', price: '' });
+      }
+    }
+  );
+
+  // 刪除項目
+  const { mutate: deleteItem } = useApiMutation(
+    (id) =&gt; fetch(`/api/v1/items/${id}`, { method: 'DELETE' }).then(r =&gt; r.json()),
+    {
+      invalidateKeys: [['items']]
+    }
+  );
+
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault();
+    const data = {
+      name: formData.name,
+      description: formData.description || null,
+      price: parseFloat(formData.price)
+    };
+
+    if (editingItem) {
+      updateItem({ id: editingItem.id, data });
+    } else {
+      createItem(data);
+    }
+  };
+
+  const handleEdit = (item) =&gt; {
+    setEditingItem(item);
+    setFormData({
+      name: item.name,
+      description: item.description || '',
+      price: item.price.toString()
+    });
+    setShowModal(true);
+  };
+
+  if (isLoading &amp;&amp; !items) return &lt;div&gt;Loading...&lt;/div&gt;;
+  if (error) return &lt;div&gt;Error: {error.message}&lt;/div&gt;;
+
+  return (
+    &lt;div className=&quot;container-fluid py-4&quot;&gt;
+      &lt;div className=&quot;d-flex justify-content-between align-items-center mb-4&quot;&gt;
+        &lt;h1&gt;Items Management&lt;/h1&gt;
+        &lt;button
+          className=&quot;btn btn-primary&quot;
+          onClick={() =&gt; {
+            setEditingItem(null);
+            setFormData({ name: '', description: '', price: '' });
+            setShowModal(true);
+          }}
+        &gt;
+          Add New Item
+        &lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;table className=&quot;table table-striped&quot;&gt;
+        &lt;thead&gt;
+          &lt;tr&gt;
+            &lt;th&gt;ID&lt;/th&gt;
+            &lt;th&gt;Name&lt;/th&gt;
+            &lt;th&gt;Description&lt;/th&gt;
+            &lt;th&gt;Price&lt;/th&gt;
+            &lt;th&gt;Actions&lt;/th&gt;
+          &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+          {items?.map(item =&gt; (
+            &lt;tr key={item.id}&gt;
+              &lt;td&gt;{item.id}&lt;/td&gt;
+              &lt;td&gt;{item.name}&lt;/td&gt;
+              &lt;td&gt;{item.description || '-'}&lt;/td&gt;
+              &lt;td&gt;${item.price.toFixed(2)}&lt;/td&gt;
+              &lt;td&gt;
+                &lt;button
+                  className=&quot;btn btn-sm btn-outline-primary me-2&quot;
+                  onClick={() =&gt; handleEdit(item)}
+                &gt;
+                  Edit
+                &lt;/button&gt;
+                &lt;button
+                  className=&quot;btn btn-sm btn-outline-danger&quot;
+                  onClick={() =&gt; deleteItem(item.id)}
+                &gt;
+                  Delete
+                &lt;/button&gt;
+              &lt;/td&gt;
+            &lt;/tr&gt;
+          ))}
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+
+      {showModal &amp;&amp; (
+        &lt;div className=&quot;modal show&quot; style={{ display: 'block' }}&gt;
+          &lt;div className=&quot;modal-dialog&quot;&gt;
+            &lt;div className=&quot;modal-content&quot;&gt;
+              &lt;div className=&quot;modal-header&quot;&gt;
+                &lt;h5 className=&quot;modal-title&quot;&gt;
+                  {editingItem ? 'Edit Item' : 'Add New Item'}
+                &lt;/h5&gt;
+                &lt;button
+                  type=&quot;button&quot;
+                  className=&quot;btn-close&quot;
+                  onClick={() =&gt; setShowModal(false)}
+                /&gt;
+              &lt;/div&gt;
+              &lt;div className=&quot;modal-body&quot;&gt;
+                &lt;form onSubmit={handleSubmit}&gt;
+                  &lt;div className=&quot;mb-3&quot;&gt;
+                    &lt;label className=&quot;form-label&quot;&gt;Name&lt;/label&gt;
+                    &lt;input
+                      type=&quot;text&quot;
+                      className=&quot;form-control&quot;
+                      value={formData.name}
+                      onChange={(e) =&gt; setFormData({...formData, name: e.target.value})}
+                      required
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div className=&quot;mb-3&quot;&gt;
+                    &lt;label className=&quot;form-label&quot;&gt;Description&lt;/label&gt;
+                    &lt;textarea
+                      className=&quot;form-control&quot;
+                      value={formData.description}
+                      onChange={(e) =&gt; setFormData({...formData, description: e.target.value})}
+                    /&gt;
+                  &lt;/div&gt;
+                  &lt;div className=&quot;mb-3&quot;&gt;
+                    &lt;label className=&quot;form-label&quot;&gt;Price&lt;/label&gt;
+                    &lt;input
+                      type=&quot;number&quot;
+                      step=&quot;0.01&quot;
+                      className=&quot;form-control&quot;
+                      value={formData.price}
+                      onChange={(e) =&gt; setFormData({...formData, price: e.target.value})}
+                      required
+                    /&gt;
+                  &lt;/div&gt;
+                &lt;/form&gt;
+              &lt;/div&gt;
+              &lt;div className=&quot;modal-footer&quot;&gt;
+                &lt;button
+                  type=&quot;button&quot;
+                  className=&quot;btn btn-secondary&quot;
+                  onClick={() =&gt; setShowModal(false)}
+                &gt;
+                  Cancel
+                &lt;/button&gt;
+                &lt;button
+                  type=&quot;button&quot;
+                  className=&quot;btn btn-primary&quot;
+                  onClick={handleSubmit}
+                  disabled={isCreating || isUpdating}
+                &gt;
+                  {isCreating || isUpdating ? 'Saving...' : 'Save'}
+                &lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+};
+
+export default ItemsPage;
+</code></pre>
+<p><strong>前端測試</strong>:</p>
+<pre><code class="language-jsx">// frontend/src/pages/ItemsPage/__tests__/ItemsPage.test.jsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import ItemsPage from '../index';
+
+// Mock fetch
+global.fetch = vi.fn();
+
+describe('ItemsPage', () =&gt; {
+  beforeEach(() =&gt; {
+    fetch.mockClear();
+  });
+
+  it('should render items list', async () =&gt; {
+    fetch.mockResolvedValueOnce({
+      json: async () =&gt; [
+        { id: 1, name: 'Item 1', description: 'Description 1', price: 10.0, created_at: '2024-01-01' },
+        { id: 2, name: 'Item 2', description: 'Description 2', price: 20.0, created_at: '2024-01-02' }
+      ]
+    });
+
+    render(&lt;ItemsPage /&gt;);
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+  });
+
+  it('should create new item', async () =&gt; {
+    fetch
+      .mockResolvedValueOnce({ json: async () =&gt; [] }) // Initial load
+      .mockResolvedValueOnce({
+        json: async () =&gt; ({ id: 3, name: 'New Item', description: null, price: 99.99, created_at: '2024-01-03' })
+      }) // Create
+      .mockResolvedValueOnce({
+        json: async () =&gt; [{ id: 3, name: 'New Item', description: null, price: 99.99, created_at: '2024-01-03' }]
+      }); // Refetch
+
+    render(&lt;ItemsPage /&gt;);
+
+    // Click &quot;Add New Item&quot; button
+    fireEvent.click(screen.getByText('Add New Item'));
+
+    // Fill form
+    await waitFor(() =&gt; {
+      const nameInput = screen.getByLabelText('Name');
+      fireEvent.change(nameInput, { target: { value: 'New Item' } });
+    });
+
+    const priceInput = screen.getByLabelText('Price');
+    fireEvent.change(priceInput, { target: { value: '99.99' } });
+
+    // Submit form
+    const saveButton = screen.getByText('Save');
+    fireEvent.click(saveButton);
+
+    await waitFor(() =&gt; {
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/v1/items',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ name: 'New Item', description: null, price: 99.99 })
+        })
+      );
+    });
+  });
+
+  it('should delete item', async () =&gt; {
+    fetch
+      .mockResolvedValueOnce({
+        json: async () =&gt; [
+          { id: 1, name: 'Item 1', description: 'Description 1', price: 10.0, created_at: '2024-01-01' }
+        ]
+      }) // Initial load
+      .mockResolvedValueOnce({ json: async () =&gt; { message: 'Item deleted' } }) // Delete
+      .mockResolvedValueOnce({ json: async () =&gt; [] }); // Refetch
+
+    render(&lt;ItemsPage /&gt;);
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+    });
+
+    // Click delete button
+    const deleteButton = screen.getByText('Delete');
+    fireEvent.click(deleteButton);
+
+    await waitFor(() =&gt; {
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/v1/items/1',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
+});
+</code></pre>
+<h4 id="12-1">任務 1.2: 實現簡單的技術指標計算 (1 週)<a class="headerlink" href="#12-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 pandas 數據處理和技術指標計算</p>
+<pre><code class="language-python"># backend/indicators/simple_rsi.py
+import pandas as pd
+import numpy as np
+
+class SimpleRSI:
+    &quot;&quot;&quot;簡單的 RSI 計算實現&quot;&quot;&quot;
+
+    def __init__(self, period: int = 14):
+        if period &lt;= 0:
+            raise ValueError(&quot;Period must be positive&quot;)
+        self.period = period
+
+    def calculate(self, prices: pd.Series) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算 RSI 指標
+
+        Args:
+            prices: 價格序列
+
+        Returns:
+            RSI 值序列
+        &quot;&quot;&quot;
+        # 計算價格變化
+        delta = prices.diff()
+
+        # 分離漲跌幅
+        gains = delta.where(delta &gt; 0, 0)
+        losses = -delta.where(delta &lt; 0, 0)
+
+        # 計算平均漲跌幅（簡單移動平均）
+        avg_gains = gains.rolling(window=self.period).mean()
+        avg_losses = losses.rolling(window=self.period).mean()
+
+        # 避免除以零
+        avg_losses = avg_losses.replace(0, np.nan)
+
+        # 計算 RSI
+        rs = avg_gains / avg_losses
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+
+# 測試
+# backend/tests/test_simple_rsi.py
+import pytest
+import pandas as pd
+import numpy as np
+from backend.indicators.simple_rsi import SimpleRSI
+
+def test_rsi_calculation():
+    &quot;&quot;&quot;測試 RSI 計算&quot;&quot;&quot;
+    # 準備測試數據
+    prices = pd.Series([
+        100, 101, 102, 101, 100, 99, 98, 99, 100, 101,
+        102, 103, 104, 105, 106, 105, 104, 103, 102, 101
+    ])
+
+    # 計算 RSI
+    rsi_calculator = SimpleRSI(period=14)
+    rsi = rsi_calculator.calculate(prices)
+
+    # 驗證
+    assert len(rsi) == len(prices)
+    assert rsi.iloc[-1] &gt;= 0
+    assert rsi.iloc[-1] &lt;= 100
+    assert not pd.isna(rsi.iloc[-1])
+
+def test_rsi_extreme_values():
+    &quot;&quot;&quot;測試 RSI 極值&quot;&quot;&quot;
+    # 持續上漲
+    rising_prices = pd.Series(range(100, 120))
+    rsi = SimpleRSI(period=14).calculate(rising_prices)
+    assert rsi.iloc[-1] &gt; 50
+
+    # 持續下跌
+    falling_prices = pd.Series(range(120, 100, -1))
+    rsi = SimpleRSI(period=14).calculate(falling_prices)
+    assert rsi.iloc[-1] &lt; 50
+
+def test_rsi_invalid_period():
+    &quot;&quot;&quot;測試無效參數&quot;&quot;&quot;
+    with pytest.raises(ValueError):
+        SimpleRSI(period=0)
+
+    with pytest.raises(ValueError):
+        SimpleRSI(period=-1)
+</code></pre>
+<h4 id="13-git">任務 1.3: Git 提交規範練習 (持續)<a class="headerlink" href="#13-git" title="連結到此標題">&para;</a></h4>
+<p><strong>練習</strong>: 對所有任務使用 Conventional Commits</p>
+<pre><code class="language-bash"># 功能開發
+git commit -m &quot;feat(items): add CRUD API for items management&quot;
+git commit -m &quot;feat(indicators): implement simple RSI calculation&quot;
+
+# Bug 修復
+git commit -m &quot;fix(items): handle empty items list gracefully&quot;
+
+# 重構
+git commit -m &quot;refactor(items): extract validation logic to separate function&quot;
+
+# 文檔
+git commit -m &quot;docs(items): add API documentation for items endpoint&quot;
+
+# 測試
+git commit -m &quot;test(items): add comprehensive tests for items API&quot;
+
+# 樣式
+git commit -m &quot;style(items): format code with black and ruff&quot;
+</code></pre>
+<h3 id="24">2.4 預估學習時間<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python/FastAPI 基礎</td>
+<td>2 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>React 19 基礎</td>
+<td>2 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>測試驅動開發</td>
+<td>1 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>DuckDB 基礎</td>
+<td>3 天</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>Git 規範</td>
+<td>2 天</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 1.1-1.3)</td>
+<td>4 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>8-9 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="25">2.5 驗證標準<a class="headerlink" href="#25" title="連結到此標題">&para;</a></h3>
+<h4 id="_2">代碼質量驗證<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 所有 API 端點有完整的單元測試（覆蓋率 ≥ 80%）</li>
+<li>[ ] 所有前端組件有組件測試</li>
+<li>[ ] 所有提交遵循 Conventional Commits 規範（100%）</li>
+<li>[ ] 代碼通過 linter 檢查（ruff, eslint）</li>
+<li>[ ] 代碼通過格式化工具（black, prettier）</li>
+</ul>
+<h4 id="_3">功能驗證<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠獨立完成完整的 CRUD API 實現</li>
+<li>[ ] 能夠實現簡單的技術指標計算</li>
+<li>[ ] 前後端能夠正確交互</li>
+<li>[ ] 能夠處理常見錯誤情況</li>
+</ul>
+<h4 id="_4">知識驗證<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠解釋分層架構的概念</li>
+<li>[ ] 能夠解釋 TDD 的 Red-Green-Refactor 流程</li>
+<li>[ ] 能夠解釋 RESTful API 的設計原則</li>
+<li>[ ] 能夠閱讀和理解現有代碼</li>
+</ul>
+<p><strong>通過標準</strong>: 所有檢查項目必須完成，並且通過代碼審查</p>
+<hr />
+<h2 id="3-2-3-6">3. 階段 2: 中級開發者 (3-6 個月)<a class="headerlink" href="#3-2-3-6" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 核心學習目標<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>掌握回測引擎使用</strong>：能夠使用 VectorBT 和 Backtrader 進行策略回測</li>
+<li><strong>理解策略引擎架構</strong>：掌握 IStrategy 接口和策略模式</li>
+<li><strong>熟練狀態管理</strong>：精通 Zustand 和 React Query</li>
+<li><strong>建立代碼審查能力</strong>：能夠審查他人代碼並提供建設性反饋</li>
+</ol>
+<h3 id="32">3.2 必備技能和能力<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="p1">回測引擎 (P1)<a class="headerlink" href="#p1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VectorBT 基礎</strong></td>
+<td>數據加載、信號生成、組合創建</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Backtrader 基礎</strong></td>
+<td>Cerebro、策略類、數據 feed</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>績效指標計算</strong></td>
+<td>Sharpe Ratio、Max Drawdown、Win Rate</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>參數優化</strong></td>
+<td>網格搜索、並行回測</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p1_1">策略引擎 (P1)<a class="headerlink" href="#p1_1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IStrategy 接口</strong></td>
+<td>generate_signals 實現</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>策略模式</strong></td>
+<td>工廠模式、適配器模式、組合策略</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>信號處理</strong></td>
+<td>信號生成、合併、過濾</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>策略工廠</strong></td>
+<td>策略註冊、實例化</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p1_2">狀態管理 (P1)<a class="headerlink" href="#p1_2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zustand</strong></td>
+<td>Store 定義、actions、selectors</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>React Query</strong></td>
+<td>useApiCache、useApiMutation、cache 管理</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>狀態分類原則</strong></td>
+<td>全局狀態、服務端狀態、本地狀態</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>快取策略</strong></td>
+<td>staleTime、gcTime、invalidate</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p1_3">集成測試 (P1)<a class="headerlink" href="#p1_3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API 集成測試</strong></td>
+<td>端到端 API 測試</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>E2E 測試</strong></td>
+<td>Cypress 測試流程</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>測試數據庫</strong></td>
+<td>測試環境數據庫設置</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33">3.3 可執行的實踐任務<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="21-rsi-2">任務 2.1: 實現完整的 RSI 策略 (2 週)<a class="headerlink" href="#21-rsi-2" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 IStrategy 接口和 VectorBT 回測</p>
+<p><strong>策略實現</strong>:</p>
+<pre><code class="language-python"># backend/strategies/rsi_strategy.py
+from .base import IStrategy, Signal, SignalAction, ExecutionContext
+from datetime import date, timedelta
+from typing import List
+import pandas as pd
+import pandas_ta as ta
+
+class RSIStrategy(IStrategy):
+    &quot;&quot;&quot;RSI 均值回歸策略&quot;&quot;&quot;
+
+    name = &quot;rsi_mean_reversion&quot;
+
+    def __init__(
+        self,
+        period: int = 14,
+        buy_threshold: float = 30,
+        sell_threshold: float = 70,
+        min_trade_size: float = 1000.0
+    ):
+        if not (0 &lt; buy_threshold &lt; sell_threshold &lt; 100):
+            raise ValueError(&quot;Invalid threshold values&quot;)
+        if period &lt;= 0:
+            raise ValueError(&quot;Period must be positive&quot;)
+
+        self.period = period
+        self.buy_threshold = buy_threshold
+        self.sell_threshold = sell_threshold
+        self.min_trade_size = min_trade_size
+        self.rsi_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        &quot;&quot;&quot;生成交易信號&quot;&quot;&quot;
+        signals = []
+
+        for symbol in symbols:
+            # 檢查市場狀態
+            if context.market_status != 'CLOSED':
+                continue
+
+            # 檢查是否已持有
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # 獲取 RSI 值
+            rsi = self._get_rsi(symbol, context.market_date)
+
+            if pd.isna(rsi):
+                continue
+
+            # 生成買入信號（僅當未持有時）
+            if rsi &lt; self.buy_threshold and not existing_position:
+                confidence = self._calculate_confidence(rsi, self.buy_threshold)
+                if confidence &gt;= 0.5:  # 只在信心高於 50% 時交易
+                    signals.append(Signal(
+                        symbol=symbol,
+                        action=SignalAction.BUY,
+                        confidence=confidence,
+                        reason=f&quot;RSI ({rsi:.2f}) below buy threshold ({self.buy_threshold})&quot;
+                    ))
+
+            # 生成賣出信號（僅當持有时）
+            elif rsi &gt; self.sell_threshold and existing_position:
+                confidence = self._calculate_confidence(rsi, self.sell_threshold)
+                if confidence &gt;= 0.5:
+                    signals.append(Signal(
+                        symbol=symbol,
+                        action=SignalAction.SELL,
+                        confidence=confidence,
+                        reason=f&quot;RSI ({rsi:.2f}) above sell threshold ({self.sell_threshold})&quot;
+                    ))
+
+        return signals
+
+    def _get_rsi(self, symbol: str, date: date) -&gt; float:
+        &quot;&quot;&quot;獲取 RSI 值並緩存&quot;&quot;&quot;
+        cache_key = f&quot;{symbol}_{date}&quot;
+
+        if cache_key not in self.rsi_cache:
+            # 使用 pandas-ta 計算 RSI
+            # 這裡需要從數據庫獲取價格數據
+            prices = self._load_prices(symbol, date - timedelta(days=self.period * 3), date)
+
+            if len(prices) &lt; self.period:
+                return float('nan')
+
+            rsi_values = ta.momentum.RSIIndicator(prices['close'], window=self.period).rsi()
+            self.rsi_cache[cache_key] = rsi_values.iloc[-1] if len(rsi_values) &gt; 0 else float('nan')
+
+        return self.rsi_cache[cache_key]
+
+    def _load_prices(self, symbol: str, start_date: date, end_date: date) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;從數據庫加載價格數據&quot;&quot;&quot;
+        # 實際實現會從數據庫查詢
+        # 這裡是簡化版本
+        pass
+
+    def _calculate_confidence(self, rsi: float, threshold: float) -&gt; float:
+        &quot;&quot;&quot;根據距離閾值的距離計算信心分數&quot;&quot;&quot;
+        if rsi &lt; threshold:  # 買入情況
+            return min(1.0, (threshold - rsi) / threshold)
+        else:  # 賣出情況
+            return min(1.0, (rsi - threshold) / (100 - threshold))
+</code></pre>
+<p><strong>VectorBT 回測實現</strong>:</p>
+<pre><code class="language-python"># backend/backtest/vectorbt_executor.py
+import vectorbt as vbt
+import pandas as pd
+from typing import List, Dict, Any
+from datetime import date
+from backend.strategies.rsi_strategy import RSIStrategy
+
+class VectorBTExecutor:
+    &quot;&quot;&quot;VectorBT 回測執行器&quot;&quot;&quot;
+
+    def __init__(self, data_loader):
+        self.data_loader = data_loader
+
+    def run_backtest(
+        self,
+        strategy: RSIStrategy,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+        initial_cash: float = 100000
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;執行回測&quot;&quot;&quot;
+
+        # 1. 加載數據
+        prices = self.data_loader.load_prices(symbols, start_date, end_date)
+
+        # 2. 生成 RSI 指標
+        rsi_values = self._calculate_rsi_vectorized(prices, strategy.period)
+
+        # 3. 生成信號
+        entries, exits = self._generate_signals(rsi_values, strategy)
+
+        # 4. 創建組合
+        pf = vbt.Portfolio.from_signals(
+            prices,
+            entries=entries,
+            exits=exits,
+            init_cash=initial_cash,
+            fees=0.001,
+            slippage=0.0001,
+            freq='1D'
+        )
+
+        # 5. 提取指標
+        stats = pf.stats()
+
+        return {
+            'strategy': strategy.name,
+            'symbols': symbols,
+            'start_date': str(start_date),
+            'end_date': str(end_date),
+            'initial_cash': initial_cash,
+            'final_value': float(pf.value().iloc[-1]),
+            'total_return': float(stats['total_return']),
+            'sharpe_ratio': float(stats['sharpe_ratio']),
+            'max_drawdown': float(stats['max_drawdown']),
+            'win_rate': float(stats['win_rate']),
+            'num_trades': int(stats['num_trades']),
+            'equity_curve': pf.value().tolist()
+        }
+
+    def _calculate_rsi_vectorized(
+        self,
+        prices: pd.DataFrame,
+        period: int
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;向量化計算 RSI&quot;&quot;&quot;
+        rsi_values = pd.DataFrame(index=prices.index, columns=prices.columns)
+
+        for symbol in prices.columns:
+            rsi_values[symbol] = ta.momentum.RSIIndicator(
+                prices[symbol],
+                window=period
+            ).rsi()
+
+        return rsi_values
+
+    def _generate_signals(
+        self,
+        rsi_values: pd.DataFrame,
+        strategy: RSIStrategy
+    ) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+        &quot;&quot;&quot;生成進入和退出信號&quot;&quot;&quot;
+        entries = rsi_values.lt(strategy.buy_threshold)
+        exits = rsi_values.gt(strategy.sell_threshold)
+
+        return entries, exits
+</code></pre>
+<p><strong>測試實現</strong>:</p>
+<pre><code class="language-python"># backend/tests/test_rsi_strategy.py
+import pytest
+from datetime import date, timedelta
+from backend.strategies.rsi_strategy import RSIStrategy
+from backend.base import ExecutionContext, PositionState
+
+@pytest.fixture
+def sample_prices():
+    &quot;&quot;&quot;樣本價格數據&quot;&quot;&quot;
+    import pandas as pd
+    return pd.Series([
+        100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+        110, 111, 112, 113, 114, 113, 112, 111, 110, 109
+    ])
+
+@pytest.fixture
+def strategy():
+    &quot;&quot;&quot;創建 RSI 策略實例&quot;&quot;&quot;
+    return RSIStrategy(
+        period=14,
+        buy_threshold=30,
+        sell_threshold=70
+    )
+
+def test_strategy_initialization(strategy):
+    &quot;&quot;&quot;測試策略初始化&quot;&quot;&quot;
+    assert strategy.period == 14
+    assert strategy.buy_threshold == 30
+    assert strategy.sell_threshold == 70
+
+def test_strategy_invalid_parameters():
+    &quot;&quot;&quot;測試無效參數&quot;&quot;&quot;
+    with pytest.raises(ValueError):
+        RSIStrategy(buy_threshold=70, sell_threshold=30)
+
+    with pytest.raises(ValueError):
+        RSIStrategy(period=0)
+
+def test_confidence_calculation(strategy):
+    &quot;&quot;&quot;測試信心計算&quot;&quot;&quot;
+    # 買入情況
+    buy_confidence = strategy._calculate_confidence(20, 30)
+    assert 0.5 &lt;= buy_confidence &lt;= 1.0
+
+    # 賣出情況
+    sell_confidence = strategy._calculate_confidence(80, 70)
+    assert 0.5 &lt;= sell_confidence &lt;= 1.0
+
+def test_generate_signals_buy(strategy, mocker):
+    &quot;&quot;&quot;測試買入信號生成&quot;&quot;&quot;
+    # Mock 數據加載
+    mocker.patch.object(
+        strategy,
+        '_load_prices',
+        return_value=pd.DataFrame({
+            'close': [100] * 42  # 足夠計算 RSI
+        })
+    )
+
+    # 創建執行上下文
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=100000,
+        current_positions=[],
+        market_date=date.today(),
+        market_status='CLOSED'
+    )
+
+    # 生成信號
+    signals = strategy.generate_signals(context, ['AAPL'])
+
+    # 驗證信號
+    assert len(signals) &gt;= 0
+    for signal in signals:
+        assert signal.symbol == 'AAPL'
+        assert signal.action.value == 'BUY'
+        assert 0.5 &lt;= signal.confidence &lt;= 1.0
+
+def test_generate_signals_sell_with_position(strategy, mocker):
+    &quot;&quot;&quot;測試賣出信號生成（有持倉時）&quot;&quot;&quot;
+    # Mock 數據加載 - 返回高 RSI 值
+    mocker.patch.object(
+        strategy,
+        '_load_prices',
+        return_value=pd.DataFrame({
+            'close': [150] * 42
+        })
+    )
+
+    # 創建執行上下文（有持倉）
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[
+            PositionState(
+                symbol='AAPL',
+                quantity=100,
+                current_price=150
+            )
+        ],
+        market_date=date.today(),
+        market_status='CLOSED'
+    )
+
+    # 生成信號
+    signals = strategy.generate_signals(context, ['AAPL'])
+
+    # 驗證信號
+    assert len(signals) &gt;= 0
+    for signal in signals:
+        assert signal.action.value == 'SELL'
+
+def test_market_status_check(strategy, mocker):
+    &quot;&quot;&quot;測試市場狀態檢查&quot;&quot;&quot;
+    # Mock 數據加載
+    mocker.patch.object(
+        strategy,
+        '_load_prices',
+        return_value=pd.DataFrame({'close': [100] * 42})
+    )
+
+    # 市場開盤時不應生成信號
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=100000,
+        current_positions=[],
+        market_date=date.today(),
+        market_status='OPEN'  # 開盤狀態
+    )
+
+    signals = strategy.generate_signals(context, ['AAPL'])
+    assert len(signals) == 0
+</code></pre>
+<h4 id="22-1">任務 2.2: 實現策略工廠 (1 週)<a class="headerlink" href="#22-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握工廠模式和策略註冊機制</p>
+<pre><code class="language-python"># backend/strategies/factory.py
+from typing import Dict, Type, Any
+from .base import IStrategy
+from .rsi_strategy import RSIStrategy
+
+class StrategyFactory:
+    &quot;&quot;&quot;策略工廠&quot;&quot;&quot;
+
+    _strategies: Dict[str, Type[IStrategy]] = {}
+
+    @classmethod
+    def register(cls, strategy_type: str, strategy_class: Type[IStrategy]):
+        &quot;&quot;&quot;註冊策略類&quot;&quot;&quot;
+        if strategy_type in cls._strategies:
+            raise ValueError(f&quot;Strategy type {strategy_type} already registered&quot;)
+        cls._strategies[strategy_type] = strategy_class
+
+    @classmethod
+    def create(cls, strategy_type: str, params: Dict[str, Any] = None) -&gt; IStrategy:
+        &quot;&quot;&quot;創建策略實例&quot;&quot;&quot;
+        params = params or {}
+
+        if strategy_type not in cls._strategies:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+
+        strategy_class = cls._strategies[strategy_type]
+        return strategy_class(**params)
+
+    @classmethod
+    def list_strategies(cls) -&gt; list:
+        &quot;&quot;&quot;列出所有已註冊的策略類型&quot;&quot;&quot;
+        return list(cls._strategies.keys())
+
+# 註冊內置策略
+StrategyFactory.register(&quot;rsi&quot;, RSIStrategy)
+
+# 測試
+# backend/tests/test_strategy_factory.py
+import pytest
+from backend.strategies.factory import StrategyFactory
+from backend.strategies.rsi_strategy import RSIStrategy
+
+def test_register_strategy():
+    &quot;&quot;&quot;測試策略註冊&quot;&quot;&quot;
+    # 註冊後應該能夠創建
+    strategy = StrategyFactory.create(&quot;rsi&quot;, {&quot;period&quot;: 14})
+    assert isinstance(strategy, RSIStrategy)
+    assert strategy.period == 14
+
+def test_create_unknown_strategy():
+    &quot;&quot;&quot;測試創建未知策略&quot;&quot;&quot;
+    with pytest.raises(ValueError, match=&quot;Unknown strategy type&quot;):
+        StrategyFactory.create(&quot;unknown_strategy&quot;)
+
+def test_list_strategies():
+    &quot;&quot;&quot;測試列出策略&quot;&quot;&quot;
+    strategies = StrategyFactory.list_strategies()
+    assert &quot;rsi&quot; in strategies
+
+def test_duplicate_registration():
+    &quot;&quot;&quot;測試重複註冊&quot;&quot;&quot;
+    with pytest.raises(ValueError, match=&quot;already registered&quot;):
+        StrategyFactory.register(&quot;rsi&quot;, RSIStrategy)
+</code></pre>
+<h4 id="23-react-query-1">任務 2.3: 實現 React Query 緩存管理 (1 週)<a class="headerlink" href="#23-react-query-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 React Query 的緩存和狀態管理</p>
+<pre><code class="language-javascript">// frontend/src/hooks/useApiCache.js
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+
+const queryClient = useQueryClient();
+
+// 緩存預設
+export const cachePresets = {
+  static: {
+    staleTime: 60 * 60 * 1000,      // 1 小時
+    gcTime: 24 * 60 * 60 * 1000,   // 24 小時
+  },
+  user: {
+    staleTime: 5 * 60 * 1000,      // 5 分鐘
+    gcTime: 30 * 60 * 1000,        // 30 分鐘
+  },
+  dynamic: {
+    staleTime: 30 * 1000,         // 30 秒
+    gcTime: 5 * 60 * 1000,        // 5 分鐘
+  },
+  realtime: {
+    staleTime: 0,
+    gcTime: 0,
+  },
+};
+
+export const useApiCache = (queryKey, fetcher, options = {}) =&gt; {
+  const {
+    staleTime = cachePresets.user.staleTime,
+    gcTime = cachePresets.user.gcTime,
+    ...restOptions
+  } = options;
+
+  return useQuery({
+    queryKey,
+    queryFn: fetcher,
+    staleTime,
+    gcTime,
+    retry: 1,
+    ...restOptions,
+  });
+};
+
+export const useApiMutation = (mutationFn, options = {}) =&gt; {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn,
+    onSuccess: (data, variables, context) =&gt; {
+      // 使相關查詢失效
+      if (options.invalidateKeys) {
+        options.invalidateKeys.forEach(key =&gt; {
+          queryClient.invalidateQueries(key);
+        });
+      }
+      // 調用成功回調
+      if (options.onSuccess) {
+        options.onSuccess(data, variables, context);
+      }
+    },
+    onError: (error) =&gt; {
+      // 顯示錯誤通知
+      const message = error.response?.data?.detail || error.message || 'Operation failed';
+      toast.error(message);
+      if (options.onError) {
+        options.onError(error);
+      }
+    },
+  });
+};
+
+// 緩存工具
+export const cacheUtils = {
+  invalidate: (key) =&gt; {
+    queryClient.invalidateQueries(key);
+  },
+
+  clear: () =&gt; {
+    queryClient.clear();
+  },
+
+  prefetch: async (key, fetcher) =&gt; {
+    await queryClient.prefetchQuery(key, fetcher);
+  },
+
+  getData: (key) =&gt; {
+    return queryClient.getQueryData(key);
+  },
+
+  setData: (key, data) =&gt; {
+    queryClient.setQueryData(key, data);
+  },
+};
+
+// 測試
+// frontend/src/hooks/__tests__/useApiCache.test.js
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useApiCache, useApiMutation, cacheUtils } from '../useApiCache';
+
+const createWrapper = () =&gt; {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+  return ({ children }) =&gt; (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      {children}
+    &lt;/QueryClientProvider&gt;
+  );
+};
+
+describe('useApiCache', () =&gt; {
+  beforeEach(() =&gt; {
+    vi.clearAllMocks();
+  });
+
+  it('should fetch data correctly', async () =&gt; {
+    const fetcher = vi.fn().mockResolvedValue({ data: 'test' });
+
+    const { result } = renderHook(
+      () =&gt; useApiCache(['test'], fetcher),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() =&gt; {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.data).toEqual({ data: 'test' });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('should use cache on subsequent calls', async () =&gt; {
+    const fetcher = vi.fn().mockResolvedValue({ data: 'test' });
+    const staleTime = 5000; // 5 秒
+
+    const { result, rerender } = renderHook(
+      () =&gt; useApiCache(['test'], fetcher, { staleTime }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() =&gt; {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    // 重新渲染（不應該重新獲取）
+    rerender();
+
+    expect(fetcher).toHaveBeenCalledTimes(1); // 只調用一次
+  });
+});
+
+describe('useApiMutation', () =&gt; {
+  it('should execute mutation and invalidate cache', async () =&gt; {
+    const mutationFn = vi.fn().mockResolvedValue({ success: true });
+    const invalidateKeys = [['test']];
+
+    const { result } = renderHook(
+      () =&gt; useApiMutation(mutationFn, { invalidateKeys }),
+      { wrapper: createWrapper() }
+    );
+
+    result.current.mutate({ data: 'input' });
+
+    await waitFor(() =&gt; {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(mutationFn).toHaveBeenCalledWith({ data: 'input' });
+  });
+});
+
+describe('cacheUtils', () =&gt; {
+  it('should invalidate queries', async () =&gt; {
+    const wrapper = createWrapper();
+
+    const { result: cacheResult } = renderHook(
+      () =&gt; ({ invalidate: cacheUtils.invalidate }),
+      { wrapper }
+    );
+
+    // invalidate 是一個函數，調用它
+    cacheResult.current.invalidate(['test']);
+  });
+});
+</code></pre>
+<h4 id="24-zustand-store-1">任務 2.4: 實現 Zustand Store (1 週)<a class="headerlink" href="#24-zustand-store-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 Zustand 全局狀態管理</p>
+<pre><code class="language-javascript">// frontend/src/store/dashboardStore.js
+import { create } from 'zustand';
+
+const useDashboardStore = create((set, get) =&gt; ({
+  // 狀態
+  watchlist: [],
+  marketMovers: {
+    gainers: [],
+    losers: [],
+    most_active: []
+  },
+  heatmapData: [],
+  marketScore: {
+    current: null,
+    history: []
+  },
+  stockDetails: {},
+  loadingStatus: 'idle', // idle, loading, success, error
+  error: null,
+  lastUpdated: null,
+
+  // Actions
+  fetchStage1Overview: async (force = false, targetDate = null, market = 'US') =&gt; {
+    const { loadingStatus, lastUpdated } = get();
+
+    // 檢查是否需要重新獲取
+    if (!force &amp;&amp; loadingStatus === 'success') {
+      const now = new Date();
+      const lastUpdatedTime = lastUpdated ? new Date(lastUpdated) : null;
+      if (lastUpdatedTime &amp;&amp; (now - lastUpdatedTime) &lt; 5 * 60 * 1000) {
+        return; // 5 分鐘內不重新獲取
+      }
+    }
+
+    set({ loadingStatus: 'loading', error: null });
+
+    try {
+      // 並行獲取數據
+      const [movers, heatmap, score] = await Promise.all([
+        fetch(`/api/v1/market/movers?market=${market}`).then(r =&gt; r.json()),
+        fetch(`/api/v1/market/heatmap?targetDate=${targetDate}&amp;market=${market}`).then(r =&gt; r.json()),
+        fetch('/api/v1/market/score').then(r =&gt; r.json())
+      ]);
+
+      set({
+        marketMovers: movers,
+        heatmapData: heatmap,
+        marketScore: score,
+        loadingStatus: 'success',
+        error: null,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      set({
+        error: error.message,
+        loadingStatus: 'error'
+      });
+    }
+  },
+
+  addWatchlistItem: (symbol) =&gt; {
+    const watchlist = get().watchlist;
+    if (!watchlist.includes(symbol)) {
+      set({ watchlist: [...watchlist, symbol] });
+    }
+  },
+
+  removeWatchlistItem: (symbol) =&gt; {
+    const watchlist = get().watchlist;
+    set({ watchlist: watchlist.filter(s =&gt; s !== symbol) });
+  },
+
+  updateStockDetail: (symbol, detail) =&gt; {
+    const stockDetails = get().stockDetails;
+    set({
+      stockDetails: {
+        ...stockDetails,
+        [symbol]: detail
+      }
+    });
+  },
+
+  reset: () =&gt; {
+    set({
+      watchlist: [],
+      marketMovers: { gainers: [], losers: [], most_active: [] },
+      heatmapData: [],
+      marketScore: { current: null, history: [] },
+      stockDetails: {},
+      loadingStatus: 'idle',
+      error: null,
+      lastUpdated: null
+    });
+  }
+}));
+
+export default useDashboardStore;
+
+// 測試
+// frontend/src/store/__tests__/dashboardStore.test.js
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import useDashboardStore from '../dashboardStore';
+
+// Mock fetch
+global.fetch = vi.fn();
+
+describe('useDashboardStore', () =&gt; {
+  beforeEach(() =&gt; {
+    fetch.mockClear();
+    // 重置 store
+    useDashboardStore.setState(useDashboardStore.getInitialState());
+  });
+
+  it('should add item to watchlist', () =&gt; {
+    const { result } = renderHook(() =&gt; useDashboardStore());
+
+    act(() =&gt; {
+      result.current.addWatchlistItem('AAPL');
+    });
+
+    expect(result.current.watchlist).toContain('AAPL');
+  });
+
+  it('should not add duplicate items to watchlist', () =&gt; {
+    const { result } = renderHook(() =&gt; useDashboardStore());
+
+    act(() =&gt; {
+      result.current.addWatchlistItem('AAPL');
+      result.current.addWatchlistItem('AAPL');
+    });
+
+    expect(result.current.watchlist).toEqual(['AAPL']);
+  });
+
+  it('should remove item from watchlist', () =&gt; {
+    const { result } = renderHook(() =&gt; useDashboardStore());
+
+    act(() =&gt; {
+      result.current.addWatchlistItem('AAPL');
+      result.current.addWatchlistItem('GOOGL');
+      result.current.removeWatchlistItem('AAPL');
+    });
+
+    expect(result.current.watchlist).not.toContain('AAPL');
+    expect(result.current.watchlist).toContain('GOOGL');
+  });
+
+  it('should update stock detail', () =&gt; {
+    const { result } = renderHook(() =&gt; useDashboardStore());
+
+    const detail = { symbol: 'AAPL', price: 150.0, change: 2.5 };
+
+    act(() =&gt; {
+      result.current.updateStockDetail('AAPL', detail);
+    });
+
+    expect(result.current.stockDetails['AAPL']).toEqual(detail);
+  });
+
+  it('should reset store', () =&gt; {
+    const { result } = renderHook(() =&gt; useDashboardStore());
+
+    act(() =&gt; {
+      result.current.addWatchlistItem('AAPL');
+      result.current.updateStockDetail('AAPL', { symbol: 'AAPL', price: 150 });
+      result.current.reset();
+    });
+
+    expect(result.current.watchlist).toEqual([]);
+    expect(result.current.stockDetails).toEqual({});
+  });
+});
+</code></pre>
+<h3 id="34">3.4 預估學習時間<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VectorBT 學習</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Backtrader 學習</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>策略引擎架構</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Zustand 精通</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>React Query 精通</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>集成測試</td>
+<td>3 天</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 2.1-2.4)</td>
+<td>5 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>10-11 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="35">3.5 驗證標準<a class="headerlink" href="#35" title="連結到此標題">&para;</a></h3>
+<h4 id="_5">代碼質量驗證<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 策略實現遵循 IStrategy 接口契約</li>
+<li>[ ] 回測代碼有完整的單元測試和集成測試</li>
+<li>[ ] 測試覆蓋率 ≥ 85%</li>
+<li>[ ] 所有提交遵循 Conventional Commits</li>
+<li>[ ] 代碼審查通過（至少 1 次他人審查）</li>
+</ul>
+<h4 id="_6">功能驗證<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠使用 VectorBT 執行策略回測</li>
+<li>[ ] 能夠正確實現並使用策略工廠</li>
+<li>[ ] 能夠使用 React Query 管理服務端狀態</li>
+<li>[ ] 能夠使用 Zustand 管理全局狀態</li>
+<li>[ ] 能夠編寫集成測試</li>
+</ul>
+<h4 id="_7">知識驗證<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠解釋策略模式的工作原理</li>
+<li>[ ] 能夠解釋向量化計算的性能優勢</li>
+<li>[ ] 能夠解釋 React Query 的緩存策略</li>
+<li>[ ] 能夠審查他人代碼並提供建設性反饋</li>
+<li>[ ] 能夠設計測試策略</li>
+</ul>
+<p><strong>通過標準</strong>: 所有檢查項目必須完成，並且通過代碼審查</p>
+<hr />
+<h2 id="4-3-6-12">4. 階段 3: 高級開發者 (6-12 個月)<a class="headerlink" href="#4-3-6-12" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 核心學習目標<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>掌握複合策略設計</strong>：能夠設計和實現組合策略和信號合併算法</li>
+<li><strong>精通性能優化</strong>：能夠識別和解決性能瓶頸</li>
+<li><strong>建立架構思維</strong>：能夠進行技術選型和架構設計決策</li>
+<li><strong>具備技術指導能力</strong>：能夠指導初級和中級開發者</li>
+</ol>
+<h3 id="42">4.2 必備技能和能力<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="p2">複合策略 (P2)<a class="headerlink" href="#p2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>組合策略</strong></td>
+<td>CompositeStrategy、多策略組合</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>信號合併算法</strong></td>
+<td>多數決、一緻同意、加權投票</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>策略共識機制</strong></td>
+<td>信號共振、多指標匯合</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>策略優化</strong></td>
+<td>參數掃描、網格搜索</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p2_1">性能優化 (P2)<a class="headerlink" href="#p2_1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>向量化優化</strong></td>
+<td>NumPy、pandas 向量化操作</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>並行處理</strong></td>
+<td>multiprocessing、asyncio</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>緩存策略</strong></td>
+<td>多級緩存、TTL 管理</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>數據庫優化</strong></td>
+<td>索引、查詢優化、批量操作</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>前端性能</strong></td>
+<td>React.memo、useMemo、代碼分割</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p2_2">架構設計 (P2)<a class="headerlink" href="#p2_2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構</strong></td>
+<td>服務拆分、API 設計</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>數據架構設計</strong></td>
+<td>數據庫選型、Schema 設計</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>技術選型</strong></td>
+<td>權衡分析、ADR 記錄</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>API 版本化</strong></td>
+<td>版本策略、向後兼容</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="e2e-p2">E2E 測試 (P2)<a class="headerlink" href="#e2e-p2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cypress</strong></td>
+<td>E2E 測試編寫、頁面对象模式</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>測試策略</strong></td>
+<td>測試金字塔、測試優先級</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>測試環境</strong></td>
+<td>測試環境設置、數據準備</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43">4.3 可執行的實踐任務<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<h4 id="31-2">任務 3.1: 實現組合策略和信號合併 (2 週)<a class="headerlink" href="#31-2" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握複合策略設計和多種合併算法</p>
+<pre><code class="language-python"># backend/strategies/composite_strategy.py
+from typing import List, Dict, Any
+from collections import defaultdict
+from .base import IStrategy, Signal, SignalAction, ExecutionContext
+
+class CompositeStrategy(IStrategy):
+    &quot;&quot;&quot;組合多個策略並使用合併算法輸出信號&quot;&quot;&quot;
+
+    name = &quot;composite_strategy&quot;
+
+    MERGE_ALGORITHMS = [
+        'majority_vote',  # 多數決
+        'unanimous',      # 一致同意
+        'weighted',       # 加權投票
+        'any',            # 任一
+        'consensus'       # 共識（需要 &gt;60% 同意）
+    ]
+
+    def __init__(
+        self,
+        strategies: List[IStrategy],
+        merge_algorithm: str = 'majority_vote',
+        weights: List[float] = None
+    ):
+        if merge_algorithm not in self.MERGE_ALGORITHMS:
+            raise ValueError(f&quot;Invalid merge algorithm: {merge_algorithm}&quot;)
+
+        if not strategies:
+            raise ValueError(&quot;At least one strategy required&quot;)
+
+        self.strategies = strategies
+        self.merge_algorithm = merge_algorithm
+        self.weights = weights or [1.0] * len(strategies)
+
+        if len(self.weights) != len(strategies):
+            raise ValueError(&quot;Number of weights must match number of strategies&quot;)
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[Signal]:
+        # 收集所有策略的信號
+        all_signals_by_symbol = defaultdict(list)
+
+        for strategy in self.strategies:
+            strategy_signals = strategy.generate_signals(context, symbols)
+            for signal in strategy_signals:
+                all_signals_by_symbol[signal.symbol].append(signal)
+
+        # 合併每個標的的信號
+        merged_signals = []
+        for symbol, signals in all_signals_by_symbol.items():
+            merged_signal = self._merge_signals(symbol, signals)
+            if merged_signal:
+                merged_signals.append(merged_signal)
+
+        return merged_signals
+
+    def _merge_signals(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;使用配置的算法合併多個信號&quot;&quot;&quot;
+        if self.merge_algorithm == 'majority_vote':
+            return self._majority_vote_merge(symbol, signals)
+        elif self.merge_algorithm == 'unanimous':
+            return self._unanimous_merge(symbol, signals)
+        elif self.merge_algorithm == 'weighted':
+            return self._weighted_merge(symbol, signals)
+        elif self.merge_algorithm == 'any':
+            return self._any_merge(symbol, signals)
+        elif self.merge_algorithm == 'consensus':
+            return self._consensus_merge(symbol, signals)
+
+    def _majority_vote_merge(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;多數決合併&quot;&quot;&quot;
+        buy_count = sum(
+            s.action == SignalAction.BUY for s in signals
+        )
+        sell_count = sum(
+            s.action == SignalAction.SELL for s in signals
+        )
+
+        total = len(signals)
+        if buy_count &gt; sell_count and buy_count &gt; total / 2:
+            avg_confidence = sum(s.confidence for s in signals if s.action == SignalAction.BUY) / buy_count
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.BUY,
+                confidence=avg_confidence,
+                reason=f&quot;Majority vote: {buy_count}/{total} BUY&quot;
+            )
+        elif sell_count &gt; buy_count and sell_count &gt; total / 2:
+            avg_confidence = sum(s.confidence for s in signals if s.action == SignalAction.SELL) / sell_count
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.SELL,
+                confidence=avg_confidence,
+                reason=f&quot;Majority vote: {sell_count}/{total} SELL&quot;
+            )
+
+        return None
+
+    def _unanimous_merge(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;一致同意合併&quot;&quot;&quot;
+        actions = [s.action for s in signals]
+
+        if all(a == SignalAction.BUY for a in actions):
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.BUY,
+                confidence=1.0,
+                reason=&quot;Unanimous: all strategies agree BUY&quot;
+            )
+        elif all(a == SignalAction.SELL for a in actions):
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.SELL,
+                confidence=1.0,
+                reason=&quot;Unanimous: all strategies agree SELL&quot;
+            )
+
+        return None
+
+    def _weighted_merge(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;加權投票合併&quot;&quot;&quot;
+        buy_weight = 0
+        sell_weight = 0
+
+        for signal, weight in zip(signals, self.weights):
+            if signal.action == SignalAction.BUY:
+                buy_weight += signal.confidence * weight
+            elif signal.action == SignalAction.SELL:
+                sell_weight += signal.confidence * weight
+
+        if buy_weight &gt; sell_weight:
+            confidence = buy_weight / (buy_weight + sell_weight)
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.BUY,
+                confidence=confidence,
+                reason=f&quot;Weighted: BUY {buy_weight:.2f} vs SELL {sell_weight:.2f}&quot;
+            )
+        elif sell_weight &gt; buy_weight:
+            confidence = sell_weight / (buy_weight + sell_weight)
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.SELL,
+                confidence=confidence,
+                reason=f&quot;Weighted: SELL {sell_weight:.2f} vs BUY {buy_weight:.2f}&quot;
+            )
+
+        return None
+
+    def _any_merge(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;任一合併（只要有任何信號就輸出）&quot;&quot;&quot;
+        buy_signals = [s for s in signals if s.action == SignalAction.BUY]
+        sell_signals = [s for s in signals if s.action == SignalAction.SELL]
+
+        if buy_signals:
+            max_confidence = max(s.confidence for s in buy_signals)
+            best_signal = next(s for s in buy_signals if s.confidence == max_confidence)
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.BUY,
+                confidence=max_confidence,
+                reason=f&quot;Any: best BUY signal with confidence {max_confidence:.2f}&quot;
+            )
+        elif sell_signals:
+            max_confidence = max(s.confidence for s in sell_signals)
+            best_signal = next(s for s in sell_signals if s.confidence == max_confidence)
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.SELL,
+                confidence=max_confidence,
+                reason=f&quot;Any: best SELL signal with confidence {max_confidence:.2f}&quot;
+            )
+
+        return None
+
+    def _consensus_merge(self, symbol: str, signals: List[Signal]) -&gt; Signal:
+        &quot;&quot;&quot;共識合併（需要 &gt;60% 同意）&quot;&quot;&quot;
+        total = len(signals)
+        buy_count = sum(s.action == SignalAction.BUY for s in signals)
+        sell_count = sum(s.action == SignalAction.SELL for s in signals)
+
+        if buy_count / total &gt; 0.6:
+            avg_confidence = sum(s.confidence for s in signals if s.action == SignalAction.BUY) / buy_count
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.BUY,
+                confidence=avg_confidence,
+                reason=f&quot;Consensus: {buy_count}/{total} ({buy_count/total:.0%}) BUY&quot;
+            )
+        elif sell_count / total &gt; 0.6:
+            avg_confidence = sum(s.confidence for s in signals if s.action == SignalAction.SELL) / sell_count
+            return Signal(
+                symbol=symbol,
+                action=SignalAction.SELL,
+                confidence=avg_confidence,
+                reason=f&quot;Consensus: {sell_count}/{total} ({sell_count/total:.0%}) SELL&quot;
+            )
+
+        return None
+
+# 測試
+# backend/tests/test_composite_strategy.py
+import pytest
+from datetime import date
+from backend.strategies.composite_strategy import CompositeStrategy
+from backend.strategies.rsi_strategy import RSIStrategy
+from backend.base import ExecutionContext, SignalAction
+
+@pytest.fixture
+def sample_context():
+    &quot;&quot;&quot;創建測試上下文&quot;&quot;&quot;
+    return ExecutionContext(
+        portfolio_value=100000,
+        available_cash=100000,
+        current_positions=[],
+        market_date=date(2024, 1, 15),
+        market_status='CLOSED'
+    )
+
+def test_majority_vote_buy(sample_context, mocker):
+    &quot;&quot;&quot;測試多數決買入（3 個策略中 2 個買入）&quot;&quot;&quot;
+    # 創建模擬策略
+    class MockStrategy1:
+        name = &quot;mock1&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.BUY, confidence=0.8)]
+
+    class MockStrategy2:
+        name = &quot;mock2&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.BUY, confidence=0.7)]
+
+    class MockStrategy3:
+        name = &quot;mock3&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.SELL, confidence=0.6)]
+
+    composite = CompositeStrategy(
+        [MockStrategy1(), MockStrategy2(), MockStrategy3()],
+        merge_algorithm='majority_vote'
+    )
+
+    signals = composite.generate_signals(sample_context, ['AAPL'])
+
+    assert len(signals) == 1
+    assert signals[0].action == SignalAction.BUY
+    assert signals[0].symbol == 'AAPL'
+
+def test_unanimous_buy(sample_context, mocker):
+    &quot;&quot;&quot;測試一致同意買入（所有策略都買入）&quot;&quot;&quot;
+    class MockStrategy1:
+        name = &quot;mock1&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.BUY, confidence=0.8)]
+
+    class MockStrategy2:
+        name = &quot;mock2&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.BUY, confidence=0.7)]
+
+    composite = CompositeStrategy(
+        [MockStrategy1(), MockStrategy2()],
+        merge_algorithm='unanimous'
+    )
+
+    signals = composite.generate_signals(sample_context, ['AAPL'])
+
+    assert len(signals) == 1
+    assert signals[0].action == SignalAction.BUY
+    assert signals[0].confidence == 1.0
+
+def test_weighted_merge(sample_context, mocker):
+    &quot;&quot;&quot;測試加權合併&quot;&quot;&quot;
+    class MockStrategy1:
+        name = &quot;mock1&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.BUY, confidence=0.9)]
+
+    class MockStrategy2:
+        name = &quot;mock2&quot;
+        def generate_signals(self, context, symbols):
+            return [Signal(symbol=symbols[0], action=SignalAction.SELL, confidence=0.8)]
+
+    # 第一個策略權重更高
+    composite = CompositeStrategy(
+        [MockStrategy1(), MockStrategy2()],
+        merge_algorithm='weighted',
+        weights=[2.0, 1.0]
+    )
+
+    signals = composite.generate_signals(sample_context, ['AAPL'])
+
+    assert len(signals) == 1
+    assert signals[0].action == SignalAction.BUY  # 高權重策略贏
+
+def test_invalid_merge_algorithm():
+    &quot;&quot;&quot;測試無效的合併算法&quot;&quot;&quot;
+    with pytest.raises(ValueError, match=&quot;Invalid merge algorithm&quot;):
+        CompositeStrategy([], merge_algorithm='invalid')
+
+def test_empty_strategies():
+    &quot;&quot;&quot;測試空策略列表&quot;&quot;&quot;
+    with pytest.raises(ValueError, match=&quot;At least one strategy required&quot;):
+        CompositeStrategy([])
+
+def test_mismatched_weights():
+    &quot;&quot;&quot;測試權重數量不匹配&quot;&quot;&quot;
+    class MockStrategy:
+        name = &quot;mock&quot;
+        def generate_signals(self, context, symbols):
+            return []
+
+    with pytest.raises(ValueError, match=&quot;Number of weights&quot;):
+        CompositeStrategy(
+            [MockStrategy(), MockStrategy()],
+            weights=[1.0]  # 只有 1 個權重
+        )
+</code></pre>
+<h4 id="32-1">任務 3.2: 性能優化實踐 (1 週)<a class="headerlink" href="#32-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 識別並解決性能瓶頸</p>
+<p><strong>向量化優化示例</strong>:</p>
+<pre><code class="language-python"># backend/optimization/vectorized_operations.py
+import pandas as pd
+import numpy as np
+from typing import List, Dict
+
+class VectorizedIndicatorCalculator:
+    &quot;&quot;&quot;向量化指標計算器&quot;&quot;&quot;
+
+    @staticmethod
+    def calculate_rsi_vectorized(
+        prices: pd.DataFrame,
+        period: int = 14
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        向量化計算多個標的的 RSI
+
+        Args:
+            prices: DataFrame (日期為索引，標的為列)
+            period: RSI 週期
+
+        Returns:
+            RSI 值 DataFrame
+        &quot;&quot;&quot;
+        delta = prices.diff()
+
+        gains = delta.where(delta &gt; 0, 0)
+        losses = -delta.where(delta &lt; 0, 0)
+
+        avg_gains = gains.rolling(window=period).mean()
+        avg_losses = losses.rolling(window=period).mean()
+
+        rs = avg_gains / avg_losses.replace(0, np.nan)
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+
+    @staticmethod
+    def calculate_macd_vectorized(
+        prices: pd.DataFrame,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9
+    ) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+        &quot;&quot;&quot;
+        向量化計算 MACD
+
+        Returns:
+            (macd_line, signal_line)
+        &quot;&quot;&quot;
+        ema_fast = prices.ewm(span=fast, adjust=False).mean()
+        ema_slow = prices.ewm(span=slow, adjust=False).mean()
+
+        macd_line = ema_fast - ema_slow
+        signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+
+        return macd_line, signal_line
+
+    @staticmethod
+    def calculate_multiple_indicators_batch(
+        prices: pd.DataFrame,
+        indicators: List[Dict[str, Any]]
+    ) -&gt; Dict[str, pd.DataFrame]:
+        &quot;&quot;&quot;
+        批量計算多個指標
+
+        Args:
+            prices: 價格數據
+            indicators: 指標配置列表
+                [{&quot;type&quot;: &quot;rsi&quot;, &quot;params&quot;: {&quot;period&quot;: 14}}, ...]
+
+        Returns:
+            指標結果字典
+        &quot;&quot;&quot;
+        results = {}
+
+        for indicator_config in indicators:
+            indicator_type = indicator_config[&quot;type&quot;]
+            params = indicator_config.get(&quot;params&quot;, {})
+
+            if indicator_type == &quot;rsi&quot;:
+                results[&quot;rsi&quot;] = VectorizedIndicatorCalculator.calculate_rsi_vectorized(
+                    prices, **params
+                )
+            elif indicator_type == &quot;macd&quot;:
+                macd, signal = VectorizedIndicatorCalculator.calculate_macd_vectorized(
+                    prices, **params
+                )
+                results[&quot;macd&quot;] = macd
+                results[&quot;macd_signal&quot;] = signal
+
+        return results
+
+# 性能測試
+# backend/tests/test_performance.py
+import pytest
+import pandas as pd
+import numpy as np
+import time
+from backend.optimization.vectorized_operations import VectorizedIndicatorCalculator
+
+@pytest.fixture
+def large_price_data():
+    &quot;&quot;&quot;生成大量價格數據用於性能測試&quot;&quot;&quot;
+    np.random.seed(42)
+    dates = pd.date_range('2020-01-01', '2023-12-31', freq='D')
+    symbols = [f'STOCK{i}' for i in range(100)]
+
+    # 生成隨機游走價格
+    prices = pd.DataFrame(
+        np.random.randn(len(dates), len(symbols)).cumsum() + 100,
+        index=dates,
+        columns=symbols
+    )
+
+    return prices
+
+def test_rsi_calculation_performance(large_price_data):
+    &quot;&quot;&quot;測試 RSI 計算性能&quot;&quot;&quot;
+    start_time = time.time()
+
+    rsi = VectorizedIndicatorCalculator.calculate_rsi_vectorized(
+        large_price_data,
+        period=14
+    )
+
+    elapsed_time = time.time() - start_time
+
+    # 驗證
+    assert rsi.shape == large_price_data.shape
+    assert elapsed_time &lt; 1.0  # 應該在 1 秒內完成
+
+    print(f&quot;RSI 計算耗時: {elapsed_time:.3f} 秒&quot;)
+
+def test_batch_indicator_performance(large_price_data):
+    &quot;&quot;&quot;測試批量指標計算性能&quot;&quot;&quot;
+    indicators = [
+        {&quot;type&quot;: &quot;rsi&quot;, &quot;params&quot;: {&quot;period&quot;: 14}},
+        {&quot;type&quot;: &quot;rsi&quot;, &quot;params&quot;: {&quot;period&quot;: 21}},
+        {&quot;type&quot;: &quot;macd&quot;, &quot;params&quot;: {&quot;fast&quot;: 12, &quot;slow&quot;: 26, &quot;signal&quot;: 9}},
+    ]
+
+    start_time = time.time()
+
+    results = VectorizedIndicatorCalculator.calculate_multiple_indicators_batch(
+        large_price_data,
+        indicators
+    )
+
+    elapsed_time = time.time() - start_time
+
+    # 驗證
+    assert len(results) == 3  # rsi, macd, macd_signal
+    assert &quot;rsi&quot; in results
+    assert &quot;macd&quot; in results
+    assert elapsed_time &lt; 2.0  # 應該在 2 秒內完成
+
+    print(f&quot;批量指標計算耗時: {elapsed_time:.3f} 秒&quot;)
+</code></pre>
+<p><strong>並行處理示例</strong>:</p>
+<pre><code class="language-python"># backend/optimization/parallel_executor.py
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from typing import List, Callable, Any
+import pandas as pd
+from datetime import date
+
+class ParallelBacktestExecutor:
+    &quot;&quot;&quot;並行回測執行器&quot;&quot;&quot;
+
+    def __init__(self, max_workers: int = None):
+        self.max_workers = max_workers
+
+    def run_backtests_parallel(
+        self,
+        backtest_tasks: List[dict],
+        backtest_fn: Callable
+    ) -&gt; List[dict]:
+        &quot;&quot;&quot;
+        並行執行多個回測任務
+
+        Args:
+            backtest_tasks: 回測任務列表
+            backtest_fn: 回測函數
+
+        Returns:
+            回測結果列表
+        &quot;&quot;&quot;
+        results = []
+
+        with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
+            # 提交所有任務
+            future_to_task = {
+                executor.submit(backtest_fn, task): task
+                for task in backtest_tasks
+            }
+
+            # 收集結果
+            for future in as_completed(future_to_task):
+                task = future_to_task[future]
+                try:
+                    result = future.result()
+                    results.append({
+                        'task': task,
+                        'result': result,
+                        'status': 'success'
+                    })
+                except Exception as e:
+                    results.append({
+                        'task': task,
+                        'error': str(e),
+                        'status': 'failed'
+                    })
+
+        return results
+
+# 測試
+# backend/tests/test_parallel_executor.py
+import pytest
+from backend.optimization.parallel_executor import ParallelBacktestExecutor
+import time
+
+def dummy_backtest_fn(task):
+    &quot;&quot;&quot;模擬回測函數&quot;&quot;&quot;
+    time.sleep(0.1)  # 模擬計算時間
+    return {
+        'symbol': task['symbol'],
+        'total_return': 0.1
+    }
+
+def test_parallel_execution():
+    &quot;&quot;&quot;測試並行執行&quot;&quot;&quot;
+    # 準備任務
+    tasks = [{'symbol': f'STOCK{i}'} for i in range(10)]
+
+    executor = ParallelBacktestExecutor(max_workers=4)
+
+    start_time = time.time()
+    results = executor.run_backtests_parallel(tasks, dummy_backtest_fn)
+    elapsed_time = time.time() - start_time
+
+    # 10 個任務，每個 0.1 秒，4 個 worker
+    # 理論上應該在 0.3 秒左右完成
+    assert elapsed_time &lt; 0.5
+    assert len(results) == 10
+    assert all(r['status'] == 'success' for r in results)
+
+    print(f&quot;並行執行耗時: {elapsed_time:.3f} 秒&quot;)
+</code></pre>
+<h4 id="33-e2e-1">任務 3.3: 實現 E2E 測試 (1 週)<a class="headerlink" href="#33-e2e-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握 Cypress E2E 測試</p>
+<pre><code class="language-javascript">// frontend/cypress/e2e/strategy.cy.js
+describe('Strategy Management E2E', () =&gt; {
+  beforeEach(() =&gt; {
+    // 登錄
+    cy.login('admin', 'password');
+
+    // 訪問策略頁面
+    cy.visit('/strategies/builder');
+  });
+
+  it('should create a new RSI strategy', () =&gt; {
+    // 填寫策略表單
+    cy.get('[data-testid=&quot;strategy-name-input&quot;]').type('Test RSI Strategy');
+    cy.get('[data-testid=&quot;strategy-type-select&quot;]').select('rsi');
+
+    // 設置參數
+    cy.get('[data-testid=&quot;rsi-period-input&quot;]').clear().type('14');
+    cy.get('[data-testid=&quot;rsi-buy-threshold-input&quot;]').clear().type('30');
+    cy.get('[data-testid=&quot;rsi-sell-threshold-input&quot;]').clear().type('70');
+
+    // 提交
+    cy.get('[data-testid=&quot;submit-button&quot;]').click();
+
+    // 驗證成功消息
+    cy.contains('Strategy created successfully').should('be.visible');
+
+    // 驗證策略出現在列表中
+    cy.visit('/strategies/list');
+    cy.contains('Test RSI Strategy').should('be.visible');
+  });
+
+  it('should run a backtest', () =&gt; {
+    // 選擇現有策略
+    cy.get('[data-testid=&quot;strategy-card&quot;]').first().click();
+
+    // 設置回測參數
+    cy.get('[data-testid=&quot;start-date-input&quot;]').type('2024-01-01');
+    cy.get('[data-testid=&quot;end-date-input&quot;]').type('2024-12-31');
+    cy.get('[data-testid=&quot;initial-capital-input&quot;]').clear().type('100000');
+
+    // 運行回測
+    cy.get('[data-testid=&quot;run-backtest-button&quot;]').click();
+
+    // 等待回測完成
+    cy.get('[data-testid=&quot;backtest-status&quot;]', { timeout: 30000 }).should(
+      'contain',
+      'completed'
+    );
+
+    // 驗證結果
+    cy.get('[data-testid=&quot;total-return&quot;]').should('be.visible');
+    cy.get('[data-testid=&quot;sharpe-ratio&quot;]').should('be.visible');
+  });
+
+  it('should delete a strategy', () =&gt; {
+    // 找到策略
+    cy.get('[data-testid=&quot;strategy-card&quot;]').first().within(() =&gt; {
+      cy.get('[data-testid=&quot;delete-button&quot;]').click();
+    });
+
+    // 確認刪除
+    cy.get('[data-testid=&quot;confirm-delete-button&quot;]').click();
+
+    // 驗證成功消息
+    cy.contains('Strategy deleted successfully').should('be.visible');
+
+    // 驗證策略已刪除
+    cy.get('[data-testid=&quot;strategy-card&quot;]').should('not.exist');
+  });
+});
+
+// Page Object 模式
+// frontend/cypress/support/pages/StrategyPage.js
+export class StrategyPage {
+  visit() {
+    cy.visit('/strategies/builder');
+  }
+
+  fillStrategyName(name) {
+    cy.get('[data-testid=&quot;strategy-name-input&quot;]').type(name);
+  }
+
+  selectStrategyType(type) {
+    cy.get('[data-testid=&quot;strategy-type-select&quot;]').select(type);
+  }
+
+  setRSIParams(period, buyThreshold, sellThreshold) {
+    cy.get('[data-testid=&quot;rsi-period-input&quot;]').clear().type(period);
+    cy.get('[data-testid=&quot;rsi-buy-threshold-input&quot;]').clear().type(buyThreshold);
+    cy.get('[data-testid=&quot;rsi-sell-threshold-input&quot;]').clear().type(sellThreshold);
+  }
+
+  submit() {
+    cy.get('[data-testid=&quot;submit-button&quot;]').click();
+  }
+
+  assertSuccessMessage() {
+    cy.contains('Strategy created successfully').should('be.visible');
+  }
+}
+
+// 使用 Page Object
+// frontend/cypress/e2e/strategy-pom.cy.js
+import { StrategyPage } from '../support/pages/StrategyPage';
+
+describe('Strategy Page (POM)', () =&gt; {
+  const strategyPage = new StrategyPage();
+
+  beforeEach(() =&gt; {
+    cy.login('admin', 'password');
+  });
+
+  it('should create strategy using POM', () =&gt; {
+    strategyPage.visit();
+    strategyPage.fillStrategyName('Test Strategy');
+    strategyPage.selectStrategyType('rsi');
+    strategyPage.setRSIParams(14, 30, 70);
+    strategyPage.submit();
+    strategyPage.assertSuccessMessage();
+  });
+});
+</code></pre>
+<h3 id="44">4.4 預估學習時間<a class="headerlink" href="#44" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>複合策略設計</td>
+<td>1.5 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>性能優化技術</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>架構設計思維</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>E2E 測試</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>技術指導能力</td>
+<td>持續</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 3.1-3.3)</td>
+<td>4 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>16-17 週</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="45">4.5 驗證標準<a class="headerlink" href="#45" title="連結到此標題">&para;</a></h3>
+<h4 id="_8">代碼質量驗證<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 複合策略有完整的單元測試</li>
+<li>[ ] 性能優化有基準測試</li>
+<li>[ ] E2E 測試覆蓋關鍵流程</li>
+<li>[ ] 測試覆蓋率 ≥ 90%</li>
+<li>[ ] 代碼審查通過（至少 2 次他人審查）</li>
+</ul>
+<h4 id="_9">功能驗證<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠設計和實現組合策略</li>
+<li>[ ] 能夠識別和優化性能瓶頸</li>
+<li>[ ] 能夠編寫 E2E 測試</li>
+<li>[ ] 能夠進行技術選型決策</li>
+<li>[ ] 能夠指導初級和中級開發者</li>
+</ul>
+<h4 id="_10">知識驗證<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠解釋多種信號合併算法的優缺點</li>
+<li>[ ] 能夠分析性能瓶頸並提供優化方案</li>
+<li>[ ] 能夠編寫 ADR（架構決策記錄）</li>
+<li>[ ] 能夠進行代碼審查並提供建設性反饋</li>
+<li>[ ] 能夠設計測試策略</li>
+</ul>
+<p><strong>通過標準</strong>: 所有檢查項目必須完成，並且通過代碼審查</p>
+<hr />
+<h2 id="5-4-12">5. 階段 4: 高級架構師 (12+ 個月)<a class="headerlink" href="#5-4-12" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 核心學習目標<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>掌握系統架構設計</strong>：能夠設計可擴展、高可用的系統架構</li>
+<li><strong>建立技術領導力</strong>：能夠制定技術路線圖和團隊技術規範</li>
+<li><strong>跨領域知識整合</strong>：能夠整合金融、數據科學、軟件工程知識</li>
+<li><strong>技術債管理</strong>：能夠識別、量化和管理技術債</li>
+</ol>
+<h3 id="52">5.2 必備技能和能力<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="p3">系統架構設計 (P3)<a class="headerlink" href="#p3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構</strong></td>
+<td>服務拆分、服務發現、API 網關</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>分層架構設計</strong></td>
+<td>清晰的關注點分離、模塊化設計</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>數據架構</strong></td>
+<td>數據流設計、ETL 管道、數據湖</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>高可用設計</strong></td>
+<td>冗餘、故障轉移、災難恢復</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>可擴展性設計</strong></td>
+<td>水平擴展、負載均衡、緩存策略</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p3_1">技術領導力 (P3)<a class="headerlink" href="#p3_1" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術路線圖</strong></td>
+<td>短期和長期技術規劃</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>技術決策</strong></td>
+<td>基於證據的技術選型、ADR 記錄</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>團隊技術規範</strong></td>
+<td>代碼規範、Git 流程、CI/CD</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>技術溝通</strong></td>
+<td>清晰表達技術決策、建立共識</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>人才培養</strong></td>
+<td>指導初級開發者、制定培訓計劃</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p3_2">跨領域整合 (P3)<a class="headerlink" href="#p3_2" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>金融領域知識</strong></td>
+<td>量化交易概念、風險管理、績效指標</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>數據科學</strong></td>
+<td>統計學、機器學習基礎、數據分析</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>前後端整合</strong></td>
+<td>API 設計、狀態管理、性能優化</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>DevOps</strong></td>
+<td>CI/CD、容器化、雲部署</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="p3_3">技術債管理 (P3)<a class="headerlink" href="#p3_3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>內容</th>
+<th>掌握程度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術債識別</strong></td>
+<td>代碼異味、架構問題、安全漏洞</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>技術債量化</strong></td>
+<td>優先級排序、成本估算</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>重構策略</strong></td>
+<td>漸進式重構、大爆炸重構</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>預防機制</strong></td>
+<td>代碼審查、自動化檢查、測試覆蓋</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 可執行的實踐任務<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="41-2">任務 4.1: 設計微服務架構 (2 週)<a class="headerlink" href="#41-2" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 掌握微服務拆分和 API 設計</p>
+<pre><code class="language-markdown"># ADR-001: 微服務架構拆分
+
+## 狀態
+已採用
+
+## 上下文
+當前系統是單體應用，隨著功能增長，維護複雜度增加。需要考慮微服務拆分。
+
+## 決策
+採用漸進式微服務拆分策略：
+
+### 階段 1: 策略服務拆分
+- 獨立部署策略引擎
+- 提供 gRPC API
+- 獨立數據庫（DuckDB）
+
+### 階段 2: 市場數據服務拆分
+- 獨立部署市場數據服務
+- 提供 REST API 和 WebSocket
+- 使用 Redis 緩存
+
+### 階段 3: 回測服務拆分
+- 獨立部署回測引擎
+- 支持異步任務隊列
+- 使用 Celery + Redis
+
+### 階段 4: 分析服務拆分
+- 獨立部署績效分析服務
+- 提供報表 API
+
+## API 網關
+使用 FastAPI + Nginx 作為 API 網關：
+- 路由轉發
+- 認證授權
+- 速率限制
+- 請求日誌
+
+## 服務間通信
+- 同步通信：gRPC（高性能）
+- 異步通信：RabbitMQ / Redis Pub/Sub
+
+## 後果
+**正面：**
+- 獨立部署和擴展
+- 故障隔離
+- 技術棧靈活
+
+**負面：**
+- 增加運維複雜度
+- 分布式事務管理
+- 服務間調用延遲
+
+## 參考
+- https://microservices.io/patterns/microservices.html
+</code></pre>
+<p><strong>API 設計示例</strong>:</p>
+<pre><code class="language-python"># strategy_service/proto/strategy.proto
+syntax = &quot;proto3&quot;;
+
+package strategy;
+
+service StrategyService {
+  rpc CreateStrategy(CreateStrategyRequest) returns (StrategyResponse);
+  rpc GetStrategy(GetStrategyRequest) returns (StrategyResponse);
+  rpc ListStrategies(ListStrategiesRequest) returns (ListStrategiesResponse);
+  rpc DeleteStrategy(DeleteStrategyRequest) returns (DeleteStrategyResponse);
+}
+
+message CreateStrategyRequest {
+  string name = 1;
+  string type = 2;
+  map&lt;string, string&gt; parameters = 3;
+  map&lt;string, string&gt; risk_limits = 4;
+}
+
+message StrategyResponse {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  string status = 4;
+  map&lt;string, string&gt; parameters = 5;
+  map&lt;string, string&gt; risk_limits = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message GetStrategyRequest {
+  string id = 1;
+}
+
+message ListStrategiesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message ListStrategiesResponse {
+  repeated StrategyResponse strategies = 1;
+  int32 total = 2;
+}
+
+message DeleteStrategyRequest {
+  string id = 1;
+}
+
+message DeleteStrategyResponse {
+  bool success = 1;
+}
+</code></pre>
+<h4 id="42-1">任務 4.2: 技術債管理實踐 (1 週)<a class="headerlink" href="#42-1" title="連結到此標題">&para;</a></h4>
+<p><strong>目標</strong>: 建立技術債識別和管理流程</p>
+<pre><code class="language-markdown"># 技術債清單
+
+## 高優先級（P0）- 必須償還
+| ID | 描述 | 類型 | 預估工作量 | 影響 |
+|----|------|------|-----------|------|
+| TD-001 | `get_futures_spec()` 棄用警告 | 重構 | 2 天 | 開發者體驗 |
+| TD-002 | 測試覆蓋率 60% → 80% | 測試 | 2 週 | 代碼質量 |
+| TD-003 | CI/CD 手動部署自動化 | DevOps | 1 週 | 效率 |
+
+## 中優先級（P1）- 應該償還
+| ID | 描述 | 類型 | 預估工作量 | 影響 |
+|----|------|------|-----------|------|
+| TD-004 | 統一錯誤處理機制 | 重構 | 3 天 | 用戶體驗 |
+| TD-005 | API 版本化 | 架構 | 1 週 | 向後兼容 |
+| TD-006 | 前端性能優化 | 性能 | 1 週 | 用戶體驗 |
+
+## 低優先級（P2）- 可以償還
+| ID | 描述 | 類型 | 預估工作量 | 影響 |
+|----|------|------|-----------|------|
+| TD-007 | 更新過時依賴 | 維護 | 1 週 | 安全性 |
+| TD-008 | 改進文檔 | 文檔 | 2 週 | 開發者體驗 |
+</code></pre>
+<p><strong>重構計劃模板</strong>:</p>
+<pre><code class="language-markdown"># 重構計劃: TD-001 get_futures_spec() 棄用
+
+## 當前狀況
+```python
+# 舊 API (已棄用)
+def get_futures_spec():
+    ...
+</code></pre>
+<h2 id="_11">重構目標<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h2>
+<p>統一使用 <code>get_spec_for_symbol(symbol_type, symbol_name)</code></p>
+<h2 id="_12">重構步驟<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h2>
+<h3 id="1-api-day-1">階段 1: 新 API 實現（Day 1）<a class="headerlink" href="#1-api-day-1" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 實現 <code>get_spec_for_symbol()</code></li>
+<li>[ ] 編寫單元測試</li>
+<li>[ ] 添加文檔</li>
+</ul>
+<h3 id="2-day-2">階段 2: 遷移（Day 2）<a class="headerlink" href="#2-day-2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 搜索所有 <code>get_futures_spec()</code> 調用</li>
+<li>[ ] 逐一替換</li>
+<li>[ ] 運行測試驗證</li>
+</ul>
+<h3 id="3-apiday-2">階段 3: 棄用舊 API（Day 2）<a class="headerlink" href="#3-apiday-2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 添加棄用警告</li>
+<li>[ ] 更新文檔</li>
+</ul>
+<h3 id="4">階段 4: 清理（下個版本）<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 移除舊 API</li>
+<li>[ ] 清理測試</li>
+</ul>
+<h2 id="_13">驗證標準<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>所有測試通過</li>
+<li>沒有 <code>get_futures_spec()</code> 調用</li>
+<li>向後兼容（至少一個版本）</li>
+</ul>
+<h2 id="_14">預估工作量<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<p>2 天</p>
+<h2 id="_15">風險<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>低：影響範圍小，有測試覆蓋</li>
+</ul>
+<pre><code>
+#### 任務 4.3: 技術路線圖制定 (1 週)
+
+**目標**: 制定 6-12 個月技術發展路線圖
+
+```markdown
+# 技術路線圖: 2026 H2
+
+## Q3 2026 (7-9 月)
+
+### 7 月
+- [ ] 微服務拆分：策略服務
+- [ ] gRPC API 實現
+- [ ] CI/CD 自動化
+
+### 8 月
+- [ ] 微服務拆分：市場數據服務
+- [ ] WebSocket 實時數據推送
+- [ ] Docker 容器化
+
+### 9 月
+- [ ] 微服務拆分：回測服務
+- [ ] Celery 任務隊列
+- [ ] Redis 緩存優化
+
+## Q4 2026 (10-12 月)
+
+### 10 月
+- [ ] 微服務拆分：分析服務
+- [ ] API 網關實現
+- [ ] 監控和告警（Prometheus + Grafana）
+
+### 11 月
+- [ ] 高級可視化（Three.js）
+- [ ] 前端性能優化
+- [ ] 響應式設計改進
+
+### 12 月
+- [ ] 機器學習模型集成
+- [ ] Kubernetes 部署
+- [ ] 安全審計和加固
+
+## 2027 Q1 (1-3 月)
+
+### 1 月
+- [ ] 實時數據流處理（Kafka）
+- [ ] 高頻交易支持
+
+### 2 月
+- [ ] 移動端應用（React Native）
+- [ ] API SDK 開發
+
+### 3 月
+- [ ] 社區建設
+- [ ] 開源計劃
+
+## 成功指標
+- 微服務部署時間: &lt; 10 分鐘
+- API 響應時間: P95 &lt; 200ms
+- 系統可用性: 99.9%
+- 測試覆蓋率: 90%
+
+## 風險
+- 微服務複雜度增加
+- 運維成本上升
+- 團隊技能差距
+
+## 緩解措施
+- 漸進式拆分
+- 自動化工具
+- 團隊培訓
+</code></pre>
+<h3 id="54">5.4 預估學習時間<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>任務類別</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>系統架構設計</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>微服務架構</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>技術領導力</td>
+<td>持續</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>技術債管理</td>
+<td>1 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>實踐項目 (任務 4.1-4.3)</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>持續進行</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="55">5.5 驗證標準<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<h4 id="_16">代碼質量驗證<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 架構設計文檔完整（ADR、架構圖）</li>
+<li>[ ] 技術債管理流程建立</li>
+<li>[ ] 測試覆蓋率 ≥ 95%</li>
+<li>[ ] 代碼審查通過（至少 3 次他人審查）</li>
+</ul>
+<h4 id="_17">功能驗證<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠設計微服務架構</li>
+<li>[ ] 能夠制定技術路線圖</li>
+<li>[ ] 能夠識別和管理技術債</li>
+<li>[ ] 能夠進行技術選型決策</li>
+<li>[ ] 能夠領導技術團隊</li>
+</ul>
+<h4 id="_18">知識驗證<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 能夠解釋微服務與單體應用的權衡</li>
+<li>[ ] 能夠編寫 ADR</li>
+<li>[ ] 能夠制定技術規範</li>
+<li>[ ] 能夠進行跨領域知識整合</li>
+<li>[ ] 能夠指導各級開發者</li>
+</ul>
+<p><strong>通過標準</strong>: 所有檢查項目必須完成，並且通過高級架構師審查</p>
+<hr />
+<h2 id="6">6. 技能評估矩陣<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 技能清單評估表<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>階段 1</th>
+<th>階段 2</th>
+<th>階段 3</th>
+<th>階段 4</th>
+<th>備註</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>後端開發</strong></td>
+<td>Python 基礎</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>FastAPI</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>Pydantic 驗證</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>DuckDB</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>異步編程</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>gRPC</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>前端開發</strong></td>
+<td>React 19 基礎</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>Zustand</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>React Query</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>Bootstrap 5</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>Three.js</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>回測引擎</strong></td>
+<td>VectorBT</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>Backtrader</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>性能優化</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>參數掃描</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>策略引擎</strong></td>
+<td>IStrategy 接口</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>策略工廠</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>組合策略</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>信號合併</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>測試</strong></td>
+<td>pytest 單元測試</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>vitest 單元測試</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>集成測試</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>E2E 測試</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>測試策略</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>架構</strong></td>
+<td>分層架構</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>微服務架構</td>
+<td>❌</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>P3</td>
+</tr>
+<tr>
+<td></td>
+<td>API 設計</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>數據架構</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>技術選型</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>DevOps</strong></td>
+<td>Git 規範</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P0</td>
+</tr>
+<tr>
+<td></td>
+<td>CI/CD</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>Docker</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>Kubernetes</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>領導力</strong></td>
+<td>代碼審查</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>技術指導</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>技術路線圖</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>P3</td>
+</tr>
+<tr>
+<td></td>
+<td>技術規範</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>跨領域</strong></td>
+<td>金融知識</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>P1</td>
+</tr>
+<tr>
+<td></td>
+<td>數據科學</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+<tr>
+<td></td>
+<td>數據可視化</td>
+<td>❌</td>
+<td>⚠️</td>
+<td>✅</td>
+<td>✅</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>圖例:</strong>
+- ✅ 已掌握
+- ⚠️ 部分掌握/進行中
+- ❌ 未掌握</p>
+<h3 id="62">6.2 階段評估標準<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<h4 id="1-0-3">階段 1: 初級開發者 (0-3 個月)<a class="headerlink" href="#1-0-3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] P0 技能全部掌握</li>
+<li>[ ] 測試覆蓋率 ≥ 80%</li>
+<li>[ ] 所有提交遵循 Conventional Commits</li>
+<li>[ ] 能夠獨立完成 CRUD 功能</li>
+</ul>
+<h4 id="2-3-6">階段 2: 中級開發者 (3-6 個月)<a class="headerlink" href="#2-3-6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] P0 + P1 技能掌握</li>
+<li>[ ] 測試覆蓋率 ≥ 85%</li>
+<li>[ ] 能夠使用回測引擎</li>
+<li>[ ] 能夠進行代碼審查</li>
+</ul>
+<h4 id="3-6-12">階段 3: 高級開發者 (6-12 個月)<a class="headerlink" href="#3-6-12" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] P0 + P1 + P2 技能掌握</li>
+<li>[ ] 測試覆蓋率 ≥ 90%</li>
+<li>[ ] 能夠設計複合策略</li>
+<li>[ ] 能夠進行性能優化</li>
+<li>[ ] 能夠指導初級/中級開發者</li>
+</ul>
+<h4 id="4-12">階段 4: 高級架構師 (12+ 個月)<a class="headerlink" href="#4-12" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] P0-P3 技能掌握</li>
+<li>[ ] 測試覆蓋率 ≥ 95%</li>
+<li>[ ] 能夠設計微服務架構</li>
+<li>[ ] 能夠制定技術路線圖</li>
+<li>[ ] 能夠領導技術團隊</li>
+</ul>
+<hr />
+<h2 id="7">7. 學習資源推薦<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71-pythonfastapi">7.1 Python/FastAPI<a class="headerlink" href="#71-pythonfastapi" title="連結到此標題">&para;</a></h3>
+<h4 id="_19">官方文檔<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><a href="https://fastapi.tiangolo.com/">FastAPI 官方文檔</a></li>
+<li><a href="https://docs.pydantic.dev/">Pydantic 文檔</a></li>
+<li><a href="https://duckdb.org/docs/">DuckDB 文檔</a></li>
+</ul>
+<h4 id="_20">書籍<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《FastAPI Web 開發實戰》</li>
+<li>《Python 並發編程實戰》</li>
+</ul>
+<h4 id="_21">在線課程<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>FastAPI 官方教程</li>
+<li>Pydantic 數據驗證課程</li>
+</ul>
+<h3 id="72-react-19">7.2 React 19<a class="headerlink" href="#72-react-19" title="連結到此標題">&para;</a></h3>
+<h4 id="_22">官方文檔<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><a href="https://react.dev/">React 19 官方文檔</a></li>
+<li><a href="https://docs.pmnd.rs/zustand/getting-started/introduction">Zustand 文檔</a></li>
+<li><a href="https://tanstack.com/query/latest">React Query 文檔</a></li>
+</ul>
+<h4 id="_23">書籍<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《React 設計模式與最佳實踐》</li>
+<li>《React Hooks 實戰》</li>
+</ul>
+<h4 id="_24">在線課程<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>React 官方教程</li>
+<li>TanStack Query 課程</li>
+</ul>
+<h3 id="73">7.3 向量化計算與回測<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<h4 id="_25">官方文檔<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><a href="https://vectorbt.dev/">VectorBT 文檔</a></li>
+<li><a href="https://www.backtrader.com/docu/">Backtrader 文檔</a></li>
+<li><a href="https://pandas.pydata.org/docs/">pandas 文檔</a></li>
+<li><a href="https://numpy.org/doc/">NumPy 文檔</a></li>
+</ul>
+<h4 id="_26">書籍<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《Python 金融數據分析》</li>
+<li>《量化交易：如何建立自己的算法交易事業》</li>
+</ul>
+<h3 id="74">7.4 測試<a class="headerlink" href="#74" title="連結到此標題">&para;</a></h3>
+<h4 id="_27">官方文檔<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><a href="https://docs.pytest.org/">pytest 文檔</a></li>
+<li><a href="https://vitest.dev/">Vitest 文檔</a></li>
+<li><a href="https://docs.cypress.io/">Cypress 文檔</a></li>
+</ul>
+<h4 id="_28">書籍<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《測試驅動開發》</li>
+<li>《Effective Unit Testing》</li>
+</ul>
+<h3 id="75">7.5 架構設計<a class="headerlink" href="#75" title="連結到此標題">&para;</a></h3>
+<h4 id="_29">書籍<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《軟件架構實踐》</li>
+<li>《領域驅動設計》</li>
+<li>《微服務設計》</li>
+</ul>
+<h4 id="_30">資源<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><a href="https://martinfowler.com/">Martin Fowler Blog</a></li>
+<li><a href="https://microservices.io/">Microservices Patterns</a></li>
+</ul>
+<h3 id="76">7.6 量化交易<a class="headerlink" href="#76" title="連結到此標題">&para;</a></h3>
+<h4 id="_31">書籍<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>《量化投資策略：一種技術方法》</li>
+<li>《算法交易：獲勝策略及其實施》</li>
+<li>《交易系統和方法》</li>
+</ul>
+<h4 id="_32">資源<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>Quantopian（已停運，但資源可參考）</li>
+<li>QuantConnect</li>
+</ul>
+<hr />
+<h2 id="8">8. 實踐項目清單<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81-1">8.1 階段 1 項目 (初級)<a class="headerlink" href="#81-1" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目名稱</th>
+<th>說明</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CRUD API 實現</strong></td>
+<td>完整的項目管理 API</td>
+<td>1 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>技術指標計算</strong></td>
+<td>RSI、MACD 指標實現</td>
+<td>1 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>前端頁面開發</strong></td>
+<td>React 組件和頁面</td>
+<td>2 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>測試驅動開發</strong></td>
+<td>TDD 實踐</td>
+<td>1 週</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>Git 提交規範</strong></td>
+<td>Conventional Commits</td>
+<td>持續</td>
+<td>P0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-2">8.2 階段 2 項目 (中級)<a class="headerlink" href="#82-2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目名稱</th>
+<th>說明</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RSI 策略實現</strong></td>
+<td>完整的 IStrategy 實現</td>
+<td>2 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>VectorBT 回測</strong></td>
+<td>向量化回測引擎</td>
+<td>2 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>策略工廠</strong></td>
+<td>策略註冊和創建</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>React Query 集成</strong></td>
+<td>服務端狀態管理</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Zustand Store</strong></td>
+<td>全局狀態管理</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>集成測試</strong></td>
+<td>API 集成測試</td>
+<td>1 週</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-3">8.3 階段 3 項目 (高級)<a class="headerlink" href="#83-3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目名稱</th>
+<th>說明</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>組合策略</strong></td>
+<td>多策略組合和信號合併</td>
+<td>2 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>性能優化</strong></td>
+<td>向量化、並行處理</td>
+<td>2 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>E2E 測試</strong></td>
+<td>Cypress 端到端測試</td>
+<td>2 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>技術選型分析</strong></td>
+<td>ADR 記錄</td>
+<td>1 週</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>代碼審查指導</strong></td>
+<td>審查他人代碼</td>
+<td>持續</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="84-4">8.4 階段 4 項目 (架構師)<a class="headerlink" href="#84-4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目名稱</th>
+<th>說明</th>
+<th>預估時間</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構</strong></td>
+<td>策略服務拆分</td>
+<td>4 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>API 網關</strong></td>
+<td>統一 API 入口</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>技術債管理</strong></td>
+<td>債務清單和重構計劃</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>技術路線圖</strong></td>
+<td>6-12 個月規劃</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>CI/CD 自動化</strong></td>
+<td>GitHub Actions</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>監控和告警</strong></td>
+<td>Prometheus + Grafana</td>
+<td>2 週</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="85">8.5 項目依賴關係<a class="headerlink" href="#85" title="連結到此標題">&para;</a></h3>
+<pre><code>階段 1 項目 (基礎)
+   ↓
+階段 2 項目 (進階)
+   ↓
+階段 3 項目 (高級)
+   ↓
+階段 4 項目 (架構)
+
+每個階段的項目應該按順序完成
+</code></pre>
+<hr />
+<h2 id="9">9. 總結<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="91">9.1 實施路徑總覽<a class="headerlink" href="#91" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>時間範圍</th>
+<th>核心重點</th>
+<th>預估時間</th>
+<th>驗證標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>初級開發者</strong></td>
+<td>0-3 個月</td>
+<td>基礎技能掌握</td>
+<td>8-9 週</td>
+<td>測試覆蓋率 ≥ 80%</td>
+</tr>
+<tr>
+<td><strong>中級開發者</strong></td>
+<td>3-6 個月</td>
+<td>回測引擎與狀態管理</td>
+<td>10-11 週</td>
+<td>測試覆蓋率 ≥ 85%</td>
+</tr>
+<tr>
+<td><strong>高級開發者</strong></td>
+<td>6-12 個月</td>
+<td>複合策略與性能優化</td>
+<td>16-17 週</td>
+<td>測試覆蓋率 ≥ 90%</td>
+</tr>
+<tr>
+<td><strong>高級架構師</strong></td>
+<td>12+ 個月</td>
+<td>系統架構與技術領導力</td>
+<td>持續</td>
+<td>測試覆蓋率 ≥ 95%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92">9.2 關鍵成功因素<a class="headerlink" href="#92" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>漸進式學習</strong>：按階段逐步提升，不要跳躍</li>
+<li><strong>測試驅動</strong>：始終保持高測試覆蓋率</li>
+<li><strong>實踐優先</strong>：通過實際項目和代碼學習</li>
+<li><strong>持續反饋</strong>：定期進行代碼審查和能力評估</li>
+<li><strong>知識整合</strong>：前後端、策略、數據庫知識逐步融合</li>
+</ol>
+<h3 id="93">9.3 風險與緩解<a class="headerlink" href="#93" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>影響</th>
+<th>概率</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>學習曲線過陡</td>
+<td>高</td>
+<td>中</td>
+<td>分解任務，提供詳細示例</td>
+</tr>
+<tr>
+<td>時間不足</td>
+<td>高</td>
+<td>高</td>
+<td>優先完成 P0/P1 技能</td>
+</tr>
+<tr>
+<td>實踐項目復雜度</td>
+<td>中</td>
+<td>中</td>
+<td>提供完整代碼示例</td>
+</tr>
+<tr>
+<td>團隊支持不足</td>
+<td>中</td>
+<td>低</td>
+<td>建立代碼審查機制</td>
+</tr>
+<tr>
+<td>技術變化快</td>
+<td>低</td>
+<td>中</td>
+<td>建立持續學習機制</td>
+</tr>
+</tbody>
+</table>
+<h3 id="94">9.4 後續行動<a class="headerlink" href="#94" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>立即開始</strong>: 從階段 1 的任務開始實施</li>
+<li><strong>定期評估</strong>: 每週檢查進度，每月進行能力評估</li>
+<li><strong>調整計劃</strong>: 根據實際進度和反饋調整計劃</li>
+<li><strong>記錄成果</strong>: 記錄學習成果和項目完成情況</li>
+<li><strong>持續改進</strong>: 根據經驗不斷優化學習路徑</li>
+</ol>
+<hr />
+<p><strong>文檔版本</strong>: 1.0
+<strong>最後更新</strong>: 2026-02-21
+<strong>聯繫方式</strong>: 如有問題或建議，請聯繫項目負責人</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

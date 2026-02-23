@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Architecture Knowledge Base for Programmer Sub-Agent - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Backend Architecture Knowledge Base for Programmer Sub-Agent</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="backend-architecture-knowledge-base-for-programmer-sub-agent">Backend Architecture Knowledge Base for Programmer Sub-Agent<a class="headerlink" href="#backend-architecture-knowledge-base-for-programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> a006a-1
+<strong>Source:</strong> a001-backend-architecture.md
+<strong>Agent:</strong> Charlie Analyst
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T02:49:00+08:00</p>
+<hr />
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="連結到此標題">&para;</a></h2>
+<p>Extracted comprehensive backend architecture knowledge from Dashboard system, covering API endpoints, service layers, data structures, code patterns, dependencies, and best practices. This knowledge base provides complete foundation for the Programmer Sub-Agent to understand and work with the backend system.</p>
+<p><strong>Key Findings:</strong>
+- Well-structured layered architecture with clear separation of concerns
+- Comprehensive API design with RESTful principles
+- Dual backtesting engines (Backtrader + VectorBT) for different use cases
+- Mature testing framework with multiple layers
+- Complete toolchain for monitoring, deployment, and maintenance</p>
+<hr />
+<h2 id="1-api-endpoints-knowledge-base">1. API Endpoints Knowledge Base<a class="headerlink" href="#1-api-endpoints-knowledge-base" title="連結到此標題">&para;</a></h2>
+<h3 id="11-strategy-management-endpoints">1.1 Strategy Management Endpoints<a class="headerlink" href="#11-strategy-management-endpoints" title="連結到此標題">&para;</a></h3>
+<h4 id="basic-strategy-operations">Basic Strategy Operations<a class="headerlink" href="#basic-strategy-operations" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies</code></td>
+<td>List strategies with pagination/filtering</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies</code></td>
+<td>Create new strategy</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>Get strategy details</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>Update strategy config</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}</code></td>
+<td>Delete strategy</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/strategies/{strategy_id}/status</code></td>
+<td>Toggle strategy status (active/inactive)</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Request Example - Create Strategy:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies
+{
+  &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+  &quot;description&quot;: &quot;雙均線交叉策略&quot;,
+  &quot;type&quot;: &quot;trend_following&quot;,
+  &quot;parameters&quot;: {
+    &quot;short_period&quot;: 5,
+    &quot;long_period&quot;: 20,
+    &quot;symbol&quot;: &quot;AAPL&quot;
+  },
+  &quot;risk_limits&quot;: {
+    &quot;max_position_size&quot;: 1000,
+    &quot;max_drawdown&quot;: 0.15
+  }
+}
+</code></pre>
+<p><strong>Response Format:</strong></p>
+<pre><code class="language-json">{
+  &quot;data&quot;: {
+    &quot;id&quot;: &quot;str_123456&quot;,
+    &quot;name&quot;: &quot;Moving Average Crossover&quot;,
+    &quot;type&quot;: &quot;trend_following&quot;,
+    &quot;status&quot;: &quot;active&quot;,
+    &quot;parameters&quot;: { ... },
+    &quot;risk_limits&quot;: { ... },
+    &quot;created_at&quot;: &quot;2026-02-20T15:30:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2026-02-20T15:30:00Z&quot;
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="backtest-endpoints">Backtest Endpoints<a class="headerlink" href="#backtest-endpoints" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest</code></td>
+<td>Submit backtest task</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>Get backtest result</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtests</code></td>
+<td>Query backtest history</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}</code></td>
+<td>Cancel/delete backtest</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/backtest/{backtest_id}/trades</code></td>
+<td>Get backtest trade records</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Request Example - Submit Backtest:</strong></p>
+<pre><code class="language-json">POST /api/v1/strategies/str_123456/backtest
+{
+  &quot;start_date&quot;: &quot;2025-01-01&quot;,
+  &quot;end_date&quot;: &quot;2025-12-31&quot;,
+  &quot;initial_capital&quot;: 100000,
+  &quot;commission&quot;: 0.001,
+  &quot;slippage&quot;: 0.0001,
+  &quot;data_source&quot;: &quot;yahoo_finance&quot;
+}
+</code></pre>
+<p><strong>Backtest Status Enum:</strong>
+- <code>pending</code>: Waiting for execution
+- <code>running</code>: Executing
+- <code>completed</code>: Completed
+- <code>failed</code>: Failed
+- <code>cancelled</code>: Cancelled</p>
+<h4 id="optimization-endpoints">Optimization Endpoints<a class="headerlink" href="#optimization-endpoints" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize</code></td>
+<td>Start parameter optimization</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize/{opt_id}</code></td>
+<td>Get optimization result</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimize/{opt_id}/progress</code></td>
+<td>Query optimization progress</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/optimizations</code></td>
+<td>Optimization history list</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="live-execution-endpoints">Live Execution Endpoints<a class="headerlink" href="#live-execution-endpoints" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/execute/start</code></td>
+<td>Start live execution</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/strategies/{strategy_id}/execute/stop</code></td>
+<td>Stop live execution</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/strategies/{strategy_id}/execution</code></td>
+<td>Query execution status</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/strategies/{strategy_id}/execution/params</code></td>
+<td>Adjust execution parameters</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-analysis-endpoints-apiv1analysis">1.2 Analysis Endpoints (<code>/api/v1/analysis</code>)<a class="headerlink" href="#12-analysis-endpoints-apiv1analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="performance-analysis">Performance Analysis<a class="headerlink" href="#performance-analysis" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}</code></td>
+<td>Strategy performance overview</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/metrics</code></td>
+<td>Detailed performance metrics</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/returns</code></td>
+<td>Return time series</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/drawdown</code></td>
+<td>Drawdown analysis</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/performance/{strategy_id}/equity</code></td>
+<td>Equity curve</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="risk-analysis">Risk Analysis<a class="headerlink" href="#risk-analysis" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}</code></td>
+<td>Risk overview</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/var</code></td>
+<td>VaR calculation</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/exposure</code></td>
+<td>Risk exposure</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/analysis/risk/{strategy_id}/stress-test</code></td>
+<td>Stress testing</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="strategy-comparison">Strategy Comparison<a class="headerlink" href="#strategy-comparison" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/analysis/compare</code></td>
+<td>Multi-strategy comparison</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/compare/{comparison_id}</code></td>
+<td>Get comparison result</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/analysis/benchmark/{strategy_id}</code></td>
+<td>Benchmark comparison</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-market-data-endpoints-apiv1market">1.3 Market Data Endpoints (<code>/api/v1/market</code>)<a class="headerlink" href="#13-market-data-endpoints-apiv1market" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/symbols</code></td>
+<td>Tradable symbols list</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quote/{symbol}</code></td>
+<td>Real-time quote</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/quotes</code></td>
+<td>Batch quotes</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/historical/{symbol}</code></td>
+<td>Historical data</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/ohlc/{symbol}</code></td>
+<td>K-line data</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/overview</code></td>
+<td>Market overview</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/market/calendar</code></td>
+<td>Trading calendar</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-system-endpoints-apiv1system">1.4 System Endpoints (<code>/api/v1/system</code>)<a class="headerlink" href="#14-system-endpoints-apiv1system" title="連結到此標題">&para;</a></h3>
+<h4 id="configuration-management">Configuration Management<a class="headerlink" href="#configuration-management" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/config</code></td>
+<td>Get system configuration</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/system/config</code></td>
+<td>Update system configuration</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/config/{key}</code></td>
+<td>Get single configuration</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/system/config/reset</code></td>
+<td>Reset configuration</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="health-check">Health Check<a class="headerlink" href="#health-check" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/health</code></td>
+<td>System health status</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/health/detailed</code></td>
+<td>Detailed health check</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/system/metrics</code></td>
+<td>Performance metrics</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h4 id="authentication-authorization">Authentication &amp; Authorization<a class="headerlink" href="#authentication-authorization" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td>User login</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/refresh</code></td>
+<td>Refresh token</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td>User logout</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/me</code></td>
+<td>Current user info</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="15-error-codes-reference">1.5 Error Codes Reference<a class="headerlink" href="#15-error-codes-reference" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Error Code</th>
+<th>HTTP Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>422</td>
+<td>Request parameter validation failed</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NOT_FOUND</code></td>
+<td>404</td>
+<td>Strategy does not exist</td>
+</tr>
+<tr>
+<td><code>STRATEGY_NAME_EXISTS</code></td>
+<td>409</td>
+<td>Strategy name already exists</td>
+</tr>
+<tr>
+<td><code>BACKTEST_NOT_FOUND</code></td>
+<td>404</td>
+<td>Backtest task does not exist</td>
+</tr>
+<tr>
+<td><code>INVALID_DATE_RANGE</code></td>
+<td>422</td>
+<td>Invalid date range</td>
+</tr>
+<tr>
+<td><code>INSUFFICIENT_DATA</code></td>
+<td>400</td>
+<td>Insufficient data</td>
+</tr>
+<tr>
+<td><code>RATE_LIMIT_EXCEEDED</code></td>
+<td>429</td>
+<td>Rate limit exceeded</td>
+</tr>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>Unauthorized access</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>403</td>
+<td>No permission to access</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>Internal server error</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-service-layer-knowledge-base">2. Service Layer Knowledge Base<a class="headerlink" href="#2-service-layer-knowledge-base" title="連結到此標題">&para;</a></h2>
+<h3 id="21-strategy-system-services">2.1 Strategy System Services<a class="headerlink" href="#21-strategy-system-services" title="連結到此標題">&para;</a></h3>
+<h4 id="strategyregistry">StrategyRegistry<a class="headerlink" href="#strategyregistry" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Global strategy registry, managing all available strategies</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class StrategyRegistry:
+    def register(self, strategy_id: str, strategy: Strategy):
+        &quot;&quot;&quot;Register strategy&quot;&quot;&quot;
+
+    def unregister(self, strategy_id: str):
+        &quot;&quot;&quot;Unregister strategy&quot;&quot;&quot;
+
+    def get(self, strategy_id: str) -&gt; Optional[Strategy]:
+        &quot;&quot;&quot;Get strategy instance&quot;&quot;&quot;
+
+    def list_ids(self) -&gt; List[str]:
+        &quot;&quot;&quot;List all strategy IDs&quot;&quot;&quot;
+</code></pre>
+<p><strong>Collaboration:</strong>
+- Depended on by all strategy-related services
+- Interacts with StrategyRepository to load strategy configurations
+- Collaborates with StrategyAggregator for cross-strategy analysis</p>
+<h4 id="strategyaggregator">StrategyAggregator<a class="headerlink" href="#strategyaggregator" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Cross-strategy analysis and aggregation operations</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class StrategyAggregator:
+    def check_symbol_resonance(self, symbol: str, strategy_types: List[str]):
+        &quot;&quot;&quot;Check symbol resonance across multiple strategies&quot;&quot;&quot;
+
+    def compare_strategies(self, strategy_ids: List[str]):
+        &quot;&quot;&quot;Compare performance of multiple strategies&quot;&quot;&quot;
+</code></pre>
+<p><strong>Collaboration:</strong>
+- Depends on StrategyRegistry to get strategy instances
+- Provides cross-strategy analysis capability for Analysis Router</p>
+<h4 id="technicalstrategyservice">TechnicalStrategyService<a class="headerlink" href="#technicalstrategyservice" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Technical indicator strategy factory, generating different types of strategies</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class TechnicalStrategyService:
+    def generate_strategy(self, strategy_type: str, universe: str, params: dict):
+        &quot;&quot;&quot;Generate strategy result based on strategy type&quot;&quot;&quot;
+
+    def calc_metrics(self, backtest_result: dict) -&gt; dict:
+        &quot;&quot;&quot;Calculate backtest metrics&quot;&quot;&quot;
+</code></pre>
+<p><strong>Supported Strategy Types:</strong>
+- RSI (Relative Strength Index)
+- MACD (Moving Average Convergence Divergence)
+- Supertrend
+- Bollinger Bands
+- Momentum
+- Dual Momentum
+- Sector Rotation
+- Extremes
+- RSI Trend</p>
+<h3 id="22-backtesting-engine-services">2.2 Backtesting Engine Services<a class="headerlink" href="#22-backtesting-engine-services" title="連結到此標題">&para;</a></h3>
+<h4 id="backtraderengine">BacktraderEngine<a class="headerlink" href="#backtraderengine" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Backtrader backtesting engine wrapper</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class BacktraderEngine:
+    def __init__(self, config: dict, db_session: Session):
+        &quot;&quot;&quot;Initialize engine&quot;&quot;&quot;
+
+    def add_strategy(self, strategy_config: dict, risk_params: dict = None):
+        &quot;&quot;&quot;Add strategy&quot;&quot;&quot;
+
+    def add_data(self, symbol: str, start_date: datetime, end_date: datetime):
+        &quot;&quot;&quot;Add data source&quot;&quot;&quot;
+
+    def run(self) -&gt; dict:
+        &quot;&quot;&quot;Execute backtest&quot;&quot;&quot;
+</code></pre>
+<p><strong>Optimization Strategies:</strong>
+- Data preloading (preload=True)
+- Batch queries to reduce database access
+- Support parallel backtesting (multi-process)
+- Memory optimization (NumPy arrays)</p>
+<h4 id="vectorbtexecutor">VectorBTExecutor<a class="headerlink" href="#vectorbtexecutor" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> VectorBT vectorized backtesting executor</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class VectorBTExecutor:
+    def run_backtest(self, strategy_func: Callable, **params) -&gt; dict:
+        &quot;&quot;&quot;Execute vectorized backtest&quot;&quot;&quot;
+
+    def run_param_scan(self, strategy_func: Callable, param_grid: dict) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;Parameter scan&quot;&quot;&quot;
+</code></pre>
+<p><strong>Advantages:</strong>
+- Full vectorization, extremely fast
+- Support batch strategy backtesting
+- Automatic data alignment
+- Built-in rich analysis tools</p>
+<h3 id="23-data-access-services">2.3 Data Access Services<a class="headerlink" href="#23-data-access-services" title="連結到此標題">&para;</a></h3>
+<h4 id="marketdataservice">MarketDataService<a class="headerlink" href="#marketdataservice" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Provide market data access interface</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class MarketDataService:
+    def get_quote(self, symbol: str) -&gt; dict:
+        &quot;&quot;&quot;Get real-time quote&quot;&quot;&quot;
+
+    def get_historical(self, symbol: str, start_date: date, end_date: date) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;Get historical data&quot;&quot;&quot;
+
+    def get_ohlc(self, symbol: str, interval: str) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;Get K-line data&quot;&quot;&quot;
+</code></pre>
+<p><strong>Data Source Priority:</strong>
+1. Local database (fastest)
+2. Redis cache (second fastest)
+3. External APIs (Yahoo Finance, Alpha Vantage)
+4. Data providers (Bloomberg, Wind)</p>
+<h4 id="repository-services">Repository Services<a class="headerlink" href="#repository-services" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Encapsulate database access logic</p>
+<p><strong>Core Repository List:</strong>
+1. <strong>StrategyRepository</strong> - Strategy configuration management
+2. <strong>BacktestRepository</strong> - Backtest result management
+3. <strong>MarketRepository</strong> - Market data management
+4. <strong>UserRepository</strong> - User data management
+5. <strong>SessionRepository</strong> - Session management
+6. <strong>TaskRepository</strong> - Task management
+7. <strong>BoardRepository</strong> - Kanban board management
+8. <strong>ColumnRepository</strong> - Column management
+9. <strong>LabelRepository</strong> - Label management
+10. <strong>CommentRepository</strong> - Comment management</p>
+<h3 id="24-cache-services">2.4 Cache Services<a class="headerlink" href="#24-cache-services" title="連結到此標題">&para;</a></h3>
+<h4 id="strategycache">StrategyCache<a class="headerlink" href="#strategycache" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Thread-safe cache with TTL</p>
+<p><strong>Cache Types:</strong>
+| Cache Name | TTL | Max Size | Purpose |
+|------------|-----|----------|---------|
+| <code>template_cache</code> | 10 minutes | 100 | Strategy template configurations |
+| <code>market_cache</code> | 15 minutes | 50 | Market configurations |
+| <code>universe_cache</code> | 10 minutes | 50 | Stock universe configurations |
+| <code>showcase_cache</code> | 2 hours | 200 | Showcase data |
+| <code>resonance_cache</code> | 5 minutes | 500 | Resonance analysis results |</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class StrategyCache:
+    def get(self, key: str) -&gt; Optional[Any]:
+        &quot;&quot;&quot;Get cached data (check expiration)&quot;&quot;&quot;
+
+    def set(self, key: str, value: Any, ttl: Optional[timedelta] = None):
+        &quot;&quot;&quot;Set cached data (enforce max size)&quot;&quot;&quot;
+
+    def clear(self):
+        &quot;&quot;&quot;Clear all cache&quot;&quot;&quot;
+</code></pre>
+<h3 id="25-notification-services">2.5 Notification Services<a class="headerlink" href="#25-notification-services" title="連結到此標題">&para;</a></h3>
+<h4 id="notificationmanager">NotificationManager<a class="headerlink" href="#notificationmanager" title="連結到此標題">&para;</a></h4>
+<p><strong>Responsibility:</strong> Manage system notification sending</p>
+<p><strong>Supported Notification Channels:</strong>
+- Telegram
+- Email
+- Slack
+- WebSocket (real-time push)</p>
+<p><strong>Key Methods:</strong></p>
+<pre><code class="language-python">class NotificationManager:
+    async def send_notification(self, recipient: str, message: str, channel: str = 'telegram'):
+        &quot;&quot;&quot;Send notification&quot;&quot;&quot;
+
+    async def send_bulk_notification(self, recipients: List[str], message: str):
+        &quot;&quot;&quot;Batch send notifications&quot;&quot;&quot;
+</code></pre>
+<hr />
+<h2 id="3-data-structures-knowledge-base">3. Data Structures Knowledge Base<a class="headerlink" href="#3-data-structures-knowledge-base" title="連結到此標題">&para;</a></h2>
+<h3 id="31-core-data-models">3.1 Core Data Models<a class="headerlink" href="#31-core-data-models" title="連結到此標題">&para;</a></h3>
+<h4 id="strategy-model">Strategy Model<a class="headerlink" href="#strategy-model" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class Strategy:
+    id: str  # Strategy ID (e.g., &quot;str_123456&quot;)
+    name: str
+    description: str
+    type: str  # Strategy type (trend_following, mean_reversion, etc.)
+    status: str  # active, inactive, archived
+    parameters: Dict  # Strategy parameters
+    risk_limits: Dict  # Risk limits
+    created_at: datetime
+    updated_at: datetime
+</code></pre>
+<h4 id="backtest-model">Backtest Model<a class="headerlink" href="#backtest-model" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class Backtest:
+    id: str  # Backtest ID (e.g., &quot;bt_123456&quot;)
+    strategy_id: str
+    status: str  # pending, running, completed, failed, cancelled
+    start_date: date
+    end_date: date
+    initial_capital: float
+    commission: float
+    slippage: float
+    data_source: str
+    metrics: Dict  # Performance metrics
+    equity_curve: List[float]
+    trades: List[Trade]
+    created_at: datetime
+    completed_at: Optional[datetime]
+</code></pre>
+<h4 id="market-data-model">Market Data Model<a class="headerlink" href="#market-data-model" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class MarketData:
+    symbol: str
+    date: date
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+    adjusted_close: Optional[float]
+</code></pre>
+<h4 id="user-model">User Model<a class="headerlink" href="#user-model" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class User:
+    id: str
+    username: str
+    email: str
+    password_hash: str  # bcrypt hash
+    role: str  # admin, user, viewer
+    created_at: datetime
+    last_login: Optional[datetime]
+</code></pre>
+<h3 id="32-requestresponse-schemas">3.2 Request/Response Schemas<a class="headerlink" href="#32-requestresponse-schemas" title="連結到此標題">&para;</a></h3>
+<h4 id="paginationparams">PaginationParams<a class="headerlink" href="#paginationparams" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class PaginationParams(BaseModel):
+    page: int = Field(1, ge=1)
+    page_size: int = Field(20, ge=1, le=100)
+    sort_by: Optional[str] = None
+    order: str = Field(&quot;desc&quot;, regex=&quot;^(asc|desc)$&quot;)
+</code></pre>
+<h4 id="filterparams">FilterParams<a class="headerlink" href="#filterparams" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class FilterParams(BaseModel):
+    status: Optional[str] = None
+    type: Optional[str] = None
+    search: Optional[str] = None
+</code></pre>
+<h4 id="unifiedresponse">UnifiedResponse<a class="headerlink" href="#unifiedresponse" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class UnifiedResponse(BaseModel):
+    data: Any
+    meta: Dict = {
+        &quot;request_id&quot;: str,
+        &quot;timestamp&quot;: str
+    }
+</code></pre>
+<h4 id="errorresponse">ErrorResponse<a class="headerlink" href="#errorresponse" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class ErrorResponse(BaseModel):
+    error: Dict = {
+        &quot;code&quot;: str,
+        &quot;message&quot;: str,
+        &quot;details&quot;: Optional[Dict]
+    }
+    meta: Dict = {
+        &quot;request_id&quot;: str,
+        &quot;timestamp&quot;: str
+    }
+</code></pre>
+<h3 id="33-performance-metrics-structure">3.3 Performance Metrics Structure<a class="headerlink" href="#33-performance-metrics-structure" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class PerformanceMetrics:
+    total_return: float
+    cagr: float  # Compound Annual Growth Rate
+    sharpe_ratio: float
+    sortino_ratio: float
+    max_drawdown: float
+    volatility: float
+    calmar_ratio: float
+    win_rate: float
+    profit_factor: float
+    avg_win: float
+    avg_loss: float
+    total_trades: int
+</code></pre>
+<hr />
+<h2 id="4-code-patterns-and-best-practices">4. Code Patterns and Best Practices<a class="headerlink" href="#4-code-patterns-and-best-practices" title="連結到此標題">&para;</a></h2>
+<h3 id="41-architecture-patterns">4.1 Architecture Patterns<a class="headerlink" href="#41-architecture-patterns" title="連結到此標題">&para;</a></h3>
+<h4 id="layered-architecture">Layered Architecture<a class="headerlink" href="#layered-architecture" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────┐
+│         Presentation Layer              │  ← Frontend (React)
+├─────────────────────────────────────────┤
+│         API Gateway Layer               │  ← Middleware (Auth, CORS, Rate Limit)
+├─────────────────────────────────────────┤
+│         Router Layer                    │  ← FastAPI Routers
+├─────────────────────────────────────────┤
+│         Service Layer                   │  ← Business Logic
+├─────────────────────────────────────────┤
+│         Repository Layer               │  ← Data Access
+├─────────────────────────────────────────┤
+│         Storage Layer                   │  ← Databases, Cache, Files
+└─────────────────────────────────────────┘
+</code></pre>
+<p><strong>Key Principles:</strong>
+- <strong>Separation of Concerns:</strong> Each layer has a single responsibility
+- <strong>Dependency Direction:</strong> Upper layers depend on lower layers, never reverse
+- <strong>Interface-Based Programming:</strong> Use interfaces (abstract classes) for dependencies</p>
+<h4 id="design-patterns-applied">Design Patterns Applied<a class="headerlink" href="#design-patterns-applied" title="連結到此標題">&para;</a></h4>
+<p><strong>Strategy Pattern:</strong></p>
+<pre><code class="language-python"># Abstract strategy interface
+class Strategy(ABC):
+    @abstractmethod
+    def generate_signals(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        pass
+
+# Concrete implementations
+class RSIStrategy(Strategy):
+    def generate_signals(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        # RSI-based signal generation
+        pass
+
+class MACDStrategy(Strategy):
+    def generate_signals(self, data: pd.DataFrame) -&gt; pd.DataFrame:
+        # MACD-based signal generation
+        pass
+</code></pre>
+<p><strong>Factory Pattern:</strong></p>
+<pre><code class="language-python">class StrategyFactory:
+    @staticmethod
+    def create_strategy(strategy_type: str, **params) -&gt; Strategy:
+        if strategy_type == &quot;rsi&quot;:
+            return RSIStrategy(**params)
+        elif strategy_type == &quot;macd&quot;:
+            return MACDStrategy(**params)
+        else:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+</code></pre>
+<p><strong>Repository Pattern:</strong></p>
+<pre><code class="language-python">class StrategyRepository(ABC):
+    @abstractmethod
+    def find_by_id(self, strategy_id: str) -&gt; Optional[Strategy]:
+        pass
+
+    @abstractmethod
+    def save(self, strategy: Strategy) -&gt; Strategy:
+        pass
+
+    @abstractmethod
+    def delete(self, strategy_id: str) -&gt; bool:
+        pass
+</code></pre>
+<p><strong>Adapter Pattern:</strong></p>
+<pre><code class="language-python">class MarketDataProviderAdapter:
+    def __init__(self, provider: str):
+        self.provider = provider
+
+    def fetch_data(self, symbol: str, start_date: date, end_date: date) -&gt; pd.DataFrame:
+        if self.provider == &quot;yahoo_finance&quot;:
+            return self._fetch_from_yahoo(symbol, start_date, end_date)
+        elif self.provider == &quot;alpha_vantage&quot;:
+            return self._fetch_from_av(symbol, start_date, end_date)
+        else:
+            raise ValueError(f&quot;Unsupported provider: {self.provider}&quot;)
+</code></pre>
+<h3 id="42-dependency-injection-pattern">4.2 Dependency Injection Pattern<a class="headerlink" href="#42-dependency-injection-pattern" title="連結到此標題">&para;</a></h3>
+<p><strong>FastAPI Dependency Injection:</strong></p>
+<pre><code class="language-python">from fastapi import Depends
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    &quot;&quot;&quot;Get current user&quot;&quot;&quot;
+    return decode_token(token)
+
+def get_db_session():
+    &quot;&quot;&quot;Get database session&quot;&quot;&quot;
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get(&quot;/strategies&quot;)
+async def get_strategies(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db_session),
+    service: StrategyService = Depends()
+):
+    &quot;&quot;&quot;Get user's strategy list&quot;&quot;&quot;
+    return service.get_user_strategies(user.id)
+</code></pre>
+<h3 id="43-error-handling-pattern">4.3 Error Handling Pattern<a class="headerlink" href="#43-error-handling-pattern" title="連結到此標題">&para;</a></h3>
+<p><strong>Custom Exception Classes:</strong></p>
+<pre><code class="language-python">from fastapi import HTTPException, status
+
+class StrategyNotFound(HTTPException):
+    def __init__(self, strategy_id: str):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f&quot;Strategy {strategy_id} not found&quot;,
+            headers={&quot;X-Error-Code&quot;: &quot;STRATEGY_NOT_FOUND&quot;}
+        )
+
+class ValidationFailed(HTTPException):
+    def __init__(self, errors: List[dict]):
+        super().__init__(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                &quot;code&quot;: &quot;VALIDATION_ERROR&quot;,
+                &quot;message&quot;: &quot;Request validation failed&quot;,
+                &quot;errors&quot;: errors
+            }
+        )
+</code></pre>
+<p><strong>Global Exception Handler:</strong></p>
+<pre><code class="language-python">@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            &quot;error&quot;: {
+                &quot;code&quot;: exc.headers.get(&quot;X-Error-Code&quot;, &quot;HTTP_ERROR&quot;),
+                &quot;message&quot;: exc.detail,
+            },
+            &quot;meta&quot;: {
+                &quot;request_id&quot;: request.state.request_id,
+                &quot;timestamp&quot;: datetime.utcnow().isoformat()
+            }
+        }
+    )
+</code></pre>
+<h3 id="44-caching-pattern">4.4 Caching Pattern<a class="headerlink" href="#44-caching-pattern" title="連結到此標題">&para;</a></h3>
+<p><strong>Multi-Level Caching:</strong></p>
+<pre><code class="language-python">class CacheManager:
+    def __init__(self):
+        self.l1_cache = {}  # In-memory cache
+        self.l2_cache = Redis()  # Redis cache
+
+    async def get(self, key: str) -&gt; Optional[Any]:
+        # Try L1 first
+        if key in self.l1_cache:
+            return self.l1_cache[key]
+
+        # Try L2
+        value = await self.l2_cache.get(key)
+        if value:
+            self.l1_cache[key] = value  # Promote to L1
+            return value
+
+        return None
+
+    async def set(self, key: str, value: Any, ttl: int = 300):
+        # Set both L1 and L2
+        self.l1_cache[key] = value
+        await self.l2_cache.set(key, value, ex=ttl)
+</code></pre>
+<h3 id="45-async-task-pattern">4.5 Async Task Pattern<a class="headerlink" href="#45-async-task-pattern" title="連結到此標題">&para;</a></h3>
+<p><strong>Celery Task Definition:</strong></p>
+<pre><code class="language-python">from celery import Celery
+
+celery_app = Celery('tasks', broker='redis://localhost:6379/0')
+
+@celery_app.task(bind=True)
+def run_backtest_task(self, strategy_id: str, config: dict):
+    &quot;&quot;&quot;Async backtest task&quot;&quot;&quot;
+    try:
+        # Execute backtest
+        result = execute_backtest(strategy_id, config)
+
+        # Save result
+        save_backtest_result(result)
+
+        # Update task status
+        self.update_state(state='SUCCESS', meta={'result': result})
+
+        return result
+    except Exception as e:
+        # Error handling
+        handle_backtest_error(self.request.id, e)
+        self.update_state(state='FAILURE', meta={'error': str(e)})
+        raise
+</code></pre>
+<h3 id="46-logging-pattern">4.6 Logging Pattern<a class="headerlink" href="#46-logging-pattern" title="連結到此標題">&para;</a></h3>
+<p><strong>Structured Logging:</strong></p>
+<pre><code class="language-python">import logging
+import json
+
+class StructuredLogger:
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+
+    def log(self, level: str, message: str, **kwargs):
+        log_entry = {
+            &quot;timestamp&quot;: datetime.utcnow().isoformat(),
+            &quot;level&quot;: level,
+            &quot;message&quot;: message,
+            &quot;context&quot;: kwargs
+        }
+        self.logger.info(json.dumps(log_entry))
+
+# Usage
+logger = StructuredLogger(__name__)
+logger.log(&quot;INFO&quot;, &quot;Strategy created&quot;, 
+           strategy_id=&quot;str_123&quot;, 
+           user_id=&quot;user_456&quot;,
+           ip_address=&quot;192.168.1.1&quot;)
+</code></pre>
+<hr />
+<h2 id="5-dependencies-and-module-interactions">5. Dependencies and Module Interactions<a class="headerlink" href="#5-dependencies-and-module-interactions" title="連結到此標題">&para;</a></h2>
+<h3 id="51-module-dependency-graph">5.1 Module Dependency Graph<a class="headerlink" href="#51-module-dependency-graph" title="連結到此標題">&para;</a></h3>
+<pre><code>System (Auth, Config, Health)
+    │
+    ├─────────────────────┬─────────────────────┬─────────────────────┐
+    │                     │                     │                     │
+    ▼                     ▼                     ▼                     ▼
+Strategies          Analysis            Market              System
+Router              Router              Router              Router
+    │                     │                     │                     │
+    │                     │                     │                     │
+    ▼                     ▼                     ▼                     ▼
+StrategyRegistry    PerformanceService  MarketDataService   ConfigService
+    │                     │                     │                     │
+    │                     │                     │                     │
+    ├─────────┬───────────┼───────────┬─────────┴─────────┬───────────┤
+    │         │           │           │                 │           │
+    ▼         ▼           ▼           ▼                 ▼           ▼
+Backtrader  VectorBT   Metrics     MarketData       Auth        Session
+Engine      Engine      Calculator  Provider         Manager     Manager
+    │         │           │           │                 │           │
+    └─────────┴───────────┼───────────┴─────────────────┴───────────┘
+                          │
+                          ▼
+                    Repository Layer
+                    (Strategy, Backtest,
+                     Market, User, Session...)
+                          │
+                          ▼
+                    Storage Layer
+                    (DuckDB, PostgreSQL,
+                     Redis, File System)
+</code></pre>
+<h3 id="52-key-data-flows">5.2 Key Data Flows<a class="headerlink" href="#52-key-data-flows" title="連結到此標題">&para;</a></h3>
+<h4 id="strategy-execution-data-flow">Strategy Execution Data Flow<a class="headerlink" href="#strategy-execution-data-flow" title="連結到此標題">&para;</a></h4>
+<pre><code>[1] STRATEGY CREATION
+POST /strategies → StrategyRegistry.register() → StrategyRepository.save()
+
+[2] BACKTEST SUBMISSION
+POST /backtest → Validate → Load Config → Build Service → Execute
+
+[3] DATA LOADING
+MarketDataService.get_historical() → MarketRepository.query() → PostgreSQL/Redis
+
+[4] ENGINE SELECTION
+Engine Selector → Backtrader/VectorBT based on params
+
+[5] BACKTEST EXECUTION
+Backtrader/VectorBT → Signal Generation → Order Execution
+
+[6] RESULT CALCULATION
+Metrics Calculator → Sharpe, Drawdown, etc.
+
+[7] RESULT STORAGE
+BacktestRepository.save() → DuckDB
+
+[8] CACHE UPDATE
+StrategyCache.set()
+
+[9] RESPONSE
+JSON response to frontend
+</code></pre>
+<h4 id="authentication-data-flow">Authentication Data Flow<a class="headerlink" href="#authentication-data-flow" title="連結到此標題">&para;</a></h4>
+<pre><code>[1] LOGIN REQUEST
+POST /auth/login → Validate credentials → Generate JWT
+
+[2] TOKEN VERIFICATION
+Auth Middleware → Decode JWT → Get user from SessionRepository
+
+[3] AUTHORIZED REQUEST
+Router → Service → Repository → Storage
+      ↑
+      └─── Depends(get_current_user)
+</code></pre>
+<h3 id="53-critical-paths">5.3 Critical Paths<a class="headerlink" href="#53-critical-paths" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Description</th>
+<th>Bottleneck</th>
+<th>Optimization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Strategy Backtest</td>
+<td>Strategies Router → StrategyRegistry → Backtrader/VectorBT Engine → Backtest Repository → DuckDB</td>
+<td>Synchronous backtest execution</td>
+<td>Use Celery async tasks</td>
+</tr>
+<tr>
+<td>Market Data</td>
+<td>Market Router → MarketDataService → MarketData Provider → Market Repository → PostgreSQL/Redis</td>
+<td>Multiple API calls</td>
+<td>Cache results, batch queries</td>
+</tr>
+<tr>
+<td>User Auth</td>
+<td>System Router → Auth Middleware → Session Manager → Session Repository → PostgreSQL/Redis</td>
+<td>JWT decoding overhead</td>
+<td>Cache user session in Redis</td>
+</tr>
+<tr>
+<td>Performance Analysis</td>
+<td>Analysis Router → PerformanceService → Metrics Calculator → Backtest Repository → DuckDB</td>
+<td>Complex calculations</td>
+<td>Pre-calculate metrics, use vectorized operations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-potential-circular-dependencies">5.4 Potential Circular Dependencies<a class="headerlink" href="#54-potential-circular-dependencies" title="連結到此標題">&para;</a></h3>
+<pre><code>Strategy → Backtest → Analysis → Strategy
+         ↓                    ↓
+      Execution           Results
+         ↑                    ↑
+         └────────────────────┘
+</code></pre>
+<p><strong>Solution:</strong>
+- Use event-driven architecture to decouple (Redis Pub/Sub)
+- Introduce message queue (Celery)
+- Strategy state updates through async events</p>
+<hr />
+<h2 id="6-technology-stack-knowledge-base">6. Technology Stack Knowledge Base<a class="headerlink" href="#6-technology-stack-knowledge-base" title="連結到此標題">&para;</a></h2>
+<h3 id="61-backend-frameworks-and-libraries">6.1 Backend Frameworks and Libraries<a class="headerlink" href="#61-backend-frameworks-and-libraries" title="連結到此標題">&para;</a></h3>
+<h4 id="core-framework">Core Framework<a class="headerlink" href="#core-framework" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FastAPI</strong></td>
+<td>0.100+</td>
+<td>Web framework, high-performance API</td>
+</tr>
+<tr>
+<td><strong>Pydantic</strong></td>
+<td>v2</td>
+<td>Data validation and serialization</td>
+</tr>
+<tr>
+<td><strong>SQLAlchemy</strong></td>
+<td>2.0+</td>
+<td>ORM framework, database abstraction layer</td>
+</tr>
+<tr>
+<td><strong>Alembic</strong></td>
+<td>1.10+</td>
+<td>Database migration tool</td>
+</tr>
+</tbody>
+</table>
+<h4 id="backtesting-engines">Backtesting Engines<a class="headerlink" href="#backtesting-engines" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Backtrader</strong></td>
+<td>1.9.78+</td>
+<td>Event-driven backtesting engine</td>
+</tr>
+<tr>
+<td><strong>VectorBT</strong></td>
+<td>0.25+</td>
+<td>Vectorized backtesting engine</td>
+</tr>
+<tr>
+<td><strong>NumPy</strong></td>
+<td>1.24+</td>
+<td>Numerical computing foundation</td>
+</tr>
+<tr>
+<td><strong>Pandas</strong></td>
+<td>2.0+</td>
+<td>Data processing and analysis</td>
+</tr>
+</tbody>
+</table>
+<h4 id="data-processing">Data Processing<a class="headerlink" href="#data-processing" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DuckDB</strong></td>
+<td>0.9+</td>
+<td>Embedded analytical database</td>
+</tr>
+<tr>
+<td><strong>psycopg2</strong></td>
+<td>2.9+</td>
+<td>PostgreSQL adapter</td>
+</tr>
+<tr>
+<td><strong>redis-py</strong></td>
+<td>4.5+</td>
+<td>Redis client</td>
+</tr>
+<tr>
+<td><strong>celery</strong></td>
+<td>5.2+</td>
+<td>Distributed task queue</td>
+</tr>
+</tbody>
+</table>
+<h4 id="utility-libraries">Utility Libraries<a class="headerlink" href="#utility-libraries" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>python-jose</strong></td>
+<td>3.3+</td>
+<td>JWT generation and verification</td>
+</tr>
+<tr>
+<td><strong>passlib</strong></td>
+<td>1.7+</td>
+<td>Password hashing (bcrypt)</td>
+</tr>
+<tr>
+<td><strong>python-multipart</strong></td>
+<td>0.0.5+</td>
+<td>File upload support</td>
+</tr>
+<tr>
+<td><strong>uvicorn</strong></td>
+<td>0.23+</td>
+<td>ASGI server</td>
+</tr>
+<tr>
+<td><strong>gunicorn</strong></td>
+<td>21.2+</td>
+<td>WSGI server (production)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-databases-and-storage">6.2 Databases and Storage<a class="headerlink" href="#62-databases-and-storage" title="連結到此標題">&para;</a></h3>
+<h4 id="relational-databases">Relational Databases<a class="headerlink" href="#relational-databases" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Database</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PostgreSQL</strong></td>
+<td>15+</td>
+<td>User data, sessions, tasks</td>
+</tr>
+<tr>
+<td><strong>DuckDB</strong></td>
+<td>0.9+</td>
+<td>Strategy configs, backtest results, market data</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cache-and-message-queue">Cache and Message Queue<a class="headerlink" href="#cache-and-message-queue" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Redis</strong></td>
+<td>7+</td>
+<td>Cache, session storage, message queue</td>
+</tr>
+<tr>
+<td><strong>Celery</strong></td>
+<td>5.2+</td>
+<td>Async task execution (broker: Redis)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="file-storage">File Storage<a class="headerlink" href="#file-storage" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Local File System</strong></td>
+<td>Reports (Markdown), converted HTML, logs</td>
+</tr>
+<tr>
+<td><strong>Git Repository</strong></td>
+<td>Version control, release management</td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-testing-frameworks">6.3 Testing Frameworks<a class="headerlink" href="#63-testing-frameworks" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pytest</strong></td>
+<td>7.4+</td>
+<td>Unit testing framework</td>
+</tr>
+<tr>
+<td><strong>pytest-asyncio</strong></td>
+<td>0.21+</td>
+<td>Async test support</td>
+</tr>
+<tr>
+<td><strong>httpx</strong></td>
+<td>0.24+</td>
+<td>HTTP client testing</td>
+</tr>
+<tr>
+<td><strong>unittest</strong></td>
+<td>Python built-in</td>
+<td>Unit testing foundation</td>
+</tr>
+<tr>
+<td><strong>Custom Testing Framework</strong></td>
+<td>-</td>
+<td>SystemTester, EnhancedReportConverter</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-development-tools">6.4 Development Tools<a class="headerlink" href="#64-development-tools" title="連結到此標題">&para;</a></h3>
+<h4 id="code-quality">Code Quality<a class="headerlink" href="#code-quality" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>black</strong></td>
+<td>Code formatting</td>
+</tr>
+<tr>
+<td><strong>flake8</strong></td>
+<td>Code style checking</td>
+</tr>
+<tr>
+<td><strong>mypy</strong></td>
+<td>Type checking</td>
+</tr>
+<tr>
+<td><strong>pylint</strong></td>
+<td>Code quality analysis</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cicd">CI/CD<a class="headerlink" href="#cicd" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GitHub Actions</strong></td>
+<td>Continuous integration/continuous deployment</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td>Containerization</td>
+</tr>
+<tr>
+<td><strong>Docker Compose</strong></td>
+<td>Local development environment</td>
+</tr>
+</tbody>
+</table>
+<h4 id="monitoring-and-logging">Monitoring and Logging<a class="headerlink" href="#monitoring-and-logging" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prometheus</strong></td>
+<td>Metrics collection and monitoring</td>
+</tr>
+<tr>
+<td><strong>Grafana</strong></td>
+<td>Visualization dashboard</td>
+</tr>
+<tr>
+<td><strong>ELK Stack</strong></td>
+<td>Log collection and analysis</td>
+</tr>
+<tr>
+<td><strong>OpenTelemetry</strong></td>
+<td>Distributed tracing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-best-practices-guidelines">7. Best Practices Guidelines<a class="headerlink" href="#7-best-practices-guidelines" title="連結到此標題">&para;</a></h2>
+<h3 id="71-code-organization">7.1 Code Organization<a class="headerlink" href="#71-code-organization" title="連結到此標題">&para;</a></h3>
+<p><strong>Directory Structure:</strong></p>
+<pre><code>backend/
+├── routers/              # Router layer (API endpoints)
+│   ├── strategies/
+│   │   ├── __init__.py
+│   │   ├── backtest.py
+│   │   ├── monte_carlo.py
+│   │   ├── comparison.py
+│   │   └── ...
+│   ├── analysis/
+│   ├── system/
+│   ├── market.py
+│   └── ...
+├── services/             # Service layer (business logic)
+│   ├── strategies/
+│   │   ├── strategy_registry.py
+│   │   ├── technical_strategy.py
+│   │   └── ...
+│   ├── market_data_service.py
+│   ├── performance_service.py
+│   └── ...
+├── repositories/         # Data access layer
+│   ├── strategy_repository.py
+│   ├── backtest_repository.py
+│   └── ...
+├── models/              # Data models
+├── schemas/             # Pydantic models (request/response)
+├── core/                # Core config and utilities
+│   ├── config.py
+│   ├── security.py
+│   ├── cache.py
+│   └── exceptions.py
+├── workers/             # Background tasks (Celery)
+│   ├── backtest_worker.py
+│   └── optimization_worker.py
+└── main.py              # Application entry point
+</code></pre>
+<p><strong>Key Principles:</strong>
+- <strong>Modular Design:</strong> Each module has a single, well-defined responsibility
+- <strong>Separation of Concerns:</strong> Router handles HTTP, Service handles logic, Repository handles data
+- <strong>Dependency Injection:</strong> Use FastAPI's dependency injection for loose coupling</p>
+<h3 id="72-api-design-standards">7.2 API Design Standards<a class="headerlink" href="#72-api-design-standards" title="連結到此標題">&para;</a></h3>
+<h4 id="restful-principles">RESTful Principles<a class="headerlink" href="#restful-principles" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use plural nouns</td>
+<td><code>/strategies</code>, <code>/orders</code></td>
+</tr>
+<tr>
+<td>Resource navigation</td>
+<td><code>/strategies/{id}/backtest</code></td>
+</tr>
+<tr>
+<td>HTTP method semantics</td>
+<td>GET (query), POST (create), PUT (update), DELETE (delete)</td>
+</tr>
+<tr>
+<td>Status code semantics</td>
+<td>200 (success), 201 (created), 400 (error), 404 (not found)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="unified-response-format">Unified Response Format<a class="headerlink" href="#unified-response-format" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">// Success Response
+{
+  &quot;data&quot;: { /* actual data */ },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+
+// Error Response
+{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;STRATEGY_NOT_FOUND&quot;,
+    &quot;message&quot;: &quot;Strategy with id 'str_999999' not found&quot;,
+    &quot;details&quot;: {
+      &quot;strategy_id&quot;: &quot;str_999999&quot;
+    }
+  },
+  &quot;meta&quot;: {
+    &quot;request_id&quot;: &quot;req_abc123&quot;,
+    &quot;timestamp&quot;: &quot;2026-02-20T23:38:00Z&quot;
+  }
+}
+</code></pre>
+<h4 id="pagination-and-filtering">Pagination and Filtering<a class="headerlink" href="#pagination-and-filtering" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># Common query parameters
+class PaginationParams(BaseModel):
+    page: int = Field(1, ge=1)
+    page_size: int = Field(20, ge=1, le=100)
+    sort_by: Optional[str] = None
+    order: str = Field(&quot;desc&quot;, regex=&quot;^(asc|desc)$&quot;)
+
+class FilterParams(BaseModel):
+    status: Optional[str] = None
+    type: Optional[str] = None
+    search: Optional[str] = None
+</code></pre>
+<h3 id="73-security-best-practices">7.3 Security Best Practices<a class="headerlink" href="#73-security-best-practices" title="連結到此標題">&para;</a></h3>
+<h4 id="authentication-security">Authentication Security<a class="headerlink" href="#authentication-security" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Password hashing</td>
+<td>Use bcrypt, salt rounds = 12</td>
+</tr>
+<tr>
+<td>JWT signing</td>
+<td>Use RS256 or HS256</td>
+</tr>
+<tr>
+<td>Token expiration</td>
+<td>Access Token 1 hour, Refresh Token 7 days</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td>Login 5 times/minute, API 100 times/minute</td>
+</tr>
+</tbody>
+</table>
+<h4 id="input-validation">Input Validation<a class="headerlink" href="#input-validation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from pydantic import BaseModel, Field, validator
+
+class StrategyCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    type: StrategyType
+    parameters: Dict
+
+    @validator('name')
+    def name_must_not_contain_special_chars(cls, v):
+        if any(c in v for c in '&lt;&gt;&quot;/\\|?*'):
+            raise ValueError('名稱不能包含特殊字符')
+        return v
+</code></pre>
+<h4 id="sql-injection-protection">SQL Injection Protection<a class="headerlink" href="#sql-injection-protection" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>Use SQLAlchemy ORM (parameterized queries)</li>
+<li>Avoid SQL string concatenation</li>
+<li>Use Alembic for database migrations</li>
+</ul>
+<h3 id="74-testing-best-practices">7.4 Testing Best Practices<a class="headerlink" href="#74-testing-best-practices" title="連結到此標題">&para;</a></h3>
+<h4 id="test-pyramid">Test Pyramid<a class="headerlink" href="#test-pyramid" title="連結到此標題">&para;</a></h4>
+<pre><code>        /\
+       /E2E\           Small quantity
+      /──────\
+     / 集成 \          Medium quantity
+    /────────\
+   /  單元  \         Large quantity
+  /──────────\
+</code></pre>
+<h4 id="test-coverage">Test Coverage<a class="headerlink" href="#test-coverage" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Target coverage:</strong> 80%+</li>
+<li><strong>Critical path coverage:</strong> 100%</li>
+<li><strong>Exception handling coverage:</strong> 100%</li>
+</ul>
+<h4 id="test-isolation">Test Isolation<a class="headerlink" href="#test-isolation" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>Each test runs independently</li>
+<li>Use test database (don't pollute production data)</li>
+<li>Mock external dependencies (like API calls)</li>
+</ul>
+<hr />
+<h2 id="8-module-priorities-for-implementation">8. Module Priorities for Implementation<a class="headerlink" href="#8-module-priorities-for-implementation" title="連結到此標題">&para;</a></h2>
+<h3 id="81-first-priority-core-foundation">8.1 First Priority (Core Foundation)<a class="headerlink" href="#81-first-priority-core-foundation" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Data Access Layer (Repository)</strong></li>
+<li>Rationale: Foundation for all modules</li>
+<li>Estimated time: 3-5 days</li>
+<li>
+<p>Deliverables: Complete Repository interfaces and implementations</p>
+</li>
+<li>
+<p><strong>API Router Layer</strong></p>
+</li>
+<li>Rationale: Direct interaction with frontend</li>
+<li>Estimated time: 5-7 days</li>
+<li>
+<p>Deliverables: All API endpoint implementations</p>
+</li>
+<li>
+<p><strong>Authentication &amp; Authorization (Middleware)</strong></p>
+</li>
+<li>Rationale: Security foundation</li>
+<li>Estimated time: 3-5 days</li>
+<li>Deliverables: JWT authentication, RBAC implementation</li>
+</ol>
+<h3 id="82-second-priority-business-logic">8.2 Second Priority (Business Logic)<a class="headerlink" href="#82-second-priority-business-logic" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Strategy System</strong></li>
+<li>Rationale: Core functionality</li>
+<li>Estimated time: 7-10 days</li>
+<li>
+<p>Deliverables: Strategy registration, execution, caching</p>
+</li>
+<li>
+<p><strong>Backtesting Engine</strong></p>
+</li>
+<li>Rationale: Core functionality</li>
+<li>Estimated time: 10-14 days</li>
+<li>
+<p>Deliverables: Backtrader and VectorBT integration</p>
+</li>
+<li>
+<p><strong>Market Data Service</strong></p>
+</li>
+<li>Rationale: Dependency for strategy execution</li>
+<li>Estimated time: 5-7 days</li>
+<li>Deliverables: Data acquisition, caching, optimization</li>
+</ol>
+<h3 id="83-third-priority-enhanced-features">8.3 Third Priority (Enhanced Features)<a class="headerlink" href="#83-third-priority-enhanced-features" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Performance Analysis Service</strong></li>
+<li>Rationale: Enhanced functionality</li>
+<li>Estimated time: 5-7 days</li>
+<li>
+<p>Deliverables: Metrics calculation, visualization data generation</p>
+</li>
+<li>
+<p><strong>Notification Service</strong></p>
+</li>
+<li>Rationale: User experience enhancement</li>
+<li>Estimated time: 3-5 days</li>
+<li>
+<p>Deliverables: Telegram/Email/Slack notifications</p>
+</li>
+<li>
+<p><strong>Monitoring &amp; Logging</strong></p>
+</li>
+<li>Rationale: Operations support</li>
+<li>Estimated time: 5-7 days</li>
+<li>Deliverables: Prometheus metrics, Grafana dashboards</li>
+</ol>
+<hr />
+<h2 id="9-development-workflow">9. Development Workflow<a class="headerlink" href="#9-development-workflow" title="連結到此標題">&para;</a></h2>
+<h3 id="91-requirements-analysis-phase">9.1 Requirements Analysis Phase<a class="headerlink" href="#91-requirements-analysis-phase" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Understand requirements</strong></li>
+<li>Read requirement documents</li>
+<li>Confirm details with product manager</li>
+<li>
+<p>Identify technical challenges</p>
+</li>
+<li>
+<p><strong>Design API</strong></p>
+</li>
+<li>Define API endpoints</li>
+<li>Design request/response formats</li>
+<li>
+<p>Write OpenAPI documentation</p>
+</li>
+<li>
+<p><strong>Design data models</strong></p>
+</li>
+<li>Define database table structure</li>
+<li>Design entity relationships</li>
+<li>Write migration scripts</li>
+</ol>
+<h3 id="92-development-phase">9.2 Development Phase<a class="headerlink" href="#92-development-phase" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Implement Repository layer</strong></li>
+<li>Create data access classes</li>
+<li>Write unit tests</li>
+<li>
+<p>Verify query performance</p>
+</li>
+<li>
+<p><strong>Implement Service layer</strong></p>
+</li>
+<li>Create business logic classes</li>
+<li>Implement core algorithms</li>
+<li>
+<p>Write integration tests</p>
+</li>
+<li>
+<p><strong>Implement Router layer</strong></p>
+</li>
+<li>Create API endpoints</li>
+<li>Integrate middleware</li>
+<li>Write API tests</li>
+</ol>
+<h3 id="93-testing-phase">9.3 Testing Phase<a class="headerlink" href="#93-testing-phase" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Unit testing</strong></li>
+<li>Test each function and class</li>
+<li>Target coverage &gt; 80%</li>
+<li>
+<p>Mock external dependencies</p>
+</li>
+<li>
+<p><strong>Integration testing</strong></p>
+</li>
+<li>Test component interactions</li>
+<li>Use test database</li>
+<li>
+<p>Verify data flow</p>
+</li>
+<li>
+<p><strong>E2E testing</strong></p>
+</li>
+<li>Test complete user flows</li>
+<li>Simulate real environment</li>
+<li>Verify end-to-end behavior</li>
+</ol>
+<h3 id="94-deployment-phase">9.4 Deployment Phase<a class="headerlink" href="#94-deployment-phase" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Code review</strong></p>
+<ul>
+<li>Pull Request review</li>
+<li>Check code quality</li>
+<li>Verify functionality completeness</li>
+</ul>
+</li>
+<li>
+<p><strong>CI/CD pipeline</strong></p>
+<ul>
+<li>Automated test execution</li>
+<li>Build and package</li>
+<li>Deploy to test environment</li>
+</ul>
+</li>
+<li>
+<p><strong>Production deployment</strong></p>
+<ul>
+<li>Blue-green or rolling update</li>
+<li>Monitor deployment health</li>
+<li>Prepare rollback plan</li>
+</ul>
+</li>
+</ol>
+<h3 id="95-maintenance-phase">9.5 Maintenance Phase<a class="headerlink" href="#95-maintenance-phase" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Monitoring and alerting</strong></p>
+<ul>
+<li>Monitor key metrics</li>
+<li>Set up alerting rules</li>
+<li>Respond to alert events</li>
+</ul>
+</li>
+<li>
+<p><strong>Log analysis</strong></p>
+<ul>
+<li>Analyze error logs</li>
+<li>Identify performance bottlenecks</li>
+<li>Optimize system performance</li>
+</ul>
+</li>
+<li>
+<p><strong>Continuous improvement</strong></p>
+<ul>
+<li>Collect user feedback</li>
+<li>Plan new features</li>
+<li>Optimize existing features</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="10-common-pitfalls-and-solutions">10. Common Pitfalls and Solutions<a class="headerlink" href="#10-common-pitfalls-and-solutions" title="連結到此標題">&para;</a></h2>
+<h3 id="101-common-issues">10.1 Common Issues<a class="headerlink" href="#101-common-issues" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Impact</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Incomplete service layer</strong></td>
+<td>High</td>
+<td>Complete service layer analysis, identify gaps</td>
+</tr>
+<tr>
+<td><strong>Inconsistent caching</strong></td>
+<td>Medium</td>
+<td>Implement unified cache interface</td>
+</tr>
+<tr>
+<td><strong>Non-uniform error handling</strong></td>
+<td>Medium</td>
+<td>Create unified exception classes, global handlers</td>
+</tr>
+<tr>
+<td><strong>Missing API version control</strong></td>
+<td>Low</td>
+<td>Implement version migration strategy</td>
+</tr>
+<tr>
+<td><strong>Synchronous backtesting</strong></td>
+<td>High</td>
+<td>Use Celery async tasks</td>
+</tr>
+<tr>
+<td><strong>Database connection pool bottlenecks</strong></td>
+<td>Medium</td>
+<td>Increase pool size, monitor usage</td>
+</tr>
+<tr>
+<td><strong>Low cache hit rates</strong></td>
+<td>Low</td>
+<td>Optimize caching strategy, increase TTL</td>
+</tr>
+<tr>
+<td><strong>Redis single point of failure</strong></td>
+<td>High</td>
+<td>Use Redis Sentinel or Cluster</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-anti-patterns-to-avoid">10.2 Anti-Patterns to Avoid<a class="headerlink" href="#102-anti-patterns-to-avoid" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Fat Controllers:</strong> Business logic should be in Service layer, not Router layer</li>
+<li><strong>Direct Database Access in Router:</strong> Always go through Repository layer</li>
+<li><strong>Hardcoded Configuration:</strong> Use environment variables or config files</li>
+<li><strong>Silent Failures:</strong> Always log errors and return meaningful error messages</li>
+<li><strong>N+1 Query Problem:</strong> Use eager loading or batch queries</li>
+<li><strong>Leaking Sensitive Data:</strong> Never log passwords, tokens, or personal data</li>
+</ol>
+<hr />
+<h2 id="11-key-insights-for-programmer-sub-agent">11. Key Insights for Programmer Sub-Agent<a class="headerlink" href="#11-key-insights-for-programmer-sub-agent" title="連結到此標題">&para;</a></h2>
+<h3 id="111-architecture-maturity">11.1 Architecture Maturity<a class="headerlink" href="#111-architecture-maturity" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>Strengths:</strong> Well-structured layered architecture, high modularity, clear responsibilities</li>
+<li><strong>Technology Choice:</strong> FastAPI + SQLAlchemy + DuckDB/PostgreSQL provides excellent performance and flexibility</li>
+<li><strong>Design Patterns:</strong> Rich application of strategy, factory, adapter, and aggregator patterns enhances scalability</li>
+</ul>
+<h3 id="112-development-priorities">11.2 Development Priorities<a class="headerlink" href="#112-development-priorities" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Start with Foundation:</strong> Repository → Router → Auth → Strategy → Backtesting → Enhancements</li>
+<li><strong>Follow Best Practices:</strong> Separation of concerns, dependency injection, unified error handling</li>
+<li><strong>Test Thoroughly:</strong> Unit tests &gt; 80%, integration tests for critical paths, E2E for user flows</li>
+<li><strong>Security First:</strong> Input validation, SQL injection protection, proper authentication</li>
+</ol>
+<h3 id="113-technology-mastery-areas">11.3 Technology Mastery Areas<a class="headerlink" href="#113-technology-mastery-areas" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>Core:</strong> Python/FastAPI, SQLAlchemy, Backtrader, VectorBT</li>
+<li><strong>Data:</strong> PostgreSQL, DuckDB, Redis, NumPy, Pandas</li>
+<li><strong>Operations:</strong> Celery, Docker, Prometheus, Grafana</li>
+<li><strong>Testing:</strong> pytest, httpx, custom testing frameworks</li>
+</ul>
+<h3 id="114-domain-knowledge-required">11.4 Domain Knowledge Required<a class="headerlink" href="#114-domain-knowledge-required" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>Trading Strategies:</strong> Technical indicators (RSI, MACD, moving averages), signal generation</li>
+<li><strong>Backtesting:</strong> Execution flow, slippage, commission, performance metrics</li>
+<li><strong>Performance Metrics:</strong> Sharpe ratio, maximum drawdown, CAGR, win rate, profit factor</li>
+<li><strong>Data Structures:</strong> Time series data (OHLCV), trade records, equity curves</li>
+</ul>
+<hr />
+<h2 id="confidence-limitations">Confidence &amp; Limitations<a class="headerlink" href="#confidence-limitations" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> High</li>
+<li><strong>Data quality:</strong> Comprehensive backend architecture document with detailed analysis</li>
+<li><strong>Assumptions made:</strong> </li>
+<li>Service layer analysis (a001b) was incomplete, based on inferences</li>
+<li>Some dependencies inferred from architecture patterns</li>
+<li><strong>Limitations:</strong> </li>
+<li>Cannot extract from actual source code (only architecture document available)</li>
+<li>Some implementation details may vary from documented architecture</li>
+</ul>
+<hr />
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Analysis framework:</strong> Architecture extraction and knowledge base structuring</li>
+<li><strong>Source documents:</strong> a001-backend-architecture.md (integrated report from a001a-a001h)</li>
+<li><strong>Knowledge areas covered:</strong> API endpoints, services, data structures, patterns, dependencies, best practices</li>
+<li><strong>Target audience:</strong> Programmer Sub-Agent for backend development tasks</li>
+<li><strong>Suggested next steps:</strong> Use this knowledge base to design and implement the Programmer Sub-Agent's backend capabilities</li>
+</ul>
+<hr />
+<p><strong>Document Version:</strong> 1.0
+<strong>Last Updated:</strong> 2026-02-21
+<strong>Maintainer:</strong> Charlie Analyst
+<strong>Next Phase:</strong> Design Programmer Sub-Agent using this knowledge base</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

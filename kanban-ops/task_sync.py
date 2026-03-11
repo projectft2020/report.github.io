@@ -18,6 +18,18 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
+# Scout Agent imports
+sys.path.insert(0, str(Path.home() / '.openclaw/workspace-scout'))
+try:
+    from scout_agent import ScoutAgent
+    SCOUT_AVAILABLE = True
+except ImportError:
+    SCOUT_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("Scout Agent not available, expansion disabled")
+else:
+    logger = logging.getLogger(__name__)
+
 # 配置
 TASKS_FILE = Path.home() / '.openclaw/workspace/kanban/tasks.json'
 SYNC_LOG = Path.home() / '.openclaw/workspace/kanban/sync.log'
@@ -241,6 +253,15 @@ def process_status_file(status_file: Path, status_data: Dict) -> bool:
         if output_path and status == 'completed':
             copy_output_file(output_path, task_id)
 
+            # ========== Scout Expansion System ==========
+            # 當研究任務完成時，觸發 Scout 擴展
+            try:
+                trigger_scout_expansion(task, output_path)
+            except Exception as e:
+                logger.error(f"[Sync] Error triggering Scout expansion: {e}")
+                # 不影響主流程，只是記錄錯誤
+            # ==========================================
+
         # 刪除 status 文件
         status_file.unlink()
         logger.info(f"[Sync] ✓ Deleted status file: {status_file.name}")
@@ -344,6 +365,73 @@ def check_timeout_tasks():
     if timeout_count > 0:
         save_tasks(tasks)
         logger.info(f"[Sync] Marked {timeout_count} tasks as failed due to timeout")
+
+
+def trigger_scout_expansion(task: Dict, output_path: str):
+    """
+    觸發 Scout 擴展（當研究任務完成時）
+
+    Args:
+        task: 完成的任務數據
+        output_path: 研究報告路徑
+    """
+    if not SCOUT_AVAILABLE:
+        logger.debug("[Sync] Scout Agent not available, skipping expansion")
+        return
+
+    # 只擴展研究任務
+    if task.get('agent') != 'research':
+        logger.debug(f"[Sync] Task {task.get('id')} is not a research task, skipping expansion")
+        return
+
+    # 只擴展由 scout 創建的任務
+    if task.get('created_by') != 'scout':
+        logger.debug(f"[Sync] Task {task.get('id')} not created by scout, skipping expansion")
+        return
+
+    try:
+        # 初始化 Scout Agent
+        scout = ScoutAgent()
+
+        # 讀取研究報告
+        output_file = Path(output_path).expanduser()
+        if not output_file.exists():
+            logger.warning(f"[Sync] Research report not found: {output_file}")
+            return
+
+        research_report = output_file.read_text(encoding='utf-8')
+
+        # 判斷是否應該擴展
+        if not scout.should_expand(task, research_report):
+            logger.info(f"[Sync] Task {task.get('id')} does not meet expansion criteria")
+            return
+
+        logger.info(f"[Sync] ✅ Task {task.get('id')} meets expansion criteria, generating expansion tasks...")
+
+        # 生成擴展任務
+        expansion_tasks = scout.generate_expansion_tasks(task, research_report)
+
+        if not expansion_tasks:
+            logger.info(f"[Sync] No expansion tasks generated for {task.get('id')}")
+            return
+
+        # 讀取現有任務並添加擴展任務
+        tasks = load_tasks()
+        tasks.extend(expansion_tasks)
+
+        # 保存
+        save_tasks(tasks)
+
+        logger.info(f"[Sync] ✅ Scout Expansion: {len(expansion_tasks)} tasks created from {task.get('id')}")
+
+        # 記錄擴展任務詳情
+        for exp_task in expansion_tasks:
+            logger.info(f"[Sync]   - {exp_task.get('id')}: {exp_task.get('title')[:60]}")
+
+    except Exception as e:
+        logger.error(f"[Sync] Error triggering Scout expansion: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def main():

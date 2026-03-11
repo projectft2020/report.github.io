@@ -1,0 +1,325 @@
+#!/usr/bin/env python3
+"""
+任務管理整合腳本
+
+整合複雜度估算和時間追蹤功能。
+"""
+
+import sys
+import json
+from pathlib import Path
+
+# 添加模組路徑
+sys.path.insert(0, str(Path(__file__).parent))
+
+from task_complexity import TaskComplexityEstimator, ComplexityAssessment
+from time_tracker import TaskTimeTracker, TimeEstimate
+from task_decomposer import TaskDecomposer
+from timeout_handler import TimeoutHandler
+
+
+class TaskManager:
+    """任務管理器"""
+
+    def __init__(self, tasks_json_path: str):
+        """
+        初始化任務管理器
+
+        Args:
+            tasks_json_path: tasks.json 文件路徑
+        """
+        self.complexity_estimator = TaskComplexityEstimator()
+        self.time_tracker = TaskTimeTracker(tasks_json_path)
+        self.decomposer = TaskDecomposer()
+        self.timeout_handler = TimeoutHandler(
+            tasks_json_path,
+            str(Path(tasks_json_path).parent.parent)  # workspace path
+        )
+        self.tasks_json_path = tasks_json_path
+
+    def create_task_with_estimation(self, task: dict) -> dict:
+        """
+        創建任務並自動估算複雜度和時間
+
+        Args:
+            task: 任務字典（不包含 id, created_at 等系統字段）
+
+        Returns:
+            包含估算資訊的完整任務字典
+        """
+        # 1. 複雜度估算
+        assessment = self.complexity_estimator.estimate(task)
+
+        # 2. 構建完整任務
+        full_task = {
+            **task,
+            'time_tracking': {
+                'estimated_time': {
+                    'min': assessment.estimated_time[0],
+                    'max': assessment.estimated_time[1]
+                },
+                'complexity_level': assessment.level,
+                'recommended_model': assessment.recommended_model
+            }
+        }
+
+        # 3. 檢查是否建議分解
+        if assessment.should_decompose:
+            print("⚠️  警告：此任務複雜度較高，建議分解為多個子任務")
+            print(f"   理由：{assessment.reason}")
+
+        return full_task
+
+    def analyze_task(self, task_id: str):
+        """
+        分析現有任務的複雜度
+
+        Args:
+            task_id: 任務 ID
+        """
+        # 載入任務
+        with open(self.tasks_json_path, 'r', encoding='utf-8') as f:
+            tasks = json.load(f)
+
+        # 查找任務
+        task = None
+        for t in tasks:
+            if t['id'] == task_id or t['id'].endswith(task_id):
+                task = t
+                break
+
+        if not task:
+            print(f"❌ 找不到任務：{task_id}")
+            return
+
+        # 轉換為估算器需要的格式
+        task_for_estimation = {
+            'input_paths': task.get('input_paths', []),
+            'agent': task.get('agent', ''),
+            'model': task.get('model', ''),
+            'depends_on': task.get('depends_on', []),
+            'notes': task.get('notes', '')
+        }
+
+        # 估算複雜度
+        assessment = self.complexity_estimator.estimate(task_for_estimation)
+
+        # 顯示結果
+        print("=" * 70)
+        print(f"📊 任務複雜度分析：{task['id']}")
+        print("=" * 70)
+        print(f"標題：{task['title']}")
+        print()
+        print(self.complexity_estimator.format_assessment(assessment))
+
+        # 檢查是否有現有的時間追蹤
+        time_tracking = task.get('time_tracking', {})
+        if time_tracking:
+            print()
+            print("─" * 70)
+            print("現有時間追蹤記錄：")
+            if 'estimated_time' in time_tracking:
+                est = time_tracking['estimated_time']
+                print(f"  預估時間：{est['min']}-{est['max']} 分鐘")
+            if 'actual_time_minutes' in time_tracking:
+                print(f"  實際時間：{time_tracking['actual_time_minutes']} 分鐘")
+            if 'time_variance_percent' in time_tracking:
+                var = time_tracking['time_variance_percent']
+                print(f"  時間偏差：{var:+.1f}%")
+        else:
+            print()
+            print("💡 提示：使用 'add' 命令為此任務添加時間預估")
+
+    def add_estimation_to_task(self, task_id: str):
+        """
+        為現有任務添加時間預估
+
+        Args:
+            task_id: 任務 ID
+        """
+        # 載入任務
+        with open(self.tasks_json_path, 'r', encoding='utf-8') as f:
+            tasks = json.load(f)
+
+        # 查找任務
+        task = None
+        task_index = -1
+        for i, t in enumerate(tasks):
+            if t['id'] == task_id or t['id'].endswith(task_id):
+                task = t
+                task_index = i
+                break
+
+        if not task:
+            print(f"❌ 找不到任務：{task_id}")
+            return
+
+        # 轉換為估算器需要的格式
+        task_for_estimation = {
+            'input_paths': task.get('input_paths', []),
+            'agent': task.get('agent', ''),
+            'model': task.get('model', ''),
+            'depends_on': task.get('depends_on', []),
+            'notes': task.get('notes', '')
+        }
+
+        # 估算複雜度
+        assessment = self.complexity_estimator.estimate(task_for_estimation)
+
+        # 添加時間追蹤
+        estimation = TimeEstimate(
+            min_minutes=assessment.estimated_time[0],
+            max_minutes=assessment.estimated_time[1]
+        )
+
+        self.time_tracker.add_time_estimation(
+            task_id,
+            estimation,
+            assessment.level,
+            assessment.recommended_model
+        )
+
+        print()
+        print(f"✅ 已為任務 {task['id']} 添加時間預估")
+        print(f"   複雜度：等級 {assessment.level}")
+        print(f"   預估時間：{estimation}")
+        print(f"   推薦模型：{assessment.recommended_model}")
+
+    def show_statistics(self):
+        """顯示統計報告"""
+        stats = self.time_tracker.generate_statistics()
+        print(self.time_tracker.format_statistics(stats))
+
+        # 顯示異常任務
+        outliers = self.time_tracker.get_outliers(threshold_percent=30.0)
+        if outliers:
+            print()
+            print("=" * 70)
+            print("⚠️  偏差較大的任務（> 30%）")
+            print("=" * 70)
+            for outlier in outliers[:5]:
+                print(f"\n{outlier['task_id']}: {outlier['title']}")
+                print(f"  偏差：{outlier['variance_percent']:+.1f}%")
+                print(f"  預估：{outlier['estimated']['min']}-{outlier['estimated']['max']} 分鐘")
+                print(f"  實際：{outlier['actual_minutes']:.1f} 分鐘")
+
+    def decompose_task(self, task_id: str):
+        """
+        分析任務並提供分解建議
+
+        Args:
+            task_id: 任務 ID
+        """
+        # 載入任務
+        with open(self.tasks_json_path, 'r', encoding='utf-8') as f:
+            tasks = json.load(f)
+
+        # 查找任務
+        task = None
+        for t in tasks:
+            if t['id'] == task_id or t['id'].endswith(task_id):
+                task = t
+                break
+
+        if not task:
+            print(f"❌ 找不到任務：{task_id}")
+            return
+
+        # 轉換為分解器需要的格式
+        task_for_decomposition = {
+            'id': task['id'],
+            'title': task['title'],
+            'input_paths': task.get('input_paths', []),
+            'agent': task.get('agent', ''),
+            'notes': task.get('notes', '')
+        }
+
+        # 分析分解建議
+        suggestion = self.decomposer.analyze_decomposition(task_for_decomposition)
+
+        # 顯示建議
+        print(self.decomposer.format_suggestion(suggestion, task))
+
+    def check_timeouts(self):
+        """檢查超時任務"""
+        print(self.timeout_handler.generate_timeout_report())
+
+
+def print_usage():
+    """打印使用說明"""
+    print("""
+任務管理工具 v1.0
+
+用法：
+    python3 task_manager.py <command> [arguments]
+
+命令：
+    analyze <task_id>       分析任務複雜度
+    add <task_id>           為任務添加時間預估
+    decompose <task_id>     分析任務並提供分解建議
+    timeout                 檢查超時任務
+    recover                 自動恢復假失敗任務
+    stats                   顯示統計報告
+
+範例：
+    python3 task_manager.py analyze p001
+    python3 task_manager.py add p001
+    python3 task_manager.py decompose p001
+    python3 task_manager.py timeout
+    python3 task_manager.py stats
+
+說明：
+    • analyze：顯示任務的複雜度評估，但不修改任務
+    • add：將複雜度評估和時間預估添加到任務的 time_tracking 字段
+    • decompose：分析任務是否需要分解，並提供分解方案
+    • timeout：檢查超時任務並提供處理建議
+    recover                 自動恢復假失敗任務
+    • stats：顯示所有任務的時間統計報告
+    """)
+
+
+def main():
+    """主程序"""
+    if len(sys.argv) < 2:
+        print_usage()
+        sys.exit(1)
+
+    command = sys.argv[1]
+    tasks_json_path = '/Users/charlie/.openclaw/workspace/kanban/tasks.json'
+
+    manager = TaskManager(tasks_json_path)
+
+    if command == 'analyze' and len(sys.argv) >= 3:
+        task_id = sys.argv[2]
+        manager.analyze_task(task_id)
+
+    elif command == 'add' and len(sys.argv) >= 3:
+        task_id = sys.argv[2]
+        manager.add_estimation_to_task(task_id)
+
+    elif command == 'decompose' and len(sys.argv) >= 3:
+        task_id = sys.argv[2]
+        manager.decompose_task(task_id)
+
+    elif command == 'timeout':
+        manager.check_timeouts()
+
+
+    elif command == 'recover':
+        manager.auto_recover()
+    elif command == 'stats':
+        manager.show_statistics()
+
+    else:
+        print_usage()
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
+
+    def auto_recover(self):
+        """自動恢復假失敗任務"""
+        import auto_recovery_extension
+        report = auto_recovery_extension.generate_recovery_report(self.timeout_handler)
+        print(report)

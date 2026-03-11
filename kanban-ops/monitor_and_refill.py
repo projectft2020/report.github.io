@@ -6,14 +6,25 @@ Monitor and Refill - 事件驅動任務監控
 
 import json
 import os
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
 # 配置
 WORKSPACE_ROOT = Path.home() / ".openclaw" / "workspace"
 TURBO_STATUS_FILE = WORKSPACE_ROOT / "kanban-ops" / "TURBO_STATUS.json"
-TASKS_FILE = Path.home() / ".openclaw" / "workspace-automation" / "kanban" / "tasks.json"
+TASKS_FILE = WORKSPACE_ROOT / "kanban" / "tasks.json"
 SCOUT_SCAN_LOG = Path.home() / ".openclaw" / "workspace-scout" / "SCAN_LOG.md"
+
+# 24 小時硬保護（防止 Scout 死鎖）
+HARD_TIMEOUT = 24 * 60 * 60  # 24 小時
+
+# 日誌配置
+logging.basicConfig(
+    level=logging.WARN,  # 默認只輸出 WARN 及以上級別
+    format='%(levelname)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 def is_turbo_mode_active():
@@ -47,8 +58,10 @@ def get_last_scan_time():
                 # 提取時間戳
                 try:
                     timestamp_str = line.split('[')[1].split(']')[0]
-                    timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S %Z')
-                    return timestamp
+                    # 嘗試 ISO 8601 格式（例如：2026-03-07T01:59:46.360706+00:00）
+                    timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                    # 移除時區信息，使其變為 offset-naive
+                    return timestamp.replace(tzinfo=None)
                 except:
                     continue
 
@@ -118,6 +131,11 @@ def should_scan(pending_count, last_scan_time):
 
     should = count_ok and interval_ok
 
+    # 24 小時硬保護（防止 Scout 死鎖）
+    if last_scan_time and time_since_scan > HARD_TIMEOUT:
+        logger.warning(f"⚠️ 超過 24 小時未掃描，強制觸發 Scout 掃描")
+        return True
+
     print(f"[Monitor] {mode}")
     print(f"[Monitor] 待辦任務: {pending_count} (閾值: {threshold})")
     print(f"[Monitor] 距離上次掃描: {time_since_scan:.0f} 秒 (最小: {min_interval} 秒)")
@@ -136,10 +154,10 @@ def trigger_scout_scan():
         scout_script = Path.home() / ".openclaw" / "workspace-scout" / "scout_agent.py"
 
         if not scout_script.exists():
-            print(f"[ERROR] Scout 腳本不存在: {scout_script}")
+            logger.error(f"Scout 腳本不存在: {scout_script}")
             return False
 
-        print(f"[Monitor] 觸發 Scout 掃描...")
+        logger.info(f"觸發 Scout 掃描...")
 
         # 執行 Scout 掃描
         import subprocess
@@ -152,14 +170,68 @@ def trigger_scout_scan():
         )
 
         if result.returncode == 0:
-            print(f"[Monitor] ✓ Scout 掃描完成")
+            logger.info(f"Scout 掃描完成")
             return True
         else:
-            print(f"[ERROR] Scout 掃描失敗: {result.stderr}")
+            logger.error(f"Scout 掃描失敗: {result.stderr}")
             return False
 
     except Exception as e:
-        print(f"[ERROR] 觸發 Scout 掃描失敗: {e}")
+        logger.error(f"觸發 Scout 掃描失敗: {e}")
+        return False
+
+
+def trigger_intelligent_spawn():
+    """
+    觸發智能並發任務啟動器
+
+    在 Scout 掃描後，自動啟動隊列中的任務
+    使用智能分組和序列啟動避免 rate limit
+    """
+    try:
+        spawn_script = WORKSPACE_ROOT / "kanban-ops" / "spawn_tasks_intelligent.py"
+
+        if not spawn_script.exists():
+            logger.error(f"智能啟動器不存在: {spawn_script}")
+            return False
+
+        # 檢查隊列中是否有任務
+        task_queue = WORKSPACE_ROOT / "kanban-ops" / "task_queue"
+        if task_queue.exists():
+            task_files = list(task_queue.glob("*.json"))
+            task_count = len(task_files)
+
+            if task_count == 0:
+                logger.info(f"隊列中沒有任務，跳過啟動")
+                return True
+
+            logger.info(f"發現 {task_count} 個任務在隊列中")
+        else:
+            logger.warning(f"隊列目錄不存在，跳過啟動")
+            return True
+
+        logger.info(f"使用智能並發啟動器啟動任務...")
+
+        # 執行智能啟動（dry-run 模式，只打印計劃）
+        import subprocess
+        result = subprocess.run(
+            ['python3', str(spawn_script), 'spawn', '--dry-run'],
+            cwd=str(WORKSPACE_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=60  # 1 分鐘超時
+        )
+
+        if result.returncode == 0:
+            logger.info(f"智能啟動計劃已生成")
+            logger.info(f"提示：在主會話中執行 'python3 kanban-ops/spawn_tasks_intelligent.py spawn' 來實際啟動")
+            return True
+        else:
+            logger.error(f"智能啟動計劃生成失敗: {result.stderr}")
+            return False
+
+    except Exception as e:
+        logger.error(f"觸發智能啟動失敗: {e}")
         return False
 
 
@@ -188,7 +260,12 @@ def main():
     # 觸發掃描
     if should:
         print(f"\n🚀 準備觸發 Scout 掃描...")
-        trigger_scout_scan()
+        scan_success = trigger_scout_scan()
+
+        # 如果掃描成功，觸發智能啟動器
+        if scan_success:
+            print(f"\n🤖 準備使用智能並發啟動器...")
+            trigger_intelligent_spawn()
 
     print(f"\n✓ 監控檢查完成")
     print("=" * 60)

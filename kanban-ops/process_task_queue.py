@@ -20,6 +20,7 @@ from datetime import datetime
 # 路徑配置
 WORKSPACE = Path.home() / ".openclaw" / "workspace"
 QUEUE_DIR = WORKSPACE / "kanban-ops" / "task_queue"
+TASKS_JSON = WORKSPACE / "kanban" / "tasks.json"
 
 
 def list_queue():
@@ -59,6 +60,50 @@ def list_queue():
     return tasks
 
 
+def load_tasks():
+    """載入 tasks.json"""
+    if not TASKS_JSON.exists():
+        print(f"⚠️ tasks.json 不存在：{TASKS_JSON}")
+        return []
+
+    try:
+        with open(TASKS_JSON, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"⚠️ 載入 tasks.json 失敗：{e}")
+        return []
+
+
+def save_tasks(tasks):
+    """保存任務到 tasks.json"""
+    try:
+        with open(TASKS_JSON, 'w', encoding='utf-8') as f:
+            json.dump(tasks, f, indent=2, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"⚠️ 保存 tasks.json 失敗：{e}")
+        return False
+
+
+def update_task_status(task_id, status):
+    """更新任務狀態"""
+    tasks = load_tasks()
+    task_found = False
+
+    for task in tasks:
+        if task.get('id') == task_id:
+            task['status'] = status
+            task['updated_at'] = datetime.now().isoformat()
+            task_found = True
+            break
+
+    if task_found:
+        save_tasks(tasks)
+        print(f"✅ 任務 {task_id} 狀態已更新為 {status}")
+    else:
+        print(f"⚠️ 未找到任務 {task_id}")
+
+
 def pop_task():
     """彈出並執行一個任務"""
     task_files = sorted(QUEUE_DIR.glob("*.json"))
@@ -75,10 +120,15 @@ def pop_task():
     with open(task_file, 'r', encoding='utf-8') as f:
         task_data = json.load(f)
 
-    # 更新狀態為 in_progress
+    # 更新任務狀態為 in_progress
     task_data['status'] = 'in_progress'
     with open(task_file, 'w', encoding='utf-8') as f:
         json.dump(task_data, f, indent=2, ensure_ascii=False)
+
+    # 更新 tasks.json 中的任務狀態
+    task_id = task_data.get('label', task_data.get('task_id'))
+    if task_id:
+        update_task_status(task_id, 'in_progress')
 
     # 準備執行
     print(f"   標籤：{task_data.get('label')}")

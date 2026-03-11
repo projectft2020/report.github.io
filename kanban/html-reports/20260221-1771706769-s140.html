@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Output</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Output</h1>
+<p><strong>Task ID:</strong> 20260221-1771706769-s140
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T21:31:00Z</p>
+<h2>Research Summary</h2>
+<p>SOLVAR is a novel method for cryo-electron microscopy (cryo-EM) heterogeneity analysis that leverages stochastic optimization and low-rank covariance estimation to efficiently analyze continuous structural variability while enabling pose refinement—an innovation absent from previous covariance-based methods.</p>
+<h2>Key Findings</h2>
+<ol>
+<li>
+<p><strong>SOLVAR Methodology</strong> — Stochastic Optimization for Low-rank Variability Analysis (SOLVAR) addresses the computational challenges of covariance-based heterogeneity analysis in cryo-EM by exploiting the low-rank structure of covariance matrices | Source: https://arxiv.org/abs/2602.17603</p>
+</li>
+<li>
+<p><strong>Pose Refinement Innovation</strong> — Unlike all previous covariance-based methods, SOLVAR can refine particle image poses within the optimization framework, correcting errors introduced by heterogeneous data | Source: https://arxiv.org/abs/2602.17603</p>
+</li>
+<li>
+<p><strong>State-of-the-Art Performance</strong> — SOLVAR achieves superior performance on multiple datasets in recent heterogeneity benchmarks while maintaining computational efficiency | Source: https://arxiv.org/abs/2602.17603</p>
+</li>
+</ol>
+<h2>Detailed Analysis</h2>
+<h3>Background and Problem Context</h3>
+<p>Cryo-electron microscopy (cryo-EM) has emerged as a powerful technique for determining three-dimensional structures of macromolecules. However, a key challenge is characterizing continuous heterogeneity, where molecules adopt a continuum of conformational states rather than discrete states. Traditional methods that model heterogeneity as a small number of discrete states cannot resolve complex molecular dynamics or achieve high-resolution reconstructions.</p>
+<h3>Covariance-Based Approaches and Limitations</h3>
+<p>Covariance-based methods offer a principled approach to modeling structural variability but face significant computational challenges due to the enormous size of covariance matrices (N³ × N³ for N×N pixel images). While recent methods have exploited low-dimensional structure to estimate principal components directly, all covariance-based methods (and most other heterogeneity analysis methods) share a critical limitation: they require pre-computed particle poses and cannot refine these initial estimates, which are distorted by heterogeneity.</p>
+<h3>SOLVAR's Technical Innovation</h3>
+<p>SOLVAR introduces several key innovations:</p>
+<ol>
+<li>
+<p><strong>Low-Rank Covariance Optimization</strong>: By leveraging the low-rank assumption on covariance matrices, SOLVAR reformulates the estimation as an optimization problem solvable via gradient-based methods, avoiding direct computation of prohibitively large covariance matrices.</p>
+</li>
+<li>
+<p><strong>Integrated Pose Refinement</strong>: The framework naturally accommodates particle image pose optimization within the same optimization problem, enabling simultaneous heterogeneity analysis and pose correction—a first for covariance-based methods.</p>
+</li>
+<li>
+<p><strong>Stochastic Optimization</strong>: The method uses stochastic optimization techniques to efficiently estimate principal components despite the apparently prohibitive computational complexity.</p>
+</li>
+</ol>
+<h3>Mathematical Framework</h3>
+<p>SOLVAR operates on the linear model for structural heterogeneity:</p>
+<pre class="codehilite"><code>X_i = X_0 + ∑_{j=1}^k z_{i,j} v_j
+</code></pre>
+
+<p>where X_0 is the mean volume, v_j are basis volumes (principal components), and z_{i,j} are latent variables describing the conformational state of each particle.</p>
+<p>The method formulates the estimation problem as:
+- Mean volume estimation: μ̂ = argmin_μ ∑‖Y_i - P_i μ‖² + ‖μ‖²_{W_μ⁻¹}
+- Covariance estimation: Σ̂ = argmin_Σ ∑‖(Y_i - P_i μ̂)(Y_i - P_i μ̂)<em> - P_i Σ P_i</em> - σ²I‖_F² + regularization</p>
+<h3>Implementation and Availability</h3>
+<p>The SOLVAR algorithm is implemented in Python and publicly available at:
+- GitHub Repository: https://github.com/RoeyYadgar/SOLVAR</p>
+<p>Key implementation features:
+- Compatible with cryoDRGN input interface
+- Integrates with RECOVAR for heterogeneous reconstruction
+- Supports various reconstruction methods (RELION, reprojection, etc.)
+- Provides comprehensive analysis tools including latent space visualization and trajectory analysis</p>
+<h3>Performance and Validation</h3>
+<p>Numerical experiments on both synthetic and experimental datasets demonstrate that SOLVAR:
+- Accurately captures dominant components of structural variability
+- Maintains computational efficiency despite the complex optimization problem
+- Outperforms existing algorithms in recent heterogeneity benchmarks
+- Successfully refines particle poses to account for heterogeneity-induced errors</p>
+<h3>Practical Applications</h3>
+<p>SOLVAR addresses a critical need in structural biology by enabling:
+- High-resolution analysis of continuously heterogeneous molecular complexes
+- Correction of pose errors caused by structural variability
+- Efficient computational analysis of large cryo-EM datasets
+- Integration with existing cryo-EM processing pipelines</p>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.17603">SOLVAR: Fast covariance-based heterogeneity analysis with pose refinement for cryo-EM</a> — arXiv paper detailing the methodology and results</li>
+<li><a href="https://github.com/RoeyYadgar/SOLVAR">SOLVAR GitHub Repository</a> — Implementation and usage documentation</li>
+</ul>
+<h2>Metadata</h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> moderate</li>
+<li><strong>Data freshness:</strong> February 19, 2026 (paper publication date)</li>
+<li><strong>Suggestions:</strong> SOLVAR represents a significant advancement in cryo-EM heterogeneity analysis, particularly for datasets with continuous conformational changes. Future work could explore extensions to handle more complex noise models and integration with deep learning approaches.</li>
+<li><strong>Errors:</strong> None encountered during research</li>
+</ul>
+        <p class="footer">Generated: 2026-02-22 11:29:11</p>
+        <a href="index.html" class="back-link">← Back to Index</a>
+    </div>
+</body>
+</html>

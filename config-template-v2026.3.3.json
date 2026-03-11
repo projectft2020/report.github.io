@@ -1,0 +1,83 @@
+{
+  "_comment": "OpenClaw 2026.3.3 配置模板",
+  "_version": "2026.3.3",
+  "_purpose": "針對 Breaking Changes 的相容配置",
+
+  "agents": {
+    "defaults": {
+      "heartbeat": {
+        "directPolicy": "block",
+        "_comment": "directPolicy: 'block' 保持舊行為，阻止 DM 遞送",
+        "_rationale": "我們主要在 webchat 運作，不需要 DM 遞送"
+      },
+      "sandbox": {
+        "docker": {
+          "dangerouslyAllowContainerNamespaceJoin": false,
+          "_comment": "使用新默認值，增強安全性",
+          "_rationale": "我們不使用 Docker network: 'container:<id>' 模式"
+        }
+      }
+    }
+  },
+
+  "acp": {
+    "dispatch": {
+      "enabled": false,
+      "_comment": "明確禁用 ACP（Agent Control Protocol）",
+      "_rationale": "我們使用 sessions_spawn 進行子代理通信，不使用 ACP"
+    }
+  },
+
+  "_breaking_changes_documented": [
+    {
+      "name": "Heartbeat DM 遞送策略",
+      "version": "2026.2.24",
+      "impact": "中等",
+      "mitigation": "設置 directPolicy: 'block'"
+    },
+    {
+      "name": "Docker 容器命名空間",
+      "version": "2026.2.x",
+      "impact": "低",
+      "mitigation": "使用新默認值 dangerouslyAllowContainerNamespaceJoin: false"
+    },
+    {
+      "name": "ACP 路由默認啟用",
+      "version": "2026.2.x",
+      "impact": "低",
+      "mitigation": "明確設置 acp.dispatch.enabled: false"
+    }
+  ],
+
+  "_configuration_notes": {
+    "tools_profile": "當前系統已安裝，不受新默認值影響",
+    "plugin_sdk": "不使用 registerHttpHandler API，無影響",
+    "node_exec": "不使用 host=node 執行，無影響",
+    "node_system_run": "主要使用完整路徑，影響較小"
+  },
+
+  "_testing_checklist": {
+    "heartbeat": [
+      "auto_spawn_heartbeat.py 正常運作",
+      "任務啟動頻率正常（65-300 秒）",
+      "背壓機制調整正常",
+      "webchat 頻道心跳不被阻止"
+    ],
+    "subagent_communication": [
+      "sessions_spawn 正常啟動",
+      "子代理完成後狀態同步",
+      "subagents list 正常運作"
+    ],
+    "backpressure": [
+      "健康度計算正常",
+      "動態調整並發上限（2-3）",
+      "動態調整啟動頻率（65-300 秒）"
+    ]
+  },
+
+  "_rollback_plan": {
+    "backup_location": "~/.openclaw/backup-YYYYMMDD/",
+    "git_rollback": "cd ~/.openclaw && git checkout <commit-hash-before-upgrade>",
+    "version_downgrade": "openclaw update 2026.2.15"
+  }
+}

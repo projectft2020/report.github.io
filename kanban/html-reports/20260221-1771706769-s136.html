@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Output</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Output</h1>
+<p><strong>Task ID:</strong> 20260221-1771706769-s136
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T21:31:00Z</p>
+<h2>Research Summary</h2>
+<p>GICDM (Generative Iterative Contextual Dissimilarity Measure) is a novel method for mitigating hubness in distance-based generative model evaluation. The paper demonstrates that common embedding spaces used for evaluating generative models exhibit the hubness phenomenon, which distorts nearest neighbor relationships and biases distance-based metrics. GICDM builds on the classical Iterative Contextual Dissimilarity Measure (ICDM) and introduces a multi-scale extension to improve empirical behavior, showing significant improvements in metric reliability and alignment with human judgment.</p>
+<h2>Key Findings</h2>
+<ol>
+<li>
+<p><strong>Hubness Problem Identification</strong> — High-dimensional embedding spaces used for generative model evaluation suffer from hubness, where certain points appear disproportionately often as nearest neighbors, distorting distance-based metrics | Source: arXiv:2602.16449</p>
+</li>
+<li>
+<p><strong>Three Key Desiderata</strong> — GICDM addresses three core requirements: (1) reduce hubness in real datasets, (2) preserve relative positioning of generated points, and (3) ensure independence between generated points during evaluation | Source: arXiv:2602.16449</p>
+</li>
+<li>
+<p><strong>Superior Performance</strong> — ICDM outperforms other hubness reduction methods across all 17 tested pairs of datasets and embeddings, making it the ideal foundation for GICDM | Source: arXiv:2602.16449</p>
+</li>
+<li>
+<p><strong>Multi-scale Filtering Innovation</strong> — GICDM introduces a multi-scale filtering strategy to prevent overcorrection, addressing limitations of existing hubness reduction methods when applied to generative model evaluation | Source: arXiv:2602.16449</p>
+</li>
+<li>
+<p><strong>Real-world Impact</strong> — Experiments show GICDM improves benchmark success rates from 8/14 to 10/14 for purpose criteria and from 8/13 to 11/13 for bounds criteria in synthetic tests, while maintaining or improving correlation with human judgment | Source: arXiv:2602.16449</p>
+</li>
+</ol>
+<h2>Detailed Analysis</h2>
+<h3>The Hubness Problem in Generative Model Evaluation</h3>
+<p>Hubness is a phenomenon in high-dimensional spaces where certain points (called "hubs") appear disproportionately often among the k-nearest neighbors of other data points. This occurs due to the curse of dimensionality and density gradients inherent in high-dimensional data distributions. In generative model evaluation, this phenomenon severely impacts distance-based metrics such as Precision, Recall, Density, and Coverage.</p>
+<p>The research shows that hubness manifests in common embedding spaces used for generative model evaluation:
+- InceptionV3: 2048 dimensions
+- DINOv3: 4096 dimensions<br />
+- CLAP: 1024 dimensions</p>
+<p>These high-dimensional spaces are particularly vulnerable to hubness, which undermines the reliability of nearest neighbor relationships that form the basis of most distance-based evaluation metrics.</p>
+<h3>GICDM Methodology</h3>
+<p>GICDM builds on the classical Iterative Contextual Dissimilarity Measure (ICDM), which was originally introduced for image retrieval but had been largely overlooked for hubness reduction in favor of its non-iterative counterpart (NICDM).</p>
+<p><strong>Core Algorithm Components:</strong></p>
+<ol>
+<li>
+<p><strong>ICDM Foundation</strong>: Apply ICDM to the real dataset only, computing scaling factors that uniformize the data density and eliminate density gradients that cause hubness.</p>
+</li>
+<li>
+<p><strong>Out-of-sample Extension</strong>: For generated points, compute scaling factors based solely on their relationship to the real set, ensuring independence between generated points.</p>
+</li>
+<li>
+<p><strong>Multi-scale Filtering</strong>: Implement filtering at multiple scales to prevent overcorrection for generated points that don't align well with the real data distribution.</p>
+</li>
+</ol>
+<p><strong>Technical Innovation:</strong></p>
+<p>The key mathematical insight is that for a generated point x_j^g, the scaling factor δ_j^g is computed as:</p>
+<pre class="codehilite"><code>δ_j^g = μ̄^{r,eq} / [1/(K+1) * Σ_{k=1}^{K+1} δ_{NN_k^{r,eq}(x_j^g)}^r * d_{x_j^g, NN_k^{r,eq}(x_j^g)}]
+</code></pre>
+
+<p>Where μ̄^{r,eq} is the equilibrium average neighbor distance for real points after ICDM convergence.</p>
+<p><strong>Multi-scale Filtering Approach:</strong></p>
+<p>GICDM uses two different neighborhood sizes (K1 and K2, typically K2 = 10*K1) to ensure at least one operates outside the problematic crossover dimension where points transition from being closer to each other to being closer to the center. Generated points are filtered out if their scaling factors deviate too much from their real neighbors' scaling factors.</p>
+<h3>Experimental Results</h3>
+<p><strong>Synthetic Benchmark Performance:</strong>
+GICDM was evaluated on the comprehensive synthetic benchmark from Räisä et al. (2025), which tests various aspects of generative model evaluation metrics:</p>
+<ul>
+<li><strong>Clipped Density</strong>: Purpose criteria improved from 8/14 to 10/14, Bounds criteria from 8/13 to 11/13</li>
+<li><strong>Clipped Coverage</strong>: Purpose criteria improved from 8/14 to 10/14, Bounds criteria from 9/13 to 11/13</li>
+<li><strong>Precision &amp; Recall</strong>: Significant improvements across most criteria</li>
+</ul>
+<p><strong>Human Correlation Analysis:</strong>
+Using 42 generated datasets across four image datasets (CIFAR-10, ImageNet, LSUN Bedroom, FFHQ), GICDM maintained or improved correlation with human judgment:</p>
+<ul>
+<li><strong>DINOv2 Embeddings</strong>: Clipped Density correlation improved from 0.82 to 0.95</li>
+<li><strong>DINOv3 Embeddings</strong>: Clipped Density correlation improved from 0.94 to 0.97</li>
+</ul>
+<p><strong>Classifier-Free Guidance Experiment:</strong>
+GICDM corrected counter-intuitive behavior in classifier-free guidance experiments, where both fidelity and coverage incorrectly increased with guidance. After GICDM application:
+- Clipped Density increased (as expected with improved fidelity)
+- Clipped Coverage decreased (as expected with reduced coverage)</p>
+<h3>Significance and Implications</h3>
+<p><strong>Theoretical Contributions:</strong>
+1. Establishes hubness as a fundamental cause of failures in distance-based generative model evaluation metrics
+2. Demonstrates that ICDM, previously overlooked for hubness reduction, is actually superior to existing methods
+3. Introduces the first hubness reduction method specifically designed for generative model evaluation</p>
+<p><strong>Practical Impact:</strong>
+1. Enables more reliable evaluation of generative models in high-dimensional spaces
+2. Improves alignment between automated metrics and human judgment
+3. Resolves specific failures that have persisted despite recent metric improvements</p>
+<p><strong>Limitations:</strong>
+1. GICDM's effectiveness depends on the underlying metric being robust to real outliers
+2. Works best with robust metrics like Clipped Density and Clipped Coverage
+3. Computational complexity is higher than non-iterative methods, but justified by performance improvements</p>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.16449">GICDM: Mitigating Hubness for Reliable Distance-Based Generative Model Evaluation</a> — Main paper introducing GICDM methodology and experimental validation</li>
+<li><a href="https://www.jmlr.org/papers/volume11/radovanovic10a/radovanovic10a.pdf">Popular Nearest Neighbors in High-Dimensional Data</a> — Foundational work on hubness phenomenon</li>
+<li><a href="https://arxiv.org/abs/1904.06991">Improved Precision and Recall Metric for Assessing Generative Models</a> — Background on generative model evaluation metrics</li>
+<li><a href="https://ieeexplore.ieee.org/document/4269995/">A contextual dissimilarity measure for accurate and efficient image search</a> — Original ICDM methodology</li>
+</ul>
+<h2>Metadata</h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (paper published February 18, 2026)</li>
+<li><strong>Suggestions:</strong> Apply GICDM to distance-based generative model evaluation tasks, particularly with high-dimensional embeddings and robust metrics like Clipped Density/Coverage</li>
+<li><strong>Errors:</strong> None identified - paper provides comprehensive theoretical analysis and experimental validation</li>
+</ul>
+        <p class="footer">Generated: 2026-02-22 11:29:11</p>
+        <a href="index.html" class="back-link">← Back to Index</a>
+    </div>
+</body>
+</html>

@@ -11,7 +11,7 @@
 - **Favorite character:** Charlie the Unicorn
 - **What matters to him:** Seriousness, consistency, not being performative
 - **Humor style:** Appreciates subtle humor (the kidney thing)
-- **Communication:** Prefers Chinese (Simplified) — but I'll use Traditional Chinese Taiwan usage for him
+- **Communication:** Prefers **Traditional Chinese (Taiwan usage)** — use繁體中文for all replies and reports
 
 **Things to remember:**
 

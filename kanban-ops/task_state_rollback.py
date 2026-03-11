@@ -31,12 +31,16 @@ from datetime import datetime, timezone, timedelta
 # 路徑配置
 WORKSPACE = Path.home() / ".openclaw" / "workspace"
 TASKS_JSON = WORKSPACE / "kanban" / "tasks.json"
-SPAWN_TIMEOUT_MINUTES = 120  # spawning 狀態超過 2 小時視為卡住
+
+# P0 行動：Spawning 超時保護（根據 Mentor 建議調整）
+SPAWN_SUSPECT_TIMEOUT_MINUTES = 30  # 30 分鐘：疑似卡住，發出警報
+SPAWN_ROLLBACK_TIMEOUT_MINUTES = 45  # 45 分鐘：確定卡住，自動回滾
 # 說明：
 # 1. spawning 是"正在執行"的狀態，不是僅"正在啟動"
 # 2. .status 文件只在完成/失敗時創建，沒有 in_progress 中間狀態
-# 3. 研究任務通常需要 60-90 分鐘，2 小時留有足夠餘量
-# 4. 如果 subagents list 正常返回活躍列表，實際上會立即跳過（不需要等超時）
+# 3. 研究任務通常需要 5-10 分鐘完成，30 分鐘足夠緩衝
+# 4. 45 分鐘回滾給予足夠啟動時間，避免誤殺
+# 5. 如果 subagents list 正常返回活躍列表，實際上會立即跳過（不需要等超時）
 
 
 def log(level, message):
@@ -82,19 +86,22 @@ def get_active_subagent_labels():
 
 def find_stuck_spawnings(tasks, active_labels):
     """
-    找出卡住的 spawning 任務
+    找出卡住的 spawning 任務（兩級超時檢測）
 
     規則：
     1. 狀態為 spawning
-    2. spawning 狀態持續時間超過 120 分鐘（2 小時）
-    3. 標籤不在活躍子代理列表中（如果提供了）
-    4. 如果 spawning 持續時間 < 10 分鐘，不回滾（給予緩衝時間）
+    2. 標籤不在活躍子代理列表中（如果提供了）
+    3. spawning < 10 分鐘：跳過（緩衝期）
+    4. 10-30 分鐘：正常
+    5. 30-45 分鐘：疑似卡住，發出警報
+    6. > 45 分鐘：確定卡住，準備回滾
 
     注意：即使 active_labels 為空（無法獲取），超時檢查仍然有效
 
     Returns:
-        卡住的任務列表
+        (疑似卡住列表, 確定卡住列表)
     """
+    suspected = []
     stuck = []
     now = datetime.now(timezone.utc)
     MIN_BUFFER_MINUTES = 10  # 最小緩衝時間，防止誤殺剛啟動的任務
@@ -113,7 +120,11 @@ def find_stuck_spawnings(tasks, active_labels):
         updated_at = task.get('updated_at', task.get('spawned_at'))
         if updated_at:
             try:
+                # 嘗試解析時間戳，並確保時區一致
                 updated_time = datetime.fromisoformat(updated_at.replace('Z', '+00:00'))
+                # 如果沒有時區信息，假設是 UTC（修復 offset-naive 問題）
+                if updated_time.tzinfo is None:
+                    updated_time = updated_time.replace(tzinfo=timezone.utc)
                 elapsed = now - updated_time
                 elapsed_minutes = elapsed.total_seconds() / 60
 
@@ -122,10 +133,15 @@ def find_stuck_spawnings(tasks, active_labels):
                     log("DEBUG", f"跳過（緩衝中）：{task_id}（spawning 持續 {int(elapsed_minutes)} 分鐘）")
                     continue
 
-                # 如果超過超時時間，視為卡住
-                if elapsed > timedelta(minutes=SPAWN_TIMEOUT_MINUTES):
+                # 30-45 分鐘：疑似卡住，發出警報
+                if timedelta(minutes=SPAWN_SUSPECT_TIMEOUT_MINUTES) <= elapsed < timedelta(minutes=SPAWN_ROLLBACK_TIMEOUT_MINUTES):
+                    suspected.append(task)
+                    log("WARNING", f"⚠️ 疑似卡住任務：{task_id}（spawning 持續 {int(elapsed_minutes)} 分鐘）")
+
+                # 超過 45 分鐘，視為卡住
+                elif elapsed >= timedelta(minutes=SPAWN_ROLLBACK_TIMEOUT_MINUTES):
                     stuck.append(task)
-                    log("INFO", f"卡住任務：{task_id}（spawning 持續 {int(elapsed_minutes)} 分鐘）")
+                    log("INFO", f"🔴 卡住任務（確定）：{task_id}（spawning 持續 {int(elapsed_minutes)} 分鐘）")
 
             except Exception as e:
                 log("WARNING", f"解析任務時間失敗：{e}")
@@ -135,7 +151,7 @@ def find_stuck_spawnings(tasks, active_labels):
             # 沒有時間戳記錄，跳過（避免誤殺）
             log("WARNING", f"跳過（無時間戳）：{task_id}")
 
-    return stuck
+    return suspected, stuck
 
 
 def rollback_tasks(tasks, task_ids):
@@ -198,18 +214,26 @@ def main():
     except Exception as e:
         log("WARNING", f"獲取活躍子代理列表時發生錯誤：{e}，將僅使用超時檢查")
 
-    # 找出卡住的任務（基於超時）
-    stuck_tasks = find_stuck_spawnings(tasks, active_labels)
+    # 找出疑似卡住和確定卡住的任務（基於超時）
+    suspected_tasks, stuck_tasks = find_stuck_spawnings(tasks, active_labels)
 
-    if not stuck_tasks:
+    if not suspected_tasks and not stuck_tasks:
         log("INFO", "沒有卡住的 spawning 任務")
         return 0
 
-    log("WARNING", f"發現 {len(stuck_tasks)} 個卡住的 spawning 任務")
+    # 警報疑似卡住的任務
+    if suspected_tasks:
+        log("WARNING", f"⚠️ 發現 {len(suspected_tasks)} 個疑似卡住的 spawning 任務（{SPAWN_SUSPECT_TIMEOUT_MINUTES}-{SPAWN_ROLLBACK_TIMEOUT_MINUTES} 分鐘）")
+        log("INFO", f"   這些任務將在 {SPAWN_ROLLBACK_TIMEOUT_MINUTES} 分鐘時自動回滾")
 
-    # 回滾任務
-    task_ids = [t['id'] for t in stuck_tasks]
-    count = rollback_tasks(tasks, task_ids)
+    # 回滾確定卡住的任務
+    if stuck_tasks:
+        log("WARNING", f"🔴 發現 {len(stuck_tasks)} 個確定卡住的 spawning 任務（>{SPAWN_ROLLBACK_TIMEOUT_MINUTES} 分鐘）")
+
+        task_ids = [t['id'] for t in stuck_tasks]
+        count = rollback_tasks(tasks, task_ids)
+    else:
+        count = 0
 
     if count > 0:
         # 保存到 tasks.json

@@ -6,7 +6,7 @@ Check these tasks periodically (rotate through them, 2-4 times per day).
 
 ### 1. 自動任務啟動器 (Auto Spawn Heartbeat)
 ```bash
-cd ~/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
+cd ~/.openclaw/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
 ```
 
 **What it does:**
@@ -45,7 +45,7 @@ cd ~/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
 
 ### 2. 狀態同步器 (Task Sync)
 ```bash
-cd ~/workspace && python3 kanban-ops/task_sync.py
+cd ~/.openclaw/workspace && python3 kanban-ops/task_sync.py
 ```
 
 **What it does:**
@@ -61,7 +61,7 @@ tail -50 ~/.openclaw/workspace/kanban/sync.log
 
 ### 4. Monitor and Refill (Scout)
 ```bash
-cd ~/workspace && python3 kanban-ops/monitor_and_refill.py
+cd ~/.openclaw/workspace && python3 kanban-ops/monitor_and_refill.py
 ```
 
 **What it does:**
@@ -77,7 +77,124 @@ cd ~/workspace && python3 kanban-ops/monitor_and_refill.py
 - ✅ No over-scanning (2-hour guardrail)
 - ✅ System self-regulation
 
-### 5. Scout Agent Status
+---
+
+### 5. 研究報告同步 (Research Sync to Obsidian)
+```bash
+cd ~/.openclaw/workspace && python3 research_sync_system.py sync-all
+```
+
+**What it does:**
+- 自動掃描 Kanban 中已完成的研究報告
+- 從報告中提取元數據（標題、摘要、分類、日期）
+- 根據內容分類到適當的 Obsidian 目錄（8 個分類）
+- 更新 INDEX.md，建立連結和索引
+
+**分類系統:**
+- Market-Microstructure（市場微結構）
+- Risk-Management（風險管理）
+- Strategy-Development（策略開發）
+- Empirical-Testing（實證測試）
+- Factor-Investing（因子投資）
+- Machine-Learning（機器學習）
+- Economic-Analysis（經濟分析）
+- Crypto-Research（加密貨幣研究）
+
+**Obsidian 路徑:**
+- 主索引：`/Users/charlie/.openclaw/workspace/quant/research/Research/INDEX.md`
+- 分類索引：`Research/<Category>/INDEX.md`
+- 報告文件：`Research/<Category>/<task-id>.md`
+
+**其他命令:**
+```bash
+# 查看同步狀態
+python3 research_sync_system.py status
+
+# 掃描新報告（不同步）
+python3 research_sync_system.py scan
+
+# 同步單個報告
+python3 research_sync_system.py sync <task_id>
+```
+
+**詳細說明:**
+- 完整使用文檔：`RESEARCH_SYNC_README.md`
+- 同步數據庫：`.research_sync_db.json`
+
+---
+
+### X. Scout Daily Scan (每天掃描)
+```bash
+cd ~/.openclaw/workspace-scout && python3 scout_agent.py scan
+```
+
+**What it does:**
+- 強制執行 Scout 掃描（不管 pending 任務數量）
+- 每天執行一次（確保不會遺漏新數據源）
+- 補充 Monitor and Refill 的不足（2 小時保護窗口）
+
+**觸發條件：**
+- 距離上次掃描 > 24 小時（每天一次）
+- 或用戶手動觸發
+
+**優勢：**
+- ✅ 確保每天至少掃描一次
+- ✅ 避免長期未掃描（如 3.5 天）
+- ✅ 與 Monitor and Refill 互補（event-driven + daily backup）
+
+**注意：** 這個任務與 Monitor and Refill 一起使用，確保 Scout 週期性掃描
+
+### 5. 狀態回滾檢查 (Task State Rollback) - P0 行動
+```bash
+cd ~/.openclaw/workspace && python3 kanban-ops/task_state_rollback.py
+```
+
+**What it does:**
+- 檢查並回滾卡住的 spawning 任務（>45 分鐘）
+- 兩級檢測：30 分鐘警報，45 分鐘回滾
+- 防止任務永久卡在 spawning 狀態
+
+**P0 行動改善**：
+- 原超時：120 分鐘 → 新超時：30/45 分鐘
+- 等待時間減少 62.5%
+
+### 6. 失敗任務清理 (Task Cleanup) - P1 行動
+```bash
+cd ~/.openclaw/workspace && python3 kanban-ops/task_cleanup.py check
+```
+
+**What it does:**
+- 檢查失敗任務數量（最多保留 50 個）
+- 清理超過 7 天的失敗任務
+- 自動備份被清理的任務
+
+**P1 行動規則**：
+- 最多保留 50 個失敗任務
+- 清理超過 7 天的失敗任務
+- 保留最近修改的失敗任務
+
+**執行清理（如需要）**：
+```bash
+cd ~/.openclaw/workspace && python3 kanban-ops/task_cleanup.py cleanup
+```
+
+### 8. Scout Daily Scan (每天掃描)
+```bash
+cd ~/.openclaw/workspace-scout && python3 scout_agent.py scan
+```
+
+**What it does:**
+- 強制執行 Scout 掃描（不管 pending 任務數量）
+- 每天執行一次（確保不會遺漏新數據源）
+- 補充 Monitor and Refill 的不足（2 小時保護窗口）
+
+**觸發條件：**
+- 距離上次掃描 > 24 小時（每天一次）
+- 或用戶手動觸發
+
+---
+
+### 9. Scout Agent Status
 ```bash
 # Check Scout's statistics and recent activity
 python3 kanban-ops/scout_agent.py stats
@@ -94,7 +211,30 @@ python3 kanban-ops/scout_agent.py stats
 - If low average rating (< 3.0) → Review Scout's recommendations
 - If high pending count (> 10) → Consider telling Scout to pause
 
-### 6. Threads 社群維護 - 每 4-6 小時
+### 7. 背壓機制檢查 (Backpressure Check) - P1 行動
+```bash
+cd ~/.openclaw/workspace && python3 kanban-ops/backpressure.py check
+```
+
+**What it does:**
+- 計算系統健康度（0.0-1.0）
+- 根據健康度動態調整啟動頻率（65-300 秒）
+- 根據健康度動態調整並發上限（2-3）
+
+**P1 行動動態調整規則**：
+
+| 健康度 | 啟動頻率 | 並發上限 | 狀態 |
+|--------|----------|----------|------|
+| ≥ 0.8 | 65 秒 | 3 | 🟢 健康 |
+| 0.5 - 0.8 | 120 秒 | 3 | 🟡 中等 |
+| < 0.5 | 300 秒 | 2 | 🔴 不健康 |
+
+**生成背壓報告**：
+```bash
+cd ~/.openclaw/workspace && python3 kanban-ops/backpressure.py report
+```
+
+### 8. Threads 社群維護 - 每 4-6 小時
 ```bash
 # 檢查 Threads 留言並回覆
 # 這個任務在主會話中執行，需要使用 browser 工具
@@ -138,7 +278,7 @@ python3 kanban-ops/scout_agent.py stats
 ### 7. 學徒檢查點 (Apprentice Checkpoint) - 每 6 小時
 ```bash
 # 每 12 個 heartbeat 觸發一次（約 6 小時）
-cd ~/workspace && python3 mentor-ops/apprentice_checkpoint.py
+cd ~/.openclaw/workspace && python3 mentor-ops/apprentice_checkpoint.py
 ```
 
 **What it does:**
@@ -171,6 +311,40 @@ cat ~/workspace/memory/learning/$(date +%Y-%m-%d).md
 
 ## Rotating Tasks (Pick 1-2 Per Heartbeat)
 
+### Weekly: 記憶維護（每週執行）
+```bash
+# 執行記憶維護（知識內化、記憶更新、記憶整理）
+cd ~/.openclaw/workspace && python3 skills/memory-maintenance/scripts/maintain.py
+```
+
+**What it does:**
+- 掃描最近 7 天的 daily logs
+- 提取重要的學習點、模式、洞察
+- 更新 MEMORY.md、SOUL.md、topics/
+- 清理過時記憶（>30 天）
+- 生成維護報告
+
+**檢查頻率：** 每週一次（約 28 個 heartbeat）
+
+**Dry run（預覽）：**
+```bash
+# 只顯示計劃，不執行
+python3 skills/memory-maintenance/scripts/maintain.py --dry-run
+```
+
+**查看報告：**
+```bash
+# 最近的維護報告
+cat ~/.openclaw/workspace/memory/maintenance-report-$(date +%Y%m%d).md
+```
+
+**注意：**
+- 記憶維護會自動識別以下標記並提取內容：
+  - `### 我學到`、`### What I've Learned` - 學習點
+  - `### 核心模式`、`### 關鍵洞察` - 模式和洞察
+  - `### 關鍵決策`、`### Key Decisions` - 決策
+  - `### 成就`、`### 實證成果` - 成就
+
 ### Every 2-4 Hours: Scout Scan Check
 ```bash
 # Force Scout to check and scan if needed
@@ -180,19 +354,19 @@ python3 kanban-ops/scout_agent.py check
 ### Every 2-4 Hours: 智能並發啟動器檢查
 ```bash
 # 檢查隊列並啟動任務（使用智能分組避免 rate limit）
-cd ~/workspace && python3 kanban-ops/spawn_tasks_intelligent.py estimate
+cd ~/.openclaw/workspace && python3 kanban-ops/spawn_tasks_intelligent.py estimate
 ```
 
 **查看隊列預估：**
 ```bash
 # 查看當前隊列的 Token 預估和分組計劃
-cd ~/workspace && python3 kanban-ops/spawn_tasks_intelligent.py group
+cd ~/.openclaw/workspace && python3 kanban-ops/spawn_tasks_intelligent.py group
 ```
 
 **實際啟動任務：**
 ```bash
 # 使用智能啟動器啟動任務（自動分組和序列啟動）
-cd ~/workspace && python3 kanban-ops/spawn_tasks_intelligent.py spawn [max_tasks]
+cd ~/.openclaw/workspace && python3 kanban-ops/spawn_tasks_intelligent.py spawn [max_tasks]
 ```
 
 **什麼時候啟動：**
@@ -320,35 +494,55 @@ grep -r "學徒檢查點" ~/workspace/memory/learning/
 
 1. **執行 auto_spawn_heartbeat.py**
    ```bash
-   cd ~/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
+   cd ~/.openclaw/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
    ```
+   - 檢查背壓狀態（P1 行動）
    - 檢查並發限制
    - 生成啟動命令（如果有 pending 任務）
    - 讀取 `spawn_commands.jsonl`
-   - 按間隔（65 秒）執行 `sessions_spawn`
+   - 按動態間隔（65-300 秒）執行 `sessions_spawn`
 
-2. **執行狀態回滾檢查**（關鍵！）
+2. **執行錯誤恢復檢查**（P0 行動）
    ```bash
-   cd ~/workspace && python3 kanban-ops/task_state_rollback.py
+   cd ~/.openclaw/workspace && python3 kanban-ops/error_recovery.py recover-all
+   ```
+   - 檢測 API rate limit、timeout 等錯誤
+   - 自動恢復失敗任務（使用指數退避）
+   - 降低 API 失敗率到 < 15%
+   - 記錄錯誤統計
+
+3. **執行狀態回滾檢查**（P0 行動）
+   ```bash
+   cd ~/.openclaw/workspace && python3 kanban-ops/task_state_rollback.py
    ```
    - 檢查並回滾卡住的 spawning 任務
+   - 兩級檢測：30 分鐘警報，45 分鐘回滾
    - 防止任務永久卡在 spawning 狀態
-   - 確保任務可以重新啟動
 
-3. **執行任務同步**
+4. **執行失敗任務清理檢查**（P1 行動）
    ```bash
-   cd ~/workspace && python3 kanban-ops/task_sync.py
+   cd ~/.openclaw/workspace && python3 kanban-ops/task_cleanup.py check
+   ```
+   - 檢查失敗任務數量（最多 50 個）
+   - 檢查超過 7 天的失敗任務
+   - 如需要，執行清理並備份
+
+5. **執行任務同步**
+   ```bash
+   cd ~/.openclaw/workspace && python3 kanban-ops/task_sync.py
    ```
 
-4. **Monitor and Refill**（背景執行）
+6. **Monitor and Refill**（背景執行）
+7. **Scout Daily Scan**（每天掃描，>24 小時）
    ```bash
-   cd ~/workspace && python3 kanban-ops/monitor_and_refill.py
+   cd ~/.openclaw/workspace && python3 kanban-ops/monitor_and_refill.py
    ```
 
 **⚠️ 關鍵：**
+- **背壓機制**：根據健康度動態調整啟動頻率和並發上限（P1 行動）
 - **主會話執行 `sessions_spawn`**（OpenClaw 限制：只能在主會話調用）
 - 心跳保持快速（啟動在後台繼續）
-- 按 65 秒間隔啟動（避免 rate limit）
+- 按動態間隔啟動（65-300 秒，避免 rate limit）
 
 ### When to reach out:
 - Task sync found errors

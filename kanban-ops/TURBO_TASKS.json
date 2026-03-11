@@ -1,15 +1,37 @@
 {
-  "version": "2.0",
-  "last_updated": "2026-02-20T03:30:00+08:00",
+  "version": "2.1",
+  "last_updated": "2026-02-20T04:22:38+08:00",
   "turbo_config": {
-    "mode": "loop",
+    "mode": "mixed",
+    "enabled": false,
     "duration_hours": 6,
-    "check_interval_minutes": 10,
-    "max_concurrent": 1,
-    "max_tasks_per_check": 2,
+    "check_interval_minutes": 2,
+    "max_concurrent": 5,
+    "max_tasks_per_check": 3,
+    "wait_for_available": true,
+    "min_available_slots": 2,
+    "timeout_minutes": 15,
+    "max_retries": 2,
     "auto_stop_on_wake": true,
     "scout_prewarm": true,
-    "scout_prewarm_force": false
+    "scout_prewarm_force": false,
+    "mixed_mode": {
+      "enabled": false,
+      "auto_trigger": {
+        "enabled": false,
+        "min_pending": 10,
+        "cooldown_minutes": 60
+      },
+      "schedule": {
+        "enabled": false,
+        "check_interval_minutes": 15
+      },
+      "limits": {
+        "max_concurrent": 5,
+        "max_tasks_per_check": 5,
+        "timeout_minutes": 15
+      }
+    }
   },
   "phases": [
     {
@@ -55,7 +77,10 @@
           "id": "spawn_kanban_highest",
           "action": "spawn_kanban_tasks",
           "description": "觸發最高優先級任務（3個）",
-          "priority_filter": ["highest", "high"],
+          "priority_filter": [
+            "highest",
+            "high"
+          ],
           "limit": 3,
           "enabled": true
         },
@@ -127,7 +152,11 @@
     "spawn_kanban_tasks": {
       "description": "觸發 Kanban 任務",
       "parameters": {
-        "priority_filter": ["highest", "high", "medium"],
+        "priority_filter": [
+          "highest",
+          "high",
+          "medium"
+        ],
         "limit": 3,
         "dependencies_check": true
       }

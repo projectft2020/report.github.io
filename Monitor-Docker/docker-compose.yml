@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  monitor-dashboard-backend:
+    build:
+      context: ../Monitor-Dashboard/backend
+      dockerfile: Dockerfile
+    container_name: monitor-dashboard-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../Monitor-Dashboard/backend/logs:/app/logs
+      - /Users/charlie/.openclaw/workspace:/data/workspace:ro
+    environment:
+      - WATCH_FILES=true
+      - LOG_LEVEL=INFO
+      - TASKS_FILE=/data/workspace/kanban/tasks.json
+      - SCOUT_DIRECTORY=/data/workspace-scout
+    networks:
+      - monitor-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: monitor-dashboard-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - monitor-dashboard-backend
+    networks:
+      - monitor-network
+    restart: unless-stopped
+
+networks:
+  monitor-network:
+    driver: bridge
+
+volumes:
+  monitor-logs:

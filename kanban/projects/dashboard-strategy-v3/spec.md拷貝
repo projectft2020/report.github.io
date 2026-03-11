@@ -1,0 +1,471 @@
+# Market Score V3 策略 - Dashboard 實現規格
+
+**項目:** Dashboard Strategy V3 Implementation  
+**日期:** 2026-02-22  
+**參考實現:** `/Users/charlie/.openclaw/workspace/market_score_dual_confirm_strategy.py`  
+**回測結果:** `/Users/charlie/.openclaw/workspace/market_score_dual_confirm_strategy_results.csv`
+
+---
+
+## 1. 策略概述
+
+### 1.1 核心理念
+
+**Market Score V3** 是一個基於雙市場（TW/US）確認的三態倉位策略，通過結合台灣市場和美國市場的 Market Score 來決定倉位，降低錯誤訊號並提高風險調整後收益。
+
+### 1.2 策略特性
+
+| 特性 | 說明 |
+|------|------|
+| **雙重確認** | TW 和 US Market Score 必須同時達到條件才執行 |
+| **三態倉位** | 0%（空倉）、50%（半倉）、100%（滿倉） |
+| **漸進式加倉** | 根據 Market Score 強度調整倉位 |
+| **動態止損** | 市場轉弱時自動降倉位 |
+| **多市場適配** | 支持 TW/US 兩市場個別評分 |
+
+---
+
+## 2. 技術需求
+
+### 2.1 架構要求
+
+**必須遵循 Dashboard 現有架構：**
+
+```
+backend/services/strategies/
+├── interface.py              # IStrategy 接口（必須實現）
+└── implementations/
+    └── dual_market_confirm_strategy.py  # 本策略實現位置
+```
+
+### 2.2 核心接口實現
+
+**IStrategy 接口必須實現的方法：**
+
+```python
+class IStrategy(ABC):
+    @abstractmethod
+    def get_name(self) -> str: ...
+    
+    @abstractmethod
+    def get_description(self) -> str: ...
+    
+    @abstractmethod
+    def get_params_schema(self) -> dict: ...
+    
+    @abstractmethod
+    def get_params_default(self) -> dict: ...
+    
+    @abstractmethod
+    def validate_params(self, params: dict) -> bool: ...
+    
+    @abstractmethod
+    def backtest(self, 
+                 data: pd.DataFrame, 
+                 params: dict,
+                 start_date: str = None,
+                 end_date: str = None) -> BacktestResult: ...
+```
+
+### 2.3 可復用服務
+
+**現有服務（必須使用，避免重複造輪子）：**
+
+| 服務名稱 | 位置 | 用途 |
+|---------|------|------|
+| `MarketThermometerService` | `services/market_thermometer/` | 獲取 TW/US 市場 MA 斜率和 Market Score |
+| `IndicatorCalculator` | `services/indicators/` | 統一的技術指標計算（RSI, MACD 等） |
+| `VBTDataLoader` | `services/data/` | 統一的價格數據加載 |
+| `StrategyParamsRegistry` | `services/strategies/` | 策略參數管理和驗證 |
+
+---
+
+## 3. 實現細節
+
+### 3.1 Market Score 計算
+
+**Market Score 定義（0-100 分）：**
+
+```python
+def calculate_market_score(ma_slope: float, rsi: float) -> int:
+    """
+    根據 MA 斜率和 RSI 計算 Market Score
+    
+    Args:
+        ma_slope: MA 斜率（正數代表上升趨勢）
+        rsi: RSI 指標（0-100）
+    
+    Returns:
+        int: Market Score (0-100)
+    """
+    # MA 斜率貢獻：斜率每增加 0.1，貢獻 10 分（最高 50 分）
+    slope_score = min(50, max(0, ma_slope * 100))
+    
+    # RSI 貢獻：RSI 在 30-70 之間給分
+    if 30 <= rsi <= 70:
+        rsi_score = 50  # 中性區域
+    elif rsi < 30:
+        rsi_score = rsi * 0.5  # 超賣，給分較低
+    else:  # rsi > 70
+        rsi_score = 50 - (rsi - 70) * 1.25  # 超買，扣分
+    
+    return int(slope_score + rsi_score)
+```
+
+### 3.2 三態倉位控制
+
+**倉位決策邏輯：**
+
+```
+IF (tw_score >= 60) AND (us_score >= 60):
+    # 強勢確認，滿倉
+    position = 100%
+    
+ELIF (tw_score >= 40) AND (us_score >= 40):
+    # 中性偏強，半倉
+    position = 50%
+    
+ELSE:
+    # 弱勢或分歧，空倉
+    position = 0%
+```
+
+**加權方案（可選參數）：**
+
+```python
+# 兩市場分數的加權平均
+combined_score = tw_score * tw_weight + us_score * us_weight
+
+# 根據 combined_score 決定倉位
+if combined_score >= 60:
+    position = 100%
+elif combined_score >= 40:
+    position = 50%
+else:
+    position = 0%
+```
+
+### 3.3 參數設計
+
+**策略參數（Params Schema）：**
+
+```python
+{
+    "tw_market": {
+        "type": "object",
+        "properties": {
+            "index_ticker": {
+                "type": "string",
+                "default": "^TWII",
+                "description": "台灣市場指數代碼"
+            },
+            "ma_period": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 5,
+                "maximum": 200,
+                "description": "移動平均線週期"
+            },
+            "weight": {
+                "type": "number",
+                "default": 0.5,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "台灣市場權重"
+            }
+        }
+    },
+    "us_market": {
+        "type": "object",
+        "properties": {
+            "index_ticker": {
+                "type": "string",
+                "default": "^GSPC",
+                "description": "美國市場指數代碼"
+            },
+            "ma_period": {
+                "type": "integer",
+                "default": 20,
+                "minimum": 5,
+                "maximum": 200,
+                "description": "移動平均線週期"
+            },
+            "weight": {
+                "type": "number",
+                "default": 0.5,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "美國市場權重"
+            }
+        }
+    },
+    "rsi_period": {
+        "type": "integer",
+        "default": 14,
+        "minimum": 5,
+        "maximum": 50,
+        "description": "RSI 週期"
+    },
+    "position_rules": {
+        "type": "object",
+        "properties": {
+            "full_threshold": {
+                "type": "integer",
+                "default": 60,
+                "minimum": 50,
+                "maximum": 100,
+                "description": "滿倉門檻（Market Score）"
+            },
+            "half_threshold": {
+                "type": "integer",
+                "default": 40,
+                "minimum": 20,
+                "maximum": 50,
+                "description": "半倉門檻（Market Score）"
+            }
+        }
+    }
+}
+```
+
+### 3.4 數據流程
+
+```
+1. 加載市場數據
+   └─> VBTDataLoader.load_data([tw_ticker, us_ticker])
+
+2. 計算技術指標
+   └─> IndicatorCalculator.add_indicators(df, ['MA', 'RSI'])
+
+3. 獲取 Market Score
+   └─> MarketThermometerService.get_market_score(market='tw'|'us')
+
+4. 倉位決策
+   └─> DualMarketConfirmStrategy._decide_position(tw_score, us_score)
+
+5. 回測執行
+   └─> VectorBT 回測引擎
+
+6. 返回結果
+   └─> BacktestResult (收益率、夏普比率、最大回撤等)
+```
+
+---
+
+## 4. 驗收標準
+
+### 4.1 功能驗收
+
+- [ ] **接口實現完整** - 所有 IStrategy 方法正確實現
+- [ ] **參數驗證** - 參數 schema 和默認值正確
+- [ ] **錯誤處理** - 缺失數據、無效參數有適當錯誤提示
+- [ ] **日誌記錄** - 關鍵操作有日誌輸出
+
+### 4.2 性能驗收（與參考實現對比）
+
+**回測期間：** 2017-01-01 至 2024-12-31  
+**基準指數：** Buy & Hold (^TWII)
+
+| 指標 | 參考 v3 目標 | 允許誤差 |
+|------|-------------|---------|
+| **總收益率** | ≥ +200% | ±5% |
+| **夏普比率** | ≥ 3.5 | ±0.3 |
+| **最大回撤** | ≤ -10% | ±2% |
+| **跑贏年份** | ≥ 7/8 (87.5%) | - |
+| **平均倉位** | 60%-70% | ±5% |
+
+**對比組：**
+- v2 策略（單市場 MA 趨勢）
+- Buy & Hold（持續持有）
+
+### 4.3 代碼品質
+
+- [ ] **代碼風格** - 遵循 PEP 8
+- [ ] **類型提示** - 使用 Type Hints
+- [ ] **文檔字符串** - 所有公共方法有 docstring
+- [ ] **單元測試** - 核心邏輯有測試覆蓋
+- [ ] **示例用法** - 提供使用示例
+
+---
+
+## 5. 實現步驟
+
+### 階段 1：基礎架構（1-2 小時）
+```python
+# 1.1 創建策略文件
+touch backend/services/strategies/implementations/dual_market_confirm_strategy.py
+
+# 1.2 實現 IStrategy 接口框架
+class DualMarketConfirmStrategy(IStrategy):
+    def get_name(self) -> str:
+        return "dual_market_confirm_v3"
+    
+    def get_description(self) -> str:
+        return "Market Score V3: Dual-market confirmation with 3-state position"
+    
+    # ... 其他方法框架
+```
+
+### 階段 2：參數系統（30 分鐘）
+```python
+# 2.1 實現 get_params_schema()
+# 2.2 實現 get_params_default()
+# 2.3 實現 validate_params()
+```
+
+### 階段 3：Market Score 計算（1 小時）
+```python
+# 3.1 集成 MarketThermometerService
+# 3.2 實現 calculate_market_score()
+# 3.3 測試分數計算邏輯
+```
+
+### 階段 4：倉位決策（1 小時）
+```python
+# 4.1 實現三態倉位邏輯
+# 4.2 實現動態加倉/減倉
+# 4.3 測試邊界情況
+```
+
+### 階段 5：回測集成（1-2 小時）
+```python
+# 5.1 實現 backtest() 方法
+# 5.2 集成 VBTDataLoader
+# 5.3 返回 BacktestResult
+```
+
+### 階段 6：測試驗證（1 小時）
+```python
+# 6.1 單元測試
+# 6.2 回測驗證（對比參考實現）
+# 6.3 性能基準測試
+```
+
+### 階段 7：文檔和示例（30 分鐘）
+```python
+# 7.1 添加使用示例
+# 7.2 更新策略文檔
+# 7.3 API 文檔（如需要）
+```
+
+**預計總時間：** 5-7 小時
+
+---
+
+## 6. 測試案例
+
+### 6.1 單元測試
+
+```python
+def test_market_score_calculation():
+    """測試 Market Score 計算邏輯"""
+    # 案例 1: 強勢市場
+    assert calculate_market_score(ma_slope=0.5, rsi=60) >= 60
+    
+    # 案例 2: 中性市場
+    assert 40 <= calculate_market_score(ma_slope=0.2, rsi=50) <= 60
+    
+    # 案例 3: 弱勢市場
+    assert calculate_market_score(ma_slope=-0.1, rsi=30) <= 40
+
+def test_position_decision():
+    """測試三態倉位決策"""
+    # 案例 1: 滿倉
+    assert decide_position(tw_score=70, us_score=70) == 1.0
+    
+    # 案例 2: 半倉
+    assert decide_position(tw_score=50, us_score=50) == 0.5
+    
+    # 案例 3: 空倉
+    assert decide_position(tw_score=30, us_score=30) == 0.0
+```
+
+### 6.2 回測驗證
+
+```python
+# 測試數據
+params = {
+    "tw_market": {"index_ticker": "^TWII", "ma_period": 20, "weight": 0.5},
+    "us_market": {"index_ticker": "^GSPC", "ma_period": 20, "weight": 0.5},
+    "rsi_period": 14,
+    "position_rules": {"full_threshold": 60, "half_threshold": 40}
+}
+
+# 執行回測
+result = strategy.backtest(data, params, "2017-01-01", "2024-12-31")
+
+# 驗證結果
+assert result.total_return >= 2.0  # ≥ 200%
+assert result.sharpe_ratio >= 3.5
+assert result.max_drawdown <= -0.10
+```
+
+---
+
+## 7. 風險與注意事項
+
+### 7.1 潛在風險
+
+| 風險 | 說明 | 緩解措施 |
+|------|------|---------|
+| **數據缺失** | 市場數據可能不完整 | 添加數據驗證，提供默認值 |
+| **參數過擬合** | 門檻值可能過度優化 | 提供默認值，允許用戶調整 |
+| **市場分歧** | 兩市場長期分歧時策略失效 | 添加分歧警告機制 |
+| **延遲數據** | Market Score 計算有延遲 | 使用 T-1 數據，避免前瞻偏差 |
+
+### 7.2 最佳實踐
+
+1. **使用現有服務** - 不要重新實現 MarketThermometerService
+2. **參數默認值** - 基於回測優化結果設置合理的默認值
+3. **錯誤處理** - 提供清晰的錯誤信息和建議
+4. **日誌記錄** - 記錄關鍵決策點，便於調試
+5. **性能優化** - 使用向量化操作，避免循環
+
+---
+
+## 8. 參考資料
+
+### 8.1 參考實現
+
+- **v3 策略腳本:** `/Users/charlie/.openclaw/workspace/market_score_dual_confirm_strategy.py`
+- **回測結果:** `/Users/charlie/.openclaw/workspace/market_score_dual_confirm_strategy_results.csv`
+- **Dashboard 策略示例:** `backend/services/strategies/implementations/dual_momentum_strategy.py`
+
+### 8.2 架構文檔
+
+- **IStrategy 接口:** `backend/services/strategies/interface.py`
+- **MarketThermometerService:** `backend/services/market_thermometer/service.py`
+- **回測框架:** `backend/services/backtesting/`
+
+### 8.3 策略知識
+
+- **雙動量策略:** Gary Antonacci 的雙動量理論
+- **Market Thermometer:** 結合趨勢和超買超賣的市場狀態指標
+- **風險平價:** 根據市場強度動態調整倉位
+
+---
+
+## 9. 交付清單
+
+### 9.1 代碼文件
+
+- [ ] `backend/services/strategies/implementations/dual_market_confirm_strategy.py`
+- [ ] `tests/test_dual_market_confirm_strategy.py`（可選）
+
+### 9.2 文檔
+
+- [ ] 策略使用示例
+- [ ] API 文檔（如集成到 Dashboard）
+- [ ] 回測報告
+
+### 9.3 驗證
+
+- [ ] 單元測試通過
+- [ ] 回測結果符合預期
+- [ ] 性能基準測試通過
+
+---
+
+**文檔版本:** v1.0  
+**最後更新:** 2026-02-22  
+**狀態:** 準備開發 🚀

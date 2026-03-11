@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sub-Agent 管理系統需求設計</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sub-Agent 管理系統需求設計</h1>
+<p><strong>Task ID:</strong> 20260221-201150-s103b
+<strong>Agent:</strong> Charlie Analyst
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-22T04:41:00+08:00</p>
+<h2>Executive Summary</h2>
+<p>基於現有 Sub-Agent 機制的分析,本文設計一套完整的 Sub-Agent 管理系統需求。現有系統具備基本的生命週期管理功能,但在狀態監控、資源管理、錯誤處理與可視化方面存在改進空間。建議系統應實現四層架構:命令層、控制層、監控層與持久化層,以提供完整的子代理程式管理能力。核心優先級為實現狀態追蹤、資源限制與錯誤恢復機制。</p>
+<h2>Analysis</h2>
+<h3>現有機制分析</h3>
+<p>基於 <code>subagents</code> 工具與 Sub-Agent 上下文結構,現有系統特性如下:</p>
+<p><strong>已有功能:</strong>
+- <code>list</code>: 列出已生成的 sub-agent 會話
+- <code>kill</code>: 終止指定的 sub-agent
+- <code>steer</code>: 向執行中的 sub-agent 發送引導訊息
+- 推送式完成通知 (descendant results auto-announced)
+- 識別子代會話 (避免輪詢)</p>
+<p><strong>現有上下文結構:</strong></p>
+<pre class="codehilite"><code>- Label: 任務識別符 (如 20260221-201150-s103b)
+- Requester session: 主代理程式會話 (如 agent:main:main)
+- Requester channel: 通道識別 (如 telegram)
+- Agent session: 子代理程式會話 ID (UUID)
+</code></pre>
+
+<p><strong>現有限制:</strong>
+- 無細粒度狀態追蹤 (只有 running/completed 之分)
+- 無資源使用監控 (CPU、記憶體、執行時間)
+- 無錯誤日誌聚合與分析
+- 無歷史記錄查詢能力
+- 無批量操作支援</p>
+<h3>識別的需求模式</h3>
+<p>基於 Sub-Agent 的典型使用場景,歸納出四個核心需求模式:</p>
+<ol>
+<li><strong>生命週期管理</strong> - 建立、執行、監控、終止、清理</li>
+<li><strong>狀態可見性</strong> - 即時狀態、進度、資源使用</li>
+<li><strong>錯誤管理</strong> - 失敗檢測、重試、日誌收集</li>
+<li><strong>歷史追溯</strong> - 任務記錄、效能分析、模式識別</li>
+</ol>
+<h3>風險評估</h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>可能性</th>
+<th>影響</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>資源耗盡 (記憶體洩漏、殭屍進程)</td>
+<td>中</td>
+<td>高</td>
+<td>實施資源限制與自動清理機制</td>
+</tr>
+<tr>
+<td>級聯失敗 (sub-agent 失敗影響主流程)</td>
+<td>中</td>
+<td>高</td>
+<td>隔離子代執行環境、實施超時機制</td>
+</tr>
+<tr>
+<td>狀態不一致 (多個管理操作衝突)</td>
+<td>低</td>
+<td>中</td>
+<td>實施操作鎖定與原子性事務</td>
+</tr>
+<tr>
+<td>可擴展性瓶頸 (大量並發 sub-agents)</td>
+<td>低</td>
+<td>中</td>
+<td>設計非同步架構、分片狀態存儲</td>
+</tr>
+</tbody>
+</table>
+<h3>機會點</h3>
+<ul>
+<li><strong>自動化負載均衡</strong>: 根據主代理程式與子代理程式的負載動態分配任務</li>
+<li><strong>智慧調度</strong>: 基於歷史效能數據優化任務分配策略</li>
+<li><strong>可觀測性增強</strong>: 整合 Prometheus/Grafana 等監控工具</li>
+<li><strong>策略配置化</strong>: 允許通過配置文件定義不同類型 sub-agent 的管理策略</li>
+</ul>
+<h2>Requirements</h2>
+<h3>FR-1: 基礎生命週期管理</h3>
+<h4>FR-1.1: 會話建立</h4>
+<p><strong>描述:</strong> 建立新的 sub-agent 會話,包含完整上下文配置。</p>
+<p><strong>需求:</strong>
+- 支援自訂 label (任務識別符)
+- 支援指定執行超時時間
+- 支援傳遞初始化參數
+- 自動生成唯一的 agent session ID (UUID)
+- 記錄 requester session 與 channel</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 建立 sub-agent 時回傳會話 ID
+- 上下文資訊正確持久化
+- 超時時自動終止會話</p>
+<h4>FR-1.2: 會話終止</h4>
+<p><strong>描述:</strong> 正常或強制終止指定的 sub-agent 會話。</p>
+<p><strong>需求:</strong>
+- 支援單個會話終止
+- 支援批量終止 (按 label、時間範圍、狀態)
+- 支援優雅關閉 (允許完成當前步驟)
+- 支援強制終止 (立即停止)
+- 終止時清理資源與臨時檔案</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 終止操作在 5 秒內完成
+- 資源清理率達 100%
+- 批量終止支援至少 100 個並發會話</p>
+<h4>FR-1.3: 會話清理</h4>
+<p><strong>描述:</strong> 清理已完成或失敗的會話記錄。</p>
+<p><strong>需求:</strong>
+- 支援定時自動清理 (可配置保留期)
+- 支援手動觸發清理
+- 清理前備份關鍵日誌 (可選)
+- 提供清理統計資訊</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 預設保留 7 天記錄
+- 清理操作不影響執行中的會話</p>
+<h3>FR-2: 狀態追蹤與監控</h3>
+<h4>FR-2.1: 狀態模型</h4>
+<p><strong>描述:</strong> 定義完整的 sub-agent 狀態模型。</p>
+<p><strong>需求:</strong></p>
+<pre class="codehilite"><code>狀態狀態機:
+pending → running → completed
+          ↓         ↓
+       timeout   failed
+          ↓
+       killed
+</code></pre>
+
+<p><strong>狀態屬性:</strong>
+- <code>label</code>: 任務識別符
+- <code>agent_session_id</code>: 子代理程式會話 ID
+- <code>requester_session</code>: 請求者會話
+- <code>status</code>: 狀態 (pending/running/completed/failed/timeout/killed)
+- <code>created_at</code>: 建立時間
+- <code>started_at</code>: 開始執行時間
+- <code>completed_at</code>: 完成時間
+- <code>progress</code>: 進度百分比 (0-100)
+- <code>error_code</code>: 錯誤代碼 (如有)
+- <code>error_message</code>: 錯誤訊息 (如有)
+- <code>retry_count</code>: 重試次數</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 狀態轉移遵循狀態機規則
+- 所有狀態屬性完整記錄</p>
+<h4>FR-2.2: 即時監控</h4>
+<p><strong>描述:</strong> 提供即時狀態查詢與監控功能。</p>
+<p><strong>需求:</strong>
+- 支援按會話 ID 查詢狀態
+- 支援按 label 批量查詢
+- 支援按 requester session 查詢
+- 支援按狀態過濾
+- 提供摘要統計 (總數、各狀態數量)</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 查詢回應時間 &lt; 100ms
+- 支援至少 1000 個並發查詢</p>
+<h4>FR-2.3: 資源監控</h4>
+<p><strong>描述:</strong> 監控 sub-agent 的資源使用情況。</p>
+<p><strong>需求:</strong>
+- 監控 CPU 使用率
+- 監控記憶體使用量
+- 監控執行時間
+- 支援設定資源閾值告警
+- 提供資源使用歷史趨勢</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 資源採樣頻率至少每 30 秒一次
+- 超過閾值時自動告警</p>
+<h4>FR-2.4: 進度追蹤</h4>
+<p><strong>描述:</strong> 追蹤 sub-agent 的執行進度。</p>
+<p><strong>需求:</strong>
+- 支援子代理程式主動報告進度
+- 支援自動推斷進度 (基於步驟)
+- 進度更新頻率可配置
+- 進度資訊持久化</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 進度更新延遲 &lt; 5 秒
+- 支援至少 10 個進度級別</p>
+<h3>FR-3: 通信與控制</h3>
+<h4>FR-3.1: 任務指派 (Steer)</h4>
+<p><strong>描述:</strong> 向執行中的 sub-agent 發送控制訊息。</p>
+<p><strong>需求:</strong>
+- 支援發送文本訊息
+- 支援發送結構化指令 (JSON)
+- 支援廣播訊息到多個 sub-agent
+- 訊息投遞確認機制
+- 訊息重試機制</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 訊息投遞延遲 &lt; 1 秒
+- 訊息成功率 &gt; 99%</p>
+<h4>FR-3.2: 推送式通知</h4>
+<p><strong>描述:</strong> Sub-agent 完成時自動通知主代理程式。</p>
+<p><strong>需求:</strong>
+- 完成結果自動推送
+- 支援自訂通知通道
+- 支援通知過濾 (如僅失敗通知)
+- 通知包含完整上下文與結果</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 通知延遲 &lt; 2 秒
+- 支援至少 3 種通知通道</p>
+<h3>FR-4: 錯誤管理</h3>
+<h4>FR-4.1: 錯誤檢測</h4>
+<p><strong>描述:</strong> 檢測 sub-agent 執行過程中的錯誤。</p>
+<p><strong>需求:</strong>
+- 自動檢測異常終止
+- 自動檢測超時
+- 自動檢測資源超限
+- 支援自訂錯誤代碼
+- 錯誤分類 (系統錯誤、業務錯誤、網絡錯誤等)</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 錯誤檢測延遲 &lt; 5 秒
+- 錯誤分類準確率 &gt; 95%</p>
+<h4>FR-4.2: 重試機制</h4>
+<p><strong>描述:</strong> 失敗時自動重試。</p>
+<p><strong>需求:</strong>
+- 可配置重試次數
+- 可配置重試間隔 (支援指數退避)
+- 可配置重試條件 (基於錯誤代碼)
+- 記錄每次重試的詳細資訊</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 預設重試 3 次
+- 指數退避: 1s, 2s, 4s</p>
+<h4>FR-4.3: 錯誤日誌</h4>
+<p><strong>描述:</strong> 收集與存儲錯誤日誌。</p>
+<p><strong>需求:</strong>
+- 記錄完整錯誤堆疊
+- 記錄錯誤發生時間
+- 記錄相關上下文資訊
+- 支援日誌級別 (error, warning)
+- 支援日誌搜尋</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 日誌保留至少 30 天
+- 搜尋回應時間 &lt; 2 秒</p>
+<h3>FR-5: 資源管理</h3>
+<h4>FR-5.1: 並發限制</h4>
+<p><strong>描述:</strong> 限制同時執行的 sub-agent 數量。</p>
+<p><strong>需求:</strong>
+- 可配置全域並發上限
+- 可配置 per-label 並發上限
+- 達到上限時排隊機制
+- 排隊超時機制</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 預設全域並發上限: 50
+- 排隊容量: 100</p>
+<h4>FR-5.2: 資源配額</h4>
+<p><strong>描述:</strong> 限制單個 sub-agent 的資源使用。</p>
+<p><strong>需求:</strong>
+- 可配置記憶體上限
+- 可配置執行時間上限
+- 可配置 CPU 時間配額
+- 超限時自動終止</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 預設記憶體上限: 512MB
+- 預設執行時間上限: 300 秒</p>
+<h3>FR-6: 歷史與分析</h3>
+<h4>FR-6.1: 歷史記錄</h4>
+<p><strong>描述:</strong> 保存 sub-agent 執行歷史。</p>
+<p><strong>需求:</strong>
+- 記錄所有會話的完整生命週期
+- 支援時間範圍查詢
+- 支援 label 過濾
+- 支援狀態過濾
+- 支援分頁查詢</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 記錄保留至少 90 天
+- 支援查詢至少 10000 條記錄</p>
+<h4>FR-6.2: 效能分析</h4>
+<p><strong>描述:</strong> 分析 sub-agent 執行效能。</p>
+<p><strong>需求:</strong>
+- 計算平均執行時間
+- 計算成功率
+- 識別效能異常
+- 產生效能報表
+- 支援趨勢分析</p>
+<p><strong>優先級:</strong> Low
+<strong>驗收標準:</strong>
+- 效能分析延遲 &lt; 5 秒
+- 支援產生日、週、月報表</p>
+<h3>FR-7: 配置與策略</h3>
+<h4>FR-7.1: 配置管理</h4>
+<p><strong>描述:</strong> 管理系統配置。</p>
+<p><strong>需求:</strong>
+- 支援配置文件 (YAML/JSON)
+- 支援環境變數覆蓋
+- 支援熱重載
+- 配置驗證機制
+- 配置版本控制</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 配置熱重載延遲 &lt; 5 秒
+- 配置驗證攔截所有非法配置</p>
+<h4>FR-7.2: 策略定義</h4>
+<p><strong>描述:</strong> 定義不同類型 sub-agent 的管理策略。</p>
+<p><strong>需求:</strong>
+- 支援按 label 定義策略
+- 支援策略繼承
+- 支援策略優先級
+- 策略包含: 超時、重試、並發、資源限制等</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 支援至少 3 層策略繼承
+- 策略優先級正確解析</p>
+<h3>FR-8: API 介面</h3>
+<h4>FR-8.1: 命令列介面 (CLI)</h4>
+<p><strong>描述:</strong> 提供命令列操作介面。</p>
+<p><strong>需求:</strong></p>
+<pre class="codehilite"><code class="language-bash"># 列出 sub-agents
+subagents list [--label LABEL] [--status STATUS] [--requester SESSION]
+
+# 終止 sub-agent
+subagents kill &lt;session-id&gt; [--force]
+
+# 引導 sub-agent
+subagents steer &lt;session-id&gt; &lt;message&gt;
+
+# 查詢狀態
+subagents status &lt;session-id&gt;
+
+# 批量操作
+subagents bulk --action kill --label &quot;research-*&quot; --older-than 24h
+</code></pre>
+
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 所有命令回應時間 &lt; 1 秒
+- 提供清晰的幫助資訊</p>
+<h4>FR-8.2: 程式介面 (API)</h4>
+<p><strong>描述:</strong> 提供程式調用介面。</p>
+<p><strong>需求:</strong></p>
+<pre class="codehilite"><code class="language-typescript">interface SubagentManager {
+  // 生命週期
+  create(label: string, options: CreateOptions): Promise&lt;Session&gt;
+  kill(sessionId: string, force?: boolean): Promise&lt;void&gt;
+
+  // 查詢
+  list(filter: Filter): Promise&lt;Session[]&gt;
+  get(sessionId: string): Promise&lt;Session&gt;
+
+  // 控制
+  steer(sessionId: string, message: string): Promise&lt;void&gt;
+
+  // 監控
+  getStats(): Promise&lt;Stats&gt;
+  getResources(sessionId: string): Promise&lt;ResourceUsage&gt;
+
+  // 歷史
+  getHistory(query: HistoryQuery): Promise&lt;HistoryRecord[]&gt;
+}
+</code></pre>
+
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 所有 API 回應時間 &lt; 100ms
+- API 錯誤處理完整</p>
+<h3>FR-9: 持久化</h3>
+<h4>FR-9.1: 狀態存儲</h4>
+<p><strong>描述:</strong> 持久化 sub-agent 狀態。</p>
+<p><strong>需求:</strong>
+- 使用可靠存儲機制 (SQLite/文件系統)
+- 支援事務性更新
+- 支援定期備份
+- 支援災難恢復</p>
+<p><strong>優先級:</strong> High
+<strong>驗收標準:</strong>
+- 數據損失率 &lt; 0.01%
+- 備份頻率至少每小時一次</p>
+<h4>FR-9.2: 日誌存儲</h4>
+<p><strong>描述:</strong> 持久化執行日誌。</p>
+<p><strong>需求:</strong>
+- 支援結構化日誌
+- 支援日誌輪轉
+- 支援日誌壓縮
+- 支援日誌歸檔</p>
+<p><strong>優先級:</strong> Normal
+<strong>驗收標準:</strong>
+- 日誌輪轉策略可配置
+- 壓縮後日誌大小 &lt; 原始大小的 20%</p>
+<h2>Architecture</h2>
+<h3>系統架構</h3>
+<pre class="codehilite"><code>┌─────────────────────────────────────────────────────────┐
+│                    Application Layer                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │   CLI    │  │   API    │  │  UI/Dash │  │ Events   │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│                  Management Layer                        │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │           SubagentManager (核心控制器)            │  │
+│  │  - 生命週期管理                                    │  │
+│  │  - 狀態機管理                                      │  │
+│  │  - 資源配額管理                                    │  │
+│  │  - 錯誤處理                                       │  │
+│  └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+           ↓              ↓              ↓              ↓
+┌─────────────────────────────────────────────────────────┐
+│                   Service Layer                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │Scheduler │  │ Monitor  │  │RetryMgr  │  │Logger    │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
+└─────────────────────────────────────────────────────────┘
+           ↓              ↓              ↓              ↓
+┌─────────────────────────────────────────────────────────┐
+│                  Storage Layer                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │State DB  │  │Log Store │  │Config    │  │Metrics   │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+
+<h3>數據模型</h3>
+<h4>Session (會話)</h4>
+<pre class="codehilite"><code class="language-typescript">interface Session {
+  id: string;                    // UUID
+  label: string;                 // 任務識別符
+  requester_session: string;     // 請求者會話
+  requester_channel: string;     // 請求者通道
+  agent_session: string;         // 子代理程式會話 ID
+  status: Status;                // 狀態
+  created_at: Date;
+  started_at?: Date;
+  completed_at?: Date;
+  progress: number;              // 0-100
+  error_code?: string;
+  error_message?: string;
+  retry_count: number;
+  resource_usage: ResourceUsage;
+  metadata: Record&lt;string, any&gt;;
+}
+
+enum Status {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  TIMEOUT = 'timeout',
+  KILLED = 'killed'
+}
+
+interface ResourceUsage {
+  max_memory_mb: number;
+  max_cpu_percent: number;
+  duration_seconds: number;
+}
+</code></pre>
+
+<h4>Configuration (配置)</h4>
+<pre class="codehilite"><code class="language-typescript">interface Config {
+  concurrency: {
+    global_max: number;
+    label_limits: Record&lt;string, number&gt;;
+    queue_capacity: number;
+    queue_timeout: number;
+  };
+  resources: {
+    default_memory_mb: number;
+    default_timeout_seconds: number;
+    label_overrides: Record&lt;string, ResourceOverride&gt;;
+  };
+  retry: {
+    max_retries: number;
+    base_delay_seconds: number;
+    max_delay_seconds: number;
+    retryable_errors: string[];
+  };
+  retention: {
+    state_days: number;
+    log_days: number;
+    cleanup_interval_hours: number;
+  };
+}
+</code></pre>
+
+<h2>Recommendations</h2>
+<h3>1. 實施優先級</h3>
+<p><strong>Phase 1 (核心功能 - 2-3 週):</strong>
+- FR-1: 基礎生命週期管理 (建立、終止)
+- FR-2.1: 狀態模型與追蹤
+- FR-2.2: 即時監控
+- FR-3.1: 任務指派
+- FR-5.1: 並發限制
+- FR-9.1: 狀態存儲
+- FR-8.1: CLI 介面</p>
+<p><strong>Phase 2 (錯誤與資源 - 1-2 週):</strong>
+- FR-4.1: 錯誤檢測
+- FR-4.3: 錯誤日誌
+- FR-4.2: 重試機制
+- FR-5.2: 資源配額
+- FR-9.2: 日誌存儲</p>
+<p><strong>Phase 3 (進階功能 - 2-3 週):</strong>
+- FR-2.3: 資源監控
+- FR-2.4: 進度追蹤
+- FR-6.1: 歷史記錄
+- FR-7.1: 配置管理
+- FR-7.2: 策略定義
+- FR-8.2: API 介面</p>
+<p><strong>Phase 4 (優化與分析 - 1-2 週):</strong>
+- FR-6.2: 效能分析
+- FR-1.3: 會話清理
+- 可視化介面
+- 文件與測試</p>
+<h3>2. 技術選型建議</h3>
+<p><strong>存儲層:</strong>
+- SQLite (輕量級、嵌入式) 或文件系統 JSON
+- 適合中小規模部署 (單機 &lt; 1000 並發)</p>
+<p><strong>日誌系統:</strong>
+- Winston (Node.js) 或 Pino
+- 支援多傳輸、日誌輪轉</p>
+<p><strong>監控:</strong>
+- 內建指標收集
+- 可選整合 Prometheus/Grafana</p>
+<p><strong>序列化:</strong>
+- JSON (可讀性好)
+- MessagePack (效能優化選項)</p>
+<h3>3. 關鍵設計決策</h3>
+<p><strong>決策 1: 狀態存儲選擇</strong>
+- <strong>選項:</strong> SQLite vs 文件系統
+- <strong>建議:</strong> SQLite (事務支援、查詢能力)
+- <strong>理由:</strong> 需要複雜查詢與事務保證,SQLite 提供最佳平衡</p>
+<p><strong>決策 2: 推送通知機制</strong>
+- <strong>選項:</strong> 內建事件總線 vs 外部 MQ
+- <strong>建議:</strong> 內建事件總線 ( EventEmitter 模式)
+- <strong>理由:</strong> 減少依賴,滿足當前規模需求</p>
+<p><strong>決策 3: 並發控制</strong>
+- <strong>選項:</strong> 全局鎖 vs 標籤級鎖 vs 無鎖
+- <strong>建議:</strong> 標籤級細粒度鎖 + 無鎖讀取
+- <strong>理由:</strong> 平衡並發性能與一致性需求</p>
+<h3>4. 非功能需求</h3>
+<p><strong>效能:</strong>
+- 狀態查詢: &lt; 100ms (P95)
+- 会話建立: &lt; 500ms (P95)
+- 訊息推送: &lt; 1s (P95)</p>
+<p><strong>可靠性:</strong>
+- 系統可用性: &gt; 99.9%
+- 數據一致性: 強一致性
+- 錯誤恢復: 自動重試 + 手動介入</p>
+<p><strong>可擴展性:</strong>
+- 支援至少 1000 並發 sub-agents
+- 水平擴展能力 (未來考慮分散式存儲)</p>
+<p><strong>可維護性:</strong>
+- 程式碼覆蓋率 &gt; 80%
+- 完整的 API 文件
+- 詳細的運維手冊</p>
+<p><strong>安全性:</strong>
+- 存取控制: 基於 requester session
+- 數據加密: 日誌敏感資訊可選加密
+- 審計日誌: 記錄所有管理操作</p>
+<h2>Confidence &amp; Limitations</h2>
+<p><strong>信心度:</strong> 高</p>
+<p><strong>數據品質:</strong>
+- 基於現有 <code>subagents</code> 工具介面分析
+- 基於 Sub-Agent 上下文結構推導
+- 未取得實際使用統計數據</p>
+<p><strong>假設:</strong>
+1. Sub-Agent 數量規模 &lt; 1000 並發
+2. 單機部署,無分散式需求
+3. 主要用戶為開發者與自動化流程
+4. 現有 <code>subagents</code> 工具可擴展或替換</p>
+<p><strong>限制:</strong>
+- 未考慮分散式場景 (如多機器協作)
+- 未深入探討與外部系統整合
+- 需求基於機制分析,未經實際用戶驗證
+- 效能基準為估計值,需實測驗證</p>
+<p><strong>下一步行動:</strong>
+1. 與開發團隊確認技術可行性
+2. 收集實際使用場景與痛點
+3. 實施 Phase 1 原型開發
+4. 進行效能測試驗證</p>
+<h2>Metadata</h2>
+<p><strong>分析框架:</strong> 需求工程 (Requirements Engineering)
+<strong>輸入來源:</strong> Sub-Agent 機制分析
+<strong>建議後續工作:</strong>
+- 實施 Phase 1 核心功能
+- 建立測試與驗證環境
+- 收集使用者回饋並迭代優化
+- 開發可視化監控介面</p>
+<hr />
+<p><em>文檔生成時間: 2026-02-22T04:41:00+08:00</em>
+<em>版本: 1.0</em></p>
+        <p class="footer">Generated: 2026-02-22 11:29:12</p>
+        <a href="index.html" class="back-link">← Back to Index</a>
+    </div>
+</body>
+</html>

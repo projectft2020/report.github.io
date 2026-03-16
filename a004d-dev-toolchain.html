@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 開發工具鏈分析報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 開發工具鏈分析報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard">Dashboard 開發工具鏈分析報告<a class="headerlink" href="#dashboard" title="連結到此標題">&para;</a></h1>
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>分析日期</strong>: 2026-02-21</li>
+<li><strong>目標目錄</strong>: <code>~/Dashboard/</code></li>
+<li><strong>分析方法</strong>: 配置文件分析、目錄結構探索</li>
+<li><strong>狀態</strong>: ✅ 已完成</li>
+</ul>
+<hr />
+<h2 id="_2">前端工具鏈<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>版本/配置</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>包管理</td>
+<td>npm</td>
+<td>-</td>
+<td>Node.js 套件管理</td>
+</tr>
+<tr>
+<td>運行工具</td>
+<td>concurrently</td>
+<td>^8.2.2</td>
+<td>多進程並行運行（frontend + backend）</td>
+</tr>
+<tr>
+<td>構建工具</td>
+<td>Babel</td>
+<td>^7.28.6</td>
+<td>JS/JSX 轉譯</td>
+</tr>
+<tr>
+<td>構建工具</td>
+<td>Webpack</td>
+<td>-</td>
+<td>前端打包和優化</td>
+</tr>
+<tr>
+<td>測試</td>
+<td>Cypress</td>
+<td>^7.0.2</td>
+<td>E2E 測試框架</td>
+</tr>
+<tr>
+<td>測試處理器</td>
+<td>@cypress/webpack-preprocessor</td>
+<td>^7.0.2</td>
+<td>Cypress Webpack 預處理</td>
+</tr>
+</tbody>
+</table>
+<h3 id="packagejson-scripts">package.json Scripts<a class="headerlink" href="#packagejson-scripts" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-json">{
+  &quot;dev&quot;: &quot;concurrently \&quot;npm run dev --prefix frontend\&quot; \&quot;cd backend &amp;&amp; python main.py\&quot;&quot;,
+  &quot;install-all&quot;: &quot;npm install --prefix frontend &amp;&amp; pip install -r backend/requirements.txt&quot;,
+  &quot;build-prod&quot;: &quot;npm run build --prefix frontend &amp;&amp; rm -rf backend/static &amp;&amp; cp -r frontend/dist backend/static&quot;
+}
+</code></pre>
+<p><strong>特點</strong>: 統一的前端啟動、依賴安裝、生產環境構建命令。</p>
+<hr />
+<h2 id="_3">後端工具鏈<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<h3 id="_4">核心框架<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web 框架</td>
+<td>FastAPI</td>
+<td>&gt;=0.128.0</td>
+<td>高性能 API 框架</td>
+</tr>
+<tr>
+<td>服務器</td>
+<td>uvicorn[standard]</td>
+<td>&gt;=0.40.0</td>
+<td>ASGI 伺服器（開發環境）</td>
+</tr>
+<tr>
+<td>服務器</td>
+<td>gunicorn</td>
+<td>-</td>
+<td>WSGI/ASGI 伺服器（生產環境）</td>
+</tr>
+<tr>
+<td>熱重載</td>
+<td>watchfiles</td>
+<td>&gt;=0.21.0</td>
+<td>文件變更監控</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">數據獲取與存儲<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>數據獲取</td>
+<td>yfinance</td>
+<td>&gt;=0.2.51</td>
+<td>Yahoo Finance 數據 API</td>
+</tr>
+<tr>
+<td>數據庫</td>
+<td>DuckDB</td>
+<td>==1.1.0</td>
+<td>列式數據庫（高性能分析）</td>
+</tr>
+<tr>
+<td>數據處理</td>
+<td>pandas</td>
+<td>==2.3.3</td>
+<td>數據操作與分析</td>
+</tr>
+<tr>
+<td>數值計算</td>
+<td>numpy</td>
+<td>&gt;=2.0.0</td>
+<td>高效數值計算</td>
+</tr>
+<tr>
+<td>科學計算</td>
+<td>scipy</td>
+<td>&gt;=1.13.0</td>
+<td>科學計算與統計</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_6">技術分析與回測<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術指標</td>
+<td>pandas-ta-classic</td>
+<td>==0.3.54</td>
+<td>技術分析指標庫</td>
+</tr>
+<tr>
+<td>回測框架</td>
+<td>backtrader</td>
+<td>-</td>
+<td>事件驅動回測</td>
+</tr>
+<tr>
+<td>回測框架</td>
+<td>vectorbt</td>
+<td>==0.28.2</td>
+<td>向量化回測（高效）</td>
+</tr>
+<tr>
+<td>進度顯示</td>
+<td>tqdm</td>
+<td>-</td>
+<td>進度條顯示</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">任務調度與驗證<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任務調度</td>
+<td>APScheduler</td>
+<td>定時任務執行</td>
+</tr>
+<tr>
+<td>數據驗證</td>
+<td>pydantic</td>
+<td>數據驗證與序列化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">測試框架<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>測試框架</td>
+<td>pytest</td>
+<td>Python 單元測試</td>
+</tr>
+<tr>
+<td>並行測試</td>
+<td>pytest-xdist</td>
+<td>並行執行加速</td>
+</tr>
+<tr>
+<td>超時控制</td>
+<td>pytest-timeout</td>
+<td>測試超時保護</td>
+</tr>
+<tr>
+<td>覆蓋率</td>
+<td>pytest-cov</td>
+<td>代碼覆蓋率報告</td>
+</tr>
+</tbody>
+</table>
+<h3 id="http">HTTP 客戶端<a class="headerlink" href="#http" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>requests</td>
+<td>同步 HTTP 請求</td>
+</tr>
+<tr>
+<td>httpx</td>
+<td>異步 HTTP 請求</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_9">自動化工具<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h2>
+<h3 id="cicd">CI/CD<a class="headerlink" href="#cicd" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>工具</th>
+<th>配置位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>持續集成</td>
+<td>GitHub Actions</td>
+<td><code>.github/workflows/</code></td>
+</tr>
+<tr>
+<td>Pre-commit hooks</td>
+<td>.pre-commit</td>
+<td><code>.pre-commit-config.yaml</code></td>
+</tr>
+<tr>
+<td>Git hooks</td>
+<td>githooks</td>
+<td><code>.githooks/</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="git">Git 工具鏈<a class="headerlink" href="#git" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>Git 忽略規則</strong>: <code>.gitignore</code>, <code>.dockerignore</code></li>
+<li><strong>預提交配置</strong>: <code>.pre-commit-config.yaml</code></li>
+<li><strong>備份機制</strong>: <code>.backup/</code> 目錄</li>
+</ul>
+<hr />
+<h2 id="_10">容器化與部署<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h2>
+<h3 id="docker">Docker 配置<a class="headerlink" href="#docker" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>配置文件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>基礎 Docker Compose 配置</td>
+</tr>
+<tr>
+<td><code>docker-compose.dev.yml</code></td>
+<td>開發環境配置</td>
+</tr>
+<tr>
+<td><code>docker-compose.prod.yml</code></td>
+<td>生產環境配置</td>
+</tr>
+<tr>
+<td><code>.dockerignore</code></td>
+<td>構建時排除的文件</td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td>環境變量模板</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_11">部署架構<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────┐
+│   Nginx    │  ← 反向代理
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│  Gunicorn   │  ← WSGI/ASGI 伺服器
+└──────┬──────┘
+       │
+┌──────▼──────┐
+│   FastAPI   │  ← Web 框架
+└─────────────┘
+</code></pre>
+<p><strong>特點</strong>: dev/prod 環境分離、容器化部署、反向代理。</p>
+<hr />
+<h2 id="_12">目錄結構<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h2>
+<pre><code>Dashboard/
+├── backend/              # 後端代碼
+│   ├── routers/         # API 路由
+│   └── requirements.txt # Python 依賴
+├── frontend/            # 前端代碼
+│   └── package.json     # Node.js 依賴
+├── docs/               # 文檔
+├── scripts/            # 腳本工具
+├── tools/              # 開發工具
+├── nginx/              # Nginx 配置
+├── market_data_export/  # 市場數據導出
+├── .github/workflows/  # CI/CD 配置
+├── docker-compose*.yml  # Docker 配置
+└── package.json        # 根級依賴管理
+</code></pre>
+<hr />
+<h2 id="_13">優化建議<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="1">1. 依賴管理<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ <strong>前端</strong>: 使用 <code>npm workspaces</code> 或 <code>pnpm</code> 優化多包管理</li>
+<li>✅ <strong>後端</strong>: 考慮 <code>poetry</code> 替代 pip（更好的依賴鎖定和虛擬環境）</li>
+</ul>
+<h3 id="2">2. 測試覆蓋率<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>⚠️ 當前: pytest + pytest-cov 已配置</li>
+<li>✅ 建議: 添加覆蓋率閾值（如 <code>&lt; 80%</code> 失敗）</li>
+</ul>
+<h3 id="3">3. 類型安全<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>❌ 缺失: 前端缺少 TypeScript</li>
+<li>✅ 建議: 遷移到 TypeScript 提高類型安全</li>
+</ul>
+<h3 id="4">4. 監控與日誌<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>⚠️ 當前: 無監控工具</li>
+<li>✅ 建議: 添加 Prometheus + Grafana（監控）</li>
+<li>✅ 建議: 使用 Loguru 替代 logging（日誌）</li>
+</ul>
+<h3 id="5">5. 文檔生成<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>⚠️ 當前: 有 docs/ 目錄但內容未知</li>
+<li>✅ 建議: 使用 Sphinx（Python）+ JSDoc（JavaScript）自動生成文檔</li>
+</ul>
+<hr />
+<h2 id="_14">總結<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="_15">工具鏈評估<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>評分</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前端</td>
+<td>🟡 7/10</td>
+<td>基礎完備，缺少類型安全</td>
+</tr>
+<tr>
+<td>後端</td>
+<td>🟢 9/10</td>
+<td>現代化工具鏈，選擇合理</td>
+</tr>
+<tr>
+<td>測試</td>
+<td>🟢 8/10</td>
+<td>pytest 生态完善</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>🟢 8/10</td>
+<td>GitHub Actions 完整</td>
+</tr>
+<tr>
+<td>部署</td>
+<td>🟢 9/10</td>
+<td>Docker + Nginx 組合優秀</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_16">核心優勢<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>✅ 前後端分離架構</li>
+<li>✅ 現代化技術棧（FastAPI + React）</li>
+<li>✅ 完整的測試框架</li>
+<li>✅ CI/CD 自動化</li>
+<li>✅ 容器化部署</li>
+</ol>
+<h3 id="_17">改進空間<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>⚠️ 前端類型安全（遷移到 TypeScript）</li>
+<li>⚠️ 監控系統（Prometheus + Grafana）</li>
+<li>⚠️ 日誌系統（Loguru）</li>
+<li>⚠️ 依賴管理（poetry/pnpm）</li>
+</ol>
+<hr />
+<p><strong>生成時間</strong>: 2026-02-21 12:45 GMT+8
+<strong>分析工具</strong>: 手動配置文件分析
+<strong>工具鏈完整度</strong>: 85%</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

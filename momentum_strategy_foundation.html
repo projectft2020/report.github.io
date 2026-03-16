@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基礎動能策略 - 第一週研究報告 - 量化交易研究報告</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .toc h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+            
+            table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>基礎動能策略 - 第一週研究報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-17</p>
+            <p class="subtitle">週期：第 1-2 週（基礎動能 + 回測）| 狀態：理論研究完成，準備實作</p>
+        </div>
+        
+        <div class="content">
+            <h2>🎯 策略概述</h2>
+            
+            <h3>核心理念</h3>
+            <p>建立一個跨資產動能策略，利用不同資產類別的動能效應來生成 alpha。策略將通過多空組合來降低市場風險，並透過動態權重調整來優化風險回報比。</p>
+            
+            <h3>選定資產</h3>
+            <p>根據跨資產動能策略的完整計畫，我們選擇以下四個核心資產：</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>資產</th>
+                        <th>代碼</th>
+                        <th>資產類別</th>
+                        <th>市場代表性</th>
+                        <th>動能特性</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>納斯達克100</td>
+                        <td>QQQ</td>
+                        <td>股票ETF</td>
+                        <td>美國科技股</td>
+                        <td>高波動性，成長導向</td>
+                    </tr>
+                    <tr>
+                        <td>黃金ETF</td>
+                        <td>GLD</td>
+                        <td>商品ETF</td>
+                        <td>避險資產</td>
+                        <td>通膨對沖，低相關性</td>
+                    </tr>
+                    <tr>
+                        <td>美元指數ETF</td>
+                        <td>UUP</td>
+                        <td>貨幣ETF</td>
+                        <td>美元強弱</td>
+                        <td>匯率波動，全球影響</td>
+                    </tr>
+                    <tr>
+                        <td>長期公債ETF</td>
+                        <td>TLT</td>
+                        <td>債券ETF</td>
+                        <td>利率敏感</td>
+                        <td>收益穩定，避險功能</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>📊 動能計算方法</h2>
+            
+            <h3>1. 時間框架選擇</h3>
+            
+            <h4>短期動能（1-3 個月）</h4>
+            <ul>
+                <li><strong>計算期間</strong>：21 個交易日（1 個月）</li>
+                <li><strong>特點</strong>：反應快速，適合捕捉短期趨勢</li>
+                <li><strong>風險</strong>：噪音較多，可能產生假信號</li>
+            </ul>
+            
+            <h4>中期動能（3-6 個月）</h4>
+            <ul>
+                <li><strong>計算期間</strong>：63 個交易日（3 個月）</li>
+                <li><strong>特點</strong>：平衡性較好，減少噪音</li>
+                <li><strong>風險</strong>：反應速度中等</li>
+            </ul>
+            
+            <h4>長期動能（6-12 個月）</h4>
+            <ul>
+                <li><strong>計算期間</strong>：126 個交易日（6 個月）</li>
+                <li><strong>特點</strong>：趨勢明確，噪音最少</li>
+                <li><strong>風險</strong>：反應緩慢，錯過早期機會</li>
+            </ul>
+            
+            <h3>2. 動能得分計算</h3>
+            
+            <h4>標準化動能得分</h4>
+            <pre><code>動能得分 = (當前價格 - n 日前價格) / n 日前價格</code></pre>
+            
+            <h4>排名動能得分</h4>
+            <pre><code>排名動能 = RANK(動能得分) / 資產總數</code></pre>
+            
+            <h4>加權動能得分</h4>
+            <pre><code>加權動能 = 0.4 × 短期動能 + 0.3 × 中期動能 + 0.3 × 長期動能</code></pre>
+            
+            <h3>3. 動能信號生成</h3>
+            
+            <h4>多空信號定義</h4>
+            <ul>
+                <li><strong>多頭信號</strong>：動能得分 &gt; 0.5</li>
+                <li><strong>空頭信號</strong>：動能得分 &lt; -0.5</li>
+                <li><strong>中性信號</strong>：-0.5 ≤ 動能得分 ≤ 0.5</li>
+            </ul>
+            
+            <h4>信號強度分級</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>等級</th>
+                        <th>動能得分範圍</th>
+                        <th>信號強度</th>
+                        <th>權重建議</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>強多</td>
+                        <td>&gt; 0.8</td>
+                        <td>非常強</td>
+                        <td>1.5x</td>
+                    </tr>
+                    <tr>
+                        <td>多</td>
+                        <td>0.5 - 0.8</td>
+                        <td>強</td>
+                        <td>1.2x</td>
+                    </tr>
+                    <tr>
+                        <td>中性</td>
+                        <td>-0.5 - 0.5</td>
+                        <td>中性</td>
+                        <td>1.0x</td>
+                    </tr>
+                    <tr>
+                        <td>空</td>
+                        <td>-0.8 - -0.5</td>
+                        <td>弱</td>
+                        <td>0.8x</td>
+                    </tr>
+                    <tr>
+                        <td>強空</td>
+                        <td>&lt; -0.8</td>
+                        <td>非常弱</td>
+                        <td>0.5x</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>⚖️ 權重分配策略</h2>
+            
+            <h3>1. 等權重基準（Baseline）</h3>
+            <pre><code>初始權重 = [0.25, 0.25, 0.25, 0.25]</code></pre>
+            
+            <h3>2. 動能調整權重</h3>
+            <pre><code>調整後權重 = 基礎權重 × (1 + 動能得分 × 調整係數)</code></pre>
+            
+            <h3>3. 風險平價權重（Risk Parity）</h3>
+            <pre><code>風險權重 = 1 / 資產波動率
+標準化權重 = 風險權重 / SUM(風險權重)</code></pre>
+            
+            <h3>4. 動態權重計算步驟</h3>
+            
+            <h4>步驟 1：計算基礎動能</h4>
+            <pre><code>def calculate_momentum(price_series, lookback_days):
+    return (price_series.iloc[-1] - price_series.iloc[-lookback_days]) / price_series.iloc[-lookback_days]</code></pre>
+            
+            <h4>步驟 2：計算組合權重</h4>
+            <pre><code>def calculate_dynamic_weights(momentum_scores, base_weights, adjustment_factor=0.3):
+    adjusted_weights = base_weights * (1 + momentum_scores * adjustment_factor)
+    return adjusted_weights / adjusted_weights.sum()</code></pre>
+            
+            <h4>步驟 3：風險控制</h4>
+            <pre><code>def risk_control(weights, max_single_weight=0.4, min_single_weight=0.1):
+    weights = np.clip(weights, min_single_weight, max_single_weight)
+    return weights / weights.sum()</code></pre>
+            
+            <h2>🎯 交易執行規則</h2>
+            
+            <h3>1. 再平衡頻率</h3>
+            
+            <h4>每週再平衡（Weekly）</h4>
+            <ul>
+                <li><strong>頻率</strong>：每週一開盤</li>
+                <li><strong>優點</strong>：跟隨趨勢，反應較快</li>
+                <li><strong>缺點</strong>：交易成本較高</li>
+            </ul>
+            
+            <h4>雙週再平衡（Bi-weekly）</h4>
+            <ul>
+                <li><strong>頻率</strong>：每兩週一再開盤</li>
+                <li><strong>優點</strong>：平衡交易成本和反應速度</li>
+                <li><strong>缺點</strong>：可能錯過短期機會</li>
+            </ul>
+            
+            <h4>月度再平衡（Monthly）</h4>
+            <ul>
+                <li><strong>頻率</strong>：每月第一個週一</li>
+                <li><strong>優點</strong>：交易成本最低</li>
+                <li><strong>缺點</strong>：反應較慢</li>
+            </ul>
+            
+            <h3>2. 交易成本考慮</h3>
+            
+            <h4>假設交易成本</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>成本類型</th>
+                        <th>比率</th>
+                        <th>影響</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>佣金</td>
+                        <td>0.1%</td>
+                        <td>每次交易</td>
+                    </tr>
+                    <tr>
+                        <td>滑點</td>
+                        <td>0.2%</td>
+                        <td>大額交易</td>
+                    </tr>
+                    <tr>
+                        <td>稅費</td>
+                        <td>0.0%</td>
+                        <td>假設免稅帳戶</td>
+                    </tr>
+                    <tr>
+                        <td>總成本</td>
+                        <td>0.3%</td>
+                        <td>每次交易</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h4>成本優化策略</h4>
+            <ul>
+                <li><strong>最小交易量</strong>：避免頻繁的小額交易</li>
+                <li><strong>批量執行</strong>：集中在一個時間點執行所有交易</li>
+                <li><strong>流動性考慮</strong>：選擇流動性好的時段交易</li>
+            </ul>
+            
+            <h3>3. 執行演算法</h3>
+            
+            <h4>基礎執行邏輯</h4>
+            <pre><code>def execute_rebalance(current_weights, target_weights, prices):
+    # 計算需要買賣的份數
+    current_value = calculate_portfolio_value(current_weights, prices)
+    target_shares = (target_weights * current_value) / prices
+    
+    # 生成交易訂單
+    orders = []
+    for asset in assets:
+        diff = target_shares[asset] - current_shares[asset]
+        if abs(diff) > MIN_TRADE_UNITS:
+            orders.append({
+                'asset': asset,
+                'action': 'BUY' if diff > 0 else 'SELL',
+                'quantity': abs(diff)
+            })
+    
+    return orders</code></pre>
+            
+            <h2>📈 回測框架設計</h2>
+            
+            <h3>1. 回測期間</h3>
+            
+            <h4>主要回測期間</h4>
+            <ul>
+                <li><strong>開始日期</strong>：2010-01-01</li>
+                <li><strong>結束日期</strong>：2025-12-31</li>
+                <li><strong>總期間</strong>：16 年</li>
+                <li><strong>樣本外</strong>：最近 2 年</li>
+            </ul>
+            
+            <h4>市場環境覆蓋</h4>
+            <ul>
+                <li><strong>牛市</strong>：2010-2015, 2019-2021</li>
+                <li><strong>熊市</strong>：2015-2016, 2018, 2022</li>
+                <li><strong>震盪市</strong>：2016-2018, 2021-2022</li>
+                <li><strong>COVID-19</strong>：2020</li>
+                <li><strong>通膨危機</strong>：2022-2023</li>
+            </ul>
+            
+            <h3>2. 績效評估指標</h3>
+            
+            <h4>核心指標</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>指標</th>
+                        <th>計算方式</th>
+                        <th>目標值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>年化報酬率</td>
+                        <td>CAGR</td>
+                        <td>&gt; 8%</td>
+                    </tr>
+                    <tr>
+                        <td>年化波動率</td>
+                        <td>標準差</td>
+                        <td>&lt; 15%</td>
+                    </tr>
+                    <tr>
+                        <td>夏普比率</td>
+                        <td>(報酬率 - 無風險利率) / 波動率</td>
+                        <td>&gt; 0.5</td>
+                    </tr>
+                    <tr>
+                        <td>最大回撤</td>
+                        <td>Max Drawdown</td>
+                        <td>&lt; -25%</td>
+                    </tr>
+                    <tr>
+                        <td>勝率</td>
+                        <td>正報酬月數 / 總月數</td>
+                        <td>&gt; 60%</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h4>風險指標</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>指標</th>
+                        <th>計算方式</th>
+                        <th>目標值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>VaR (95%)</td>
+                        <td>分位數</td>
+                        <td>&lt; -3%</td>
+                    </tr>
+                    <tr>
+                        <td>CVaR</td>
+                        <td>超過 VaR 的平均損失</td>
+                        <td>&lt; -5%</td>
+                    </tr>
+                    <tr>
+                        <td>Calmar 比率</td>
+                        <td>年化報酬率 / 最大回撤</td>
+                        <td>&gt; 0.3</td>
+                    </tr>
+                    <tr>
+                        <td>Sortino 比率</td>
+                        <td>(報酬率 - 無風險利率) / 下行波動率</td>
+                        <td>&gt; 0.8</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>3. 基準比較</h3>
+            
+            <h4>基準組合</h4>
+            <ol>
+                <li><strong>買入持有</strong>：等權重持有四個資產</li>
+                <li><strong>60/40 組合</strong>：60% QQQ + 40% TLT</li>
+                <li><strong>S&amp;P 500</strong>：單一市場基準</li>
+                <li><strong>無風險利率</strong>：3 個月期國庫券</li>
+            </ol>
+            
+            <h4>超額報酬分析</h4>
+            <pre><code>def calculate_excess_returns(strategy_returns, benchmark_returns):
+    # 計算策略相對基準的超額報酬
+    excess_returns = strategy_returns - benchmark_returns
+    
+    # 計算追蹤誤差
+    tracking_error = excess_returns.std() * np.sqrt(252)
+    
+    # 計算信息比率
+    information_ratio = excess_returns.mean() / tracking_error
+    
+    return {
+        'excess_returns': excess_returns,
+        'tracking_error': tracking_error,
+        'information_ratio': information_ratio
+    }</code></pre>
+            
+            <h2>🛠️ 實作技術棧</h2>
+            
+            <h3>1. 數據獲取</h3>
+            <pre><code># 使用 yfinance 獲取數據
+import yfinance as yf
+
+def get_price_data(tickers, start_date, end_date):
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+    return data</code></pre>
+            
+            <h3>2. 策略核心</h3>
+            <pre><code>class MomentumStrategy:
+    def __init__(self, tickers, lookback_periods):
+        self.tickers = tickers
+        self.lookback_periods = lookback_periods
+        self.weights = None
+        
+    def calculate_momentum(self, prices):
+        momentum_scores = {}
+        for period in self.lookback_periods:
+            momentum = (prices.iloc[-1] / prices.iloc[-period] - 1)
+            momentum_scores[period] = momentum
+        return momentum_scores
+    
+    def generate_signals(self, momentum_scores):
+        # 綜合動能得分
+        combined_score = np.mean(list(momentum_scores.values()))
+        
+        # 生成信號
+        if combined_score > 0.1:
+            return 'BUY'
+        elif combined_score < -0.1:
+            return 'SELL'
+        else:
+            return 'HOLD'</code></pre>
+            
+            <h3>3. 回測引擎</h3>
+            <pre><code>class BacktestEngine:
+    def __init__(self, strategy, initial_capital=100000):
+        self.strategy = strategy
+        self.initial_capital = initial_capital
+        self.portfolio_value = []
+        self.positions = {}
+        
+    def run_backtest(self, prices):
+        for date, price_row in prices.iterrows():
+            # 計算當天動能
+            momentum_scores = self.strategy.calculate_momentum(
+                prices[:date]
+            )
+            
+            # 生成信號
+            signal = self.strategy.generate_signals(momentum_scores)
+            
+            # 執行交易
+            self.execute_trade(signal, price_row, date)
+            
+            # 更新組合價值
+            self.update_portfolio_value(price_row, date)
+        
+        return self.get_results()</code></pre>
+            
+            <h2>📊 預期結果</h2>
+            
+            <h3>1. 績效預期</h3>
+            
+            <h4>樂觀情景</h4>
+            <ul>
+                <li><strong>年化報酬率</strong>：10-12%</li>
+                <li><strong>年化波動率</strong>：12-15%</li>
+                <li><strong>夏普比率</strong>：0.6-0.8</li>
+                <li><strong>最大回撤</strong>：-15% to -20%</li>
+            </ul>
+            
+            <h4>基準情景</h4>
+            <ul>
+                <li><strong>年化報酬率</strong>：8-10%</li>
+                <li><strong>年化波動率</strong>：14-18%</li>
+                <li><strong>夏普比率</strong>：0.4-0.6</li>
+                <li><strong>最大回撤</strong>：-20% to -25%</li>
+            </ul>
+            
+            <h4>悲觀情景</h4>
+            <ul>
+                <li><strong>年化報酬率</strong>：5-8%</li>
+                <li><strong>年化波動率</strong>：16-20%</li>
+                <li><strong>夏普比率</strong>：0.2-0.4</li>
+                <li><strong>最大回撤</strong>：-25% to -30%</li>
+            </ul>
+            
+            <h3>2. 風險特徵</h3>
+            
+            <h4>相關性分析</h4>
+            <ul>
+                <li><strong>與傳統資產相關性</strong>：低至中等</li>
+                <li><strong>跨資產分散效果</strong>：良好</li>
+                <li><strong>市場中性程度</strong>：部分中性</li>
+            </ul>
+            
+            <h4>極端情境分析</h4>
+            <ul>
+                <li><strong>2008 類似危機</strong>：預期回撤 -25% to -35%</li>
+                <li><strong>2020 COVID 危機</strong>：預期回撤 -20% to -30%</li>
+                <li><strong>2022 通膨危機</strong>：預期回撤 -15% to -25%</li>
+            </ul>
+            
+            <h2>🎯 下一步行動</h2>
+            
+            <h3>第 1-2 週任務清單</h3>
+            
+            <h4>✅ 本週完成（理論研究）</h4>
+            <ul>
+                <li>[x] 基礎動能策略理論框架</li>
+                <li>[x] 資產選擇與特性分析</li>
+                <li>[x] 動能計算方法設計</li>
+                <li>[x] 權重分配策略制定</li>
+                <li>[x] 回測框架規劃</li>
+            </ul>
+            
+            <h4>⏳ 下週開始（實作階段）</h4>
+            <ul>
+                <li>[ ] Matrix 系統整合</li>
+                <li>[ ] 數據收集與清洗</li>
+                <li>[ ] 基礎動能策略程式碼實作</li>
+                <li>[ ] 第一次回測執行</li>
+                <li>[ ] 結果分析與優化</li>
+            </ul>
+            
+            <h3>優先級排序</h3>
+            <ol>
+                <li><strong>高優先級</strong>：Matrix 系統整合</li>
+                <li><strong>中優先級</strong>：數據收集</li>
+                <li><strong>中優先級</strong>：策略實作</li>
+                <li><strong>低優先級</strong>：回測執行</li>
+            </ol>
+            
+            <h2>📝 備註與注意事項</h2>
+            
+            <h3>技術限制</h3>
+            <ol>
+                <li><strong>數據品質</strong>：確保數據的完整性和準確性</li>
+                <li><strong>滑點成本</strong>：實際交易可能面臨更高的滑點</li>
+                <li><strong>流動性風險</strong>：大額交易可能影響市場價格</li>
+                <li><strong>模型風險</strong>：歷史表現不能保證未來結果</li>
+            </ol>
+            
+            <h3>市場風險</h3>
+            <ol>
+                <li><strong>黑天鵝事件</strong>：無法預測的極端事件</li>
+                <li><strong>制度變化</strong>：交易規則或稅制改變</li>
+                <li><strong>相關性突變</strong>：危機時期相關性可能急劇變化</li>
+                <li><strong>流動性乾涸</strong>：市場流動性可能突然消失</li>
+            </ol>
+            
+            <div class="info-box">
+                <strong>報告完成日期：</strong> 2026-02-17<br>
+                <strong>下次更新：</strong> 第 2 週結束時（2026-03-03）<br>
+                <strong>負責人：</strong> Charlie (AI Assistant)<br>
+                <strong>審核：</strong> David (Researcher)
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

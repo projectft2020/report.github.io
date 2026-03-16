@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threads 第一週發文內容日曆 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Threads 第一週發文內容日曆</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="threads">Threads 第一週發文內容日曆<a class="headerlink" href="#threads" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> s002-content-calendar
+<strong>帳號:</strong> @projectft2020 (Charlie 交易學習筆記)
+<strong>設計日期:</strong> 2026-02-21
+<strong>執行週期:</strong> Day 1-7 (建議週一開始)</p>
+<hr />
+<h2 id="_1">日曆總覽<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>天數</th>
+<th>發文數</th>
+<th>教育類</th>
+<th>分析類</th>
+<th>互動類</th>
+<th>娛樂類</th>
+<th>時段分配</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Day 1</td>
+<td>2則</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>20:00, 00:00</td>
+</tr>
+<tr>
+<td>Day 2</td>
+<td>2則</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>20:00, 22:00</td>
+</tr>
+<tr>
+<td>Day 3</td>
+<td>2則</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>20:00, 00:00</td>
+</tr>
+<tr>
+<td>Day 4</td>
+<td>2則</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>20:00, 22:00</td>
+</tr>
+<tr>
+<td>Day 5</td>
+<td>2則</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>20:00, 00:00</td>
+</tr>
+<tr>
+<td>Day 6</td>
+<td>2則</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>20:00, 00:00</td>
+</tr>
+<tr>
+<td>Day 7</td>
+<td>2則</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>20:00, 22:00</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>14則</strong></td>
+<td><strong>6</strong></td>
+<td><strong>4</strong></td>
+<td><strong>3</strong></td>
+<td><strong>1</strong></td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><strong>內容比例:</strong>
+- 教育類: 42.9% (目標40%) ✓
+- 分析類: 28.6% (目標30%) ✓
+- 互動類: 21.4% (目標20%) ✓
+- 娛樂類: 7.1% (目標10%) ✓</p>
+<hr />
+<h2 id="day-1-">Day 1 (週一) - 教育與分析開局<a class="headerlink" href="#day-1-" title="連結到此標題">&para;</a></h2>
+<h3 id="1">📌 貼文 #1<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【新手友善】移動平均線入門：看懂趨勢的第一步</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 簡介：為什麼要用移動平均線？<br>- 三種常用 MA：5日、10日、20日的差異<br>- 金叉與死叉：實用但不絕對<br>- 案例分享：用 MA 避免追高殺低<br>- 下集預告：如何搭配成交量判斷</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：簡潔的 MA 交叉示意圖（金叉向上📈、死叉向下📉）<br>- 真實圖表截圖：標明 MA 線條的股票 K 線圖</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#量化交易 #技術指標 #移動平均線 #交易學習 #新手入門</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>有沒有人用過 MA 交易？分享一下你的經驗吧！💬</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2">📌 貼文 #2<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>00:00 (次優時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📊 分析類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>晨間速遞：今日市場關注點與 Python 代碼分享</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 今日重點：Fed 官員講話、GDP 數據公布<br>- 市場情緒指數：VIX 顯示目前風險偏好<br>- Python 小技巧：用 yfinance 抓取即時股價的3行程式碼<br>- 實用資源：推薦 3 個追蹤經濟數據的網站</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 截圖：yfinance 代碼執行結果（高亮關鍵行）<br>- 圖表：VIX 指數走勢圖（標記當前位置）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#市場分析 #Python #量化交易 #數據分析 #Trading</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你今天最關注哪個數據？留言告訴我！👇</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-2-">Day 2 (週二) - 教育與互動<a class="headerlink" href="#day-2-" title="連結到此標題">&para;</a></h2>
+<h3 id="3">📌 貼文 #3<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【Python實戰】用 pandas 處理股價數據（新手也能懂）</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 為什麼要用 pandas？<br>- DataFrame 基礎：讀取 CSV、篩選日期<br>- 實用函數：rolling().mean() 計算移動平均<br>- 視覺化：用 matplotlib 畫出股價與 MA<br>- 完整代碼：可直接複製運行</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 代碼截圖：高亮關鍵函數，添加註解<br>- 執行結果：DataFrame 截圖 + 股價圖表</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#Python教學 #量化交易 #pandas #數據分析 #交易學習</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>照著試跑了嗎？遇到的問題都可以留言問！🤝</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4">📌 貼文 #4<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>22:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>💬 互動類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【問答時間】你認為交易最重要的是什麼？</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 開放式問題：技術分析 vs 基本面分析 vs 情緒控制<br>- 個人觀點：學習初期我犯了哪些錯<br>- 邀請分享：你的「交易第一原則」是什麼？<br>- 精選回覆會在下週整理成貼文</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：三個選項的對比圖（用簡單圖標）<br>- 截圖：社群中的精彩回覆（範例）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#交易討論 #量化交易 #學習交流 #社群互動 #Trading</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你的答案是什麼？用簡單的幾個字告訴我！🔥</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-3-">Day 3 (週三) - 教育與分析<a class="headerlink" href="#day-3-" title="連結到此標題">&para;</a></h2>
+<h3 id="5">📌 貼文 #5<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【指標解說】布林帶：不只是波動範圍</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 布林帶三條線：中軌、上軌、下軌的計算方式<br>- 三種訊號：收斂、擴張、突破<br>- 實用策略：布林帶收斂+放量突破<br>- 常見誤區：單獨使用布林帶的風險<br>- 搭配建議：結合 RSI 或成交量</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：布林帶結構示意（標明計算公式）<br>- 真實圖表：標明收斂和擴張的布林帶圖</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#布林帶 #技術指標 #量化交易 #交易學習 #波動率</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>有沒有人試過布林帶策略？效果如何？💭</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6">📌 貼文 #6<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>00:00 (次優時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📊 分析類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>盤後觀察：台積電與英偉達相關性分析</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 數據來源：近3個月股價相關性<br>- 相關係數：0.87（高度正相關）<br>- 實際應用：NVDA 走勢作為 TSMC 參考<br>- 風險提醒：相關性可能突然變化<br>- Python 代碼：計算相關係數的 snippet</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 圖表：雙股價走勢對比圖（標明關鍵點）<br>- 截圖：相關係數計算結果</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#市場分析 #台積電 #NVDA #相關性 #量化交易</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你還知道哪些高度相關的股票？分享一下吧！📊</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-4-">Day 4 (週四) - 教育與娛樂<a class="headerlink" href="#day-4-" title="連結到此標題">&para;</a></h2>
+<h3 id="7">📌 貼文 #7<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【新手常見錯誤】這 3 個習慣可能正在毀掉你的交易</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 錯誤1：不設止損 — 「會漲回來的」心態<br>- 錯誤2：過度交易 — 手癢就想進場<br>- 錯誤3：不記交易筆記 — 重複犯同樣錯<br>- 個人經驗：我犯過哪個錯？如何改正？<br>- 改善建議：交易檢查清單分享</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：三個錯誤的圖標+簡短描述<br>- 截圖：交易筆記範本（可下載版）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#交易教學 #新手入門 #風險管理 #交易筆記 #量化交易</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你犯過哪個錯？分享出來讓大家避雷！⚡</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8">📌 貼文 #8<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>22:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>🎭 娛樂類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>交易員的周末：其實是研究報告與咖啡 ☕</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 朋友以為：我在開盤時買賣股票<br>- 實際上：我在看報告、寫代碼、分析數據<br>- 真實日常：一天喝了5杯咖啡還沒寫完策略<br>- 自嘲式幽默：AI 預測比我都準...<br>- 結論：交易不只是看盤，是無止盡的學習</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：對比圖（朋友想像 vs 實際情況）<br>- 截圖：桌上一堆咖啡+筆電+報告的場景</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#交易日常 #學習筆記 #量化交易 #交易幽默 #生活分享</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你最常喝哪種咖啡寫代碼？推薦一下！☕</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-5-">Day 5 (週五) - 分析與互動<a class="headerlink" href="#day-5-" title="連結到此標題">&para;</a></h2>
+<h3 id="9">📌 貼文 #9<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📊 分析類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【策略回測】移動平均線雙週期策略實戰</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 策略說明：5日均線 &gt; 20日均線做多，反之做空<br>- 回測區間：2023年1月-2024年12月（台股加權指數）<br>- 績效報告：年化報酬率、最大回撤、夏普比率<br>- 優缺點分析：哪些市場有效？哪些會失靈？<br>- 改進方向：加入成交量濾網、趨勢判斷</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 圖表：回測累積收益曲線（標明買賣點）<br>- 表格：績效指標摘要（年化報酬、最大回撤等）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#策略回測 #移動平均線 #量化交易 #數據分析 #Trading</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>想看哪個策略的回測？留言告訴我！📈</td>
+</tr>
+</tbody>
+</table>
+<h3 id="10">📌 貼文 #10<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>00:00 (次優時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>💬 互動類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【經驗分享】你試過最有效的止損方法是什麼？</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 引導：止損是新手最難學的課題<br>- 分享：我試過的止損方式<br>  - 固定百分比止損<br>  - ATR 波動止損<br>  - 技術位止損（支撐/壓力）<br>- 邀請：你的經驗是什麼？<br>- 承諾：精選回覆會整理成止損指南</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：三種止損方式的示意圖<br>- 截圖：過往精華回覆範例</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#止損教學 #交易討論 #風險管理 #量化交易 #社群分享</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你的止損心得是什麼？留言讓大家學習！📝</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-6-">Day 6 (週六) - 學習與回顧<a class="headerlink" href="#day-6-" title="連結到此標題">&para;</a></h2>
+<h3 id="11">📌 貼文 #11<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【週末學習】MACD 指標：由來、計算、實戰應用</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- MACD 是什麼？由來與基本概念<br>- 計算方式：DIF、DEA、MACD 柱狀圖<br>- 兩種訊號：金叉、零軸上下<br>- 實戰案例：如何用 MACD 判斷轉折<br>- 常見誤解：MACD 也有滯後性</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：MACD 結構示意（標明計算步驟）<br>- 真實圖表：標明金叉、死叉的 MACD 圖</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#MACD #技術指標 #週末學習 #量化交易 #交易學習</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>有沒有人同時用 MACD 和其他指標？搭配什麼最好？🤔</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">📌 貼文 #12<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>00:00 (次優時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📊 分析類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>本週精華：5天內學到的 3 個重要洞察</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 洞察1：社群回覆中提到的最多問題是「止損」<br>- 洞察2：Python 新手最卡在資料清理<br>- 洞察3：多數人偏好簡單策略，但執行是關鍵<br>- 下週方向：根據社群需求調整內容<br>- 感謝：所有參與討論的朋友</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：三個洞察的卡片式排版<br>- 截圖：本週熱門回覆匯總（隱私處理）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#週回顧 #學習筆記 #量化交易 #社群精華 #成長記錄</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>這週學到最實用的是什麼？分享一下！✨</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="day-7-">Day 7 (週日) - 學習與互動<a class="headerlink" href="#day-7-" title="連結到此標題">&para;</a></h2>
+<h3 id="13">📌 貼文 #13<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>20:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>📚 教育類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【概念解說】什麼是「量化交易」？用白話說清楚</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 簡單定義：用數據和規則做交易決策<br>- 與傳統交易的差異：情緒 vs 紀律<br>- 常見誤解：不是只有 AI 或高頻交易<br>- 入門途徑：從簡單的技術指標開始<br>- 我的起點：如何從0開始學量化</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：傳統交易 vs 量化交易對比圖<br>- 流程圖：量化交易步驟（數據→策略→回測→執行）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#量化交易 #新手入門 #交易學習 #數據分析 #白話說明</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你對量化交易最不了解的是什麼？留言問！🙋</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">📌 貼文 #14<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>發文時間</strong></td>
+<td>22:00 (黃金時段)</td>
+</tr>
+<tr>
+<td><strong>內容類型</strong></td>
+<td>💬 互動類</td>
+</tr>
+<tr>
+<td><strong>主題標題</strong></td>
+<td>【新的一週】你對市場有什麼預期？</td>
+</tr>
+<tr>
+<td><strong>內容大綱</strong></td>
+<td>- 下週重點事件：經濟數據公布、企業財報<br>- 我的觀察：近期市場趨勢簡要分析<br>- 邀請預測：你看好或看衰？理由是什麼？<br>- 互動承諾：週末回顧準度最高的預測<br>- 下週預告：更多實用代碼與策略分享</td>
+</tr>
+<tr>
+<td><strong>視覺建議</strong></td>
+<td>- 自製圖片：下週重要事件日曆（圖標式）<br>- 截圖：熱門預測範例（匿名）</td>
+</tr>
+<tr>
+<td><strong>Hashtags</strong></td>
+<td>#市場預測 #交易討論 #量化交易 #社群互動 #新的一週</td>
+</tr>
+<tr>
+<td><strong>CTA</strong></td>
+<td>你的下週預測是什麼？留言留下記錄！🎯</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_2">總結說明<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">內容分配統計<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>則數</th>
+<th>占比</th>
+<th>目標</th>
+<th>達成狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>教育類</td>
+<td>6</td>
+<td>42.9%</td>
+<td>40%</td>
+<td>✅ 超標2.9%</td>
+</tr>
+<tr>
+<td>分析類</td>
+<td>4</td>
+<td>28.6%</td>
+<td>30%</td>
+<td>✅ 略低1.4%</td>
+</tr>
+<tr>
+<td>互動類</td>
+<td>3</td>
+<td>21.4%</td>
+<td>20%</td>
+<td>✅ 略高1.4%</td>
+</tr>
+<tr>
+<td>娛樂類</td>
+<td>1</td>
+<td>7.1%</td>
+<td>10%</td>
+<td>✅ 略低2.9%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>總計：14則貼文，符合每日1-2則的目標</strong></p>
+<h3 id="_4">時段分配統計<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>時段</th>
+<th>則數</th>
+<th>占比</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20:00-24:00</td>
+<td>11</td>
+<td>78.6%</td>
+<td>黃金時段主力</td>
+</tr>
+<tr>
+<td>00:00-02:00</td>
+<td>3</td>
+<td>21.4%</td>
+<td>次優時段補充</td>
+</tr>
+<tr>
+<td>07:00-09:00</td>
+<td>0</td>
+<td>0%</td>
+<td>第一週未安排，可視情況加入</td>
+</tr>
+<tr>
+<td>12:00-14:00</td>
+<td>0</td>
+<td>0%</td>
+<td>第一週未安排，可視情況加入</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">主題覆蓋範圍<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<p><strong>技術指標類：</strong>
+- ✅ 移動平均線（Day 1, Day 5）
+- ✅ 布林帶（Day 3）
+- ✅ MACD（Day 6）</p>
+<p><strong>Python 實戰類：</strong>
+- ✅ pandas 基礎（Day 2）
+- ✅ yfinance 數據抓取（Day 1, Day 3）
+- ✅ 相關性計算（Day 3）
+- ✅ 策略回測（Day 5）</p>
+<p><strong>交易觀念類：</strong>
+- ✅ 止損重要性（Day 4, Day 5）
+- ✅ 新手常見錯誤（Day 4）
+- ✅ 量化交易概念（Day 7）</p>
+<p><strong>市場分析類：</strong>
+- ✅ 晨間市場速遞（Day 1）
+- ✅ 股票相關性分析（Day 3）
+- ✅ 本週精華回顧（Day 6）
+- ✅ 下週預測互動（Day 7）</p>
+<h3 id="hashtag">Hashtag 策略<a class="headerlink" href="#hashtag" title="連結到此標題">&para;</a></h3>
+<p><strong>核心 Hashtags（全部貼文使用）：</strong>
+- #量化交易
+- #交易學習</p>
+<p><strong>分類 Hashtags：</strong>
+- 技術指標：#技術指標 #移動平均線 #布林帶 #MACD #止損
+- Python：#Python #Python教學 #pandas #yfinance #數據分析
+- 分析：#市場分析 #策略回測 #相關性 #週回顧
+- 互動：#交易討論 #社群互動 #學習交流 #社群精華
+- 娛樂：#交易日常 #交易幽默 #生活分享</p>
+<p><strong>原則：每則貼文3-5個Hashtags，包含2個核心 + 1-3個分類</strong></p>
+<hr />
+<h2 id="_6">執行注意事項<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="_7">發文前準備<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<h4 id="1_1">1. 視覺元素製建清單<a class="headerlink" href="#1_1" title="連結到此標題">&para;</a></h4>
+<p><strong>自製圖片（優先製作）：</strong>
+- [ ] MA 交叉示意圖（金叉/死叉）
+- [ ] 布林帶結構示意圖
+- [ ] MACD 計算流程圖
+- [ ] 三種止損方式對比圖
+- [ ] 傳統 vs 量化交易對比圖
+- [ ] 下週重要事件日曆</p>
+<p><strong>真實圖表（即時截取）：</strong>
+- [ ] 股票 K 線 + MA 圖（台積電或熱門股）
+- [ ] VIX 走勢圖
+- [ ] 布林帶實例圖
+- [ ] MACD 實例圖
+- [ ] 回測收益曲線圖
+- [ ] 雙股價相關性圖</p>
+<p><strong>代碼截圖：</strong>
+- [ ] yfinance 即時股價代碼
+- [ ] pandas 移動平均計算代碼
+- [ ] 相關係數計算代碼</p>
+<h4 id="2_1">2. 文字內容準備<a class="headerlink" href="#2_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li>[ ] 確保每則貼文控制在300-500字（Threads 最佳長度）</li>
+<li>[ ] 每則貼文都有明確的 CTA（Call to Action）</li>
+<li>[ ] 白話表達，避免過度專業術語</li>
+<li>[ ] 加入個人經驗分享，增加親近感</li>
+<li>[ ] 檢查錯別字與語句通順度</li>
+</ul>
+<h3 id="_8">發文後執行<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<h4 id="1_2">1. 互動回應策略<a class="headerlink" href="#1_2" title="連結到此標題">&para;</a></h4>
+<p><strong>回應時間：</strong>
+- 第一小時內：回應所有留言（演算法好感度）
+- 24小時內：持續追蹤並回覆後續留言
+- 精選回覆：收藏有價值的問題與見解</p>
+<p><strong>回應方式：</strong>
+- 避免：「讚」、「好文」等簡短回覆
+- 鼓勵：提問引導持續對話（「你試過嗎？」、「具體是什麼情況？」）
+- 認可：對有價值的回覆給予讚 + 詳細回應</p>
+<h4 id="2_2">2. 數據追蹤與記錄<a class="headerlink" href="#2_2" title="連結到此標題">&para;</a></h4>
+<p><strong>追蹤指標：</strong>
+- [ ] 每則貼文的瀏覽量、讚數、回覆數
+- [ ] 計算互動率：（讚 + 回覆）/ 瀏覽量
+- [ ] 粉絲成長：每日記錄粉絲數
+- [ ] Hashtag 表現：哪些標籤帶來更多曝光</p>
+<p><strong>記錄格式建議：</strong></p>
+<pre><code class="language-markdown">### Day 1 貼文統計
+| 時間 | 主題 | 瀏覽 | 讚 | 回覆 | 互動率 | 粉絲增減 |
+|------|------|------|-----|------|--------|----------|
+| 20:00 | MA入門 | - | - | - | - | - |
+| 00:00 | 晨間速遞 | - | - | - | - | - |
+</code></pre>
+<h4 id="3_1">3. 靈活調整策略<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h4>
+<p><strong>表現良好（互動率 &gt; 5%）：</strong>
+- 延續相同主題系列的後續貼文
+- 記錄成功元素（視覺、話題、CTA 方式）
+- 考慮在黃金時段發布類似內容</p>
+<p><strong>表現一般（互動率 3-4%）：</strong>
+- 分析可能原因（時段？話題？視覺？）
+- 嘗試微調標題或視覺元素
+- 觀察1-2天再決定是否繼續</p>
+<p><strong>表現不佳（互動率 &lt; 3%）：</strong>
+- 暫停該類型內容1-2天
+- 回到社群討論中尋找感興趣的話題
+- 增加個人經驗分享，減少純知識輸出</p>
+<h3 id="_9">週中調整建議<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<p><strong>如果發現：</strong>
+1. <strong>教育類反應熱烈</strong> → 增加技術指標教學，減少分析類
+2. <strong>Python 代碼特別受歡迎</strong> → 增加「每週代碼」專欄
+3. <strong>互動類貼文討論度高</strong> → 考慮每週固定一天為「問答日」
+4. <strong>分析類表現不佳</strong> → 將分析融入教育類，或加入更多視覺
+5. <strong>週末表現較弱</strong> → 考慮改為輕鬆的學習筆記型式</p>
+<h3 id="_10">第二週預告（基於第一週表現）<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<p><strong>預計新增內容：</strong>
+- Python 完整策略代碼分享（如果代碼類受歡迎）
+- 精選回覆整理貼文（Day 2、Day 5、Day 7 的精華）
+- 交易筆記範本分享（可下載版）
+- 風險管理專題（如果止損討論熱烈）</p>
+<p><strong>可能調整：</strong>
+- 增加晨間發文（07:00-09:00）如果粉絲習慣早閱讀
+- 減少週末發文如果週末流量明顯較低
+- 加入「每月主題」（如2月：技術指標月）</p>
+<hr />
+<h2 id="_11">品牌形象貫穿<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h2>
+<h3 id="_12">語氣與風格原則<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<p><strong>✅ 要做的：</strong>
+- 用「我覺得」、「我試過」、「我犯過的錯」展現真誠
+- 避免絕對性詞彙（「一定」、「必定」）
+- 用白話解釋專業概念（避免學究氣）
+- 承認自己也在學習（不裝專家）
+- 加入適度幽默和自嘲（親近感）</p>
+<p><strong>❌ 不要做的：</strong>
+- 使用過多術語不解釋
+- 表現得像交易大師
+- 推薦特定股票或喊單
+- 承諾「必賺」策略
+- 過度自我推廣</p>
+<h3 id="_13">視覺風格一致<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<p><strong>建議配色：</strong>
+- 主色：藍色系（專業、信任）
+- 輔色：橙色（活力、注意）
+- 背景：深色或淺灰（科技感）</p>
+<p><strong>排版原則：</strong>
+- 自製圖片統一尺寸（建議1080x1080）
+- 代碼截圖使用等寬字體、語法高亮
+- 圖表標記關鍵點（箭頭、圓圈、文字註解）
+- Hashtag 放在最後，與正文隔一行</p>
+<hr />
+<h2 id="_14">風險提示與注意<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="_15">內容風險管理<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<p><strong>財務建議聲明：</strong>
+- 所有貼文底部添加：「⚠️ 內容僅供學習參考，不構成投資建議」
+- 避免具體喊單或明確買賣建議
+- 強調「每個人交易風格不同，需自行判斷」</p>
+<p><strong>資訊準確性：</strong>
+- 技術指標計算公式需經過驗證
+- 回測數據註明來源與時間範圍
+- 市場數據註明「截至某月某日」</p>
+<h3 id="_16">法律與合規<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<p><strong>避免：</strong>
+- 未經授權使用他人圖表或數據
+- 宣稱「保證收益」
+- 疑似招投資的言論
+- 未經證實的內幕消息</p>
+<hr />
+<h2 id="_17">第二週規劃建議（待第一週數據回饋）<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h2>
+<h3 id="_18">視第一週表況可能調整<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<p><strong>如果互動率普遍 &gt; 5%：</strong>
+- 增加發文頻率至每日2-3則
+- 加入更深層次的量化策略討論
+- 考慮開始系列內容（如「RSI 完全指南」分3篇）</p>
+<p><strong>如果互動率 3-4%：</strong>
+- 維持現有頻率，微調內容組合
+- 增加個人經驗分享比例
+- 嘗試不同視覺元素（動態圖、流程圖）</p>
+<p><strong>如果互動率 &lt; 3%：</strong>
+- 暫停發文1-2天，重新定位內容方向
+- 參考其他成功帳號的做法
+- 考慮邀請社群朋友給予反饋</p>
+<hr />
+<h2 id="_19">執行檢查清單<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h2>
+<h3 id="_20">每日檢查<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 今日貼文是否已準備完成（視覺+文字）</li>
+<li>[ ] 發文時間是否按計劃執行</li>
+<li>[ ] 發文後1小時內是否有回應所有留言</li>
+<li>[ ] 記錄今日數據（瀏覽、讚、回覆、互動率）</li>
+<li>[ ] 準備明日貼文素材</li>
+</ul>
+<h3 id="day-3-4">週中檢查（Day 3-4）<a class="headerlink" href="#day-3-4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 檢視前3天表現，識別表現最佳/最差的貼文類型</li>
+<li>[ ] 根據社群回饋微調後半週內容</li>
+<li>[ ] 製作週末精華回覆素材</li>
+</ul>
+<h3 id="day-7">週末檢查（Day 7）<a class="headerlink" href="#day-7" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 整理本週完整數據</li>
+<li>[ ] 分析成功與失敗的元素</li>
+<li>[ ] 規劃第二週內容方向</li>
+<li>[ ] 回顧社群討論中提到最多的問題</li>
+</ul>
+<hr />
+<h2 id="_21">附錄：快速查找索引<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h2>
+<h3 id="_22">按內容類型查找<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>教育類：</strong> 貼文 #1, #3, #5, #7, #11, #13</li>
+<li><strong>分析類：</strong> 貼文 #2, #6, #9, #12</li>
+<li><strong>互動類：</strong> 貼文 #4, #8, #10, #14</li>
+<li><strong>娛樂類：</strong> 貼文 #8</li>
+</ul>
+<h3 id="_23">按主題查找<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>移動平均線：</strong> #1, #5, #9</li>
+<li><strong>布林帶：</strong> #5</li>
+<li><strong>MACD：</strong> #11</li>
+<li><strong>Python：</strong> #2, #3, #6, #9</li>
+<li><strong>止損：</strong> #4, #7, #10</li>
+<li><strong>市場分析：</strong> #2, #6, #9, #12, #14</li>
+</ul>
+<h3 id="_24">按時段查找<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>20:00-24:00：</strong> #1, #3, #5, #7, #9, #11, #13, #14</li>
+<li><strong>00:00-02:00：</strong> #2, #6, #10, #12</li>
+</ul>
+<hr />
+<p><strong>日曆版本:</strong> v1.0
+<strong>最後更新:</strong> 2026-02-21
+<strong>設計者:</strong> Charlie Analyst
+<strong>下次審閱:</strong> 2026-02-28（第一週結束後）</p>
+<hr />
+<h2 id="_25">執行預期成果<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h2>
+<p><strong>第一週目標：</strong>
+- ✅ 粉絲從13位增至30-40位
+- ✅ 平均互動率維持4-5%
+- ✅ 單則貼文平均瀏覽量達到300-500
+- ✅ 建立2-3個活躍互動的社群成員
+- ✅ 識別出最受歡迎的內容類型</p>
+<p><strong>成功指標：</strong>
+- 至少有1則貼文互動率超過6%
+- 粉絲留言中有「學習到」、「實用」等正面回饋
+- 收到至少3個具體問題（表示內容引發思考）
+- 重複訪客/互動者出現（表示內容有吸引力）</p>
+<hr />
+<p><strong>準備好了嗎？開始第一週的執行吧！一起成長！🚀</strong></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

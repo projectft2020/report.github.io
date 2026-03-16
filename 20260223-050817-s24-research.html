@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robust Stochastic Gradient Posterior Sampling: Research Report - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Robust Stochastic Gradient Posterior Sampling: Research Report</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="robust-stochastic-gradient-posterior-sampling-research-report">Robust Stochastic Gradient Posterior Sampling: Research Report<a class="headerlink" href="#robust-stochastic-gradient-posterior-sampling-research-report" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s24
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-23T00:10:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report presents a comprehensive analysis of robust stochastic gradient posterior sampling methods, focusing on theoretical frameworks, stochastic gradient techniques, robustness properties, convergence analysis, and practical applications. The research synthesizes recent advances in scalable Bayesian inference methods that maintain robustness to various sources of uncertainty and noise.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>Stochastic Gradient Langevin Dynamics (SGLD)</strong> — Foundation method that combines stochastic gradient descent with Langevin dynamics for approximate Bayesian inference | Source: arXiv:1704.04289</li>
+<li><strong>Stochastic Gradient Lattice Random Walk (SGLRW)</strong> — Novel robust method using lattice-based discretization with improved stability to minibatch size variations | Source: arXiv:2602.15925</li>
+<li><strong>Density Power Divergence (DPD)</strong> — Robust Bayesian framework using generalized posterior distributions for handling outliers and model misspecification | Source: arXiv:2501.07790</li>
+<li><strong>Constant SGD as Bayesian Inference</strong> — Theoretical connection showing constant learning rate SGD can sample from approximate posterior distributions | Source: JMLR 2017</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="theoretical-framework">Theoretical Framework<a class="headerlink" href="#theoretical-framework" title="連結到此標題">&para;</a></h3>
+<h4 id="bayesian-posterior-sampling">Bayesian Posterior Sampling<a class="headerlink" href="#bayesian-posterior-sampling" title="連結到此標題">&para;</a></h4>
+<p>Bayesian posterior sampling aims to approximate the posterior distribution (p(\theta|D) \propto p(D|\theta)p(\theta)), where (\theta) represents model parameters and (D) denotes observed data. Traditional Markov Chain Monte Carlo (MCMC) methods face computational challenges with large datasets due to the requirement of evaluating gradients over the entire dataset at each iteration.</p>
+<h4 id="stochastic-gradient-mcmc">Stochastic Gradient MCMC<a class="headerlink" href="#stochastic-gradient-mcmc" title="連結到此標題">&para;</a></h4>
+<p>Stochastic gradient MCMC methods address scalability by using minibatch gradients. The general form of the update equation is:</p>
+<p>[\theta_{t+1} = \theta_t + \epsilon_t \nabla \log p(\theta_t|D_{i_t}) + \sqrt{2\epsilon_t} \eta_t]</p>
+<p>where (\epsilon_t) is the step size, (D_{i_t}) is a minibatch, and (\eta_t \sim \mathcal{N}(0, I)) is injected noise.</p>
+<h4 id="theoretical-foundations">Theoretical Foundations<a class="headerlink" href="#theoretical-foundations" title="連結到此標題">&para;</a></h4>
+<p>Recent theoretical work has established that <strong>constant SGD</strong> with appropriate tuning can function as an approximate Bayesian posterior inference algorithm. The stationary distribution of SGD with constant learning rate can be matched to a target posterior distribution by minimizing the Kullback-Leibler divergence between the distributions.</p>
+<h3 id="stochastic-gradient-methods">Stochastic Gradient Methods<a class="headerlink" href="#stochastic-gradient-methods" title="連結到此標題">&para;</a></h3>
+<h4 id="stochastic-gradient-langevin-dynamics-sgld">Stochastic Gradient Langevin Dynamics (SGLD)<a class="headerlink" href="#stochastic-gradient-langevin-dynamics-sgld" title="連結到此標題">&para;</a></h4>
+<p>SGLD combines stochastic gradient descent with Langevin dynamics:</p>
+<p>[\theta_{t+1} = \theta_t + \epsilon_t \left( \frac{1}{|B|} \sum_{i \in B_t} \nabla \log p(x_i|\theta_t) + \nabla \log p(\theta_t) \right) + \sqrt{2\epsilon_t \beta^{-1}} \eta_t]</p>
+<p>where (B_t) is the minibatch at iteration (t), (|B|) is the batch size, and (\beta) is the inverse temperature parameter.</p>
+<p><strong>Key Properties:</strong>
+- Asymptotically samples from the true posterior as (\epsilon_t \to 0)
+- Scalable to large datasets through minibatch sampling
+- Requires careful tuning of step size schedules</p>
+<h4 id="stochastic-gradient-fisher-scoring-sgfs">Stochastic Gradient Fisher Scoring (SGFS)<a class="headerlink" href="#stochastic-gradient-fisher-scoring-sgfs" title="連結到此標題">&para;</a></h4>
+<p>SGFS uses the Fisher information matrix as a preconditioner:</p>
+<p>[\theta_{t+1} = \theta_t + \epsilon_t I^{-1}(\theta_t) \nabla \log p(\theta_t|D_{B_t}) + \sqrt{2\epsilon_t \beta^{-1}} \eta_t]</p>
+<p>This method leverages the Bayesian Central Limit Theorem to provide normal approximations of the posterior at high mixing rates while maintaining SGLD-like behavior at slower mixing rates.</p>
+<h3 id="robustness-techniques">Robustness Techniques<a class="headerlink" href="#robustness-techniques" title="連結到此標題">&para;</a></h3>
+<h4 id="stochastic-gradient-lattice-random-walk-sglrw">Stochastic Gradient Lattice Random Walk (SGLRW)<a class="headerlink" href="#stochastic-gradient-lattice-random-walk-sglrw" title="連結到此標題">&para;</a></h4>
+<p>SGLRW introduces a novel discretization scheme that enhances robustness:</p>
+<p><strong>Key Innovation:</strong> Unlike conventional SGLD, SGLRW introduces stochastic noise only through the off-diagonal elements of the update covariance matrix. This modification provides:</p>
+<ol>
+<li><strong>Greater robustness to minibatch size variations</strong> — Performance remains stable across different batch sizes</li>
+<li><strong>Asymptotic correctness</strong> — Maintains theoretical guarantees while improving practical stability</li>
+<li><strong>Heavy-tailed gradient noise tolerance</strong> — Performs well in the presence of non-Gaussian gradient noise</li>
+</ol>
+<p><strong>Update Equation:</strong>
+[\theta_{t+1} = \theta_t + \epsilon_t \nabla \log p(\theta_t|D_{B_t}) + \sqrt{2\epsilon_t} L \eta_t]</p>
+<p>where (L) is a lower triangular matrix from the lattice-based discretization.</p>
+<h4 id="density-power-divergence-dpd-methods">Density Power Divergence (DPD) Methods<a class="headerlink" href="#density-power-divergence-dpd-methods" title="連結到此標題">&para;</a></h4>
+<p>DPD-based generalized posteriors provide robustness to outliers and model misspecification:</p>
+<p>[p_\gamma(\theta|D) \propto p(\theta) \prod_{i=1}^n p(x_i|\theta)^\gamma]</p>
+<p>where (\gamma \in (0,1]) is the robustness parameter. When (\gamma = 1), this reduces to the standard posterior; when (\gamma &lt; 1), it downweights the influence of outliers.</p>
+<p><strong>Computational Challenge:</strong> DPD-based posteriors involve intractable integral terms for general parametric models, making traditional sampling methods infeasible.</p>
+<p><strong>Solution:</strong> Novel stochastic gradient algorithms combine loss-likelihood bootstrap with specialized optimization techniques for DPD-based estimation.</p>
+<h3 id="convergence-analysis">Convergence Analysis<a class="headerlink" href="#convergence-analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="theoretical-guarantees">Theoretical Guarantees<a class="headerlink" href="#theoretical-guarantees" title="連結到此標題">&para;</a></h4>
+<ol>
+<li>
+<p><strong>Asymptotic Correctness:</strong> Both SGLD and SGLRW converge to the true posterior distribution as the step size (\epsilon_t \to 0) at an appropriate rate.</p>
+</li>
+<li>
+<p><strong>Convergence Rates:</strong> Under suitable conditions, the Wasserstein distance between the algorithm's stationary distribution and the true posterior is (O(\sqrt{\epsilon})) for step size (\epsilon).</p>
+</li>
+<li>
+<p><strong>Robustness Bounds:</strong> SGLRW provides tighter bounds on approximation errors under minibatch perturbations compared to SGLD.</p>
+</li>
+</ol>
+<h4 id="error-sources">Error Sources<a class="headerlink" href="#error-sources" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>Discretization Error:</strong> Arises from the Euler-Maruyama discretization of the continuous-time Langevin diffusion</li>
+<li><strong>Minibatch Error:</strong> Due to using noisy gradient estimates from data subsets</li>
+<li><strong>Approximation Error:</strong> From finite-time convergence in practical implementations</li>
+</ol>
+<p><strong>Error Decomposition:</strong>
+[|P_T - P_\infty| \leq C_1 \sqrt{\epsilon} + C_2 \frac{\sigma}{\sqrt{|B|}} + C_3 e^{-\lambda T}]</p>
+<p>where (P_T) is the distribution at time (T), (P_\infty) is the target posterior, (\sigma^2) is the gradient noise variance, and (\lambda) is the mixing rate.</p>
+<h3 id="applications">Applications<a class="headerlink" href="#applications" title="連結到此標題">&para;</a></h3>
+<h4 id="bayesian-neural-networks">Bayesian Neural Networks<a class="headerlink" href="#bayesian-neural-networks" title="連結到此標題">&para;</a></h4>
+<p>Stochastic gradient posterior sampling methods enable scalable Bayesian inference in neural networks:</p>
+<ul>
+<li><strong>Uncertainty Quantification:</strong> Provides predictive uncertainty estimates crucial for safety-critical applications</li>
+<li><strong>Regularization:</strong> Bayesian approach naturally prevents overfitting</li>
+<li><strong>Model Selection:</strong> Enables comparison of models with different architectures using marginal likelihoods</li>
+</ul>
+<p><strong>Experimental Results:</strong> SGLRW demonstrates superior stability in Bayesian neural network training, particularly in regimes with heavy-tailed gradient noise or variable batch sizes.</p>
+<h4 id="generalized-linear-models">Generalized Linear Models<a class="headerlink" href="#generalized-linear-models" title="連結到此標題">&para;</a></h4>
+<p>For generalized linear models (GLMs), robust stochastic gradient methods provide:</p>
+<ol>
+<li><strong>Outlier Resistance:</strong> DPD-based methods maintain stable parameter estimates in the presence of outliers</li>
+<li><strong>Scalability:</strong> Handle large datasets through minibatch processing</li>
+<li><strong>Uncertainty Propagation:</strong> Full posterior distribution captures parameter uncertainty</li>
+</ol>
+<h4 id="high-dimensional-models">High-Dimensional Models<a class="headerlink" href="#high-dimensional-models" title="連結到此標題">&para;</a></h4>
+<p>In high-dimensional settings, traditional sampling methods become computationally prohibitive. Stochastic gradient methods:</p>
+<ul>
+<li><strong>Scale to High Dimensions:</strong> Efficiently explore high-dimensional parameter spaces</li>
+<li><strong>Adapt to Structure:</strong> Can incorporate problem-specific structure through preconditioning</li>
+<li><strong>Maintain Robustness:</strong> Provide stable performance even when gradients are noisy or ill-conditioned</li>
+</ul>
+<h2 id="advanced-topics">Advanced Topics<a class="headerlink" href="#advanced-topics" title="連結到此標題">&para;</a></h2>
+<h4 id="variants-and-extensions">Variants and Extensions<a class="headerlink" href="#variants-and-extensions" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>Preconditioned SGLD:</strong> Uses adaptive preconditioners like RMSprop or Adam to improve convergence</li>
+<li><strong>Particle SGLD:</strong> Combines multiple chains for better exploration of multimodal distributions</li>
+<li><strong>Controlled Variance:</strong> Techniques to reduce the variance of stochastic gradient estimates</li>
+</ol>
+<h4 id="practical-considerations">Practical Considerations<a class="headerlink" href="#practical-considerations" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>Step Size Tuning:</strong> Critical for performance; often requires careful annealing schedules</li>
+<li><strong>Gradient Preprocessing:</strong> Standardization and clipping can improve stability</li>
+<li><strong>Diagnostics:</strong> Essential to monitor convergence and mixing properties</li>
+</ol>
+<h4 id="comparison-with-traditional-methods">Comparison with Traditional Methods<a class="headerlink" href="#comparison-with-traditional-methods" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th><strong>Method</strong></th>
+<th><strong>Scalability</strong></th>
+<th><strong>Robustness</strong></th>
+<th><strong>Theoretical Guarantees</strong></th>
+<th><strong>Computational Cost</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HMC</strong></td>
+<td>Low</td>
+<td>High</td>
+<td>Strong</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td><strong>SGLD</strong></td>
+<td>High</td>
+<td>Medium</td>
+<td>Moderate</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>SGLRW</strong></td>
+<td>High</td>
+<td>High</td>
+<td>Strong</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td><strong>DPD-SG</strong></td>
+<td>High</td>
+<td>Very High</td>
+<td>Moderate</td>
+<td>Medium-High</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Robust Stochastic Gradient Posterior Sampling with Lattice Based Discretisation</strong> (arXiv:2602.15925) — Novel SGLRW method with improved robustness properties</li>
+<li><strong>Stochastic Gradient Descent as Approximate Bayesian Inference</strong> (arXiv:1704.04289) — Foundational work connecting SGD to Bayesian inference</li>
+<li><strong>Sampling from density power divergence-based generalized posterior distribution via stochastic optimization</strong> (arXiv:2501.07790) — Robust Bayesian methods using DPD</li>
+<li><strong>Stochastic Gradient Descent as Approximate Bayesian Inference</strong> (JMLR 2017, Volume 18) — Comprehensive theoretical analysis and extensions</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026</li>
+<li><strong>Suggestions:</strong> Future research should focus on adaptive step size methods, theoretical analysis of robustness bounds, and applications to large-scale machine learning problems</li>
+<li><strong>Errors:</strong> Web search rate limit prevented additional source verification; analysis based on 3 core papers and 1 foundational journal article</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,3726 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmer Sub-Agent 評估指標和方法 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Programmer Sub-Agent 評估指標和方法</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="programmer-sub-agent">Programmer Sub-Agent 評估指標和方法<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h1>
+<p><strong>文檔 ID:</strong> a006c-2
+<strong>版本:</strong> 1.0
+<strong>狀態:</strong> Active
+<strong>創建日期:</strong> 2026-02-21
+<strong>適用對象:</strong> Programmer Sub-Agent
+<strong>基於文件:</strong> a006c-1.md (實施路徑框架)</p>
+<hr />
+<h2 id="_1">目錄<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><a href="#1-評估指標體系概述">評估指標體系概述</a></li>
+<li><a href="#2-階段-1-初級開發者評估指標">階段 1: 初級開發者評估指標</a></li>
+<li><a href="#3-階段-2-中級開發者評估指標">階段 2: 中級開發者評估指標</a></li>
+<li><a href="#4-階段-3-高級開發者評估指標">階段 3: 高級開發者評估指標</a></li>
+<li><a href="#5-階段-4-高級架構師評估指標">階段 4: 高級架構師評估指標</a></li>
+<li><a href="#6-評估方法和工具">評估方法和工具</a></li>
+<li><a href="#7-評估時間表和頻率">評估時間表和頻率</a></li>
+<li><a href="#8-改進計劃模板">改進計劃模板</a></li>
+</ol>
+<hr />
+<h2 id="1">1. 評估指標體系概述<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 評估體系哲學<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p>本評估體系基於 <strong>科學量化</strong> 和 <strong>持續改進</strong> 原則：</p>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>可量化性</strong></td>
+<td>所有指標應該可測量、可驗證</td>
+</tr>
+<tr>
+<td><strong>多維度</strong></td>
+<td>從技術、實踐、領域、領導力四個維度評估</td>
+</tr>
+<tr>
+<td><strong>漸進性</strong></td>
+<td>評估標準隨階段逐步提高</td>
+</tr>
+<tr>
+<td><strong>客觀性</strong></td>
+<td>通過自動化工具和同行審查減少主觀偏差</td>
+</tr>
+<tr>
+<td><strong>行動導向</strong></td>
+<td>評估結果應該直接導向具體改進行動</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 評估維度框架<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                  程序員能力評估框架                            │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  技術能力 (40%)                                              │
+│  ├─ 代碼質量                                                 │
+│  ├─ 架構設計                                                 │
+│  ├─ 技術棧掌握程度                                            │
+│  └─ 問題解決能力                                              │
+│                                                             │
+│  實踐能力 (30%)                                              │
+│  ├─ TDD 執行度                                               │
+│  ├─ 代碼審查參與度                                            │
+│  ├─ 文檔完整性                                                │
+│  └─ Git 規範遵循度                                            │
+│                                                             │
+│  領域知識 (20%)                                              │
+│  ├─ 量化交易知識                                              │
+│  ├─ 策略引擎理解                                              │
+│  ├─ 金融指標掌握                                              │
+│  └─ 數據分析能力                                              │
+│                                                             │
+│  領導力 (10%) - 僅高級/架構師階段                             │
+│  ├─ 技術指導                                                 │
+│  ├─ 代碼審查質量                                             │
+│  ├─ 技術決策                                                 │
+│  └─ 團隊影響力                                               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="13">1.3 評分標準<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>等級</th>
+<th>分數範圍</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>優秀 (A)</strong></td>
+<td>90-100</td>
+<td>超越預期，可作為參考標準</td>
+</tr>
+<tr>
+<td><strong>良好 (B)</strong></td>
+<td>80-89</td>
+<td>達到預期，有改進空間</td>
+</tr>
+<tr>
+<td><strong>合格 (C)</strong></td>
+<td>70-79</td>
+<td>基本達標，需要改進</td>
+</tr>
+<tr>
+<td><strong>待改進 (D)</strong></td>
+<td>60-69</td>
+<td>未達標，必須改進</td>
+</tr>
+<tr>
+<td><strong>不合格 (F)</strong></td>
+<td>0-59</td>
+<td>嚴重不達標，需重新培訓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">1.4 階段晉升門檻<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>階段</th>
+<th>最低分數</th>
+<th>必備條件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>階段 1 → 階段 2</td>
+<td>75 分</td>
+<td>所有 P0 指標達到 C 以上</td>
+</tr>
+<tr>
+<td>階段 2 → 階段 3</td>
+<td>80 分</td>
+<td>所有 P0+P1 指標達到 B 以上</td>
+</tr>
+<tr>
+<td>階段 3 → 階段 4</td>
+<td>85 分</td>
+<td>所有 P0-P2 指標達到 B 以上，領導力達到 C 以上</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-1">2. 階段 1: 初級開發者評估指標<a class="headerlink" href="#2-1" title="連結到此標題">&para;</a></h2>
+<h3 id="21-40">2.1 技術能力指標 (40%)<a class="headerlink" href="#21-40" title="連結到此標題">&para;</a></h3>
+<h4 id="211-15">2.1.1 代碼質量 (15%)<a class="headerlink" href="#211-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td><code>pytest-cov</code> / <code>vitest coverage</code></td>
+<td>5%</td>
+<td>≥80%</td>
+<td>80%=70分, 85%=80分, 90%=90分, 95+=100分</td>
+</tr>
+<tr>
+<td><strong>Linter 通過率</strong></td>
+<td><code>ruff check</code> / <code>eslint</code></td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 90%=60分, &lt;90%=0分</td>
+</tr>
+<tr>
+<td><strong>代碼複雜度</strong></td>
+<td><code>radon</code> / <code>complexity report</code></td>
+<td>3%</td>
+<td>≤10</td>
+<td>≤10=100分, 15=80分, 20=60分, &gt;20=0分</td>
+</tr>
+<tr>
+<td><strong>代碼重複率</strong></td>
+<td><code>duplication detector</code></td>
+<td>2%</td>
+<td>&lt;5%</td>
+<td>&lt;3%=100分, 3-5%=80分, 5-10%=60分, &gt;10%=0分</td>
+</tr>
+<tr>
+<td><strong>類型註解覆蓋</strong></td>
+<td><code>mypy</code> 檢查</td>
+<td>2%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=80分, 100%=100分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>自動化檢查腳本示例:</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+# scripts/check_code_quality.sh
+
+echo &quot;=== 代碼質量檢查 ===&quot;
+
+# 測試覆蓋率
+echo &quot;測試覆蓋率:&quot;
+pytest --cov=backend --cov-report=term-missing
+
+# Linter
+echo &quot;Linter 檢查:&quot;
+ruff check backend/
+eslint frontend/src/
+
+# 代碼複雜度
+echo &quot;代碼複雜度:&quot;
+radon cc backend/ -a -nb
+
+# 類型註解
+echo &quot;類型註解檢查:&quot;
+mypy backend/
+</code></pre>
+<h4 id="212-10">2.1.2 架構設計理解 (10%)<a class="headerlink" href="#212-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>分層架構理解</strong></td>
+<td>代碼審查 + 問答</td>
+<td>3%</td>
+<td>正確理解分層</td>
+<td>完全理解=100分, 基本理解=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>RESTful API 設計</strong></td>
+<td>API 設計審查</td>
+<td>3%</td>
+<td>符合 REST 原則</td>
+<td>完全符合=100分, 基本符合=70分, 不符合=0分</td>
+</tr>
+<tr>
+<td><strong>數據模型設計</strong></td>
+<td>Schema 設計審查</td>
+<td>2%</td>
+<td>合理規範</td>
+<td>合理=100分, 可改進=70分, 不合理=0分</td>
+</tr>
+<tr>
+<td><strong>錯誤處理</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>全面正確</td>
+<td>全面=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>評估問題示例:</strong></p>
+<pre><code>1. 請解釋三層架構（表現層、業務邏輯層、數據訪問層）的職責
+2. 為什麼 API 端點應該使用名詞而不是動詞？
+3. 如何設計一個用戶實體，需要哪些字段？
+4. 如何處理數據庫連接失敗的錯誤？
+</code></pre>
+<h4 id="213-15">2.1.3 技術棧掌握 (15%)<a class="headerlink" href="#213-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>權重</th>
+<th>測量方法</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>基礎語法、異步編程</td>
+<td>3%</td>
+<td>代碼審查 + 測試</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>FastAPI</strong></td>
+<td>路由、依賴注入、驗證</td>
+<td>4%</td>
+<td>API 實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>React 19</strong></td>
+<td>Hooks、組件、狀態</td>
+<td>4%</td>
+<td>組件實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>DuckDB</strong></td>
+<td>查詢、CRUD 操作</td>
+<td>2%</td>
+<td>數據操作審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Conventional Commits</td>
+<td>2%</td>
+<td>提交歷史檢查</td>
+<td>100% 遵循</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-30">2.2 實踐能力指標 (30%)<a class="headerlink" href="#22-30" title="連結到此標題">&para;</a></h3>
+<h4 id="221-tdd-10">2.2.1 TDD 執行度 (10%)<a class="headerlink" href="#221-tdd-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試先於實現比例</strong></td>
+<td>Git 提交歷史分析</td>
+<td>4%</td>
+<td>≥80%</td>
+<td>80%=70分, 90%=90分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>測試數量與功能匹配</strong></td>
+<td>測試/功能比</td>
+<td>3%</td>
+<td>≥3:1</td>
+<td>3:1=70分, 5:1=90分, 10:1=100分</td>
+</tr>
+<tr>
+<td><strong>AAA 模式遵循度</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>測量腳本示例:</strong></p>
+<pre><code class="language-python"># scripts/measure_tdd_compliance.py
+import subprocess
+import re
+from collections import defaultdict
+
+def analyze_tdd_compliance(repo_path):
+    &quot;&quot;&quot;分析 TDD 合規性&quot;&quot;&quot;
+    result = subprocess.run(
+        ['git', 'log', '--all', '--oneline', '--reverse'],
+        cwd=repo_path,
+        capture_output=True,
+        text=True
+    )
+
+    commits = result.stdout.strip().split('\n')
+
+    test_commits = []
+    impl_commits = []
+
+    for commit in commits:
+        if 'test' in commit.lower() or 'feat' in commit.lower():
+            # 獲取提交的文件
+            files = subprocess.run(
+                ['git', 'show', '--name-only', '--pretty=format:', commit.split()[0]],
+                cwd=repo_path,
+                capture_output=True,
+                text=True
+            ).stdout
+
+            has_test = any('test' in f for f in files.split('\n'))
+            has_impl = any('test' not in f and f.endswith('.py') for f in files.split('\n'))
+
+            if has_test:
+                test_commits.append(commit)
+            if has_impl:
+                impl_commits.append(commit)
+
+    compliance = len(test_commits) / max(len(impl_commits), 1)
+    return compliance * 100
+</code></pre>
+<h4 id="222-5">2.2.2 代碼審查參與度 (5%)<a class="headerlink" href="#222-5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PR 創建頻率</strong></td>
+<td>PR 數量 / 月</td>
+<td>2%</td>
+<td>≥4 PR/月</td>
+<td>4=70分, 6=90分, 8+=100分</td>
+</tr>
+<tr>
+<td><strong>PR 審查回應時間</strong></td>
+<td>平均回應時間</td>
+<td>2%</td>
+<td>&lt;24小時</td>
+<td>&lt;24h=100分, 24-48h=70分, &gt;48h=0分</td>
+</tr>
+<tr>
+<td><strong>審查質量評分</strong></td>
+<td>審查反饋質量</td>
+<td>1%</td>
+<td>≥3/5</td>
+<td>3=60分, 4=80分, 5=100分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="223-10">2.2.3 文檔完整性 (10%)<a class="headerlink" href="#223-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docstring 覆蓋率</strong></td>
+<td><code>pydocstyle</code> 檢查</td>
+<td>4%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=80分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>API 文檔完整性</strong></td>
+<td>Swagger/OpenAPI 檢查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+<tr>
+<td><strong>README 質量</strong></td>
+<td>人工審查</td>
+<td>2%</td>
+<td>完整清晰</td>
+<td>完整=100分, 基本=70分, 不完整=0分</td>
+</tr>
+<tr>
+<td><strong>註釋質量</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>合理必要</td>
+<td>合理=100分, 過多/過少=50分, 不當=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="224-git-5">2.2.4 Git 規範遵循度 (5%)<a class="headerlink" href="#224-git-5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>Commit 檢查</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 90%=70分, &lt;90%=0分</td>
+</tr>
+<tr>
+<td><strong>分支命名規範</strong></td>
+<td>分支名檢查</td>
+<td>1%</td>
+<td>100%</td>
+<td>100%=100分, 否則=0分</td>
+</tr>
+<tr>
+<td><strong>提交粒度</strong></td>
+<td>人工審查</td>
+<td>1%</td>
+<td>合理</td>
+<td>合理=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-20">2.3 領域知識指標 (20%)<a class="headerlink" href="#23-20" title="連結到此標題">&para;</a></h3>
+<h4 id="231-8">2.3.1 量化交易基礎 (8%)<a class="headerlink" href="#231-8" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術指標理解</strong></td>
+<td>問答 + 實現</td>
+<td>3%</td>
+<td>理解至少 3 個</td>
+<td>3個=70分, 5個=90分, 10+=100分</td>
+</tr>
+<tr>
+<td><strong>回測概念理解</strong></td>
+<td>問答</td>
+<td>2%</td>
+<td>理解基本概念</td>
+<td>完全理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>市場數據結構</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確使用</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>交易信號概念</strong></td>
+<td>問答</td>
+<td>1%</td>
+<td>理解買賣信號</td>
+<td>理解=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>測試題目示例:</strong></p>
+<pre><code>1. RSI 是什麼？如何計算？其買入和賣出閾值通常設為多少？
+2. 回測和實時交易的區別是什麼？
+3. OHLCV 數據包含哪些欄位？每個欄位的意義是什麼？
+4. 什麼情況下應該生成買入信號？什麼情況下應該生成賣出信號？
+</code></pre>
+<h4 id="232-6">2.3.2 策略引擎理解 (6%)<a class="headerlink" href="#232-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IStrategy 接口理解</strong></td>
+<td>問答 + 代碼審查</td>
+<td>3%</td>
+<td>理解接口契約</td>
+<td>完全理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>信號生成邏輯</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確實現</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>執行上下文理解</strong></td>
+<td>問答</td>
+<td>1%</td>
+<td>理解各欄位</td>
+<td>理解=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="233-6">2.3.3 數據分析能力 (6%)<a class="headerlink" href="#233-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>pandas 操作</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>數據清洗</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確處理</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>統計計算</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>正確計算</td>
+<td>正確=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-0">2.4 領導力指標 (0%)<a class="headerlink" href="#24-0" title="連結到此標題">&para;</a></h3>
+<p>初級開發者階段不評估領導力指標。</p>
+<h3 id="25-1">2.5 階段 1 總評分表<a class="headerlink" href="#25-1" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>權重</th>
+<th>得分</th>
+<th>加權得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術能力</td>
+<td>40%</td>
+<td>___ / 100</td>
+<td>___ / 40</td>
+</tr>
+<tr>
+<td>實踐能力</td>
+<td>30%</td>
+<td>___ / 100</td>
+<td>___ / 30</td>
+</tr>
+<tr>
+<td>領域知識</td>
+<td>20%</td>
+<td>___ / 100</td>
+<td>___ / 20</td>
+</tr>
+<tr>
+<td>領導力</td>
+<td>0%</td>
+<td>N/A</td>
+<td>0 / 0</td>
+</tr>
+<tr>
+<td><strong>總分</strong></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>___ / 90</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>晉升門檻:</strong> 總分 ≥ 75 分，且所有 P0 指標達到 C 以上</p>
+<hr />
+<h2 id="3-2">3. 階段 2: 中級開發者評估指標<a class="headerlink" href="#3-2" title="連結到此標題">&para;</a></h2>
+<h3 id="31-40">3.1 技術能力指標 (40%)<a class="headerlink" href="#31-40" title="連結到此標題">&para;</a></h3>
+<h4 id="311-15">3.1.1 代碼質量 (15%)<a class="headerlink" href="#311-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td><code>pytest-cov</code> / <code>vitest coverage</code></td>
+<td>5%</td>
+<td>≥85%</td>
+<td>85%=70分, 90%=80分, 95%=90分, 98+=100分</td>
+</tr>
+<tr>
+<td><strong>Linter 通過率</strong></td>
+<td><code>ruff check</code> / <code>eslint</code></td>
+<td>3%</td>
+<td>100%</td>
+<td>同階段 1</td>
+</tr>
+<tr>
+<td><strong>代碼複雜度</strong></td>
+<td><code>radon</code> / <code>complexity report</code></td>
+<td>3%</td>
+<td>≤8</td>
+<td>≤8=100分, 12=80分, 15=60分, &gt;15=0分</td>
+</tr>
+<tr>
+<td><strong>代碼重複率</strong></td>
+<td><code>duplication detector</code></td>
+<td>2%</td>
+<td>&lt;3%</td>
+<td>&lt;2%=100分, 2-3%=80分, 3-5%=60分, &gt;5%=0分</td>
+</tr>
+<tr>
+<td><strong>類型註解覆蓋</strong></td>
+<td><code>mypy</code> 檢查</td>
+<td>2%</td>
+<td>≥95%</td>
+<td>95%=70分, 98%=80分, 100%=100分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="312-10">3.1.2 架構設計能力 (10%)<a class="headerlink" href="#312-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API 設計質量</strong></td>
+<td>API 審查 + Swagger 檢查</td>
+<td>3%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>狀態管理設計</strong></td>
+<td>Zustand/React Query 審查</td>
+<td>3%</td>
+<td>合理分類</td>
+<td>合理=100分, 可改進=70分, 不合理=0分</td>
+</tr>
+<tr>
+<td><strong>策略模式應用</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確應用</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+<tr>
+<td><strong>工廠模式應用</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>正確應用</td>
+<td>正確=100分, 基本=70分, 錯誤=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>API 設計評估檢查清單:</strong></p>
+<pre><code>□ 路由設計符合 RESTful 原則
+□ HTTP 方法使用正確（GET/POST/PUT/DELETE）
+□ 請求/響應模型清晰完整
+□ 錯誤處理統一且明確
+□ 版本化策略清晰
+□ 文檔完整（OpenAPI/Swagger）
+</code></pre>
+<h4 id="313-15">3.1.3 技術棧掌握 (15%)<a class="headerlink" href="#313-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>權重</th>
+<th>測量方法</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VectorBT</strong></td>
+<td>數據加載、信號生成、組合</td>
+<td>3%</td>
+<td>回測實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>Backtrader</strong></td>
+<td>Cerebro、策略類、數據 feed</td>
+<td>3%</td>
+<td>策略實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>Zustand</strong></td>
+<td>Store、actions、selectors</td>
+<td>3%</td>
+<td>Store 實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>React Query</strong></td>
+<td>useApiCache、useApiMutation</td>
+<td>3%</td>
+<td>Hook 使用審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><strong>策略引擎</strong></td>
+<td>IStrategy 實現、策略工廠</td>
+<td>3%</td>
+<td>策略實現審查</td>
+<td>熟練</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-30">3.2 實踐能力指標 (30%)<a class="headerlink" href="#32-30" title="連結到此標題">&para;</a></h3>
+<h4 id="321-tdd-10">3.2.1 TDD 執行度 (10%)<a class="headerlink" href="#321-tdd-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試先於實現比例</strong></td>
+<td>Git 提交歷史分析</td>
+<td>4%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=90分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>集成測試覆蓋</strong></td>
+<td>集成測試數量/比例</td>
+<td>3%</td>
+<td>≥60% 關鍵流程</td>
+<td>60%=70分, 80%=90分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>測試獨立性</strong></td>
+<td>測試運行順序無關</td>
+<td>3%</td>
+<td>100%</td>
+<td>100%=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="322-10">3.2.2 代碼審查能力 (10%)<a class="headerlink" href="#322-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>審查參與頻率</strong></td>
+<td>審查數量 / 月</td>
+<td>3%</td>
+<td>≥6 PR/月</td>
+<td>6=70分, 10=90分, 15+=100分</td>
+</tr>
+<tr>
+<td><strong>審查回應時間</strong></td>
+<td>平均回應時間</td>
+<td>2%</td>
+<td>&lt;12小時</td>
+<td>&lt;12h=100分, 12-24h=70分, &gt;24h=0分</td>
+</tr>
+<tr>
+<td><strong>審查質量評分</strong></td>
+<td>同行評分</td>
+<td>3%</td>
+<td>≥4/5</td>
+<td>4=80分, 5=100分</td>
+</tr>
+<tr>
+<td><strong>建設性反饋</strong></td>
+<td>反饋質量評估</td>
+<td>2%</td>
+<td>提供具體建議</td>
+<td>優秀=100分, 良好=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>審查質量評估標準:</strong></p>
+<pre><code>優秀 (5分):
+- 識別潛在 bug 和性能問題
+- 提供具體改進建議和代碼示例
+- 對架構和設計提出見解
+- 維護積極的評論氛圍
+
+良好 (4分):
+- 識別明顯問題
+- 提供一般性建議
+- 對代碼風格提出意見
+
+合格 (3分):
+- 基本錯誤檢查
+- 簡單建議
+
+不足 (0-2分):
+- 僅 LGTM 評論
+- 沒有具體反饋
+- 評論帶有攻擊性
+</code></pre>
+<h4 id="323-6">3.2.3 文檔完整性 (6%)<a class="headerlink" href="#323-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API 文檔質量</strong></td>
+<td>OpenAPI/Swagger 檢查</td>
+<td>3%</td>
+<td>完整詳細</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>策略文檔</strong></td>
+<td>README + 說明</td>
+<td>2%</td>
+<td>包含使用示例</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>README 質量</strong></td>
+<td>人工審查</td>
+<td>1%</td>
+<td>專業完整</td>
+<td>專業=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="324-git-4">3.2.4 Git 規範遵循度 (4%)<a class="headerlink" href="#324-git-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>Commit 檢查</td>
+<td>2%</td>
+<td>100%</td>
+<td>同階段 1</td>
+</tr>
+<tr>
+<td><strong>PR 描述質量</strong></td>
+<td>PR 模板遵循度</td>
+<td>2%</td>
+<td>100% 遵循</td>
+<td>100%=100分, 80%=70分, &lt;80%=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-20">3.3 領域知識指標 (20%)<a class="headerlink" href="#33-20" title="連結到此標題">&para;</a></h3>
+<h4 id="331-10">3.3.1 回測引擎掌握 (10%)<a class="headerlink" href="#331-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VectorBT 熟練度</strong></td>
+<td>回測實現審查</td>
+<td>4%</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>Backtrader 熟練度</strong></td>
+<td>策略實現審查</td>
+<td>3%</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>績效指標理解</strong></td>
+<td>問答 + 實現</td>
+<td>2%</td>
+<td>理解至少 5 個</td>
+<td>5個=70分, 8個=90分, 10+=100分</td>
+</tr>
+<tr>
+<td><strong>參數優化理解</strong></td>
+<td>問答 + 實現</td>
+<td>1%</td>
+<td>理解基本方法</td>
+<td>理解=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>績效指標清單:</strong></p>
+<pre><code>必須理解 (5個):
+1. Sharpe Ratio (夏普比率)
+2. Max Drawdown (最大回撤)
+3. Win Rate (勝率)
+4. Total Return (總回報)
+5. Annualized Return (年化回報)
+
+加分指標 (5個):
+6. Sortino Ratio (索提諾比率)
+7. Calmar Ratio (卡馬比率)
+8. Information Ratio (信息比率)
+9. Beta (貝塔)
+10. Alpha (阿爾法)
+</code></pre>
+<h4 id="332-6">3.3.2 策略引擎深入 (6%)<a class="headerlink" href="#332-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>策略工廠設計</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>信號合併理解</strong></td>
+<td>問答</td>
+<td>2%</td>
+<td>理解基本方法</td>
+<td>理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>策略參數管理</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>合理</td>
+<td>合理=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="333-4">3.3.3 技術指標掌握 (4%)<a class="headerlink" href="#333-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術指標實現</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>實現至少 5 個</td>
+<td>5個=70分, 8個=90分, 10+=100分</td>
+</tr>
+<tr>
+<td><strong>指標優化</strong></td>
+<td>性能測試</td>
+<td>2%</td>
+<td>向量化實現</td>
+<td>向量化=100分, 迴圈=60分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-10">3.4 領導力指標 (10%)<a class="headerlink" href="#34-10" title="連結到此標題">&para;</a></h3>
+<h4 id="341-6">3.4.1 代碼審查領導力 (6%)<a class="headerlink" href="#341-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>審查深度</strong></td>
+<td>代碼審查質量評估</td>
+<td>3%</td>
+<td>≥4/5</td>
+<td>4=80分, 5=100分</td>
+</tr>
+<tr>
+<td><strong>指導價值</strong></td>
+<td>被審查者反饋</td>
+<td>2%</td>
+<td>有價值</td>
+<td>有價值=100分, 一般=70分, 無價值=0分</td>
+</tr>
+<tr>
+<td><strong>代碼風格影響</strong></td>
+<td>團隊代碼風格檢查</td>
+<td>1%</td>
+<td>積極影響</td>
+<td>積極=100分, 中性=50分, 消極=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="342-4">3.4.2 知識分享 (4%)<a class="headerlink" href="#342-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>文檔貢獻</strong></td>
+<td>文檔修改頻率/質量</td>
+<td>2%</td>
+<td>≥2 次/月</td>
+<td>2次=70分, 4次=90分, 6+=100分</td>
+</tr>
+<tr>
+<td><strong>技術分享</strong></td>
+<td>分享會/博客/Pull Request 說明</td>
+<td>2%</td>
+<td>≥1 次/季度</td>
+<td>1次=70分, 2次=90分, 3+=100分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35-2">3.5 階段 2 總評分表<a class="headerlink" href="#35-2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>權重</th>
+<th>得分</th>
+<th>加權得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術能力</td>
+<td>40%</td>
+<td>___ / 100</td>
+<td>___ / 40</td>
+</tr>
+<tr>
+<td>實踐能力</td>
+<td>30%</td>
+<td>___ / 100</td>
+<td>___ / 30</td>
+</tr>
+<tr>
+<td>領域知識</td>
+<td>20%</td>
+<td>___ / 100</td>
+<td>___ / 20</td>
+</tr>
+<tr>
+<td>領導力</td>
+<td>10%</td>
+<td>___ / 100</td>
+<td>___ / 10</td>
+</tr>
+<tr>
+<td><strong>總分</strong></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>___ / 100</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>晉升門檻:</strong> 總分 ≥ 80 分，且所有 P0+P1 指標達到 B 以上</p>
+<hr />
+<h2 id="4-3">4. 階段 3: 高級開發者評估指標<a class="headerlink" href="#4-3" title="連結到此標題">&para;</a></h2>
+<h3 id="41-40">4.1 技術能力指標 (40%)<a class="headerlink" href="#41-40" title="連結到此標題">&para;</a></h3>
+<h4 id="411-15">4.1.1 代碼質量 (15%)<a class="headerlink" href="#411-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td><code>pytest-cov</code> / <code>vitest coverage</code></td>
+<td>5%</td>
+<td>≥90%</td>
+<td>90%=70分, 95%=80分, 98%=90分, 99+=100分</td>
+</tr>
+<tr>
+<td><strong>Linter 通過率</strong></td>
+<td><code>ruff check</code> / <code>eslint</code></td>
+<td>3%</td>
+<td>100%</td>
+<td>同階段 1</td>
+</tr>
+<tr>
+<td><strong>代碼複雜度</strong></td>
+<td><code>radon</code> / <code>complexity report</code></td>
+<td>3%</td>
+<td>≤5</td>
+<td>≤5=100分, 8=80分, 10=60分, &gt;10=0分</td>
+</tr>
+<tr>
+<td><strong>代碼重複率</strong></td>
+<td><code>duplication detector</code></td>
+<td>2%</td>
+<td>&lt;2%</td>
+<td>&lt;1%=100分, 1-2%=80分, &gt;2%=0分</td>
+</tr>
+<tr>
+<td><strong>類型註解覆蓋</strong></td>
+<td><code>mypy</code> 檢查</td>
+<td>2%</td>
+<td>≥98%</td>
+<td>98%=70分, 100%=100分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="412-10">4.1.2 架構設計能力 (10%)<a class="headerlink" href="#412-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構理解</strong></td>
+<td>ADR + 實現審查</td>
+<td>3%</td>
+<td>深入理解</td>
+<td>深入=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>API 版本化設計</strong></td>
+<td>API 設計審查</td>
+<td>2%</td>
+<td>向後兼容</td>
+<td>完全兼容=100分, 基本=70分, 不兼容=0分</td>
+</tr>
+<tr>
+<td><strong>數據架構設計</strong></td>
+<td>Schema 設計審查</td>
+<td>2%</td>
+<td>合理可擴展</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>技術選型能力</strong></td>
+<td>ADR 文檔審查</td>
+<td>2%</td>
+<td>基於證據</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>E2E 測試策略</strong></td>
+<td>測計劃審查</td>
+<td>1%</td>
+<td>完整策略</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="413-15">4.1.3 技術棧掌握 (15%)<a class="headerlink" href="#413-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>權重</th>
+<th>測量方法</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>複合策略</strong></td>
+<td>組合策略、信號合併</td>
+<td>4%</td>
+<td>策略實現審查</td>
+<td>精通</td>
+<td>精通=100分, 熟練=80分, 基本=60分</td>
+</tr>
+<tr>
+<td><strong>性能優化</strong></td>
+<td>向量化、並行處理</td>
+<td>4%</td>
+<td>性能測試</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>Three.js</strong></td>
+<td>3D 可視化</td>
+<td>2%</td>
+<td>可視化實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>Celery</strong></td>
+<td>任務隊列</td>
+<td>2%</td>
+<td>任務實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>Cypress</strong></td>
+<td>E2E 測試</td>
+<td>3%</td>
+<td>測試實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>性能優化評估標準:</strong></p>
+<pre><code>優秀 (100分):
+- 使用向量化操作替代迴圈
+- 實現並行處理
+- 優化查詢和索引
+- 使用緩存策略
+- 性能提升 &gt; 50%
+
+良好 (80分):
+- 部分向量化
+- 基本優化
+- 性能提升 &gt; 20%
+
+合格 (60分):
+- 基本性能測試
+- 性能提升 &gt; 5%
+</code></pre>
+<h3 id="42-30">4.2 實踐能力指標 (30%)<a class="headerlink" href="#42-30" title="連結到此標題">&para;</a></h3>
+<h4 id="421-tdd-10">4.2.1 TDD 執行度 (10%)<a class="headerlink" href="#421-tdd-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試先於實現比例</strong></td>
+<td>Git 提交歷史分析</td>
+<td>3%</td>
+<td>≥95%</td>
+<td>95%=70分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>E2E 測試覆蓋</strong></td>
+<td>關鍵流程覆蓋率</td>
+<td>4%</td>
+<td>≥80%</td>
+<td>80%=70分, 90%=90分, 100%=100分</td>
+</tr>
+<tr>
+<td><strong>測試策略</strong></td>
+<td>測試金字塔實現</td>
+<td>3%</td>
+<td>健康的金字塔</td>
+<td>健康=100分, 基本=70分, 不健康=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="422-12">4.2.2 代碼審查能力 (12%)<a class="headerlink" href="#422-12" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>審查參與頻率</strong></td>
+<td>審查數量 / 月</td>
+<td>3%</td>
+<td>≥10 PR/月</td>
+<td>10=70分, 15=90分, 20+=100分</td>
+</tr>
+<tr>
+<td><strong>審查回應時間</strong></td>
+<td>平均回應時間</td>
+<td>2%</td>
+<td>&lt;8小時</td>
+<td>&lt;8h=100分, 8-12h=70分, &gt;12h=0分</td>
+</tr>
+<tr>
+<td><strong>審查質量評分</strong></td>
+<td>同行評分</td>
+<td>4%</td>
+<td>≥4.5/5</td>
+<td>4.5=90分, 5=100分</td>
+</tr>
+<tr>
+<td><strong>架構審查</strong></td>
+<td>架構設計審查貢獻</td>
+<td>2%</td>
+<td>有價值的建議</td>
+<td>有價值=100分, 一般=70分, 無價值=0分</td>
+</tr>
+<tr>
+<td><strong>安全審查</strong></td>
+<td>安全漏洞識別</td>
+<td>1%</td>
+<td>識別安全問題</td>
+<td>識別=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="423-5">4.2.3 文檔完整性 (5%)<a class="headerlink" href="#423-5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ADR 文檔</strong></td>
+<td>架構決策記錄</td>
+<td>2%</td>
+<td>完整詳細</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>API 文檔質量</strong></td>
+<td>OpenAPI/Swagger 檢查</td>
+<td>2%</td>
+<td>專業完整</td>
+<td>專業=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>架構文檔</strong></td>
+<td>架構圖和說明</td>
+<td>1%</td>
+<td>清晰易懂</td>
+<td>清晰=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="424-git-3">4.2.4 Git 規範遵循度 (3%)<a class="headerlink" href="#424-git-3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conventional Commits</strong></td>
+<td>Commit 檢查</td>
+<td>1%</td>
+<td>100%</td>
+<td>同階段 1</td>
+</tr>
+<tr>
+<td><strong>PR 質量</strong></td>
+<td>PR 描述和討論質量</td>
+<td>2%</td>
+<td>高質量</td>
+<td>高=100分, 中=70分, 低=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-20">4.3 領域知識指標 (20%)<a class="headerlink" href="#43-20" title="連結到此標題">&para;</a></h3>
+<h4 id="431-10">4.3.1 複合策略掌握 (10%)<a class="headerlink" href="#431-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>組合策略設計</strong></td>
+<td>策略實現審查</td>
+<td>4%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>信號合併算法</strong></td>
+<td>實現和測試</td>
+<td>4%</td>
+<td>實現至少 3 種</td>
+<td>3種=70分, 5種=90分, 全部=100分</td>
+</tr>
+<tr>
+<td><strong>策略優化</strong></td>
+<td>參數掃描實現</td>
+<td>2%</td>
+<td>有效實現</td>
+<td>有效=100分, 基本=70分, 無效=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>信號合併算法清單:</strong></p>
+<pre><code>必須實現 (3種):
+1. 多數決 (Majority Vote)
+2. 一致同意 (Unanimous)
+3. 任一 (Any)
+
+加分算法 (2種):
+4. 加權投票 (Weighted)
+5. 共識 (Consensus)
+</code></pre>
+<h4 id="432-6">4.3.2 性能優化深入 (6%)<a class="headerlink" href="#432-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>向量化操作</strong></td>
+<td>代碼審查</td>
+<td>3%</td>
+<td>全面應用</td>
+<td>全面=100分, 部分=70分, 無=0分</td>
+</tr>
+<tr>
+<td><strong>並行處理</strong></td>
+<td>代碼審查 + 測試</td>
+<td>2%</td>
+<td>有效應用</td>
+<td>有效=100分, 基本=70分, 無=0分</td>
+</tr>
+<tr>
+<td><strong>緩存策略</strong></td>
+<td>代碼審查</td>
+<td>1%</td>
+<td>合理應用</td>
+<td>合理=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="433-4">4.3.3 跨領域整合 (4%)<a class="headerlink" href="#433-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>前後端整合</strong></td>
+<td>API 整合審查</td>
+<td>2%</td>
+<td>無縫整合</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>數據科知識</strong></td>
+<td>代碼審查</td>
+<td>2%</td>
+<td>應用統計方法</td>
+<td>應用=100分, 基本=70分, 無=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-10">4.4 領導力指標 (10%)<a class="headerlink" href="#44-10" title="連結到此標題">&para;</a></h3>
+<h4 id="441-6">4.4.1 技術指導 (6%)<a class="headerlink" href="#441-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>指導初級開發者</strong></td>
+<td>被指導者反饋</td>
+<td>3%</td>
+<td>有價值</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>代碼審查指導</strong></td>
+<td>審查評論質量</td>
+<td>2%</td>
+<td>建設性</td>
+<td>建設性=100分, 一般=70分, 消極=0分</td>
+</tr>
+<tr>
+<td><strong>知識傳遞</strong></td>
+<td>培訓/分享頻率</td>
+<td>1%</td>
+<td>≥2 次/季度</td>
+<td>2次=70分, 4次=90分, 6+=100分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="442-4">4.4.2 技術決策 (4%)<a class="headerlink" href="#442-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ADR 質量</strong></td>
+<td>ADR 文檔審查</td>
+<td>2%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>技術選型影響</strong></td>
+<td>實施效果評估</td>
+<td>2%</td>
+<td>正面影響</td>
+<td>正面=100分, 中性=50分, 負面=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45-3">4.5 階段 3 總評分表<a class="headerlink" href="#45-3" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>權重</th>
+<th>得分</th>
+<th>加權得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術能力</td>
+<td>40%</td>
+<td>___ / 100</td>
+<td>___ / 40</td>
+</tr>
+<tr>
+<td>實踐能力</td>
+<td>30%</td>
+<td>___ / 100</td>
+<td>___ / 30</td>
+</tr>
+<tr>
+<td>領域知識</td>
+<td>20%</td>
+<td>___ / 100</td>
+<td>___ / 20</td>
+</tr>
+<tr>
+<td>領導力</td>
+<td>10%</td>
+<td>___ / 100</td>
+<td>___ / 10</td>
+</tr>
+<tr>
+<td><strong>總分</strong></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>___ / 100</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>晉升門檻:</strong> 總分 ≥ 85 分，且所有 P0-P2 指標達到 B 以上，領導力達到 C 以上</p>
+<hr />
+<h2 id="5-4">5. 階段 4: 高級架構師評估指標<a class="headerlink" href="#5-4" title="連結到此標題">&para;</a></h2>
+<h3 id="51-40">5.1 技術能力指標 (40%)<a class="headerlink" href="#51-40" title="連結到此標題">&para;</a></h3>
+<h4 id="511-15">5.1.1 代碼質量 (15%)<a class="headerlink" href="#511-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試覆蓋率</strong></td>
+<td><code>pytest-cov</code> / <code>vitest coverage</code></td>
+<td>5%</td>
+<td>≥95%</td>
+<td>95%=70分, 98%=80分, 99+=100分</td>
+</tr>
+<tr>
+<td><strong>Linter 通過率</strong></td>
+<td><code>ruff check</code> / <code>eslint</code></td>
+<td>3%</td>
+<td>100%</td>
+<td>同階段 1</td>
+</tr>
+<tr>
+<td><strong>代碼複雜度</strong></td>
+<td><code>radon</code> / <code>complexity report</code></td>
+<td>3%</td>
+<td>≤3</td>
+<td>≤3=100分, 5=80分, &gt;5=0分</td>
+</tr>
+<tr>
+<td><strong>代碼重複率</strong></td>
+<td><code>duplication detector</code></td>
+<td>2%</td>
+<td>&lt;1%</td>
+<td>&lt;0.5%=100分, 0.5-1%=80分, &gt;1%=0分</td>
+</tr>
+<tr>
+<td><strong>安全審查</strong></td>
+<td><code>bandit</code> / <code>snyk</code></td>
+<td>2%</td>
+<td>0 高危漏洞</td>
+<td>0=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="512-15">5.1.2 架構設計能力 (15%)<a class="headerlink" href="#512-15" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務架構設計</strong></td>
+<td>架構文檔 + 實現</td>
+<td>4%</td>
+<td>優秀設計</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>數據架構設計</strong></td>
+<td>數據流設計審查</td>
+<td>3%</td>
+<td>可擴展可維護</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>API 網關設計</strong></td>
+<td>網關實現審查</td>
+<td>3%</td>
+<td>統一高效</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>高可用設計</strong></td>
+<td>冗餘和故障轉移</td>
+<td>3%</td>
+<td>健壯的設計</td>
+<td>健壯=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>可擴展性設計</strong></td>
+<td>水平擴展能力</td>
+<td>2%</td>
+<td>易於擴展</td>
+<td>易於擴展=100分, 可擴展=70分, 難擴展=0分</td>
+</tr>
+</tbody>
+</table>
+<p><strong>架構設計評估檢查清單:</strong></p>
+<pre><code>微服務架構:
+□ 服務邊界清晰合理
+□ 服務間通信高效
+□ 數據一致性策略明確
+□ 故障隔離設計完善
+□ 監控和日誌策略完整
+
+數據架構:
+□ 數據庫選型合理
+□ Schema 設計規範
+□ 數據流設計清晰
+□ ETL 管道健壯
+□ 數據備份策略完善
+
+高可用:
+□ 冗餘設計充分
+□ 故障轉移自動化
+□ 負載均衡策略合理
+□ 災難恢復計劃完整
+</code></pre>
+<h4 id="513-10">5.1.3 技術棧掌握 (10%)<a class="headerlink" href="#513-10" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>技能類別</th>
+<th>具體技能</th>
+<th>權重</th>
+<th>測量方法</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務技術</strong></td>
+<td>gRPC、服務發現、API 網關</td>
+<td>3%</td>
+<td>架構實現審查</td>
+<td>精通</td>
+<td>精通=100分, 熟練=80分, 基本=60分</td>
+</tr>
+<tr>
+<td><strong>DevOps</strong></td>
+<td>Docker、Kubernetes、CI/CD</td>
+<td>3%</td>
+<td>運維實現審查</td>
+<td>精通</td>
+<td>精通=100分, 熟練=80分, 基本=60分</td>
+</tr>
+<tr>
+<td><strong>機器學習</strong></td>
+<td>模型集成、訓練、部署</td>
+<td>2%</td>
+<td>ML 實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+<tr>
+<td><strong>實時數據流</strong></td>
+<td>Kafka、Redis Pub/Sub</td>
+<td>2%</td>
+<td>流處理實現審查</td>
+<td>熟練</td>
+<td>熟練=100分, 基本=70分, 生疏=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-30">5.2 實踐能力指標 (30%)<a class="headerlink" href="#52-30" title="連結到此標題">&para;</a></h3>
+<h4 id="521-tdd-8">5.2.1 TDD 執行度 (8%)<a class="headerlink" href="#521-tdd-8" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>測試先於實現比例</strong></td>
+<td>Git 提交歷史分析</td>
+<td>2%</td>
+<td>100%</td>
+<td>100%=100分, 否則=0分</td>
+</tr>
+<tr>
+<td><strong>測試策略制定</strong></td>
+<td>測試策略文檔</td>
+<td>3%</td>
+<td>完整策略</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>測�试質量</strong></td>
+<td>測試可靠性</td>
+<td>3%</td>
+<td>穩定可靠</td>
+<td>穩定=100分, 基本=70分, 不穩定=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="522-12">5.2.2 代碼審查能力 (12%)<a class="headerlink" href="#522-12" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>審查參與頻率</strong></td>
+<td>審查數量 / 月</td>
+<td>3%</td>
+<td>≥15 PR/月</td>
+<td>15=70分, 20=90分, 30+=100分</td>
+</tr>
+<tr>
+<td><strong>審查回應時間</strong></td>
+<td>平均回應時間</td>
+<td>2%</td>
+<td>&lt;4小時</td>
+<td>&lt;4h=100分, 4-8h=70分, &gt;8h=0分</td>
+</tr>
+<tr>
+<td><strong>審查質量評分</strong></td>
+<td>同行評分</td>
+<td>4%</td>
+<td>≥4.8/5</td>
+<td>4.8=95分, 5=100分</td>
+</tr>
+<tr>
+<td><strong>架構審查貢獻</strong></td>
+<td>架構決策影響</td>
+<td>2%</td>
+<td>關鍵影響</td>
+<td>關鍵=100分, 重要=80分, 一般=60分</td>
+</tr>
+<tr>
+<td><strong>安全審查</strong></td>
+<td>安全漏洞識別和修復</td>
+<td>1%</td>
+<td>識別並修復</td>
+<td>識別=100分, 否則=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="523-7">5.2.3 文檔完整性 (7%)<a class="headerlink" href="#523-7" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術路線圖</strong></td>
+<td>路線圖文檔審查</td>
+<td>3%</td>
+<td>完整可行</td>
+<td>完整=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>架構文檔</strong></td>
+<td>架構圖和說明</td>
+<td>2%</td>
+<td>專業詳細</td>
+<td>專業=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>API 文檔質量</strong></td>
+<td>OpenAPI/Swagger 檢查</td>
+<td>2%</td>
+<td>行業標準</td>
+<td>標準=100分, 良好=80分, 合格=60分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="524-3">5.2.4 技術債管理 (3%)<a class="headerlink" href="#524-3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術債識別</strong></td>
+<td>技術債清單</td>
+<td>2%</td>
+<td>全面識別</td>
+<td>全面=100分, 基本=70分, 不足=0分</td>
+</tr>
+<tr>
+<td><strong>技術債償還</strong></td>
+<td>重構計劃執行</td>
+<td>1%</td>
+<td>有效償還</td>
+<td>有效=100分, 部分=70分, 無=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-20">5.3 領域知識指標 (20%)<a class="headerlink" href="#53-20" title="連結到此標題">&para;</a></h3>
+<h4 id="531-8">5.3.1 系統架構知識 (8%)<a class="headerlink" href="#531-8" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>微服務模式</strong></td>
+<td>問答 + ADR</td>
+<td>3%</td>
+<td>深入理解</td>
+<td>深入=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>分布式系統</strong></td>
+<td>問答 + 設計審查</td>
+<td>3%</td>
+<td>理解挑戰和方案</td>
+<td>理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>高可用模式</strong></td>
+<td>問答 + 設計審查</td>
+<td>2%</td>
+<td>理解模式和實現</td>
+<td>理解=100分, 基本=70分, 不理解=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="532-7">5.3.2 跨領域整合 (7%)<a class="headerlink" href="#532-7" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>金融領域知識</strong></td>
+<td>問答 + 實現</td>
+<td>3%</td>
+<td>深入理解</td>
+<td>深入=100分, 基本=70分, 不理解=0分</td>
+</tr>
+<tr>
+<td><strong>數據科知識</strong></td>
+<td>實現審查</td>
+<td>2%</td>
+<td>應用 ML 方法</td>
+<td>應用=100分, 基本=70分, 無=0分</td>
+</tr>
+<tr>
+<td><strong>DevOps 知識</strong></td>
+<td>實現審查</td>
+<td>2%</td>
+<td>CI/CD 自動化</td>
+<td>自動化=100分, 部分=70分, 無=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="533-5">5.3.3 技術前沿追蹤 (5%)<a class="headerlink" href="#533-5" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>新技術研究</strong></td>
+<td>POC 實現</td>
+<td>3%</td>
+<td>≥1 POC/季度</td>
+<td>1=70分, 2=90分, 3+=100分</td>
+</tr>
+<tr>
+<td><strong>技術博客/分享</strong></td>
+<td>博客/會議分享</td>
+<td>2%</td>
+<td>≥1 次/季度</td>
+<td>1=70分, 2=90分, 3+=100分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-10">5.4 領導力指標 (10%)<a class="headerlink" href="#54-10" title="連結到此標題">&para;</a></h3>
+<h4 id="541-6">5.4.1 技術領導力 (6%)<a class="headerlink" href="#541-6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術路線圖制定</strong></td>
+<td>路線圖質量 + 執行</td>
+<td>2%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>團隊技術規範</strong></td>
+<td>規範制定 + 執行</td>
+<td>2%</td>
+<td>全面執行</td>
+<td>全面=100分, 部分=70分, 無=0分</td>
+</tr>
+<tr>
+<td><strong>人才培養</strong></td>
+<td>培養效果評估</td>
+<td>2%</td>
+<td>有效培養</td>
+<td>有效=100分, 部分=70分, 無=0分</td>
+</tr>
+</tbody>
+</table>
+<h4 id="542-4">5.4.2 技術決策和溝通 (4%)<a class="headerlink" href="#542-4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>測量方法</th>
+<th>權重</th>
+<th>目標值</th>
+<th>評分標準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>技術決策質量</strong></td>
+<td>ADR 質量 + 實施效果</td>
+<td>2%</td>
+<td>優秀</td>
+<td>優秀=100分, 良好=80分, 合格=60分</td>
+</tr>
+<tr>
+<td><strong>技術溝通能力</strong></td>
+<td>團隊反饋</td>
+<td>2%</td>
+<td>清晰有效</td>
+<td>清晰=100分, 基本=70分, 不足=0分</td>
+</tr>
+</tbody>
+</table>
+<h3 id="55-4">5.5 階段 4 總評分表<a class="headerlink" href="#55-4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>維度</th>
+<th>權重</th>
+<th>得分</th>
+<th>加權得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術能力</td>
+<td>40%</td>
+<td>___ / 100</td>
+<td>___ / 40</td>
+</tr>
+<tr>
+<td>實踐能力</td>
+<td>30%</td>
+<td>___ / 100</td>
+<td>___ / 30</td>
+</tr>
+<tr>
+<td>領域知識</td>
+<td>20%</td>
+<td>___ / 100</td>
+<td>___ / 20</td>
+</tr>
+<tr>
+<td>領導力</td>
+<td>10%</td>
+<td>___ / 100</td>
+<td>___ / 10</td>
+</tr>
+<tr>
+<td><strong>總分</strong></td>
+<td><strong>100%</strong></td>
+<td></td>
+<td><strong>___ / 100</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>維持標準:</strong> 總分 ≥ 85 分，且所有指標達到 B 以上</p>
+<hr />
+<h2 id="6">6. 評估方法和工具<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 自評工具<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<h4 id="611">6.1.1 自評問卷模板<a class="headerlink" href="#611" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown"># Programmer Sub-Agent 自評問卷
+
+**評估日期:** ___ / ___ / ___
+**評估階段:** [ ] 階段 1 [ ] 階段 2 [ ] 階段 3 [ ] 階段 4
+**評估人:** ___
+
+## 技術能力自評
+
+### 代碼質量
+1. **測試覆蓋率**
+   - 當前覆蓋率: ___%
+   - 目標覆蓋率: ___%
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+   - 說明: ___
+
+2. **代碼複雜度**
+   - 平均複雜度: ___
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+   - 說明: ___
+
+### 技術棧掌握
+1. **Python/FastAPI**
+   - 熟練度: [ ] 精通 [ ] 熟練 [ ] 基本 [ ] 生疏
+   - 最近 3 個月學習成果: ___
+
+2. **React 19**
+   - 熟練度: [ ] 精通 [ ] 熟練 [ ] 基本 [ ] 生疏
+   - 最近 3 個月學習成果: ___
+
+## 實踐能力自評
+
+### TDD 執行度
+1. **測試先於實現比例**
+   - 當前比例: ___%
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+   - 說明: ___
+
+### 代碼審查
+1. **審查參與**
+   - 最近 1 個月審查 PR 數量: ___
+   - 平均回應時間: ___ 小時
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+
+### 文檔完整性
+1. **Docstring 覆蓋率**
+   - 當前覆蓋率: ___%
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+
+## 領域知識自評
+
+### 量化交易
+1. **技術指標理解**
+   - 已理解指標數量: ___
+   - 已實現指標數量: ___
+   - 自評等級: [ ] A [ ] B [ ] C [ ] D [ ] F
+
+### 策略引擎
+1. **IStrategy 接口**
+   - 理解程度: [ ] 完全 [ ] 基本 [ ] 不理解
+   - 已實現策略數量: ___
+
+## 領導力自評 (僅階段 3-4)
+
+### 技術指導
+1. **指導初級開發者**
+   - 指導次數: ___
+   - 被指導者反饋: ___
+
+### 技術決策
+1. **ADR 貢獻**
+   - 創建 ADR 數量: ___
+   - ADR 質量自評: [ ] 優秀 [ ] 良好 [ ] 合格
+
+## 改進計劃
+
+### 下個月目標
+1. ___
+2. ___
+3. ___
+
+### 需要的支持
+1. ___
+2. ___
+
+**自評總分:** ___ / 100
+</code></pre>
+<h4 id="612">6.1.2 自評腳本<a class="headerlink" href="#612" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># scripts/self_assessment.py
+import subprocess
+import re
+from pathlib import Path
+from typing import Dict, List
+import json
+
+class SelfAssessment:
+    &quot;&quot;&quot;自評工具&quot;&quot;&quot;
+
+    def __init__(self, repo_path: str):
+        self.repo_path = Path(repo_path)
+
+    def measure_test_coverage(self) -&gt; float:
+        &quot;&quot;&quot;測量測試覆蓋率&quot;&quot;&quot;
+        result = subprocess.run(
+            ['pytest', '--cov=backend', '--cov-report=json'],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        # 解析 coverage.json
+        coverage_file = self.repo_path / 'coverage.json'
+        if coverage_file.exists():
+            with open(coverage_file) as f:
+                data = json.load(f)
+            return data['totals']['percent_covered']
+        return 0.0
+
+    def measure_code_complexity(self) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;測量代碼複雜度&quot;&quot;&quot;
+        result = subprocess.run(
+            ['radon', 'cc', 'backend/', '-a', '-j'],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode == 0:
+            data = json.loads(result.stdout)
+            # 計算平均複雜度
+            total_complexity = 0
+            count = 0
+            for module in data.values():
+                for klass in module.values():
+                    for method in klass.values():
+                        total_complexity += method['complexity']
+                        count += 1
+
+            if count &gt; 0:
+                return {'average': total_complexity / count}
+        return {'average': 0.0}
+
+    def analyze_tdd_compliance(self) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;分析 TDD 合規性&quot;&quot;&quot;
+        result = subprocess.run(
+            ['git', 'log', '--all', '--oneline', '--since=&quot;1 month ago&quot;'],
+            cwd=self.repo_path,
+            capture_output=True,
+            text=True
+        )
+
+        commits = result.stdout.strip().split('\n')
+        test_commits = 0
+        impl_commits = 0
+
+        for commit in commits:
+            if not commit:
+                continue
+
+            # 獲取提交的文件
+            files = subprocess.run(
+                ['git', 'show', '--name-only', '--pretty=format:', commit.split()[0]],
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True
+            ).stdout
+
+            has_test = any('test' in f for f in files.split('\n'))
+            has_impl = any('test' not in f and f.endswith('.py') for f in files.split('\n'))
+
+            if has_test:
+                test_commits += 1
+            if has_impl:
+                impl_commits += 1
+
+        if impl_commits &gt; 0:
+            return {
+                'test_before_impl': test_commits / impl_commits * 100
+            }
+        return {'test_before_impl': 0.0}
+
+    def count_pr_reviews(self) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;統計 PR 審查數量&quot;&quot;&quot;
+        # 這需要根據具體的 Git host (GitHub/GitLab) 實現
+        # 這裡是示例
+        return {
+            'reviews_last_month': 0,
+            'avg_response_time_hours': 0
+        }
+
+    def generate_report(self) -&gt; Dict:
+        &quot;&quot;&quot;生成自評報告&quot;&quot;&quot;
+        report = {
+            'test_coverage': self.measure_test_coverage(),
+            'code_complexity': self.measure_code_complexity(),
+            'tdd_compliance': self.analyze_tdd_compliance(),
+            'pr_reviews': self.count_pr_reviews()
+        }
+
+        return report
+
+    def print_report(self, report: Dict):
+        &quot;&quot;&quot;打印報告&quot;&quot;&quot;
+        print(&quot;=== 自評報告 ===&quot;)
+        print(f&quot;測試覆蓋率: {report['test_coverage']:.1f}%&quot;)
+        print(f&quot;平均代碼複雜度: {report['code_complexity']['average']:.1f}&quot;)
+        print(f&quot;TDD 合規性: {report['tdd_compliance']['test_before_impl']:.1f}%&quot;)
+        print(f&quot;PR 審查數量: {report['pr_reviews']['reviews_last_month']}&quot;)
+        print(f&quot;平均回應時間: {report['pr_reviews']['avg_response_time_hours']:.1f} 小時&quot;)
+
+if __name__ == '__main__':
+    import sys
+    repo_path = sys.argv[1] if len(sys.argv) &gt; 1 else '.'
+    assessment = SelfAssessment(repo_path)
+    report = assessment.generate_report()
+    assessment.print_report(report)
+</code></pre>
+<h3 id="62">6.2 代碼審查檢查清單<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<h4 id="621">6.2.1 通用代碼審查清單<a class="headerlink" href="#621" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown"># 代碼審查檢查清單
+
+**審查 ID:** PR-XXX
+**審查人:** ___
+**審查日期:** ___ / ___ / ___
+
+## 代碼質量
+
+- [ ] 測試覆蓋率是否足夠？（目標: 階段 1 ≥80%, 階段 2 ≥85%, 階段 3 ≥90%, 階段 4 ≥95%）
+- [ ] 代碼複雜度是否合理？（目標: 階段 1 ≤10, 階段 2 ≤8, 階段 3 ≤5, 階段 4 ≤3）
+- [ ] 是否有代碼重複？
+- [ ] 是否有明顯的 bug？
+- [ ] 是否有潛在的安全漏洞？
+- [ ] 錯誤處理是否完善？
+- [ ] 類型註解是否完整？
+
+## 架構和設計
+
+- [ ] 設計是否符合分層架構原則？
+- [ ] API 設計是否符合 RESTful 原則？
+- [ ] 數據模型設計是否合理？
+- [ ] 是否有循環依賴？
+- [ ] 模塊職責是否清晰？
+
+## 測試
+
+- [ ] 測試是否遵循 TDD 原則？
+- [ ] 測試是否獨立且可重複？
+- [ ] 測試是否覆蓋邊界情況？
+- [ ] 是否有集成測試？
+- [ ] 測試命名是否清晰？
+
+## 文檔
+
+- [ ] Docstring 是否完整？
+- [ ] API 文檔是否更新？
+- [ ] README 是否需要更新？
+- [ ] 是否有適當的註釋？
+
+## Git 和工作流
+
+- [ ] Commit message 是否符合 Conventional Commits？
+- [ ] PR 描述是否清晰完整？
+- [ ] 是否拆分合理的 PR？
+
+## 性能
+
+- [ ] 是否有性能問題？
+- [ ] 是否有必要的性能測試？
+- [ ] 數據庫查詢是否優化？
+
+## 安全
+
+- [ ] 是否有 SQL 注入風險？
+- [ ] 是否有 XSS 風險？
+- [ ] 敏感信息是否硬編碼？
+
+## 總評
+
+**評分:** ___ / 5
+**建議:** ___
+</code></pre>
+<h4 id="622">6.2.2 架構審查清單<a class="headerlink" href="#622" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown"># 架構審查檢查清單
+
+**審查 ID:** ADR-XXX
+**審查人:** ___
+**審查日期:** ___ / ___ / ___
+
+## 架構設計
+
+- [ ] 架構決策是否有充分的理由？
+- [ ] 是否考慮了替代方案？
+- [ ] 是否記錄了優缺點？
+- [ ] 是否記錄了後果？
+
+## 可擴展性
+
+- [ ] 設計是否支持未來擴展？
+- [ ] 是否有擴展點？
+- [ ] 模塊耦合度是否合理？
+
+## 性能
+
+- [ ] 是否有性能預估？
+- [ ] 是否有性能瓶頸？
+- [ ] 是否有性能優化計劃？
+
+## 安全
+
+- [ ] 是否考慮了安全要求？
+- [ ] 是否有安全邊界？
+- [ ] 是否有審計日誌？
+
+## 運維
+
+- [ ] 部署是否簡單？
+- [ ] 監控是否完善？
+- [ ] 故障排查是否容易？
+
+## 總評
+
+**評分:** ___ / 5
+**建議:** ___
+</code></pre>
+<h3 id="63">6.3 實踐項目評分標準<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<h4 id="631">6.3.1 項目評分模板<a class="headerlink" href="#631" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown"># 項目評分表
+
+**項目名稱:** ___
+**項目階段:** [ ] 階段 1 [ ] 階段 2 [ ] 階段 3 [ ] 階段 4
+**評估人:** ___
+**評估日期:** ___ / ___ / ___
+
+## 技術實現 (40%)
+
+### 代碼質量 (15%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 測試覆蓋率 | 5% | ___ | |
+| 代碼複雜度 | 3% | ___ | |
+| 代碼重複率 | 2% | ___ | |
+| Linter 通過 | 2% | ___ | |
+| 類型註解 | 2% | ___ | |
+| **小計** | **15%** | ___ | |
+
+### 架構設計 (15%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 設計合理性 | 5% | ___ | |
+| 模塊化程度 | 4% | ___ | |
+| API 設計 | 3% | ___ | |
+| 錯誤處理 | 3% | ___ | |
+| **小計** | **15%** | ___ | |
+
+### 技術棧掌握 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 後端技術 | 4% | ___ | |
+| 前端技術 | 4% | ___ | |
+| 領域技術 | 2% | ___ | |
+| **小計** | **10%** | ___ | |
+
+## 實踐質量 (30%)
+
+### TDD 執行 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 測試先於實現 | 5% | ___ | |
+| 測試質量 | 5% | ___ | |
+| **小計** | **10%** | ___ | |
+
+### 代碼審查 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| PR 提交 | 3% | ___ | |
+| 審查參與 | 3% | ___ | |
+| 審查質量 | 4% | ___ | |
+| **小計** | **10%** | ___ | |
+
+### 文檔完整性 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| Docstring | 4% | ___ | |
+| API 文檔 | 3% | ___ | |
+| README | 3% | ___ | |
+| **小計** | **10%** | ___ | |
+
+## 領域知識 (20%)
+
+### 量化交易 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 指標理解 | 4% | ___ | |
+| 回測理解 | 3% | ___ | |
+| 策略設計 | 3% | ___ | |
+| **小計** | **10%** | ___ | |
+
+### 策略引擎 (10%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 接口實現 | 5% | ___ | |
+| 信號生成 | 5% | ___ | |
+| **小計** | **10%** | ___ | |
+
+## 領導力 (10%) - 僅階段 3-4
+
+### 技術指導 (6%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| 指導初級開發者 | 3% | ___ | |
+| 代碼審查指導 | 3% | ___ | |
+| **小計** | **6%** | ___ | |
+
+### 技術決策 (4%)
+| 指標 | 權重 | 得分 | 說明 |
+|------|------|------|------|
+| ADR 貢獻 | 2% | ___ | |
+| 技術選型 | 2% | ___ | |
+| **小計** | **4%** | ___ | |
+
+## 總評
+
+**總分:** ___ / 100
+**等級:** [ ] A [ ] B [ ] C [ ] D [ ] F
+
+## 優點
+1. ___
+2. ___
+3. ___
+
+## 改進建議
+1. ___
+2. ___
+3. ___
+
+## 下一步行動
+1. ___
+2. ___
+</code></pre>
+<h3 id="64">6.4 同行評估機制<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<h4 id="641-360">6.4.1 360 度評估模板<a class="headerlink" href="#641-360" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown"># 360 度評估表
+
+**被評估人:** ___
+**評估階段:** [ ] 階段 1 [ ] 階段 2 [ ] 階段 3 [ ] 階段 4
+**評估日期:** ___ / ___ / ___
+
+## 評估人信息
+
+**姓名:** ___
+**角色:** [ ] 同行 [ ] 上級 [ ] 下級 [ ] 其他
+**關係:** ___
+
+## 技術能力
+
+### 代碼質量
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 問題解決能力
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+## 實踐能力
+
+### TDD 執行
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 代碼審查
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 文檔編寫
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+## 領域知識
+
+### 量化交易
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 策略引擎
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+## 領導力 (僅階段 3-4)
+
+### 技術指導
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 技術決策
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+## 團隊協作
+
+### 溝通能力
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+### 團隊合作
+**評分:** ___ / 5
+**評價:**
+- 優點: ___
+- 改進空間: ___
+
+## 總評
+
+**總評分:** ___ / 5
+**推薦晉升:** [ ] 強烈推薦 [ ] 推薦 [ ] 中立 [ ] 不推薦
+
+**其他評價:**
+___
+</code></pre>
+<h4 id="642">6.4.2 同行評估腳本<a class="headerlink" href="#642" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># scripts/peer_review.py
+import json
+from pathlib import Path
+from typing import Dict, List
+from datetime import datetime
+
+class PeerReviewManager:
+    &quot;&quot;&quot;同行評估管理器&quot;&quot;&quot;
+
+    def __init__(self, data_dir: str):
+        self.data_dir = Path(data_dir)
+
+    def create_review(self, review: Dict) -&gt; str:
+        &quot;&quot;&quot;創建評估&quot;&quot;&quot;
+        review_id = f&quot;review-{datetime.now().strftime('%Y%m%d%H%M%S')}.json&quot;
+        review_file = self.data_dir / review_id
+
+        with open(review_file, 'w') as f:
+            json.dump(review, f, indent=2)
+
+        return review_id
+
+    def load_review(self, review_id: str) -&gt; Dict:
+        &quot;&quot;&quot;加載評估&quot;&quot;&quot;
+        review_file = self.data_dir / f&quot;{review_id}.json&quot;
+        with open(review_file) as f:
+            return json.load(f)
+
+    def list_reviews(self, subject: str = None) -&gt; List[Dict]:
+        &quot;&quot;&quot;列出評估&quot;&quot;&quot;
+        reviews = []
+        for review_file in self.data_dir.glob(&quot;review-*.json&quot;):
+            with open(review_file) as f:
+                review = json.load(f)
+                if subject is None or review['subject'] == subject:
+                    reviews.append(review)
+        return reviews
+
+    def calculate_average_score(self, subject: str) -&gt; Dict:
+        &quot;&quot;&quot;計算平均分&quot;&quot;&quot;
+        reviews = self.list_reviews(subject)
+
+        if not reviews:
+            return {}
+
+        # 計算各項平均分
+        scores = {}
+        for review in reviews:
+            for key, value in review.items():
+                if isinstance(value, (int, float)) and 0 &lt;= value &lt;= 5:
+                    if key not in scores:
+                        scores[key] = []
+                    scores[key].append(value)
+
+        average = {key: sum(values) / len(values) for key, values in scores.items()}
+
+        return average
+
+    def generate_report(self, subject: str) -&gt; str:
+        &quot;&quot;&quot;生成評估報告&quot;&quot;&quot;
+        reviews = self.list_reviews(subject)
+        average = self.calculate_average_score(subject)
+
+        report = f&quot;&quot;&quot;# 同行評估報告
+
+**被評估人:** {subject}
+**評估數量:** {len(reviews)}
+**評估日期:** {datetime.now().strftime('%Y-%m-%d')}
+
+## 平均得分
+&quot;&quot;&quot;
+
+        for key, value in average.items():
+            report += f&quot;- {key}: {value:.2f} / 5\n&quot;
+
+        report += &quot;\n## 詳細評估\n&quot;
+        for review in reviews:
+            report += f&quot;\n### 評估人: {review.get('reviewer', '匿名')}\n&quot;
+            report += f&quot;- 總評分: {review.get('total_score', 0)} / 5\n&quot;
+
+        return report
+
+if __name__ == '__main__':
+    import sys
+
+    manager = PeerReviewManager('./reviews')
+
+    if len(sys.argv) &gt; 1:
+        command = sys.argv[1]
+        if command == 'report':
+            subject = sys.argv[2] if len(sys.argv) &gt; 2 else None
+            print(manager.generate_report(subject))
+        elif command == 'list':
+            subject = sys.argv[2] if len(sys.argv) &gt; 2 else None
+            reviews = manager.list_reviews(subject)
+            print(f&quot;Found {len(reviews)} reviews&quot;)
+            for review in reviews:
+                print(f&quot;- {review.get('id', 'unknown')}: {review.get('subject', 'unknown')}&quot;)
+</code></pre>
+<hr />
+<h2 id="7">7. 評估時間表和頻率<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 評估頻率<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>評估類型</th>
+<th>頻率</th>
+<th>責任人</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自評</strong></td>
+<td>每月</td>
+<td>個人</td>
+<td>自我反思和改進</td>
+</tr>
+<tr>
+<td><strong>代碼審查</strong></td>
+<td>每次 PR</td>
+<td>審查者</td>
+<td>即時反饋</td>
+</tr>
+<tr>
+<td><strong>同行評估</strong></td>
+<td>每季度</td>
+<td>團隊</td>
+<td>360 度視角</td>
+</tr>
+<tr>
+<td><strong>項目評估</strong></td>
+<td>每項目完成後</td>
+<td>項目負責人</td>
+<td>項目質量評估</td>
+</tr>
+<tr>
+<td><strong>階段評估</strong></td>
+<td>每階段結束</td>
+<td>導師 + 自評</td>
+<td>晉升評估</td>
+</tr>
+<tr>
+<td><strong>年度評估</strong></td>
+<td>每年</td>
+<td>HR + 導師</td>
+<td>總體發展評估</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72">7.2 評估時間表<a class="headerlink" href="#72" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-markdown"># 評估時間表模板
+
+## 階段 1: 初級開發者 (0-3 個月)
+
+### 第 1 個月
+- [ ] **第 1 週:** 初始自評 + 能力基線測試
+- [ ] **每週:** 代碼審查反饋
+- [ ] **第 4 週:** 月度自評 + 導師 1-on-1
+
+### 第 2 個月
+- [ ] **第 1 週:** 月度自評
+- [ ] **第 2 週:** 項目 1 評估 (CRUD API)
+- [ ] **第 3 週:** 同行評估邀請
+- [ ] **第 4 週:** 月度自評 + 導師 1-on-1
+
+### 第 3 個月
+- [ ] **第 1 週:** 月度自評
+- [ ] **第 2 週:** 項目 2 評估 (技術指標)
+- [ ] **第 3 週:** 階段評估準備
+- [ ] **第 4 週:** 階段評估 + 晉升決定
+
+## 階段 2: 中級開發者 (3-6 個月)
+
+### 第 4 個月
+- [ ] **第 1 週:** 月度自評
+- [ ] **第 2 週:** 項目 3 評估 (RSI 策略)
+- [ ] **第 3 週:** 同行評估邀請
+- [ ] **第 4 週:** 月度自評 + 導師 1-on-1
+
+### 第 5 個月
+- [ ] **第 1 週:** 月度自評
+- [ ] **第 2 週:** 項目 4 評估 (VectorBT 回測)
+- [ ] **第 3 週:** 代碼審查質量評估
+- [ ] **第 4 週:** 月度自評 + 導師 1-on-1
+
+### 第 6 個月
+- [ ] **第 1 週:** 月度自評
+- [ ] **第 2 週:** 項目 5 評估 (策略工廠)
+- [ ] **第 3 週:** 階段評估準備
+- [ ] **第 4 週:** 階段評估 + 晉升決定
+
+## 階段 3: 高級開發者 (6-12 個月)
+
+### 第 7-8 個月
+- [ ] **每週:** 代碼審查 + 項目評估
+- [ ] **每週:** 月度自評
+- [ ] **第 8 個月末:** 階段中期評估
+
+### 第 9-10 個月
+- [ ] **每週:** 代碼審查 + 項目評估
+- [ ] **每週:** 月度自評
+- [ ] **第 10 個月末:** 同行評估
+
+### 第 11-12 個月
+- [ ] **每週:** 代碼審查 + 項目評估
+- [ ] **每週:** 月度自評
+- [ ] **第 12 週:** 階段評估 + 晉升決定
+
+## 階段 4: 高級架構師 (12+ 個月)
+
+### 季度評估
+- [ ] **每季度:** 自評 + 同行評估
+- [ ] **每季度:** ADR 評估
+- [ ] **每季度:** 技術路線圖評估
+
+### 年度評估
+- [ ] **每年:** 年度總結
+- [ ] **每年:** 技術貢獻評估
+- [ ] **每年:** 團隊發展評估
+</code></pre>
+<h3 id="73">7.3 評估流程<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<pre><code>1. 自評 (第 1 週)
+   ↓
+2. 同行評估 (第 2 週)
+   ↓
+3. 導師評估 (第 3 週)
+   ↓
+4. 評估會議 (第 4 週)
+   ↓
+5. 改進計劃 (評估後 1 週)
+   ↓
+6. 跟進 (每週)
+</code></pre>
+<hr />
+<h2 id="8">8. 改進計劃模板<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 個人改進計劃<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-markdown"># 個人改進計劃
+
+**姓名:** ___
+**當前階段:** [ ] 階段 1 [ ] 階段 2 [ ] 階段 3 [ ] 階段 4
+**評估日期:** ___ / ___ / ___
+**計劃期間:** ___ / ___ / ___ ~ ___ / ___ / ___
+
+## 評估總結
+
+### 總分
+**上期得分:** ___ / 100
+**本期得分:** ___ / 100
+**變化:** +___ / -___
+
+### 優點
+1. ___
+2. ___
+3. ___
+
+### 改進空間
+1. ___
+2. ___
+3. ___
+
+## 本期目標
+
+### 技術能力 (40%)
+
+#### 代碼質量 (15%)
+- [ ] 測試覆蓋率從 ___% 提升到 ___%
+- [ ] 代碼複雜度從 ___ 降低到 ___
+- [ ] 代碼重複率從 ___% 降低到 ___%
+- [ ] 類型註解覆蓋率從 ___% 提升到 ___%
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 架構設計 (10-15%)
+- [ ] 學習 [ ] 微服務架構 [ ] API 設計 [ ] 數據架構
+- [ ] 完成 ADR-XXX: ___
+- [ ] 參與架構審查 X 次
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 技術棧掌握 (10-15%)
+- [ ] 學習 [ ] VectorBT [ ] Backtrader [ ] Zustand [ ] React Query
+- [ ] 完成項目: ___
+- [ ] 讀書/課程: ___
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+### 實踐能力 (30%)
+
+#### TDD 執行 (10%)
+- [ ] 測試先於實現比例從 ___% 提升到 ___%
+- [ ] 編寫 X 個集成測試
+- [ ] 編寫 Y 個 E2E 測試
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 代碼審查 (10-12%)
+- [ ] 審查 PR 數量: X 個/月
+- [ ] 平均回應時間: &lt; X 小時
+- [ ] 審查質量評分: ≥ X/5
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 文檔完整性 (6-10%)
+- [ ] Docstring 覆蓋率從 ___% 提升到 ___%
+- [ ] 更新 API 文檔: X 次
+- [ ] 編寫技術博客: X 篇
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+### 領域知識 (20%)
+
+#### 量化交易 (8-10%)
+- [ ] 理解 X 個技術指標
+- [ ] 實現 X 個技術指標
+- [ ] 完成 X 個回測項目
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 策略引擎 (6-10%)
+- [ ] 實現 X 個策略
+- [ ] 學習信號合併算法
+- [ ] 參與策略引擎開發
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+### 領導力 (10%) - 僅階段 3-4
+
+#### 技術指導 (6%)
+- [ ] 指導 X 個初級開發者
+- [ ] 進行 X 次代碼審查指導
+- [ ] 進行 X 次知識分享
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+#### 技術決策 (4%)
+- [ ] 創建 X 個 ADR
+- [ ] 參與 X 次技術選型
+- [ ] 制定 X 項技術規範
+
+**具體行動:**
+1. ___
+2. ___
+
+**截止日期:** ___
+
+## 學習資源
+
+### 書籍
+1. ___
+2. ___
+
+### 在線課程
+1. ___
+2. ___
+
+### 文檔/教程
+1. ___
+2. ___
+
+## 支持需求
+
+### 需要導師支持
+1. ___
+2. ___
+
+### 需要團隊支持
+1. ___
+2. ___
+
+### 需要資源支持
+1. ___
+2. ___
+
+## 跟進計劃
+
+| 週 | 檢查項目 | 狀態 | 備註 |
+|----|---------|------|------|
+| 第 1 週 | ___ | [ ] | |
+| 第 2 週 | ___ | [ ] | |
+| 第 3 週 | ___ | [ ] | |
+| ... | | | |
+
+## 簽名
+
+**個人簽名:** ___
+**導師簽名:** ___
+**日期:** ___ / ___ / ___
+</code></pre>
+<h3 id="82">8.2 團隊改進計劃<a class="headerlink" href="#82" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-markdown"># 團隊改進計劃
+
+**團隊名稱:** ___
+**計劃期間:** ___ / ___ / ___ ~ ___ / ___ / ___
+
+## 團隊現狀分析
+
+### 團隊總體得分
+**上期得分:** ___ / 100
+**本期得分:** ___ / 100
+**變化:** +___ / -___
+
+### 團隊優勢
+1. ___
+2. ___
+3. ___
+
+### 團隊改進空間
+1. ___
+2. ___
+3. ___
+
+## 團隊目標
+
+### 技術目標
+- [ ] 團隊平均測試覆蓋率: ___%
+- [ ] 團隊平均代碼複雜度: ≤ ___
+- [ ] 團隊技術債清單: ___ 項
+
+### 實踐目標
+- [ ] TDD 執行度: ___%
+- [ ] 代碼審查回應時間: &lt; ___ 小時
+- [ ] 文檔完整性: ___%
+
+### 領域目標
+- [ ] 實現技術指標: X 個
+- [ ] 實現策略: X 個
+- [ ] 完成回測項目: X 個
+
+## 改進措施
+
+### 技術改進
+1. ___
+2. ___
+3. ___
+
+### 流程改進
+1. ___
+2. ___
+3. ___
+
+### 培訓計劃
+1. ___
+2. ___
+3. ___
+
+## 資源分配
+
+### 培訓預算
+- [ ] 課程培訓: $___
+- [ ] 書籍購買: $___
+- [ ] 會議參加: $___
+
+### 時間投入
+- [ ] 培訓時間: X 小時/月
+- [ ] 代碼審查: X 小時/週
+- [ ] 知識分享: X 次/月
+
+## 跟進計劃
+
+| 週 | 檢查項目 | 責任人 | 狀態 |
+|----|---------|--------|------|
+| 第 1 週 | ___ | ___ | [ ] |
+| 第 2 週 | ___ | ___ | [ ] |
+| 第 3 週 | ___ | ___ | [ ] |
+| ... | | | |
+
+## 評估標準
+
+### 成功標準
+1. 團隊總分提升 ≥ ___ 分
+2. 測試覆蓋率達到 ___%
+3. 技術債減少 ≥ ___%
+
+### 風險評估
+| 風險 | 可能性 | 影響 | 緩解措施 |
+|------|--------|------|---------|
+| ___ | 高/中/低 | 高/中/低 | ___ |
+
+## 簽名
+
+**團隊負責人簽名:** ___
+**技術負責人簽名:** ___
+**日期:** ___ / ___ / ___
+</code></pre>
+<h3 id="83">8.3 改進計劃追蹤腳本<a class="headerlink" href="#83" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># scripts/track_improvement.py
+import json
+from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Dict, List
+
+class ImprovementTracker:
+    &quot;&quot;&quot;改進計劃追蹤器&quot;&quot;&quot;
+
+    def __init__(self, data_dir: str):
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(exist_ok=True)
+
+    def create_plan(self, plan: Dict) -&gt; str:
+        &quot;&quot;&quot;創建改進計劃&quot;&quot;&quot;
+        plan_id = f&quot;plan-{datetime.now().strftime('%Y%m%d%H%M%S')}.json&quot;
+        plan_file = self.data_dir / plan_id
+
+        with open(plan_file, 'w') as f:
+            json.dump(plan, f, indent=2)
+
+        return plan_id
+
+    def load_plan(self, plan_id: str) -&gt; Dict:
+        &quot;&quot;&quot;加載改進計劃&quot;&quot;&quot;
+        plan_file = self.data_dir / f&quot;{plan_id}.json&quot;
+        with open(plan_file) as f:
+            return json.load(f)
+
+    def update_progress(self, plan_id: str, task_id: str, status: str, notes: str = &quot;&quot;):
+        &quot;&quot;&quot;更新任務進度&quot;&quot;&quot;
+        plan = self.load_plan(plan_id)
+
+        for task in plan.get('tasks', []):
+            if task['id'] == task_id:
+                task['status'] = status
+                task['notes'] = notes
+                task['updated_at'] = datetime.now().isoformat()
+                break
+
+        plan_file = self.data_dir / f&quot;{plan_id}.json&quot;
+        with open(plan_file, 'w') as f:
+            json.dump(plan, f, indent=2)
+
+    def get_due_tasks(self, plan_id: str) -&gt; List[Dict]:
+        &quot;&quot;&quot;獲取到期任務&quot;&quot;&quot;
+        plan = self.load_plan(plan_id)
+        today = datetime.now()
+
+        due_tasks = []
+        for task in plan.get('tasks', []):
+            if 'due_date' in task:
+                due_date = datetime.fromisoformat(task['due_date'])
+                if due_date &lt;= today + timedelta(days=7) and task.get('status') != 'completed':
+                    due_tasks.append(task)
+
+        return due_tasks
+
+    def generate_report(self, plan_id: str) -&gt; str:
+        &quot;&quot;&quot;生成進度報告&quot;&quot;&quot;
+        plan = self.load_plan(plan_id)
+
+        total_tasks = len(plan.get('tasks', []))
+        completed_tasks = sum(1 for t in plan.get('tasks', []) if t.get('status') == 'completed')
+        progress = completed_tasks / total_tasks * 100 if total_tasks &gt; 0 else 0
+
+        report = f&quot;&quot;&quot;# 改進計劃進度報告
+
+**計劃 ID:** {plan_id}
+**進度:** {completed_tasks}/{total_tasks} ({progress:.1f}%)
+**生成時間:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+## 任務進度
+&quot;&quot;&quot;
+
+        for task in plan.get('tasks', []):
+            status_icon = &quot;✅&quot; if task.get('status') == 'completed' else &quot;⏳&quot;
+            report += f&quot;- {status_icon} {task.get('title', '無標題')} - {task.get('status', '無狀態')}\n&quot;
+            if 'due_date' in task:
+                report += f&quot;  到期日期: {task['due_date']}\n&quot;
+            if 'notes' in task:
+                report += f&quot;  備註: {task['notes']}\n&quot;
+
+        return report
+
+if __name__ == '__main__':
+    import sys
+
+    tracker = ImprovementTracker('./plans')
+
+    if len(sys.argv) &gt; 1:
+        command = sys.argv[1]
+        if command == 'report':
+            plan_id = sys.argv[2] if len(sys.argv) &gt; 2 else None
+            print(tracker.generate_report(plan_id))
+        elif command == 'due':
+            plan_id = sys.argv[2] if len(sys.argv) &gt; 2 else None
+            due_tasks = tracker.get_due_tasks(plan_id)
+            print(f&quot;Found {len(due_tasks)} due tasks:&quot;)
+            for task in due_tasks:
+                print(f&quot;- {task.get('title', '無標題')} - {task.get('due_date', '無日期')}&quot;)
+</code></pre>
+<hr />
+<h2 id="_2">總結<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">評估體系特點<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>科學量化</strong>: 所有指標都可測量、可驗證</li>
+<li><strong>多維度</strong>: 涵蓋技術、實踐、領域、領導力四個維度</li>
+<li><strong>漸進性</strong>: 評估標準隨階段逐步提高</li>
+<li><strong>行動導向</strong>: 評估結果直接導向具體改進行動</li>
+<li><strong>持續改進</strong>: 定期評估和追蹤改進進度</li>
+</ol>
+<h3 id="_4">使用建議<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>定期評估</strong>: 按照時間表進行評估</li>
+<li><strong>客觀公正</strong>: 使用自動化工具減少主觀偏差</li>
+<li><strong>建設性反饋</strong>: 專注於改進而非批評</li>
+<li><strong>跟蹤進度</strong>: 使用改進計劃模板追蹤進度</li>
+<li><strong>持續優化</strong>: 根據實際情況調整評估標準</li>
+</ol>
+<hr />
+<p><strong>文檔版本:</strong> 1.0
+<strong>最後更新:</strong> 2026-02-21
+<strong>聯繫方式:</strong> 如有問題或建議，請聯繫項目負責人</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

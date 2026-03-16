@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Report: On Sparsity, Extremal Structure, and Monotonicity - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Research Report: On Sparsity, Extremal Structure, and Monotonicity</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="research-report-on-sparsity-extremal-structure-and-monotonicity">Research Report: On Sparsity, Extremal Structure, and Monotonicity<a class="headerlink" href="#research-report-on-sparsity-extremal-structure-and-monotonicity" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s15
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-23T07:09:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report provides a comprehensive analysis of sparsity, extremal structure, and monotonicity properties in statistical learning theory and estimation. The research covers theoretical foundations, sparse estimation methods, extremal structures analysis, monotonicity constraints, and practical implementations across various domains including optimal transport, machine learning, and statistical modeling.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Sparsity in Optimal Transport</strong> — Recent research shows that Gromov-Wasserstein optimal transport plans exhibit sparsity properties and can be supported on permutations under certain conditions | Source: arXiv:2602.16265 (2026)</p>
+</li>
+<li>
+<p><strong>Sparse Estimation Methods</strong> — Lasso and compressed sensing techniques enable signal recovery from underdetermined systems by exploiting sparsity, requiring fewer samples than Nyquist-Shannon theorem | Source: Wikipedia - Compressed Sensing</p>
+</li>
+<li>
+<p><strong>Extremal Structures Analysis</strong> — Multivariate extreme value theory deals with sparse patterns in rare events, with applications in clustering, graphical modeling, and principal component analysis for extremes | Source: Annual Reviews (2021)</p>
+</li>
+<li>
+<p><strong>Monotonicity Constraints</strong> — Machine learning models with monotonic constraints follow general trends rather than local variations, improving interpretability and robustness | Source: scikit-learn documentation</p>
+</li>
+<li>
+<p><strong>Practical Applications</strong> — These methods have wide-ranging applications in MRI imaging, financial risk modeling, environmental monitoring, and structural engineering | Source: Multiple sources</p>
+</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="1-theoretical-background">1. Theoretical Background<a class="headerlink" href="#1-theoretical-background" title="連結到此標題">&para;</a></h3>
+<h4 id="11-sparsity-theory">1.1 Sparsity Theory<a class="headerlink" href="#11-sparsity-theory" title="連結到此標題">&para;</a></h4>
+<p>Sparsity is a fundamental concept in signal processing and statistical learning that refers to the property of having many zero or near-zero coefficients when represented in an appropriate domain. The theoretical foundation rests on the principle that many real-world signals and data structures are inherently sparse or compressible.</p>
+<p><strong>Key Theoretical Concepts:</strong>
+- <strong>Underdetermined Linear Systems</strong>: Systems with more unknowns than equations, having infinitely many solutions without additional constraints
+- <strong>Sparsity as Prior Knowledge</strong>: The assumption that the true solution has few non-zero components
+- <strong>Incoherence</strong>: The measurement basis should be incoherent with the sparsity basis for successful recovery</p>
+<h4 id="12-extreme-value-theory-foundations">1.2 Extreme Value Theory Foundations<a class="headerlink" href="#12-extreme-value-theory-foundations" title="連結到此標題">&para;</a></h4>
+<p>Extreme value theory provides the mathematical framework for analyzing the behavior of rare events and extreme observations. The Fisher-Tippett-Gnedenko theorem establishes that limiting distributions of maxima (or minima) belong to one of three families: Gumbel, Fréchet, or Weibull.</p>
+<p><strong>Multivariate Extensions:</strong>
+- <strong>Max-stable Distributions</strong>: The natural multivariate extension of univariate extreme value distributions
+- <strong>Extremal Dependence Structures</strong>: Different forms of dependence between extreme observations of multivariate random vectors
+- <strong>Spectral Measure</strong>: Characterizes the dependence structure in multivariate extreme value distributions</p>
+<h4 id="13-monotonicity-in-statistical-learning">1.3 Monotonicity in Statistical Learning<a class="headerlink" href="#13-monotonicity-in-statistical-learning" title="連結到此標題">&para;</a></h4>
+<p>Monotonicity constraints represent prior knowledge about the direction of relationships between variables. In statistical estimation, monotonic functions preserve order relationships, making them valuable for modeling systems where certain relationships are known to be non-decreasing or non-increasing.</p>
+<h3 id="2-sparse-estimation-methods">2. Sparse Estimation Methods<a class="headerlink" href="#2-sparse-estimation-methods" title="連結到此標題">&para;</a></h3>
+<h4 id="21-lasso-and-linear-regression">2.1 Lasso and Linear Regression<a class="headerlink" href="#21-lasso-and-linear-regression" title="連結到此標題">&para;</a></h4>
+<p>The Lasso (Least Absolute Shrinkage and Selection Operator) is a cornerstone method in sparse estimation. It solves the optimization problem:</p>
+<pre><code>minimize (1/2n) ||y - Xβ||²₂ + λ||β||₁
+</code></pre>
+<p>where λ is a regularization parameter that controls the sparsity level.</p>
+<p><strong>Key Properties:</strong>
+- <strong>Simultaneous Selection and Estimation</strong>: Performs variable selection while estimating coefficients
+- <strong>Convex Optimization</strong>: The L1 penalty makes the problem convex, enabling efficient solution algorithms
+- <strong>Coordinate Descent</strong>: Efficient algorithm for solving Lasso problems, especially for high-dimensional data</p>
+<h4 id="22-compressed-sensing">2.2 Compressed Sensing<a class="headerlink" href="#22-compressed-sensing" title="連結到此標題">&para;</a></h4>
+<p>Compressed sensing demonstrates that sparse signals can be recovered from far fewer measurements than required by the Nyquist-Shannon sampling theorem. The key requirements are:</p>
+<ol>
+<li><strong>Sparsity</strong>: The signal must be sparse in some domain</li>
+<li><strong>Incoherence</strong>: The sampling matrix must satisfy the restricted isometry property (RIP)</li>
+<li><strong>Optimization</strong>: Recovery via L1 minimization (basis pursuit) or greedy algorithms</li>
+</ol>
+<p><strong>Mathematical Formulation:</strong></p>
+<pre><code>minimize ||x||₁ subject to y = Ax
+</code></pre>
+<p>where A is the measurement matrix and y are the measurements.</p>
+<h4 id="23-advanced-sparse-methods">2.3 Advanced Sparse Methods<a class="headerlink" href="#23-advanced-sparse-methods" title="連結到此標題">&para;</a></h4>
+<p><strong>Sparse Group Lasso</strong>: Combines element-wise and group-wise sparsity, useful for hierarchical data structures. The optimization problem is:</p>
+<pre><code>minimize (1/2n) ||y - Xβ||²₂ + λ₁||β||₁ + λ₂∑||β_g||₂
+</code></pre>
+<p>where β_g represents groups of coefficients.</p>
+<p><strong>Structured Sparsity</strong>: Generalizes standard sparsity by allowing arbitrary structures on the feature set, based on coding complexity associated with the structure.</p>
+<h3 id="3-extremal-structures-analysis">3. Extremal Structures Analysis<a class="headerlink" href="#3-extremal-structures-analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="31-multivariate-extreme-value-theory">3.1 Multivariate Extreme Value Theory<a class="headerlink" href="#31-multivariate-extreme-value-theory" title="連結到此標題">&para;</a></h4>
+<p>In the multivariate setting, extreme value theory becomes more complex due to the lack of natural ordering for vectors. The theory must address:</p>
+<p><strong>Definition of Extremes:</strong>
+- <strong>Component-wise Extremes</strong>: Each coordinate exceeds a threshold
+- <strong>Radial Extremes</strong>: Points far from the origin in some norm
+- <strong>Regional Extremes</strong>: Extreme values in specific regions of the domain</p>
+<p><strong>Extremal Dependence Types:</strong>
+1. <strong>Asymptotic Independence</strong>: Extreme events in different components occur independently in the limit
+2. <strong>Asymptotic Dependence</strong>: Extreme events tend to occur simultaneously across components
+3. <strong>Hidden Regular Variation</strong>: Intermediate cases with complex dependence structures</p>
+<h4 id="32-sparse-structures-in-extremes">3.2 Sparse Structures in Extremes<a class="headerlink" href="#32-sparse-structures-in-extremes" title="連結到此標題">&para;</a></h4>
+<p>Recent research has established appropriate notions of sparsity for extreme events, connecting to machine learning and graphical models. Key areas include:</p>
+<p><strong>Clustering for Extremes</strong>: Identifying groups of variables that can be concomitantly extreme, using techniques like:
+- Hierarchical clustering based on extremal correlation
+- Model-based clustering for extreme value distributions
+- Spectral clustering on extremal dependence matrices</p>
+<p><strong>Principal Component Analysis for Extremes</strong>: Extending PCA to identify dominant patterns in extreme events:
+- Extremal principal components that capture the main directions of extremal dependence
+- Sparse loadings to improve interpretability
+- Robust estimation procedures for high-dimensional settings</p>
+<p><strong>Graphical Models for Extremes</strong>: Representing extremal dependence structures using graphs:
+- Nodes represent variables, edges represent extremal dependence
+- Conditional independence properties for extreme events
+- Graph learning algorithms tailored to extreme value data</p>
+<h4 id="33-statistical-inference-for-extremes">3.3 Statistical Inference for Extremes<a class="headerlink" href="#33-statistical-inference-for-extremes" title="連結到此標題">&para;</a></h4>
+<p><strong>Peaks Over Threshold (POT) Method</strong>: Models exceedances above high thresholds using generalized Pareto distributions.</p>
+<p><strong>Point Process Approach</strong>: Unifies block maxima and POT methods within a single framework using Poisson point processes.</p>
+<p><strong>Semi-parametric Methods</strong>: Combine parametric models for marginal distributions with non-parametric estimation of dependence structures.</p>
+<h3 id="4-monotonicity-constraints">4. Monotonicity Constraints<a class="headerlink" href="#4-monotonicity-constraints" title="連結到此標題">&para;</a></h3>
+<h4 id="41-theoretical-foundations">4.1 Theoretical Foundations<a class="headerlink" href="#41-theoretical-foundations" title="連結到此標題">&para;</a></h4>
+<p>Monotonicity constraints enforce that the relationship between input features and output predictions follows a known directional trend. This is particularly important when:</p>
+<ul>
+<li>Domain knowledge dictates certain relationships</li>
+<li>Model interpretability is crucial</li>
+<li>Robustness to noise is required</li>
+</ul>
+<p><strong>Mathematical Definition</strong>: A function f: ℝ^d → ℝ is monotonic increasing in feature j if:</p>
+<pre><code>f(x₁, ..., x_j, ..., x_d) ≤ f(x₁, ..., x'_j, ..., x_d) for all x_j ≤ x'_j
+</code></pre>
+<h4 id="42-implementation-methods">4.2 Implementation Methods<a class="headerlink" href="#42-implementation-methods" title="連結到此標題">&para;</a></h4>
+<p><strong>Tree-based Methods with Monotonicity</strong>:
+- <strong>Gradient Boosting Trees</strong>: Enforce monotonicity during tree construction by restricting split directions
+- <strong>Random Forests</strong>: Apply monotonicity constraints to individual trees and aggregate results
+- <strong>XGBoost/LightGBM</strong>: Built-in support for monotonic constraints via parameter specification</p>
+<p><strong>Regularization Approaches</strong>:
+- <strong>Isotonic Regression</strong>: Non-parametric approach that fits monotonic functions to data
+- <strong>Monotonic Neural Networks</strong>: Neural architectures with built-in monotonicity guarantees
+- <strong>Constrained Optimization</strong>: Formulate learning as constrained optimization problems</p>
+<h4 id="43-benefits-and-applications">4.3 Benefits and Applications<a class="headerlink" href="#43-benefits-and-applications" title="連結到此標題">&para;</a></h4>
+<p><strong>Advantages</strong>:
+- <strong>Improved Interpretability</strong>: Models respect intuitive relationships
+- <strong>Robustness</strong>: Less sensitive to noise and outliers
+- <strong>Domain Consistency</strong>: Models align with expert knowledge
+- <strong>Generalization</strong>: Often better extrapolation behavior</p>
+<p><strong>Application Domains</strong>:
+- <strong>Medical Diagnosis</strong>: Ensuring that risk scores increase with disease severity markers
+- <strong>Credit Scoring</strong>: Guaranteeing that higher risk factors lead to lower credit scores
+- <strong>Engineering</strong>: Maintaining physically meaningful relationships in predictive models</p>
+<h3 id="5-practical-implementations">5. Practical Implementations<a class="headerlink" href="#5-practical-implementations" title="連結到此標題">&para;</a></h3>
+<h4 id="51-software-and-libraries">5.1 Software and Libraries<a class="headerlink" href="#51-software-and-libraries" title="連結到此標題">&para;</a></h4>
+<p><strong>Python Ecosystem</strong>:
+- <strong>scikit-learn</strong>: <code>HistGradientBoostingRegressor</code> with monotonic constraints
+- <strong>XGBoost/LightGBM</strong>: Built-in monotonic constraint support
+- <strong>CVXPY</strong>: Convex optimization for constrained problems
+- <strong>PyTorch/TensorFlow</strong>: Custom implementations of monotonic neural networks</p>
+<p><strong>R Packages</strong>:
+- <strong>glmnet</strong>: Lasso and elastic net implementations
+- <strong>evd/ismev</strong>: Extreme value analysis
+- <strong>monotonicity</strong>: Packages for monotonic regression</p>
+<h4 id="52-application-case-studies">5.2 Application Case Studies<a class="headerlink" href="#52-application-case-studies" title="連結到此標題">&para;</a></h4>
+<p><strong>Case Study 1: Medical Imaging</strong>
+Compressed sensing techniques are widely used in MRI reconstruction, reducing scan times while maintaining image quality. The sparse representation of medical images in wavelet domains enables recovery from undersampled k-space data.</p>
+<p><strong>Case Study 2: Financial Risk Modeling</strong>
+Extreme value theory with sparse structures is used to model tail dependencies in financial markets, improving risk assessment for portfolio management and regulatory compliance.</p>
+<p><strong>Case Study 3: Environmental Monitoring</strong>
+Monotonicity constraints in environmental models ensure that pollution predictions increase appropriately with emission levels, providing more reliable policy support.</p>
+<h4 id="53-best-practices">5.3 Best Practices<a class="headerlink" href="#53-best-practices" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>Problem Formulation</strong>: Clearly identify which constraints are theoretically justified and practically necessary</li>
+<li><strong>Algorithm Selection</strong>: Choose methods appropriate for the problem scale and structure</li>
+<li><strong>Validation</strong>: Use cross-validation and domain expertise to validate constrained models</li>
+<li><strong>Interpretation</strong>: Balance model complexity with interpretability requirements</li>
+<li><strong>Computational Efficiency</strong>: Consider scalability for large-scale applications</li>
+</ol>
+<h2 id="future-research-directions">Future Research Directions<a class="headerlink" href="#future-research-directions" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>Integration of Methods</strong>: Combining sparsity, extremal structure, and monotonicity in unified frameworks</li>
+<li><strong>High-dimensional Settings</strong>: Developing methods for very high-dimensional data with complex constraints</li>
+<li><strong>Deep Learning Integration</strong>: Incorporating these concepts into neural network architectures</li>
+<li><strong>Causal Inference</strong>: Using monotonicity and sparsity for causal discovery and inference</li>
+<li><strong>Real-time Applications</strong>: Developing efficient algorithms for streaming data applications</li>
+</ol>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.16265">On sparsity, extremal structure, and monotonicity properties of Wasserstein and Gromov-Wasserstein optimal transport plans</a> — Recent paper on sparsity in optimal transport (2026)</li>
+<li><a href="https://en.wikipedia.org/wiki/Compressed_sensing">Compressed Sensing - Wikipedia</a> — Comprehensive overview of compressed sensing theory</li>
+<li><a href="https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-040620-041554">Sparse Structures for Multivariate Extremes - Annual Reviews</a> — Review of sparsity in extreme value analysis</li>
+<li><a href="https://scikit-learn.org/stable/auto_examples/ensemble/plot_monotonic_constraints.html">Monotonic Constraints - scikit-learn</a> — Practical implementation guide</li>
+<li><a href="https://en.wikipedia.org/wiki/Extreme_value_theory">Extreme Value Theory - Wikipedia</a> — Theoretical foundations of extreme value analysis</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (most recent sources)</li>
+<li><strong>Suggestions:</strong> This research provides a solid foundation for applications in statistical learning, signal processing, and risk modeling. The integration of these three concepts (sparsity, extremal structure, monotonicity) offers promising directions for future research.</li>
+<li><strong>Errors:</strong> None identified in the research process. All sources were successfully accessed and synthesized.</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

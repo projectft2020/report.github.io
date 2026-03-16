@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Middleware & Authentication Analysis - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard Middleware & Authentication Analysis</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard-middleware-authentication-analysis">Dashboard Middleware &amp; Authentication Analysis<a class="headerlink" href="#dashboard-middleware-authentication-analysis" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> a001g-middleware-auth
+<strong>Agent:</strong> Charlie Analyst
+<strong>Status:</strong> completed (with limitations)
+<strong>Timestamp:</strong> 2026-02-20T23:59:00+08:00</p>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="連結到此標題">&para;</a></h2>
+<p>This analysis provides a comprehensive security knowledge foundation for middleware and authentication mechanisms essential for designing the programmer sub-agent. The document covers industry-standard authentication patterns, security strategies, middleware design patterns, and best practices. While specific Dashboard backend code could not be located for direct analysis, this framework provides the programmer sub-agent with the necessary knowledge to implement secure authentication and middleware systems.</p>
+<hr />
+<h2 id="1-authentication-mechanisms">1. 認證機制說明 (Authentication Mechanisms)<a class="headerlink" href="#1-authentication-mechanisms" title="連結到此標題">&para;</a></h2>
+<h3 id="11-jwt-json-web-token-authentication">1.1 JWT (JSON Web Token) Authentication<a class="headerlink" href="#11-jwt-json-web-token-authentication" title="連結到此標題">&para;</a></h3>
+<p><strong>基本原理：</strong>
+- JWT 是一種無狀態認證機制
+- Token 包含三個部分：Header, Payload, Signature
+- 簽名確保 token 完整性，防止篡改</p>
+<p><strong>典型實現：</strong></p>
+<pre><code class="language-javascript">// JWT Token 結構示例
+{
+  &quot;header&quot;: {
+    &quot;alg&quot;: &quot;HS256&quot;,
+    &quot;typ&quot;: &quot;JWT&quot;
+  },
+  &quot;payload&quot;: {
+    &quot;userId&quot;: &quot;123&quot;,
+    &quot;username&quot;: &quot;user@example.com&quot;,
+    &quot;role&quot;: &quot;admin&quot;,
+    &quot;iat&quot;: 1708425600,
+    &quot;exp&quot;: 1708512000
+  }
+}
+</code></pre>
+<p><strong>優點：</strong>
+- 無狀態，適合微服務架構
+- 不需要在服務器端存儲 session
+- 支援跨域請求
+- 可包含自定義聲明（claims）</p>
+<p><strong>缺點：</strong>
+- Token 一旦簽發無法輕易撤銷
+- Payload 不應包含敏感信息
+- 需要妥善保護 secret key</p>
+<h3 id="12-session-based-authentication">1.2 Session-Based Authentication<a class="headerlink" href="#12-session-based-authentication" title="連結到此標題">&para;</a></h3>
+<p><strong>基本原理：</strong>
+- 服務器端維護 session 狀態
+- 客戶端存儲 session ID（通常在 cookie 中）
+- 每次請求攜帶 session ID</p>
+<p><strong>典型流程：</strong>
+1. 用戶登錄 → 驗證憑證
+2. 創建 session → 生成 session ID
+3. 返回 session ID → 存儲在客戶端 cookie
+4. 後續請求攜帶 session ID → 服務器查詢 session</p>
+<p><strong>優點：</strong>
+- 易於撤銷 session（直接刪除服務器端記錄）
+- 可以存儲任意數量的用戶數據
+- 更容易實現實時的權限控制</p>
+<p><strong>缺點：</strong>
+- 需要服務器端存儲（Redis/Memcached）
+- 不適合無狀態微服務
+- 跨域實現較複雜</p>
+<h3 id="13-api-key-authentication">1.3 API Key Authentication<a class="headerlink" href="#13-api-key-authentication" title="連結到此標題">&para;</a></h3>
+<p><strong>基本原理：</strong>
+- 客戶端使用預先生成的 API Key
+- Key 通常通過 HTTP Header 傳遞
+- 適合服務間通信（service-to-service）</p>
+<p><strong>典型實現：</strong></p>
+<pre><code class="language-javascript">// HTTP Header 示例
+Authorization: Api-Key YOUR_API_KEY
+// 或
+X-API-Key: YOUR_API_KEY
+</code></pre>
+<p><strong>優點：</strong>
+- 實現簡單
+- 適合機器對機器通信
+- 易於追蹤和限流</p>
+<p><strong>缺點：</strong>
+- 如果洩露，無法區分合法和非法調用
+- 不適合人類用戶認證
+- 通常需要配合其他安全措施</p>
+<h3 id="14-oauth-20-openid-connect">1.4 OAuth 2.0 &amp; OpenID Connect<a class="headerlink" href="#14-oauth-20-openid-connect" title="連結到此標題">&para;</a></h3>
+<p><strong>基本原理：</strong>
+- 基於授權碼流程（Authorization Code Flow）
+- 第三方登錄（Google, GitHub, Facebook 等）
+- OpenID Connect 在 OAuth 2.0 上添加了認證層</p>
+<p><strong>典型流程（授權碼流程）：</strong>
+1. 用戶訪問應用 → 重定向到授權服務器
+2. 用戶登錄授權服務器 → 同意授權
+3. 授權服務器返回授權碼
+4. 應用用授權碼換取 access token
+5. 應用使用 access token 訪問受保護資源</p>
+<p><strong>優點：</strong>
+- 用戶不需要記住多個密碼
+- 統一的身份管理
+- 支援單點登錄（SSO）</p>
+<p><strong>缺點：</strong>
+- 實現複雜度高
+- 依賴第三方服務的可用性
+- 隱私考量</p>
+<h3 id="15-multi-factor-authentication-mfa">1.5 Multi-Factor Authentication (MFA)<a class="headerlink" href="#15-multi-factor-authentication-mfa" title="連結到此標題">&para;</a></h3>
+<p><strong>基本原理：</strong>
+- 結合多種認證因素
+- 通常包括：你知道的（密碼）、你有的（設備/Token）、你是的（生物特徵）</p>
+<p><strong>常見實現：</strong>
+- TOTP (Time-based One-Time Password) - Google Authenticator
+- SMS 驗證碼
+- Email 驗證碼
+- 硬件安全密鑰（YubiKey）
+- 生物識別（指紋、面容 ID）</p>
+<p><strong>實現位置：</strong>
+- 登錄時強制要求
+- 管理員操作前要求
+- 異常登錄行為觸發</p>
+<hr />
+<h2 id="2-security-strategies">2. 安全策略清單 (Security Strategies)<a class="headerlink" href="#2-security-strategies" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 認證安全策略<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<h4 id="211">2.1.1 密碼安全<a class="headerlink" href="#211" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>密碼複雜度要求</td>
+<td>最少 12 位字符，包含大小寫字母、數字、特殊字符</td>
+<td>高</td>
+</tr>
+<tr>
+<td>密碼哈希</td>
+<td>使用 bcrypt, argon2, scrypt 或 PBKDF2</td>
+<td>高</td>
+</tr>
+<tr>
+<td>防止暴力破解</td>
+<td>登錄失敗 5 次後鎖定 30 分鐘</td>
+<td>高</td>
+</tr>
+<tr>
+<td>密碼過期</td>
+<td>每 90 天要求更改密碼</td>
+<td>中</td>
+</tr>
+<tr>
+<td>禁止常見密碼</td>
+<td>黑名單檢查（password123, 123456 等）</td>
+<td>中</td>
+</tr>
+<tr>
+<td>密碼重複檢查</td>
+<td>新密碼不能與最近 5 次相同</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h4 id="212-session">2.1.2 Session 安全<a class="headerlink" href="#212-session" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session 過期</td>
+<td>30 分鐘無活動自動過期</td>
+<td>高</td>
+</tr>
+<tr>
+<td>絕對過期</td>
+<td>Session 最長有效期 8 小時</td>
+<td>高</td>
+</tr>
+<tr>
+<td>SameSite Cookie</td>
+<td>設置為 Strict 或 Lax</td>
+<td>高</td>
+</tr>
+<tr>
+<td>HttpOnly Cookie</td>
+<td>防止 XSS 攻擊讀取 cookie</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Secure Cookie</td>
+<td>僅通過 HTTPS 傳輸</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Session 重新生成</td>
+<td>登錄成功後重新生成 session ID</td>
+<td>高</td>
+</tr>
+<tr>
+<td>併發 Session 限制</td>
+<td>同一用戶最多 3 個活躍 session</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h4 id="213-jwt">2.1.3 JWT 安全<a class="headerlink" href="#213-jwt" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>短期有效期</td>
+<td>Access token 15 分鐘有效期</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Refresh Token</td>
+<td>使用 refresh token 獲取新的 access token</td>
+<td>高</td>
+</tr>
+<tr>
+<td>強簽名算法</td>
+<td>使用 HS256 或 RS256</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Token 黑名單</td>
+<td>Redis 存儲已撤銷的 token</td>
+<td>高</td>
+</tr>
+<tr>
+<td>受眾限制</td>
+<td>設置 aud 聲明限制 token 使用範圍</td>
+<td>中</td>
+</tr>
+<tr>
+<td>簽發者驗證</td>
+<td>驗證 iss 聲明</td>
+<td>高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22">2.2 授權安全策略<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<h4 id="221-rbac-role-based-access-control">2.2.1 RBAC (Role-Based Access Control)<a class="headerlink" href="#221-rbac-role-based-access-control" title="連結到此標題">&para;</a></h4>
+<pre><code>用戶 → 角色 → 權限
+User → Role → Permission
+</code></pre>
+<p><strong>典型角色定義：</strong>
+- <strong>super_admin</strong>: 所有權限
+- <strong>admin</strong>: 系統管理權限
+- <strong>user</strong>: 基本用戶權限
+- <strong>guest</strong>: 只讀權限</p>
+<p><strong>權限粒度：</strong>
+- 模塊級別（讀取/寫入/刪除）
+- 資源級別（特定資源的訪問）
+- 欄位級別（某些欄位的訪問控制）</p>
+<h4 id="222-abac-attribute-based-access-control">2.2.2 ABAC (Attribute-Based Access Control)<a class="headerlink" href="#222-abac-attribute-based-access-control" title="連結到此標題">&para;</a></h4>
+<p><strong>基於屬性的訪問控制，更靈活但複雜：</strong></p>
+<pre><code class="language-javascript">{
+  &quot;user&quot;: {
+    &quot;department&quot;: &quot;engineering&quot;,
+    &quot;level&quot;: 5
+  },
+  &quot;resource&quot;: {
+    &quot;type&quot;: &quot;document&quot;,
+    &quot;classification&quot;: &quot;confidential&quot;
+  },
+  &quot;environment&quot;: {
+    &quot;time&quot;: &quot;09:00-18:00&quot;,
+    &quot;location&quot;: &quot;office&quot;
+  },
+  &quot;action&quot;: &quot;read&quot;,
+  &quot;decision&quot;: &quot;allow/deny&quot;
+}
+</code></pre>
+<h3 id="23">2.3 通信安全策略<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTPS 強制</td>
+<td>所有 API 端點必須使用 HTTPS</td>
+<td>高</td>
+</tr>
+<tr>
+<td>HSTS</td>
+<td>啟用 HTTP Strict Transport Security</td>
+<td>高</td>
+</tr>
+<tr>
+<td>TLS 1.2+</td>
+<td>禁用舊版本 TLS</td>
+<td>高</td>
+</tr>
+<tr>
+<td>證書固定 (Pinning)</td>
+<td>移動端實施證書固定</td>
+<td>中</td>
+</tr>
+<tr>
+<td>CSP</td>
+<td>內容安全策略防止 XSS</td>
+<td>高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24">2.4 輸入驗證策略<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>參數類型驗證</td>
+<td>使用 JSON Schema 或 Zod 驗證</td>
+<td>高</td>
+</tr>
+<tr>
+<td>長度限制</td>
+<td>限制字符串、數組長度</td>
+<td>高</td>
+</tr>
+<tr>
+<td>格式驗證</td>
+<td>Email、URL、日期格式檢查</td>
+<td>高</td>
+</tr>
+<tr>
+<td>範圍檢查</td>
+<td>數值範圍、枚舉值檢查</td>
+<td>高</td>
+</tr>
+<tr>
+<td>SQL 注入防護</td>
+<td>使用參數化查詢，ORM 防護</td>
+<td>高</td>
+</tr>
+<tr>
+<td>XSS 防護</td>
+<td>輸出時 HTML 轉義</td>
+<td>高</td>
+</tr>
+<tr>
+<td>CSRF 防護</td>
+<td>CSRF Token 驗證</td>
+<td>高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-rate-limiting">2.5 速率限制策略 (Rate Limiting)<a class="headerlink" href="#25-rate-limiting" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>限制</th>
+<th>窗口期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全局請求</td>
+<td>1000 請求</td>
+<td>1 分鐘</td>
+</tr>
+<tr>
+<td>登錄嘗試</td>
+<td>5 次</td>
+<td>15 分鐘</td>
+</tr>
+<tr>
+<td>API 調用</td>
+<td>100 請求</td>
+<td>1 分鐘</td>
+</tr>
+<tr>
+<td>文件上傳</td>
+<td>10 MB/次</td>
+<td>-</td>
+</tr>
+<tr>
+<td>郵件發送</td>
+<td>10 封</td>
+<td>1 小時</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26">2.6 數據保護策略<a class="headerlink" href="#26" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>敏感數據加密</td>
+<td>密碼、信用卡等使用 AES-256 加密</td>
+<td>高</td>
+</tr>
+<tr>
+<td>數據庫加密</td>
+<td>TDE (Transparent Data Encryption)</td>
+<td>中</td>
+</tr>
+<tr>
+<td>備份加密</td>
+<td>備份文件加密存儲</td>
+<td>高</td>
+</tr>
+<tr>
+<td>日志脫敏</td>
+<td>日志中移除敏感信息</td>
+<td>高</td>
+</tr>
+<tr>
+<td>數據最小化</td>
+<td>只收集必要的數據</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h3 id="27">2.7 監控與審計策略<a class="headerlink" href="#27" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>實現方式</th>
+<th>優先級</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>登錄日誌</td>
+<td>記錄所有登錄/登出事件</td>
+<td>高</td>
+</tr>
+<tr>
+<td>操作審計</td>
+<td>記錄敏感操作（刪除、修改權限）</td>
+<td>高</td>
+</tr>
+<tr>
+<td>異常檢測</td>
+<td>監控異常登錄模式、IP 變化</td>
+<td>中</td>
+</tr>
+<tr>
+<td>安全事件告警</td>
+<td>失敗登錄超過閾值時告警</td>
+<td>中</td>
+</tr>
+<tr>
+<td>定期審計</td>
+<td>每月審查權限分配</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-middleware-design-patterns">3. 中間件設計模式 (Middleware Design Patterns)<a class="headerlink" href="#3-middleware-design-patterns" title="連結到此標題">&para;</a></h2>
+<h3 id="31-middleware-chain">3.1 中間件鏈模式 (Middleware Chain)<a class="headerlink" href="#31-middleware-chain" title="連結到此標題">&para;</a></h3>
+<p><strong>基本概念：</strong>
+- 請求通過一系列中間件處理器
+- 每個中間件可以：
+  - 終止請求處理並返回響應
+  - 將請求傳遞給下一個中間件
+  - 修改請求/響應對象</p>
+<p><strong>典型結構：</strong></p>
+<pre><code class="language-javascript">// Express.js 示例
+app.use(middleware1);
+app.use(middleware2);
+app.use(middleware3);
+
+app.get('/api/protected', authMiddleware, roleMiddleware, handler);
+
+// 中間件函數簽名
+function middleware(req, res, next) {
+  // 前置處理
+  console.log('Request received');
+
+  // 決定是否繼續
+  if (shouldStop) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  // 傳遞給下一個中間件
+  next();
+}
+</code></pre>
+<p><strong>處理流程：</strong></p>
+<pre><code>Request → [MW1] → [MW2] → [MW3] → [Handler] → [MW3] → [MW2] → [MW1] → Response
+           ↓        ↓        ↓         ↓           ↑        ↑        ↑
+        Pre      Pre      Pre      Business      Post     Post     Post
+</code></pre>
+<h3 id="32">3.2 常見中間件類型<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="321-authentication-middleware">3.2.1 認證中間件 (Authentication Middleware)<a class="headerlink" href="#321-authentication-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">async function authMiddleware(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+</code></pre>
+<h4 id="322-authorization-middleware">3.2.2 授權中間件 (Authorization Middleware)<a class="headerlink" href="#322-authorization-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">function requireRole(...allowedRoles) {
+  return (req, res, next) =&gt; {
+    const userRole = req.user?.role;
+
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    next();
+  };
+}
+
+// 使用
+app.get('/api/admin', authMiddleware, requireRole('admin', 'super_admin'), handler);
+</code></pre>
+<h4 id="323-rate-limiting-middleware">3.2.3 速率限制中間件 (Rate Limiting Middleware)<a class="headerlink" href="#323-rate-limiting-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 分鐘
+  max: 5, // 最多 5 次嘗試
+  message: 'Too many login attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/api/login', loginLimiter, loginHandler);
+</code></pre>
+<h4 id="324-error-handling-middleware">3.2.4 錯誤處理中間件 (Error Handling Middleware)<a class="headerlink" href="#324-error-handling-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">function errorHandler(err, req, res, next) {
+  console.error('Error:', err);
+
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation Error',
+      details: err.message
+    });
+  }
+
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+}
+
+app.use(errorHandler);
+</code></pre>
+<h4 id="325-request-logging-middleware">3.2.5 請求日誌中間件 (Request Logging Middleware)<a class="headerlink" href="#325-request-logging-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">function requestLogger(req, res, next) {
+  const start = Date.now();
+
+  res.on('finish', () =&gt; {
+    const duration = Date.now() - start;
+    console.log({
+      method: req.method,
+      url: req.url,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      ip: req.ip,
+      userAgent: req.get('user-agent')
+    });
+  });
+
+  next();
+}
+</code></pre>
+<h4 id="326-cors-cors-middleware">3.2.6 CORS 中間件 (CORS Middleware)<a class="headerlink" href="#326-cors-cors-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const cors = require('cors');
+
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS?.split(','),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+</code></pre>
+<h4 id="327-request-validation-middleware">3.2.7 請求驗證中間件 (Request Validation Middleware)<a class="headerlink" href="#327-request-validation-middleware" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const { body, validationResult } = require('express-validator');
+
+const userValidationRules = [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 12 }).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]/)
+];
+
+function validate(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+}
+
+app.post('/api/users', userValidationRules, validate, createUserHandler);
+</code></pre>
+<h3 id="33">3.3 中間件組合模式<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="331">3.3.1 條件中間件<a class="headerlink" href="#331" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">function conditionalMiddleware(condition, middleware) {
+  return (req, res, next) =&gt; {
+    if (condition(req)) {
+      middleware(req, res, next);
+    } else {
+      next();
+    }
+  };
+}
+
+// 使用：僅在生產環境啟用壓縮
+app.use(conditionalMiddleware(
+  () =&gt; process.env.NODE_ENV === 'production',
+  compression()
+));
+</code></pre>
+<h4 id="332">3.3.2 中間件工廠模式<a class="headerlink" href="#332" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">function createAuthMiddleware(options = {}) {
+  const {
+    tokenExtractor = (req) =&gt; req.headers.authorization?.replace('Bearer ', ''),
+    secret = process.env.JWT_SECRET,
+    onError = (res, error) =&gt; res.status(401).json({ error: error.message })
+  } = options;
+
+  return async function authMiddleware(req, res, next) {
+    try {
+      const token = tokenExtractor(req);
+      if (!token) throw new Error('No token provided');
+
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      onError(res, error);
+    }
+  };
+}
+
+// 使用
+app.use(createAuthMiddleware({
+  tokenExtractor: (req) =&gt; req.cookies?.token,
+  secret: 'custom-secret'
+}));
+</code></pre>
+<h3 id="34">3.4 中間件執行順序<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<p><strong>推薦順序：</strong></p>
+<pre><code class="language-javascript">// 1. 全局錯誤處理（放在最後）
+// 2. 速率限制
+// 3. 請求解析
+// 4. 安全頭
+// 5. CORS
+// 6. 請求日誌
+// 7. 認證
+// 8. 授權
+// 9. 業務邏輯
+</code></pre>
+<p><strong>示例：</strong></p>
+<pre><code class="language-javascript">const app = express();
+
+// 1. 全局中間件
+app.use(helmet()); // 安全頭
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
+app.use(compression());
+
+// 2. 速率限制
+app.use('/api/', apiLimiter);
+
+// 3. 公開路由
+app.post('/api/login', loginLimiter, loginHandler);
+app.post('/api/register', registerHandler);
+
+// 4. 認證路由
+app.use('/api/', authMiddleware);
+
+// 5. 角色路由
+app.use('/api/admin', requireRole('admin'));
+app.use('/api/users', requireRole('user', 'admin'));
+
+// 6. API 路由
+app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
+
+// 7. 錯誤處理（放在最後）
+app.use(notFoundHandler);
+app.use(errorHandler);
+</code></pre>
+<hr />
+<h2 id="4-security-best-practices">4. 安全最佳實踐 (Security Best Practices)<a class="headerlink" href="#4-security-best-practices" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 認證最佳實踐<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<h4 id="411">4.1.1 密碼處理<a class="headerlink" href="#411" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：使用 bcrypt
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
+
+async function hashPassword(password) {
+  return await bcrypt.hash(password, saltRounds);
+}
+
+async function verifyPassword(password, hash) {
+  return await bcrypt.compare(password, hash);
+}
+
+// ❌ 錯誤：使用 MD5
+const md5 = require('md5');
+const hash = md5(password); // 不安全！
+</code></pre>
+<h4 id="412-token">4.1.2 Token 生成與驗證<a class="headerlink" href="#412-token" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：使用強密碃學隨機數生成器
+const crypto = require('crypto');
+function generateResetToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// ✅ 正確：JWT 設置
+const jwt = require('jsonwebtoken');
+const token = jwt.sign(
+  { userId, role },
+  process.env.JWT_SECRET,
+  { expiresIn: '15m' }
+);
+
+// ✅ 正確：驗證所有聲明
+const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+  issuer: 'your-app',
+  audience: 'your-api'
+});
+
+// ❌ 錯誤：使用 Math.random()
+const token = Math.random().toString(36); // 不安全！
+</code></pre>
+<h4 id="413">4.1.3 安全登錄流程<a class="headerlink" href="#413" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 登錄時的安全檢查
+async function secureLogin(email, password) {
+  // 1. 速率限制檢查
+  const attempts = await getLoginAttempts(email);
+  if (attempts &gt;= 5) {
+    throw new Error('Too many attempts. Account locked.');
+  }
+
+  // 2. 查找用戶
+  const user = await findUserByEmail(email);
+  if (!user) {
+    await incrementLoginAttempts(email);
+    throw new Error('Invalid credentials');
+  }
+
+  // 3. 驗證密碼（使用恆定時間比較）
+  const isValid = await bcrypt.compare(password, user.passwordHash);
+  if (!isValid) {
+    await incrementLoginAttempts(email);
+    throw new Error('Invalid credentials');
+  }
+
+  // 4. 檢查帳號狀態
+  if (user.locked) {
+    throw new Error('Account is locked');
+  }
+  if (!user.verified) {
+    throw new Error('Account not verified');
+  }
+
+  // 5. 清除失敗嘗試
+  await clearLoginAttempts(email);
+
+  // 6. 生成 Token
+  const accessToken = jwt.sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' }
+  );
+
+  const refreshToken = crypto.randomBytes(32).toString('hex');
+  await saveRefreshToken(user.id, refreshToken);
+
+  // 7. 記錄登錄事件
+  await logLoginEvent(user.id, {
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+    timestamp: new Date()
+  });
+
+  return { accessToken, refreshToken };
+}
+</code></pre>
+<h3 id="42">4.2 中間件安全最佳實踐<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="421-timing-attacks">4.2.1 防止時序攻擊（Timing Attacks）<a class="headerlink" href="#421-timing-attacks" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：使用恆定時間比較
+function safeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+
+  const len = Math.max(a.length, b.length);
+  let result = 0;
+
+  for (let i = 0; i &lt; len; i++) {
+    result |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
+
+  return result === 0;
+}
+
+// 或者使用 crypto.timingSafeEqual
+const crypto = require('crypto');
+function secureCompare(a, b) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+// ❌ 錯誤：直接比較
+if (token === storedToken) { // 容易受到時序攻擊
+  // ...
+}
+</code></pre>
+<h4 id="422">4.2.2 安全錯誤處理<a class="headerlink" href="#422" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：不洩露敏感信息
+function errorHandler(err, req, res, next) {
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({ error: 'Authentication failed' });
+  }
+
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Invalid input',
+      details: err.errors
+    });
+  }
+
+  // 生產環境不返回詳細錯誤
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+
+  // 開發環境返回詳細錯誤
+  res.status(500).json({
+    error: err.message,
+    stack: err.stack
+  });
+}
+
+// ❌ 錯誤：洩露系統信息
+function badErrorHandler(err, req, res, next) {
+  res.status(500).json({
+    error: err.message,
+    stack: err.stack, // 可能洩露文件路徑、環境變量
+    database: err.sql // 可能洩露數據庫結構
+  });
+}
+</code></pre>
+<h4 id="423">4.2.3 安全重定向<a class="headerlink" href="#423" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：驗證重定向 URL
+function safeRedirect(req, res, next) {
+  const redirectTo = req.query.redirect;
+
+  if (!redirectTo) {
+    return next();
+  }
+
+  try {
+    const url = new URL(redirectTo, process.env.BASE_URL);
+
+    // 只允許重定向到本站點
+    if (url.origin !== process.env.BASE_URL) {
+      return res.redirect('/dashboard');
+    }
+
+    return res.redirect(redirectTo);
+  } catch {
+    return res.redirect('/dashboard');
+  }
+}
+
+// ❌ 錯誤：直接重定向
+function unsafeRedirect(req, res, next) {
+  const redirectTo = req.query.redirect;
+  res.redirect(redirectTo); // 可能導致釣魚攻擊
+}
+</code></pre>
+<h3 id="43">4.3 數據保護最佳實踐<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<h4 id="431">4.3.1 敏感數據加密<a class="headerlink" href="#431" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const crypto = require('crypto');
+
+const algorithm = 'aes-256-gcm';
+const key = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
+const ivLength = 16;
+
+// 加密
+function encrypt(text) {
+  const iv = crypto.randomBytes(ivLength);
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  const authTag = cipher.getAuthTag();
+
+  return {
+    iv: iv.toString('hex'),
+    encrypted,
+    authTag: authTag.toString('hex')
+  };
+}
+
+// 解密
+function decrypt(encryptedData) {
+  const { iv, encrypted, authTag } = encryptedData;
+
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    key,
+    Buffer.from(iv, 'hex')
+  );
+
+  decipher.setAuthTag(Buffer.from(authTag, 'hex'));
+
+  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+
+  return decrypted;
+}
+</code></pre>
+<h4 id="432">4.3.2 日志脫敏<a class="headerlink" href="#432" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 敏感字段列表
+const SENSITIVE_FIELDS = ['password', 'token', 'apiKey', 'secret', 'ssn'];
+
+// 脫敏函數
+function sanitizeLogData(data) {
+  if (typeof data !== 'object' || data === null) {
+    return data;
+  }
+
+  const sanitized = Array.isArray(data) ? [] : {};
+
+  for (const key in data) {
+    if (SENSITIVE_FIELDS.includes(key)) {
+      sanitized[key] = '***REDACTED***';
+    } else if (typeof data[key] === 'object') {
+      sanitized[key] = sanitizeLogData(data[key]);
+    } else {
+      sanitized[key] = data[key];
+    }
+  }
+
+  return sanitized;
+}
+
+// 使用
+console.log('Request:', sanitizeLogData({
+  username: 'user@example.com',
+  password: 'secret123',
+  profile: {
+    name: 'John Doe',
+    ssn: '123-45-6789'
+  }
+}));
+
+// 輸出：
+// Request: {
+//   username: 'user@example.com',
+//   password: '***REDACTED***',
+//   profile: {
+//     name: 'John Doe',
+//     ssn: '***REDACTED***'
+//   }
+// }
+</code></pre>
+<h3 id="44">4.4 配置管理最佳實踐<a class="headerlink" href="#44" title="連結到此標題">&para;</a></h3>
+<h4 id="441">4.4.1 環境變量管理<a class="headerlink" href="#441" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// ✅ 正確：使用環境變量
+const config = {
+  jwtSecret: process.env.JWT_SECRET,
+  dbUrl: process.env.DATABASE_URL,
+  encryptionKey: process.env.ENCRYPTION_KEY,
+  apiKey: process.env.API_KEY
+};
+
+// 驗證必需的環境變量
+function validateConfig() {
+  const required = ['JWT_SECRET', 'DATABASE_URL', 'ENCRYPTION_KEY'];
+  const missing = required.filter(key =&gt; !process.env[key]);
+
+  if (missing.length &gt; 0) {
+    throw new Error(`Missing environment variables: ${missing.join(', ')}`);
+  }
+}
+
+// ❌ 錯誤：硬編碼配置
+const config = {
+  jwtSecret: 'my-secret-key-123', // 不應該提交到版本控制
+  dbUrl: 'mongodb://localhost:27017/mydb',
+  apiKey: 'sk-1234567890'
+};
+</code></pre>
+<h4 id="442">4.4.2 配置驗證<a class="headerlink" href="#442" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">const Joi = require('joi');
+
+// 配置 schema
+const configSchema = Joi.object({
+  jwtSecret: Joi.string().min(32).required(),
+  jwtExpiresIn: Joi.string().pattern(/^\d+[mhd]$/).default('15m'),
+  database: Joi.object({
+    url: Joi.string().uri().required(),
+    ssl: Joi.boolean().default(false)
+  }).required(),
+  cors: Joi.object({
+    origins: Joi.array().items(Joi.string().uri()).required()
+  }).required(),
+  rateLimit: Joi.object({
+    windowMs: Joi.number().positive().required(),
+    max: Joi.number().positive().required()
+  }).required()
+});
+
+// 驗證並加載配置
+function loadConfig() {
+  const rawConfig = {
+    jwtSecret: process.env.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN,
+    database: {
+      url: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_SSL === 'true'
+    },
+    cors: {
+      origins: process.env.CORS_ORIGINS?.split(',')
+    },
+    rateLimit: {
+      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
+      max: parseInt(process.env.RATE_LIMIT_MAX) || 100
+    }
+  };
+
+  const { error, value } = configSchema.validate(rawConfig, {
+    allowUnknown: false,
+    stripUnknown: true
+  });
+
+  if (error) {
+    throw new Error(`Configuration error: ${error.message}`);
+  }
+
+  return value;
+}
+</code></pre>
+<h3 id="45">4.5 測試最佳實踐<a class="headerlink" href="#45" title="連結到此標題">&para;</a></h3>
+<h4 id="451">4.5.1 認證測試<a class="headerlink" href="#451" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 測試登錄流程
+describe('POST /api/login', () =&gt; {
+  it('should reject invalid credentials', async () =&gt; {
+    const response = await request(app)
+      .post('/api/login')
+      .send({
+        email: 'user@example.com',
+        password: 'wrongpassword'
+      });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBeDefined();
+  });
+
+  it('should return JWT token on successful login', async () =&gt; {
+    const response = await request(app)
+      .post('/api/login')
+      .send({
+        email: 'user@example.com',
+        password: 'correctpassword'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.accessToken).toBeDefined();
+    expect(response.body.refreshToken).toBeDefined();
+
+    // 驗證 token 格式
+    const decoded = jwt.verify(
+      response.body.accessToken,
+      process.env.JWT_SECRET
+    );
+    expect(decoded.userId).toBeDefined();
+  });
+
+  it('should lock account after 5 failed attempts', async () =&gt; {
+    // 5 次失敗登錄
+    for (let i = 0; i &lt; 5; i++) {
+      await request(app)
+        .post('/api/login')
+        .send({
+          email: 'user@example.com',
+          password: 'wrongpassword'
+        });
+    }
+
+    // 第 6 次應該被鎖定
+    const response = await request(app)
+      .post('/api/login')
+      .send({
+        email: 'user@example.com',
+        password: 'correctpassword'
+      });
+
+    expect(response.status).toBe(423); // Locked
+  });
+});
+</code></pre>
+<h4 id="452">4.5.2 中間件測試<a class="headerlink" href="#452" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// 測試認證中間件
+describe('authMiddleware', () =&gt; {
+  it('should allow valid token', async () =&gt; {
+    const token = jwt.sign(
+      { userId: '123', role: 'user' },
+      process.env.JWT_SECRET
+    );
+
+    const response = await request(app)
+      .get('/api/protected')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+  });
+
+  it('should reject missing token', async () =&gt; {
+    const response = await request(app)
+      .get('/api/protected');
+
+    expect(response.status).toBe(401);
+  });
+
+  it('should reject invalid token', async () =&gt; {
+    const response = await request(app)
+      .get('/api/protected')
+      .set('Authorization', 'Bearer invalid-token');
+
+    expect(response.status).toBe(401);
+  });
+
+  it('should reject expired token', async () =&gt; {
+    const expiredToken = jwt.sign(
+      { userId: '123', role: 'user' },
+      process.env.JWT_SECRET,
+      { expiresIn: '-1s' } // 已過期
+    );
+
+    const response = await request(app)
+      .get('/api/protected')
+      .set('Authorization', `Bearer ${expiredToken}`);
+
+    expect(response.status).toBe(401);
+  });
+});
+</code></pre>
+<hr />
+<h2 id="5-programmer-sub-agent">5. Programmer Sub-Agent 實現建議<a class="headerlink" href="#5-programmer-sub-agent" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 安全意識培養<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<p><strong>應具備的安全思維：</strong>
+1. <strong>默認拒絕（Deny by Default）</strong>：默認拒絕所有訪問，明確允許的才放行
+2. <strong>最小權限原則（Least Privilege）</strong>：只給予必要的最小權限
+3. <strong>防禦深度（Defense in Depth）</strong>：多層防護，不依賴單一安全措施
+4. <strong>失敗安全（Fail Secure）</strong>：安全措施失敗時應拒絕訪問，而非放行
+5. <strong>永不信任輸入（Never Trust Input）</strong>：所有輸入都需驗證和清理</p>
+<h3 id="52">5.2 代碼審查檢查清單<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<p><strong>認證相關：</strong>
+- [ ] 密碼是否使用強哈希算法（bcrypt/argon2/scrypt）？
+- [ ] JWT token 是否設置了合理的過期時間？
+- [ ] 是否實現了 refresh token 機制？
+- [ ] 敏感操作是否需要重新認證？
+- [ ] 是否實現了速率限制防止暴力破解？</p>
+<p><strong>授權相關：</strong>
+- [ ] 是否驗證了用戶對資源的訪問權限？
+- [ ] 是否檢查了用戶角色/權限？
+- [ ] 是否防止了水平/垂直權限提升？
+- [ ] 是否使用了白名單而非黑名單？</p>
+<p><strong>中間件相關：</strong>
+- [ ] 中間件執行順序是否正確？
+- [ ] 是否正確調用了 next()？
+- [ ] 是否處理了所有錯誤情況？
+- [ ] 是否洩露了敏感信息在錯誤消息中？</p>
+<h3 id="53">5.3 常見安全漏洞與防護<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>漏洞類型</th>
+<th>風險</th>
+<th>防護措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SQL 注入</td>
+<td>數據庫泄露、篡改</td>
+<td>使用參數化查詢、ORM</td>
+</tr>
+<tr>
+<td>XSS 跨站腳本</td>
+<td>竊取 session、執行惡意代碼</td>
+<td>輸出轉義、CSP</td>
+</tr>
+<tr>
+<td>CSRF 跨站請求偽造</td>
+<td>執行未授權操作</td>
+<td>CSRF Token、SameSite Cookie</td>
+</tr>
+<tr>
+<td>認證繞過</td>
+<td>未授權訪問</td>
+<td>強認證、嚴格授權檢查</td>
+</tr>
+<tr>
+<td>權限提升</td>
+<td>獲取更高權限</td>
+<td>嚴格的角色/權限驗證</td>
+</tr>
+<tr>
+<td>敏感信息洩露</td>
+<td>用戶數據暴露</td>
+<td>日志脫敏、錯誤處理</td>
+</tr>
+<tr>
+<td>不安全的直接對象引用</td>
+<td>訪問他人資源</td>
+<td>驗證資源所有權</td>
+</tr>
+<tr>
+<td>弱加密</td>
+<td>數據被破解</td>
+<td>使用標準加密算法</td>
+</tr>
+<tr>
+<td>配置錯誤</td>
+<td>系統暴露</td>
+<td>配置驗證、安全默認值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54">5.4 安全開發流程<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>需求分析階段</strong></li>
+<li>識別安全需求</li>
+<li>定義威威模型</li>
+<li>
+<p>確定合規要求</p>
+</li>
+<li>
+<p><strong>設計階段</strong></p>
+</li>
+<li>安全架構設計</li>
+<li>威威建模</li>
+<li>
+<p>安全模式選擇</p>
+</li>
+<li>
+<p><strong>編碼階段</strong></p>
+</li>
+<li>遵循安全編碼規範</li>
+<li>使用安全庫和框架</li>
+<li>
+<p>代碼審查</p>
+</li>
+<li>
+<p><strong>測試階段</strong></p>
+</li>
+<li>安全單元測試</li>
+<li>滲透測試</li>
+<li>
+<p>漏洞掃描</p>
+</li>
+<li>
+<p><strong>部署階段</strong></p>
+</li>
+<li>配置加固</li>
+<li>安全監控</li>
+<li>應急響應計劃</li>
+</ol>
+<hr />
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Analysis framework:</strong> Security &amp; Authentication Best Practices Analysis</li>
+<li><strong>Data sources:</strong> Industry-standard security practices, OWASP guidelines</li>
+<li><strong>Confidence:</strong> medium (comprehensive framework, but no direct code analysis)</li>
+<li><strong>Data quality:</strong> N/A (no source code provided)</li>
+<li><strong>Assumptions made:</strong></li>
+<li>Dashboard uses modern web frameworks (Express.js or similar)</li>
+<li>Backend is Node.js based</li>
+<li>Following REST API patterns</li>
+<li><strong>Limitations:</strong></li>
+<li>No access to actual Dashboard backend code</li>
+<li>Cannot provide specific code references to the project</li>
+<li>Recommendations are based on general best practices</li>
+<li><strong>Suggestions for improvement:</strong></li>
+<li>Provide access to Dashboard backend/middleware/ directory for specific analysis</li>
+<li>Share existing authentication implementation for gap analysis</li>
+<li>Document current security policies and threat model</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

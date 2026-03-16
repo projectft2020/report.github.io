@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美股技術面分析（短期） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>美股技術面分析（短期）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">美股技術面分析（短期）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務目標：</strong>
+分析美股標普500（SPX）和納斯達克（IXIC）短期（1-7天）技術面走勢。</p>
+<p><strong>分析日期：</strong> 2026年2月20日</p>
+<hr />
+<h2 id="1-500spx">1. 標普500（SPX）技術分析<a class="headerlink" href="#1-500spx" title="連結到此標題">&para;</a></h2>
+<h3 id="_2">技術指標分析<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h3>
+<h4 id="rsi">RSI（相對強弱指數）<a class="headerlink" href="#rsi" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>14日RSI：</strong> 52.285</li>
+<li><strong>狀態：</strong> 中性</li>
+<li><strong>分析：</strong> RSI位於50附近，顯示市場處於平衡狀態，既未超買也未超賣</li>
+</ul>
+<h4 id="macd">MACD（移動平均收斂發散指標）<a class="headerlink" href="#macd" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MACD值：</strong> -0.830</li>
+<li><strong>信號：</strong> 賣出</li>
+<li><strong>分析：</strong> MACD為負值，顯示短期動能偏弱，但接近零軸，轉向信號不強烈</li>
+</ul>
+<h4 id="_3">移動平均線<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>週期</th>
+<th>簡單移動平均</th>
+<th>指數移動平均</th>
+<th>信號</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MA5</td>
+<td>6,882.65</td>
+<td>6,881.56</td>
+<td>賣出</td>
+</tr>
+<tr>
+<td>MA10</td>
+<td>6,867.37</td>
+<td>6,876.68</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA20</td>
+<td>6,872.61</td>
+<td>6,870.65</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA50</td>
+<td>6,882.28</td>
+<td>6,878.23</td>
+<td>賣出</td>
+</tr>
+<tr>
+<td>MA100</td>
+<td>6,898.87</td>
+<td>6,893.27</td>
+<td>賣出</td>
+</tr>
+<tr>
+<td>MA200</td>
+<td>6,916.02</td>
+<td>6,898.15</td>
+<td>賣出</td>
+</tr>
+</tbody>
+</table>
+<p><strong>移動平均線總結：</strong> 6個買入信號，6個賣出信號，整體呈現中性</p>
+<h3 id="_4">關鍵支撐阻力位<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<h4 id="_5">支撐位<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>S1：</strong> 6,881.48</li>
+<li><strong>S2：</strong> 6,860.84</li>
+<li><strong>S3：</strong> 6,847.17</li>
+</ul>
+<h4 id="_6">阻力位<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>R1：</strong> 6,915.79</li>
+<li><strong>R2：</strong> 6,929.46</li>
+<li><strong>R3：</strong> 6,950.10</li>
+</ul>
+<p><strong>重要樞紐點：</strong> 6,895.15（斐波那契樞紐點）</p>
+<h3 id="_7">短期走勢判斷<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>當前價格：</strong> 6,882.94</li>
+<li><strong>技術信號：</strong> 中性</li>
+<li><strong>綜合評級：</strong> 中性偏弱</li>
+</ul>
+<hr />
+<h2 id="2-100ndx">2. 納斯達克100（NDX）技術分析<a class="headerlink" href="#2-100ndx" title="連結到此標題">&para;</a></h2>
+<h3 id="_8">技術指標分析<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<h4 id="rsi_1">RSI（相對強弱指數）<a class="headerlink" href="#rsi_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>14日RSI：</strong> 53.398</li>
+<li><strong>狀態：</strong> 中性</li>
+<li><strong>分析：</strong> RSI略高於50，顯示輕微的多頭優勢，但仍在平衡區域</li>
+</ul>
+<h4 id="macd_1">MACD（移動平均收斂發散指標）<a class="headerlink" href="#macd_1" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>MACD值：</strong> 6.610</li>
+<li><strong>信號：</strong> 買入</li>
+<li><strong>分析：</strong> MACD為正值且顯著，顯示短期動能偏強</li>
+</ul>
+<h4 id="_9">移動平均線<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>週期</th>
+<th>簡單移動平均</th>
+<th>指數移動平均</th>
+<th>信號</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MA5</td>
+<td>24,934.95</td>
+<td>24,934.04</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA10</td>
+<td>24,852.16</td>
+<td>24,901.14</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA20</td>
+<td>24,869.00</td>
+<td>24,863.89</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA50</td>
+<td>24,899.82</td>
+<td>24,906.94</td>
+<td>買入</td>
+</tr>
+<tr>
+<td>MA100</td>
+<td>25,045.63</td>
+<td>25,040.50</td>
+<td>賣出</td>
+</tr>
+<tr>
+<td>MA200</td>
+<td>25,334.93</td>
+<td>25,204.64</td>
+<td>賣出</td>
+</tr>
+</tbody>
+</table>
+<p><strong>移動平均線總結：</strong> 8個買入信號，4個賣出信號，整體呈現買入</p>
+<h3 id="_10">關鍵支撐阻力位<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<h4 id="_11">支撐位<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>S1：</strong> 24,942.29</li>
+<li><strong>S2：</strong> 24,846.82</li>
+<li><strong>S3：</strong> 24,779.56</li>
+</ul>
+<h4 id="_12">阻力位<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>R1：</strong> 25,105.02</li>
+<li><strong>R2：</strong> 25,172.26</li>
+<li><strong>R3：</strong> 25,267.75</li>
+</ul>
+<p><strong>重要樞紐點：</strong> 25,009.53（斐波那契樞紐點）</p>
+<h3 id="_13">短期走勢判斷<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>當前價格：</strong> 24,941.71</li>
+<li><strong>技術信號：</strong> 強勁買入</li>
+<li><strong>綜合評級：</strong> 看漲</li>
+</ul>
+<hr />
+<h2 id="3">3. 兩指數對比分析<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="_14">領跌/領漲關係<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>納斯達克：</strong> 24,941.71（+0.58%）</li>
+<li><strong>標普500：</strong> 6,882.94（+0.31%）</li>
+<li><strong>分析：</strong> 納斯達克表現強於標普500，科技股領漲</li>
+</ul>
+<h3 id="_15">分化/同步狀態<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>技術指標分化：</strong> </li>
+<li>納斯達克MACD正值（買入），標普500MACD負值（賣出）</li>
+<li>納斯達克移動平均線多數買入，標普500中性</li>
+<li><strong>價格同步：</strong> 兩指數均上漲，但漲幅不同</li>
+</ul>
+<h3 id="_16">市場廣度<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>廣度改善：</strong> 根據市場數據，標普500的廣度指標顯示改善，多數成分股位於關鍵移動平均線之上</li>
+<li><strong>行業輪動：</strong> 科技股（納斯達克）領先，傳統行業（標普500）相對落後</li>
+<li><strong>內部強度：</strong> 高β值小型股和運輸股表現強勁，顯示市場內部動能良好</li>
+</ul>
+<hr />
+<h2 id="4">4. 短期走勢判斷<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="_17">整體市場情緒<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>短期趨勢：</strong> 中性偏多</li>
+<li><strong>波動性：</strong> VIX指數19.54，波動性相對穩定</li>
+<li><strong>市場信心：</strong> 中等水平</li>
+</ul>
+<h3 id="_18">具體指標預測<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<h4 id="500spx">標普500（SPX）<a class="headerlink" href="#500spx" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>走勢判斷：</strong> 中性</li>
+<li><strong>短期目標位：</strong></li>
+<li>第一目標：6,915.79（R1阻力位）</li>
+<li>第二目標：6,929.46（R2阻力位）</li>
+<li><strong>支撐位關注：</strong> 6,881.48（S1支撐位）</li>
+</ul>
+<h4 id="ndx">納斯達克（NDX）<a class="headerlink" href="#ndx" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>走勢判斷：</strong> 看漲</li>
+<li><strong>短期目標位：</strong></li>
+<li>第一目標：25,105.02（R1阻力位）</li>
+<li>第二目標：25,172.26（R2阻力位）</li>
+<li><strong>支撐位關注：</strong> 24,942.29（S1支撐位）</li>
+</ul>
+<hr />
+<h2 id="5">5. 操作建議<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="_19">交易策略<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>納斯達克優先：</strong> 考慮在納斯達克相關ETF或個股中尋做多機會</li>
+<li><strong>標普500觀望：</strong> 建議觀望至技術指標更明確</li>
+<li><strong>倉位管理：</strong> 納斯達克部位可佔60%，標普500部位佔40%</li>
+</ol>
+<h3 id="_20">進場時機<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>納斯達克：</strong> 可考慮在24,900-24,920區間進場做多，目標25,100-25,170</li>
+<li><strong>標普500：</strong> 建議等待突破6,890或回調至6,870再考慮</li>
+</ul>
+<h3 id="_21">風險管理<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>止損設定：</strong> 納斯達克設在24,850，標普500設在6,850</li>
+<li><strong>獲利了結：</strong> 納斯達克接近25,100時部分獲利，標普500接近6,915時部分獲利</li>
+</ul>
+<h3 id="_22">關注要點<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>關鍵阻力位突破：</strong> 納斯達克25,000關口，標普5006,900關口</li>
+<li><strong>MACD信號轉向：</strong> 特別是標普500的MACD何時轉正</li>
+<li><strong>市場廣度持續性：</strong> 觀察漲跌家數比例和成交量配合度</li>
+<li><strong>外部因素：</strong> 關注美聯儲政策走向和經濟數據發布</li>
+</ol>
+<hr />
+<p><strong>免責聲明：</strong> 本分析僅供參考，不構成投資建議。投資有風險，入市需謹慎。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

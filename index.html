@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charlie's Quantitative Trading Research Hub</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .header .stats {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-bar {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .report-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            left: -2.3rem;
+            top: 2rem;
+            width: 1rem;
+            height: 1rem;
+            background: white;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .report-card.trend-trading::before {
+            border-color: #667eea;
+        }
+
+        .report-card.quant-evolve::before {
+            border-color: #764ba2;
+        }
+
+        .report-card.momentum::before {
+            border-color: #10b981;
+        }
+
+        .report-card.system::before {
+            border-color: #f59e0b;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .report-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-color);
+            flex: 1;
+        }
+
+        .report-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .report-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .tag.trend-trading {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .tag.quant-evolve {
+            background: #ede9fe;
+            color: #6b21a8;
+        }
+
+        .tag.momentum {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tag.system {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .report-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .report-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            color: #1d4ed8;
+            gap: 0.75rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .timeline {
+                padding-left: 1rem;
+            }
+
+            .report-card::before {
+                left: -1.3rem;
+                top: 1.5rem;
+                width: 0.75rem;
+                height: 0.75rem;
+            }
+
+            .report-header {
+                flex-direction: column;
+            }
+
+            .report-date {
+                align-self: flex-start;
+            }
+
+            .report-meta {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦄 Charlie's Research Hub</h1>
+            <p class="subtitle">量化交易研究報告中心</p>
+            <p class="stats">
+                📊 <strong>286 份</strong> 研究報告 • 
+                🎯 <strong>5 個</strong> 專案領域 • 
+                📈 <strong>持續更新</strong>
+            </p>
+        </div>
+
+        <div class="filter-bar">
+            <button class="filter-btn active" onclick="filterReports('all')">全部</button>
+            <button class="filter-btn" onclick="filterReports('trend-trading')">趨勢交易</button>
+            <button class="filter-btn" onclick="filterReports('quant-evolve')">QuantEvolve</button>
+            <button class="filter-btn" onclick="filterReports('momentum')">動能策略</button>
+            <button class="filter-btn" onclick="filterReports('system')">系統優化</button>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <!-- Reports will be loaded here -->
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; font-style: italic;">
+                ⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。
+            </p>
+        </div>
+    </div>
+
+    <script>
+const reports = [
+            {
+                id: 'x001-research',
+                title: '可解釋人工智慧在交易策略透明化中的應用',
+                description: '',
+                date: '2026-02-23',
+                category: 'ai',
+                tags: ['ai'],
+                file: 'x001-research.html'
+            },
+            {
+                id: 'x001-explainable-ai',
+                title: '可解釋人工智慧在交易策略透明化中的應用',
+                description: '',
+                date: '2026-02-21',
+                category: 'ai',
+                tags: ['ai'],
+                file: 'x001-explainable-ai.html'
+            },
+            {
+                id: 'w008-final-report',
+                title: '優化動能策略完整報告',
+                description: '策略優化、回測驗證與改進建議 - 年化回報 14.65%，夏普比率 18.58',
+                date: '2026-02-20',
+                category: 'system',
+                tags: ['system'],
+                file: 'w008-final-report.html'
+            },
+            {
+                id: 'w007-strategy-verification',
+                title: '動能策略驗證報告',
+                description: '策略代碼驗證與初步回測結果',
+                date: '2026-02-20',
+                category: 'system',
+                tags: ['system'],
+                file: 'w007-strategy-verification.html'
+            },
+            {
+                id: 'v001-transformer-volatility',
+                title: '基於Transformer架構和注意力機制的波動率預測研究',
+                description: '',
+                date: '2026-02-21',
+                category: 'ml',
+                tags: ['ml'],
+                file: 'v001-transformer-volatility.html'
+            },
+            {
+                id: 'v001-research',
+                title: '基於Transformer架構和注意力機制的波動率預測研究',
+                description: '',
+                date: '2026-02-23',
+                category: 'ml',
+                tags: ['ml'],
+                file: 'v001-research.html'
+            },
+            {
+                id: 'top_quant_hedge_funds',
+                title: '🏆 全球頂尖量化對沖基金研究',
+                description: '',
+                date: '2026-02-18',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 'top_quant_hedge_funds.html'
+            },
+            {
+                id: 'test',
+                title: 'Test',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 'test.html'
+            },
+            {
+                id: 'test-progressive-20260220',
+                title: 'Research Task: Test progressive research protocol with checkpoint mechanism',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 'test-progressive-20260220.html'
+            },
+            {
+                id: 't006-ml-trend',
+                title: '完整趨勢交易系統整合',
+                description: '六層系統架構：數據處理 → 策略分析 → 風險管理 → 執行 → 監控 → 優化',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't006-ml-trend.html'
+            },
+            {
+                id: 't005-tail-hedge',
+                title: '趨勢跟隮 + 尾部風險對沖',
+                description: '看跌期權、VIX 期權、CPPI、Delta 對沖等四種對沖方法與動態對沖比例調整',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't005-tail-hedge.html'
+            },
+            {
+                id: 't004-volatility-adaptive',
+                title: '波動率適應性趨勢跟隮',
+                description: '四種波動率測量方法 + 五級波動率分類 + Kelly 公式集成',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't004-volatility-adaptive.html'
+            },
+            {
+                id: 't003-robust-gating-mechanism',
+                title: '魯棒門控機制教學報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't003-robust-gating-mechanism.html'
+            },
+            {
+                id: 't003-failure-monitor',
+                title: '趨勢策略失效監控系統',
+                description: '四大失效模式監控 + 四級預警系統 + 自動應對措施',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't003-failure-monitor.html'
+            },
+            {
+                id: 't002-weighted-kl-divergence',
+                title: '加權 KL 散度教學報告 - 馬爾可夫鏈檢驗',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't002-weighted-kl-divergence.html'
+            },
+            {
+                id: 't002-multi-timeframe',
+                title: '多時間框架趨勢確認策略',
+                description: '三層結構（D1/H4/H1）+ 多層驗證機制 + 動態倉位管理',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't002-multi-timeframe.html'
+            },
+            {
+                id: 't001-strength-score',
+                title: '趨勢強度評分系統',
+                description: '綜合 ADX、MACD、趨勢線分析算法與智能信號過濾',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't001-strength-score.html'
+            },
+            {
+                id: 't001-multi-period-direct-projection',
+                title: '多期直接投影教學報告 - 第一性原理與實作應用',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 't001-multi-period-direct-projection.html'
+            },
+            {
+                id: 'st04-backtest-validation',
+                title: '統計套利回測驗證',
+                description: '統計套利策略完整回測與驗證結果',
+                date: '2026-02-20',
+                category: 'statistical-arb',
+                tags: ['statistical-arb'],
+                file: 'st04-backtest-validation.html'
+            },
+            {
+                id: 'st003-portfolio',
+                title: '統計套利組合管理',
+                description: '多配對交易組合構建與風險管理',
+                date: '2026-02-20',
+                category: 'statistical-arb',
+                tags: ['statistical-arb'],
+                file: 'st003-portfolio.html'
+            },
+            {
+                id: 'st002-pairs-trading',
+                title: '配對交易策略實作',
+                description: '配對交易策略完整實現與回測驗證',
+                date: '2026-02-20',
+                category: 'statistical-arb',
+                tags: ['statistical-arb'],
+                file: 'st002-pairs-trading.html'
+            },
+            {
+                id: 'st001-cointegration',
+                title: '協整關係檢測與應用',
+                description: '統計套利核心：協整關係檢測與交易對構建',
+                date: '2026-02-20',
+                category: 'statistical-arb',
+                tags: ['statistical-arb'],
+                file: 'st001-cointegration.html'
+            },
+            {
+                id: 'spec',
+                title: 'Market Score V3 策略 - Dashboard 實現規格',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 'spec.html'
+            },
+            {
+                id: 'scout-1771789383872',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 'scout-1771789383872.html'
+            },
+            {
+                id: 's105c',
+                title: 'QA/Tester Sub-Agent Types Exploration',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's105c.html'
+            },
+            {
+                id: 's103b',
+                title: 'Sub-Agent 管理系統需求設計',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's103b.html'
+            },
+            {
+                id: 's103b-management-system-requirements',
+                title: 'Sub-Agent 管理系統需求設計',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's103b-management-system-requirements.html'
+            },
+            {
+                id: 's102b',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's102b.html'
+            },
+            {
+                id: 's101d-review-report',
+                title: 'Architect Review Report',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's101d-review-report.html'
+            },
+            {
+                id: 's101c',
+                title: 'Dashboard 測試策略實現',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's101c.html'
+            },
+            {
+                id: 's101c-implementation-report',
+                title: 'Dashboard 測試策略實現',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's101c-implementation-report.html'
+            },
+            {
+                id: 's101b',
+                title: 'Dashboard 策略設計（測試用）',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's101b.html'
+            },
+            {
+                id: 's004-drafts',
+                title: 'Threads 第一週 14 則貼文草稿',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's004-drafts.html'
+            },
+            {
+                id: 's003-topics',
+                title: '量化交易社群熱門話題研究',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's003-topics.html'
+            },
+            {
+                id: 's003-dynamic-risk-control',
+                title: '非傳統止損策略研究',
+                description: '動態風控系統（年化淨收益 +11.1%）- 漸進式降風險 vs 傳統止損',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's003-dynamic-risk-control.html'
+            },
+            {
+                id: 's002-scout-research',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-21',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's002-scout-research.html'
+            },
+            {
+                id: 's002-fat-tail-risks',
+                title: '肥尾市場下傳統風險指標失效研究',
+                description: 'VaR/CVaR/標準差失效分析與替代風險度量方法',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's002-fat-tail-risks.html'
+            },
+            {
+                id: 's002-calendar',
+                title: 'Threads 第一週發文內容日曆',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's002-calendar.html'
+            },
+            {
+                id: 's001-scout-scan',
+                title: 'Scout Scan Report - Quantitative Trading Research Topics',
+                description: '',
+                date: '2026-02-21',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's001-scout-scan.html'
+            },
+            {
+                id: 's001-research',
+                title: 'Threads 社群經營策略研究報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's001-research.html'
+            },
+            {
+                id: 's001-llm-sentiment',
+                title: 'Research Report: Real-Time Sentiment Analysis with Large Language Models for Financial Markets',
+                description: '',
+                date: '2026-02-21',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's001-llm-sentiment.html'
+            },
+            {
+                id: 's001-distribution-metrics',
+                title: '收益分佈作為策略評估指標研究',
+                description: '三維度評估框架（偏度 + 峰度 + 肥尾指數）- 替代 Sharpe Ratio 的風險度量方法',
+                date: '2026-02-20',
+                category: 'trend-trading',
+                tags: ['trend-trading'],
+                file: 's001-distribution-metrics.html'
+            },
+            {
+                id: 'r003-trend-integration',
+                title: '趨勢強度集成',
+                description: 'TrendStrengthIntegrator + RegimeTrendHybrid + BayesianTrendDetector 類實現',
+                date: '2026-02-20',
+                category: 'risk-management',
+                tags: ['risk-management'],
+                file: 'r003-trend-integration.html'
+            },
+            {
+                id: 'r002-momentum-backtest',
+                title: '基礎動能策略回測最終報告',
+                description: '10/60/200 MA 動能策略完整回測結果 - 15年總回報 674.48%',
+                date: '2026-02-20',
+                category: 'risk-management',
+                tags: ['risk-management'],
+                file: 'r002-momentum-backtest.html'
+            },
+            {
+                id: 'r002-feature-engineering',
+                title: '狀態識別特徵工程',
+                description: '80+ 種特徵設計（價格、波動率、趨勢、情緒、宏觀、關聯性）',
+                date: '2026-02-20',
+                category: 'risk-management',
+                tags: ['risk-management'],
+                file: 'r002-feature-engineering.html'
+            },
+            {
+                id: 'r001-research',
+                title: 'R001 Research',
+                description: '',
+                date: '2026-02-23',
+                category: 'risk-management',
+                tags: ['risk-management'],
+                file: 'r001-research.html'
+            },
+            {
+                id: 'r001-model-selection',
+                title: 'Regime Detection 模型選擇',
+                description: 'Transformer 性能最佳（RMSE 41.87），推薦 HMM + Bayesian Change Point 混合模型',
+                date: '2026-02-20',
+                category: 'risk-management',
+                tags: ['risk-management'],
+                file: 'r001-model-selection.html'
+            },
+            {
+                id: 'q011',
+                title: '跨市場最終整合報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q011.html'
+            },
+            {
+                id: 'q010',
+                title: '原物料期貨綜合分析報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q010.html'
+            },
+            {
+                id: 'q009',
+                title: '指數期貨綜合分析報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q009.html'
+            },
+            {
+                id: 'q008',
+                title: '美股綜合分析報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q008.html'
+            },
+            {
+                id: 'q007',
+                title: '台股綜合分析報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q007.html'
+            },
+            {
+                id: 'q005-final-report',
+                title: 'QuantEvolve 多智能體演化框架完整報告',
+                description: '多智能體演化策略發現機制 - 技術可行性評估與實作路徑',
+                date: '2026-02-20',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q005-final-report.html'
+            },
+            {
+                id: 'q004b-us-mid-term-technical',
+                title: '美股技術面分析（中期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q004b-us-mid-term-technical.html'
+            },
+            {
+                id: 'q004a-us-short-term-technical',
+                title: '美股技術面分析（短期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q004a-us-short-term-technical.html'
+            },
+            {
+                id: 'q004-backtest',
+                title: 'QuantEvolve 回測驗證',
+                description: '歷史數據驗證演化策略有效性',
+                date: '2026-02-20',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q004-backtest.html'
+            },
+            {
+                id: 'q003b-tw-mid-term-risk',
+                title: '台股中期風險評估報告（1-3個月）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q003b-tw-mid-term-risk.html'
+            },
+            {
+                id: 'q003a-tw-short-term-risk',
+                title: '台股短期風險評估報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q003a-tw-short-term-risk.html'
+            },
+            {
+                id: 'q003-trajectory-visualizations',
+                title: '關鍵軌跡可視化範例',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q003-trajectory-visualizations.html'
+            },
+            {
+                id: 'q003-prototype',
+                title: 'QuantEvolve 原型實作',
+                description: '原型系統開發與策略演化能力測試',
+                date: '2026-02-20',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q003-prototype.html'
+            },
+            {
+                id: 'q002b-tw-mid-term-sentiment',
+                title: '台股市場情緒分析（中期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002b-tw-mid-term-sentiment.html'
+            },
+            {
+                id: 'q002a-tw-short-term-sentiment',
+                title: '台股市場情緒分析（短期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002a-tw-short-term-sentiment.html'
+            },
+            {
+                id: 'q002-opt-3-final-memory',
+                title: 'MEMORY.md - My Long-Term Memory',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002-opt-3-final-memory.html'
+            },
+            {
+                id: 'q002-opt-3-automation',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002-opt-3-automation.html'
+            },
+            {
+                id: 'q002-opt-2-tags-block',
+                title: 'Q002 Opt 2 Tags Block',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002-opt-2-tags-block.html'
+            },
+            {
+                id: 'q002-opt-1-topics',
+                title: 'Q002 Opt 1 Topics',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002-opt-1-topics.html'
+            },
+            {
+                id: 'q002-framework-design',
+                title: 'QuantEvolve 策略框架設計',
+                description: '智能體設計、適應度函數、演化算法架構',
+                date: '2026-02-20',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q002-framework-design.html'
+            },
+            {
+                id: 'q001b-tw-mid-term-technical',
+                title: '台股技術面分析（中期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q001b-tw-mid-term-technical.html'
+            },
+            {
+                id: 'q001a-tw-short-term-technical',
+                title: '台股技術面分析（短期）',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q001a-tw-short-term-technical.html'
+            },
+            {
+                id: 'q001-vector-trajectory-script',
+                title: '向量軌跡腳本實現報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q001-vector-trajectory-script.html'
+            },
+            {
+                id: 'q001-research',
+                title: '量子儲備計算在市場狀態檢測中的應用研究',
+                description: '',
+                date: '2026-02-23',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q001-research.html'
+            },
+            {
+                id: 'q001-paper-analysis',
+                title: 'QuantEvolve 論文深度分析',
+                description: '多智能體演化機制與自動化策略發現原理解析',
+                date: '2026-02-20',
+                category: 'quant-evolve',
+                tags: ['quant-evolve'],
+                file: 'q001-paper-analysis.html'
+            },
+            {
+                id: 'pj004-backtest-validation',
+                title: '崩盤預測模型回測驗證',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'pj004-backtest-validation.html'
+            },
+            {
+                id: 'pj003-crash-prediction-model',
+                title: '崩盤預測模型',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'pj003-crash-prediction-model.html'
+            },
+            {
+                id: 'pj002-market-stress-indicators',
+                title: '市場壓力指標系統設計',
+                description: '基於 Black Monday 分析的四維度市場壓力監控系統，包含 15 個核心指標',
+                date: '2026-02-20',
+                category: 'system',
+                tags: ['system'],
+                file: 'pj002-market-stress-indicators.html'
+            },
+            {
+                id: 'pj001-black-monday-analysis',
+                title: 'Black Monday 事件研究',
+                description: '1987 年股市崩盤深度分析，歷史事件研究與啟示',
+                date: '2026-02-20',
+                category: 'system',
+                tags: ['system'],
+                file: 'pj001-black-monday-analysis.html'
+            },
+            {
+                id: 'p005-risk-adjustment-test',
+                title: '動態風險調整機制測試報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'p005-risk-adjustment-test.html'
+            },
+            {
+                id: 'p004-montecarlo-test',
+                title: '蒙特卡洛模擬測試報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'p004-montecarlo-test.html'
+            },
+            {
+                id: 'p003-comparison-test',
+                title: 'Matrix Dashboard 策略對比功能測試報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'p003-comparison-test.html'
+            },
+            {
+                id: 'p002-backtest-test',
+                title: 'Matrix Dashboard 基礎回測功能測試報告',
+                description: '',
+                date: '2026-02-23',
+                category: 'system',
+                tags: ['system'],
+                file: 'p002-backtest-test.html'
+            },
+            {
+                id: 'momentum_strategy_foundation',
+                title: '基礎動能策略 - 第一週研究報告',
+                description: '',
+                date: '2026-02-17',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'momentum_strategy_foundation.html'
+            },
+            {
+                id: 'matrix_system_integration',
+                title: '⚙️ Matrix 系統整合報告',
+                description: '',
+                date: '2026-02-18',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'matrix_system_integration.html'
+            },
+            {
+                id: 'm004-new-risk-metric',
+                title: '新型風險指標設計',
+                description: '替代傳統 Sharpe Ratio 的綜合風險度量指標開發',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm004-new-risk-metric.html'
+            },
+            {
+                id: 'm003-benchmark-comparison',
+                title: '動能策略基準比較分析',
+                description: '與傳統風險指標和基準策略的綜合比較研究',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm003-benchmark-comparison.html'
+            },
+            {
+                id: 'm002-risk-left-tail-analysis',
+                title: '動能策略左尾風險分析',
+                description: '動能策略下行風險與左尾肥尾效應深度分析',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm002-risk-left-tail-analysis.html'
+            },
+            {
+                id: 'm002-risk-assessment',
+                title: '動能策略風險評估系統',
+                description: '基於收益分佈的動能策略綜合風險評估框架',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm002-risk-assessment.html'
+            },
+            {
+                id: 'm002-ml-multifactor-cn',
+                title: '机器学习增强多因子模型研究报告',
+                description: '',
+                date: '2026-02-21',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm002-ml-multifactor-cn.html'
+            },
+            {
+                id: 'm002-memory-compression-20260220',
+                title: '2026-02-20 (Compressed)',
+                description: '',
+                date: '2026-02-23',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm002-memory-compression-20260220.html'
+            },
+            {
+                id: 'm002-automation-report',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-23',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm002-automation-report.html'
+            },
+            {
+                id: 'm001-research',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-23',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm001-research.html'
+            },
+            {
+                id: 'm001-momentum-distribution',
+                title: '動能策略收益分佈分析',
+                description: '動能策略偏度、峰度、肥尾指數計算與風險評估',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm001-momentum-distribution.html'
+            },
+            {
+                id: 'm001-ml-multifactor',
+                title: 'Task Output',
+                description: '',
+                date: '2026-02-21',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm001-ml-multifactor.html'
+            },
+            {
+                id: 'm001-memory-compression-20260219',
+                title: 'Task: 壓縮 2026-02-19.md',
+                description: '',
+                date: '2026-02-23',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm001-memory-compression-20260219.html'
+            },
+            {
+                id: 'm001-advanced-metrics',
+                title: '高級績效指標研究',
+                description: 'Omega Ratio、Conditional Sharpe Ratio、Kappa Ratio、Expected Shortfall 完整研究',
+                date: '2026-02-20',
+                category: 'momentum',
+                tags: ['momentum'],
+                file: 'm001-advanced-metrics.html'
+            },
+            {
+                id: 'k004-final-report',
+                title: '協偏度綜合研究報告',
+                description: '偏度因子、協偏度組合、風險調整指標的完整研究總結',
+                date: '2026-02-20',
+                category: 'skewness',
+                tags: ['skewness'],
+                file: 'k004-final-report.html'
+            },
+            {
+                id: 'k003-risk-adjusted-metrics',
+                title: '風險調整指標評估',
+                description: '完整的風險調整指標評估框架（11+ 指標），推薦 SKTASR 為主要指標',
+                date: '2026-02-20',
+                category: 'skewness',
+                tags: ['skewness'],
+                file: 'k003-risk-adjusted-metrics.html'
+            },
+            {
+                id: 'k002-coskewness-portfolio',
+                title: '協偏度組合構建',
+                description: '協偏度優化顯著降低尾部風險（1% VaR 改善 40%，最大回撤減少 25-35%）',
+                date: '2026-02-20',
+                category: 'skewness',
+                tags: ['skewness'],
+                file: 'k002-coskewness-portfolio.html'
+            },
+            {
+                id: 'k001-skewness-factor',
+                title: '偏度因子實作與回測',
+                description: '偏度因子計算與回測框架（年化收益 11.5%，夏普比率 0.76）',
+                date: '2026-02-20',
+                category: 'skewness',
+                tags: ['skewness'],
+                file: 'k001-skewness-factor.html'
+            },
+            {
+                id: 'h004',
+                title: 'Research Task: OpenClaw 系統效能優化：分析當前瓶頸並提供具體優化建議，包括架構、代碼、資源管理等各方面',
+                description: '',
+                date: '2026-02-23',
+                category: 'hft',
+                tags: ['hft'],
+                file: 'h004.html'
+            },
+            {
+                id: 'h002-dynamic-hedge-decision',
+                title: '動態對沖決策機制',
+                description: '智能對沖系統 - 漸進式對沖比例調整與四種對沖方式整合',
+                date: '2026-02-20',
+                category: 'hft',
+                tags: ['hft'],
+                file: 'h002-dynamic-hedge-decision.html'
+            },
+        ];
+
+        function renderReports(filter = 'all') {
+            const timeline = document.getElementById('timeline');
+            const filteredReports = filter === 'all' 
+                ? reports 
+                : reports.filter(r => r.category === filter);
+
+            if (filteredReports.length === 0) {
+                timeline.innerHTML = `
+                    <div class="empty-state">
+                        <p>🔍 沒有找到符合篩選條件的報告</p>
+                    </div>
+                `;
+                return;
+            }
+
+            timeline.innerHTML = filteredReports.map(report => `
+                <div class="report-card ${report.category}" onclick="window.location.href='${report.file}'">
+                    <div class="report-header">
+                        <h3 class="report-title">${report.title}</h3>
+                        <span class="report-date">📅 ${report.date}${report.time ? " " + report.time : ""}</span>
+                    </div>
+                    <div class="report-tags">
+                        ${report.tags.map(tag => `<span class="tag ${report.category}">${tag}</span>`).join('')}
+                    </div>
+                    <p class="report-description">${report.description}</p>
+                    <div class="report-meta">
+                        <span>📁 ${report.category}</span>
+                        <span>📄 ${report.id}</span>
+                    </div>
+                    <a href="${report.file}" class="read-more" onclick="event.stopPropagation()">
+                        閱讀完整報告 →
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function filterReports(category) {
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === getCategoryName(category)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            renderReports(category);
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'all': '全部',
+                'trend-trading': '趨勢交易',
+                'quant-evolve': 'QuantEvolve',
+                'momentum': '動能策略',
+                'system': '系統優化'
+            };
+            return names[category] || category;
+        }
+
+        // Initial render
+        renderReports('all');
+    </script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Combinatorial Multi-Armed Bandit Framework Research Report - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Multi-Agent Combinatorial Multi-Armed Bandit Framework Research Report</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="multi-agent-combinatorial-multi-armed-bandit-framework-research-report">Multi-Agent Combinatorial Multi-Armed Bandit Framework Research Report<a class="headerlink" href="#multi-agent-combinatorial-multi-armed-bandit-framework-research-report" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s18
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-23T07:40:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report provides a comprehensive analysis of multi-agent combinatorial multi-armed bandit (MA-CMAB) frameworks, focusing on theoretical foundations, multi-agent coordination mechanisms, combinatorial optimization approaches, regret analysis, and practical applications. The research synthesizes recent advances from 2024-2026 alongside foundational work from 2013-2020, presenting a unified view of this rapidly evolving field.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Recent Breakthrough (2026)</strong> — Multi-agent combinatorial bandit framework for submodular welfare problems achieves 𝒪̃(T^(2/3)) regret against (1-1/e) approximation benchmark under full-bandit feedback | Source: arXiv:2602.16183</p>
+</li>
+<li>
+<p><strong>Federated Learning Integration (2024)</strong> — First general multi-agent framework for adapting combinatorial offline algorithms to federated learning settings with communication efficiency guarantees | Source: arXiv:2405.05950</p>
+</li>
+<li>
+<p><strong>Foundational Framework (2013)</strong> — General CMAB framework with CUCB algorithm achieving O(log n) regret for nonlinear reward structures | Source: ICML 2013</p>
+</li>
+<li>
+<p><strong>Game-Theoretic Coordination (2020)</strong> — Multi-agent Thompson sampling with sparse neighborhood structures achieves low-order polynomial regret in agent action spaces | Source: Nature Scientific Reports</p>
+</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="1-theoretical-foundations">1. Theoretical Foundations<a class="headerlink" href="#1-theoretical-foundations" title="連結到此標題">&para;</a></h3>
+<h4 id="11-multi-agent-multi-armed-bandit-mamab-definition">1.1 Multi-Agent Multi-Armed Bandit (MAMAB) Definition<a class="headerlink" href="#11-multi-agent-multi-armed-bandit-mamab-definition" title="連結到此標題">&para;</a></h4>
+<p>A MAMAB is formally defined as a tuple ⟨𝒟,𝒜,f⟩ where:
+- <strong>𝒟</strong>: Set of m enumerated agents, factorized into ρ (possibly overlapping) subsets
+- <strong>𝒜</strong>: Set of joint actions, 𝒜 = 𝒜₁ × ... × 𝒜ₘ (Cartesian product of individual action sets)
+- <strong>f</strong>: Stochastic global reward function, decomposed into ρ local reward functions fᵉ such that f(𝐚) = Σᵉ₌₁ᵖ fᵉ(𝐚ᵉ)</p>
+<h4 id="12-coordination-graph-structure">1.2 Coordination Graph Structure<a class="headerlink" href="#12-coordination-graph-structure" title="連結到此標題">&para;</a></h4>
+<p>The dependencies between agents and reward functions are described by a coordination graph G = ⟨𝒟,{fᵉ}ᵉ₌₁ᵖ, E⟩, where an edge ⟨i,fᵉ⟩ ∈ E exists if and only if agent i influences component fᵉ. This sparse structure is crucial for tractability in multi-agent settings.</p>
+<h4 id="13-submodular-welfare-extension-2026">1.3 Submodular Welfare Extension (2026)<a class="headerlink" href="#13-submodular-welfare-extension-2026" title="連結到此標題">&para;</a></h4>
+<p>The most recent extension considers the Submodular Welfare Problem (SWP), where:
+- Items are partitioned among agents with monotone submodular utilities
+- The objective is to maximize total welfare under bandit feedback
+- Actions are partitions under full-bandit feedback with non-communicating agents
+- Agents are coupled through shared allocation constraints</p>
+<h3 id="2-multi-agent-coordination">2. Multi-Agent Coordination<a class="headerlink" href="#2-multi-agent-coordination" title="連結到此標題">&para;</a></h3>
+<h4 id="21-non-communicating-agent-coordination">2.1 Non-Communicating Agent Coordination<a class="headerlink" href="#21-non-communicating-agent-coordination" title="連結到此標題">&para;</a></h4>
+<p>Recent work (2026) explores settings where agents are non-communicating but must coordinate through shared allocation constraints. The key innovation is an explore-then-commit strategy with randomized assignments that achieves 𝒪̃(T^(2/3)) regret against a (1-1/e) benchmark.</p>
+<p><strong>Algorithm Components:</strong>
+- <strong>Exploration Phase</strong>: m = ⌈δ^(2/3) T^(2/3) M^(2/3) (log T)^(1/3)/(2η^(2/3))⌉ rounds
+- <strong>Exploitation Phase</strong>: Commit to optimal partition S = {s₁, ..., sₘ}
+- <strong>Randomized Assignment</strong>: Approximates continuous-greedy trajectory via adaptive sampling</p>
+<h4 id="22-communicating-agent-coordination">2.2 Communicating Agent Coordination<a class="headerlink" href="#22-communicating-agent-coordination" title="連結到此標題">&para;</a></h4>
+<p>Federated approaches (2024) enable communication between agents at specific intervals, providing:
+- Linear speedup with increasing number of communicating agents
+- Communication-efficient protocols with 𝒪̃(ψ T^(β/(β+1))) rounds
+- Transformation from offline resilient (α-ε)-approximation algorithms to online multi-agent algorithms</p>
+<h4 id="23-sparse-neighborhood-coordination">2.3 Sparse Neighborhood Coordination<a class="headerlink" href="#23-sparse-neighborhood-coordination" title="連結到此標題">&para;</a></h4>
+<p>The MATS framework (2020) exploits loose couplings through:
+- <strong>Thompson Sampling</strong>: Bayesian approach with posterior sampling over local means
+- <strong>Variable Elimination</strong>: Efficient computation of optimal joint arms without full enumeration
+- <strong>Probabilistic Matching</strong>: Decision strategy matching probability of arm optimality</p>
+<h3 id="3-combinatorial-optimization">3. Combinatorial Optimization<a class="headerlink" href="#3-combinatorial-optimization" title="連結到此標題">&para;</a></h3>
+<h4 id="31-offline-to-online-reduction">3.1 Offline-to-Online Reduction<a class="headerlink" href="#31-offline-to-online-reduction" title="連結到此標題">&para;</a></h4>
+<p>A unified framework for adapting offline algorithms to online settings:</p>
+<p><strong>Key Steps:</strong>
+1. <strong>Resilience Guarantee</strong>: Offline algorithm must be (α,δ,η)-resilient under noisy oracle access
+2. <strong>Empirical Estimation</strong>: Collect m samples for each explored action
+3. <strong>Robust Transfer</strong>: Under concentration bounds, offline guarantees transfer to online setting
+4. <strong>Regret Bound</strong>: Achieves 𝒪(δ^(2/3) η^(1/3) C^(2/3) T^(2/3) log(T)^(1/3))</p>
+<h4 id="32-continuous-greedy-for-submodular-welfare">3.2 Continuous Greedy for Submodular Welfare<a class="headerlink" href="#32-continuous-greedy-for-submodular-welfare" title="連結到此標題">&para;</a></h4>
+<p>The continuous greedy algorithm achieves optimal (1-1/e) approximation for submodular welfare maximization:
+- <strong>Fractional Solution</strong>: Operates in matroid polytope 𝒫(ℳ) = {y ∈ [0,1]^(M×N): Σᵢ₌₁ᴹ yᵢⱼ ≤ 1 ∀j ∈ Q}
+- <strong>Marginal Estimation</strong>: ωᵢⱼ(t) ≈ 𝔼[wᵢ(Rᵢ(t) ∪ {j}) - wᵢ(Rᵢ(t))]
+- <strong>Pipage Rounding</strong>: Converts fractional solutions to integral solutions while preserving approximation guarantees</p>
+<h4 id="33-oracle-complexity-and-resilience">3.3 Oracle Complexity and Resilience<a class="headerlink" href="#33-oracle-complexity-and-resilience" title="連結到此標題">&para;</a></h4>
+<p>The continuous greedy algorithm under noisy oracle access is (α,δ,η)-resilient with:
+- <strong>Approximation Factor</strong>: α = 1-1/e
+- <strong>Robustness Parameter</strong>: δ = (4MN + 2M) for M agents and N items
+- <strong>Oracle Complexity</strong>: η = (MN)^⁸</p>
+<h3 id="4-regret-analysis">4. Regret Analysis<a class="headerlink" href="#4-regret-analysis" title="連結到此標題">&para;</a></h3>
+<h4 id="41-regret-definitions">4.1 Regret Definitions<a class="headerlink" href="#41-regret-definitions" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Expected Cumulative Regret</strong>: 𝔼[R(T,π)] = 𝔼[Σₜ₌₁ᵀ (μ(𝐚₊) - μ(𝐚ₜ))]</li>
+<li><strong>α-Regret</strong>: 𝔼[ℛ(T)] = αT f(OPT) - 𝔼[Σₜ₌₁ᵀ fₜ(𝐴ₜ)]</li>
+<li><strong>Bayesian Regret</strong>: 𝔼[R(T,π)] ≤ √(32σ²ÃρT log(δ⁻¹)) + 2ÃT²δ</li>
+</ul>
+<h4 id="42-key-regret-bounds">4.2 Key Regret Bounds<a class="headerlink" href="#42-key-regret-bounds" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Regret Bound</th>
+<th>Conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CUCB (2013)</strong></td>
+<td>O(log n)</td>
+<td>Semi-bandit feedback, (α,β)-approximation oracle</td>
+</tr>
+<tr>
+<td><strong>MATS (2020)</strong></td>
+<td>O(√(σ²ÃρT log(ÃT)))</td>
+<td>σ-subgaussian rewards, sparse coordination graph</td>
+</tr>
+<tr>
+<td><strong>Federated (2024)</strong></td>
+<td>𝒪̃(m^(-1/(3+β)) ψ^(1/(3+β)) T^((2+β)/(3+β)))</td>
+<td>m communicating agents</td>
+</tr>
+<tr>
+<td><strong>SWP (2026)</strong></td>
+<td>𝒪̃(T^(2/3))</td>
+<td>Full-bandit feedback, (1-1/e)-approximation</td>
+</tr>
+</tbody>
+</table>
+<h4 id="43-concentration-and-clean-event-analysis">4.3 Concentration and Clean Event Analysis<a class="headerlink" href="#43-concentration-and-clean-event-analysis" title="連結到此標題">&para;</a></h4>
+<p>Regret analysis relies on concentration inequalities:
+- <strong>Hoeffding's Inequality</strong>: Binds sample means around true means
+- <strong>Union Bound</strong>: Extends to multiple actions and time steps
+- <strong>Clean Event</strong>: ℰ = ⋂ⱼ₌₁ᵐ {|f̄(Sⱼ) - f(Sⱼ)| &lt; rad} with P(ℰ) ≥ 1 - 2η/T</p>
+<h3 id="5-algorithmic-approaches">5. Algorithmic Approaches<a class="headerlink" href="#5-algorithmic-approaches" title="連結到此標題">&para;</a></h3>
+<h4 id="51-explore-then-commit-etc-strategies">5.1 Explore-Then-Commit (ETC) Strategies<a class="headerlink" href="#51-explore-then-commit-etc-strategies" title="連結到此標題">&para;</a></h4>
+<p><strong>Algorithm 1: Submodular Welfare MA-CMAB</strong></p>
+<pre><code>Input: Horizon T, resilience parameters (α,δ,η)
+1. m ← ⌈δ^(2/3) T^(2/3) M^(2/3) (log T)^(1/3)/(2η^(2/3))⌉
+2. Exploration Phase:
+   - For each action S, play m times
+   - Compute empirical means w̄ᵢ(sᵢ) = (1/m) Σₖ₌₁ᵐ wᵢ,ⱼ(sᵢ)
+   - Return f̄(S) = Σᵢ₌₁ᴹ w̄ᵢ(sᵢ) to offline oracle
+3. Exploitation Phase:
+   - Play optimal partition S* from offline oracle
+   - Continue until horizon T
+</code></pre>
+<h4 id="52-thompson-sampling-approaches">5.2 Thompson Sampling Approaches<a class="headerlink" href="#52-thompson-sampling-approaches" title="連結到此標題">&para;</a></h4>
+<p><strong>Algorithm 2: Multi-Agent Thompson Sampling (MATS)</strong></p>
+<pre><code>For each time step t:
+1. Sample local means: μₜᵉ(𝐚ᵉ) ~ Qₐᵉᵉ(·|ℋₜ₋₁)
+2. Optimize joint action: 𝐚ₜ = argmaxₐ Σᵉ₌₁ᵖ μₜᵉ(𝐚ᵉ) using variable elimination
+3. Play joint action 𝐚ₜ
+4. Observe local rewards fₜᵉ(𝐚ₜᵉ) and update posteriors
+</code></pre>
+<h4 id="53-federated-learning-integration">5.3 Federated Learning Integration<a class="headerlink" href="#53-federated-learning-integration" title="連結到此標題">&para;</a></h4>
+<p><strong>Key Innovations:</strong>
+- <strong>Offline Resilience</strong>: Transforms any offline (α-ε)-approximation algorithm
+- <strong>Communication Efficiency</strong>: Only 𝒪̃(ψ T^(β/(β+1))) communication rounds
+- <strong>Linear Speedup</strong>: Regret scales favorably with number of communicating agents</p>
+<h3 id="6-practical-applications">6. Practical Applications<a class="headerlink" href="#6-practical-applications" title="連結到此標題">&para;</a></h3>
+<h4 id="61-wind-farm-control">6.1 Wind Farm Control<a class="headerlink" href="#61-wind-farm-control" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Problem</strong>: Multiple wind turbines must coordinate to maximize total power production</li>
+<li><strong>Challenges</strong>: Wake effects create complex aerodynamic interactions between turbines</li>
+<li><strong>Solution</strong>: MATS achieves 5× increase in normalized power production vs. state-of-the-art</li>
+<li><strong>Structure</strong>: Sparse coordination graph based on physical turbine dependencies</li>
+</ul>
+<h4 id="62-stochastic-combinatorial-auctions">6.2 Stochastic Combinatorial Auctions<a class="headerlink" href="#62-stochastic-combinatorial-auctions" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Problem</strong>: Multiple agents bidding for indivisible goods with submodular valuations</li>
+<li><strong>Challenges</strong>: Privacy concerns prevent full utility revelation</li>
+<li><strong>Solution</strong>: SWP MA-CMAB framework with bandit feedback</li>
+<li><strong>Performance</strong>: Achieves (1-1/e)-approximation under full-bandit feedback</li>
+</ul>
+<h4 id="63-data-summarization">6.3 Data Summarization<a class="headerlink" href="#63-data-summarization" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Problem</strong>: Select representative subsets from large datasets</li>
+<li><strong>Challenges</strong>: Distributed data with local utility functions</li>
+<li><strong>Solution</strong>: Federated combinatorial multi-agent bandits</li>
+<li><strong>Benefits</strong>: Communication-efficient with theoretical guarantees</li>
+</ul>
+<h4 id="64-traffic-light-control">6.4 Traffic Light Control<a class="headerlink" href="#64-traffic-light-control" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Problem</strong>: Coordinated traffic light optimization across intersections</li>
+<li><strong>Challenges</strong>: Exponential joint action space, real-time decision making</li>
+<li><strong>Solution</strong>: Sparse neighborhood coordination with Thompson sampling</li>
+<li><strong>Performance</strong>: Sublinear regret with polynomial scaling in local action spaces</li>
+</ul>
+<h3 id="7-future-directions-and-open-problems">7. Future Directions and Open Problems<a class="headerlink" href="#7-future-directions-and-open-problems" title="連結到此標題">&para;</a></h3>
+<h4 id="71-theoretical-challenges">7.1 Theoretical Challenges<a class="headerlink" href="#71-theoretical-challenges" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Lower Bounds</strong>: Characterize tight lower bounds that explicitly capture multi-agent dimension</li>
+<li><strong>Non-Stationary Settings</strong>: Extend frameworks to time-varying reward distributions</li>
+<li><strong>Partial Observability</strong>: Handle settings with incomplete or corrupted feedback</li>
+</ul>
+<h4 id="72-algorithmic-improvements">7.2 Algorithmic Improvements<a class="headerlink" href="#72-algorithmic-improvements" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Oracle Complexity</strong>: Reduce the (MN)^⁸ complexity of continuous greedy algorithms</li>
+<li><strong>Communication Efficiency</strong>: Further minimize communication rounds in federated settings</li>
+<li><strong>Distributed Computation</strong>: Develop fully decentralized algorithms without central coordination</li>
+</ul>
+<h4 id="73-application-extensions">7.3 Application Extensions<a class="headerlink" href="#73-application-extensions" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>Large-Scale Systems</strong>: Scale to hundreds or thousands of agents</li>
+<li><strong>Heterogeneous Agents</strong>: Handle agents with different capabilities and constraints</li>
+<li><strong>Real-World Integration</strong>: Deploy in practical industrial and societal applications</li>
+</ul>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>[arXiv:2602.16183] Multi-Agent Combinatorial-Multi-Armed-Bandit framework for the Submodular Welfare Problem under Bandit Feedback (2026) — Most recent comprehensive framework with full-bandit feedback guarantees</li>
+<li>[arXiv:2405.05950] Federated Combinatorial Multi-Agent Multi-Armed Bandits (2024) — Federated learning integration with communication efficiency</li>
+<li>[ICML 2013] Combinatorial Multi-Armed Bandit: General Framework and Applications — Foundational CUCB algorithm with O(log n) regret</li>
+<li>[Nature Scientific Reports, 2020] Multi-Agent Thompson Sampling for Bandit Applications with Sparse Neighbourhood Structures — Game-theoretic coordination with polynomial regret bounds</li>
+<li>[JMLR 2016] Combinatorial Multi-Armed Bandit and Its Extension to Probabilistically Triggered Arms — Extended framework for triggered arm scenarios</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (most recent source)</li>
+<li><strong>Suggestions:</strong> This comprehensive foundation supports both theoretical research and practical implementation of MA-CMAB systems. Future work should focus on scaling to large-scale applications and tightening regret bounds.</li>
+<li><strong>Errors:</strong> No significant gaps identified in core theoretical frameworks, though lower bound characterization remains an open problem.</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

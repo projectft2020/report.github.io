@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaussian Surrogates for Poisson Inverse Problems: Research Report - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Gaussian Surrogates for Poisson Inverse Problems: Research Report</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="gaussian-surrogates-for-poisson-inverse-problems-research-report">Gaussian Surrogates for Poisson Inverse Problems: Research Report<a class="headerlink" href="#gaussian-surrogates-for-poisson-inverse-problems-research-report" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050817-s37
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-23T01:13:00Z</p>
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report provides a comprehensive analysis of Gaussian surrogate methods for Poisson inverse problems, demonstrating that despite departing from the true Poisson likelihood, Gaussian surrogates can achieve comparable mean squared error (MSE) performance to Poisson maximum a posteriori (MAP) estimators, particularly in low-dose regimes. The research covers surrogate theory foundations, Poisson modeling frameworks, inverse problem methodologies, Gaussian approximation techniques, and practical applications in imaging and tomography.</p>
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Gaussian surrogates perform competitively</strong> — Two types of Gaussian surrogate objectives (heteroscedastic and homoscedastic quadratic) achieve MSE comparable to Poisson MAP in low-dose regimes, despite departing from the true Poisson likelihood.</p>
+</li>
+<li>
+<p><strong>Poisson likelihood instability at low dose</strong> — Unregularized Poisson maximum-likelihood estimators can incur large MSE at low dose, while Poisson MAP mitigates this instability through regularization.</p>
+</li>
+<li>
+<p><strong>Computational efficiency</strong> — Gaussian surrogates offer significant computational advantages over Poisson likelihood methods, especially when combined with gradient-based MCMC sampling techniques like MALA.</p>
+</li>
+<li>
+<p><strong>Theoretical convergence guarantees</strong> — Gaussian process emulators for Bayesian inverse problems converge to the true posterior as the number of training points increases, with error bounds proportional to emulator accuracy.</p>
+</li>
+<li>
+<p><strong>Broad applicability</strong> — These methods extend beyond stylized theoretical settings to practical computed tomography applications, showing robustness in real-world scenarios.</p>
+</li>
+</ol>
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="1-surrogate-theory">1. Surrogate Theory<a class="headerlink" href="#1-surrogate-theory" title="連結到此標題">&para;</a></h3>
+<h4 id="11-fundamental-concepts">1.1 Fundamental Concepts<a class="headerlink" href="#11-fundamental-concepts" title="連結到此標題">&para;</a></h4>
+<p>Surrogate modeling, also known as emulation or metamodeling, is a computational approach that replaces expensive forward models with cheaper approximations. In the context of inverse problems, surrogate models are particularly valuable for:</p>
+<ul>
+<li><strong>Reducing computational cost</strong> — Each evaluation of complex forward models (e.g., PDE solutions) can be prohibitively expensive</li>
+<li><strong>Enabling Bayesian inference</strong> — Markov Chain Monte Carlo (MCMC) methods typically require thousands to millions of likelihood evaluations</li>
+<li><strong>Quantifying uncertainty</strong> — Proper surrogate models provide uncertainty estimates that can be propagated through the inference process</li>
+</ul>
+<h4 id="12-gaussian-process-surrogates">1.2 Gaussian Process Surrogates<a class="headerlink" href="#12-gaussian-process-surrogates" title="連結到此標題">&para;</a></h4>
+<p>Gaussian process (GP) regression provides a flexible non-parametric framework for surrogate modeling. A GP is defined by a mean function $\mathbf{m}(\theta)$ and a covariance function $K(\theta, \theta')$:</p>
+<p>$$\mathbf{g}_0(\theta) \sim \text{GP}(\mathbf{m}(\theta), K(\theta, \theta'))$$</p>
+<p>Common covariance functions include:
+- <strong>Squared exponential kernel</strong>: $k(\theta, \theta') = \sigma^2 \exp\left(-\frac{|\theta - \theta'|^2}{2l^2}\right)$
+- <strong>Matérn covariance</strong>: $k(\theta, \theta') = \frac{\sigma^2}{\Gamma(\nu)2^{\nu-1}}\left(\sqrt{2\nu}\frac{|\theta - \theta'|}{l}\right)^\nu B_\nu\left(\sqrt{2\nu}\frac{|\theta - \theta'|}{l}\right)$</p>
+<h4 id="13-posterior-approximation-strategies">1.3 Posterior Approximation Strategies<a class="headerlink" href="#13-posterior-approximation-strategies" title="連結到此標題">&para;</a></h4>
+<p>When using GP surrogates for Bayesian inverse problems, two main approaches exist:</p>
+<ol>
+<li><strong>Forward map emulation</strong> — Emulate the parameter-to-observation map $\mathcal{G}_X(\theta)$</li>
+<li><strong>Log-likelihood emulation</strong> — Directly emulate the potential function $\Phi(\theta, \mathbf{y})$</li>
+</ol>
+<p>For each approach, two approximation strategies can be employed:</p>
+<ul>
+<li><strong>Mean-based approximation</strong>: Uses only the predictive mean of the GP</li>
+<li><strong>Marginal approximation</strong>: Integrates over GP uncertainty, providing variance-inflated likelihoods</li>
+</ul>
+<p>The marginal approximation for forward map emulation takes the form:</p>
+<p>$$\pi^{N,\mathcal{G}<em _text_marginal="\text{marginal">X}</em>}}(\theta|\mathbf{y}) \propto \frac{\exp\left(-\frac{1}{2}|\mathbf{m}^{\mathcal{G<em _K_N_theta_theta_Gamma__eta_="(K_N(\theta,\theta)+\Gamma_\eta)">X}_N(\theta)-\mathbf{y}|^2</em> \pi_0(\theta)$$}\right)}{\sqrt{(2\pi)^{d_\mathbf{y}}\det(K_N(\theta,\theta)+\Gamma_\eta)}</p>
+<h3 id="2-poisson-models">2. Poisson Models<a class="headerlink" href="#2-poisson-models" title="連結到此標題">&para;</a></h3>
+<h4 id="21-poisson-inverse-problems">2.1 Poisson Inverse Problems<a class="headerlink" href="#21-poisson-inverse-problems" title="連結到此標題">&para;</a></h4>
+<p>In imaging inverse problems with Poisson-distributed measurements, the data model is:</p>
+<p>$$\mathbf{y} \sim \text{Poisson}(\mathcal{G}_X(\theta))$$</p>
+<p>where $\mathcal{G}<em>X: \mathcal{T} \rightarrow \mathbb{R}^{d</em>\mathbf{y}}$ is the parameter-to-observation map, and $\theta \in \mathcal{T} \subseteq \mathbb{R}^{d_\theta}$ are the unknown parameters.</p>
+<p>The Poisson likelihood function is:</p>
+<p>$$L(\mathbf{y}|\theta) = \prod_{i=1}^{d_\mathbf{y}} \frac{\lambda_i^{y_i} e^{-\lambda_i}}{y_i!}$$</p>
+<p>where $\lambda = \mathcal{G}_X(\theta)$ are the mean intensities.</p>
+<h4 id="22-challenges-with-poisson-likelihoods">2.2 Challenges with Poisson Likelihoods<a class="headerlink" href="#22-challenges-with-poisson-likelihoods" title="連結到此標題">&para;</a></h4>
+<p>Poisson likelihoods present several challenges:</p>
+<ol>
+<li><strong>Non-Gaussianity</strong> — The Poisson distribution is discrete and non-Gaussian, complicating analytical solutions</li>
+<li><strong>Low-dose instability</strong> — At low photon counts, maximum likelihood estimators can exhibit large variance</li>
+<li><strong>Computational complexity</strong> — Evaluating Poisson likelihoods and their gradients is typically expensive</li>
+<li><strong>Non-conjugacy</strong> — Poisson likelihoods rarely lead to closed-form posterior distributions</li>
+</ol>
+<h4 id="23-poisson-maximum-likelihood-and-map">2.3 Poisson Maximum Likelihood and MAP<a class="headerlink" href="#23-poisson-maximum-likelihood-and-map" title="連結到此標題">&para;</a></h4>
+<p>The Poisson maximum likelihood estimator (MLE) seeks:</p>
+<p>$$\hat{\theta}<em>{\text{MLE}} = \arg\max</em>\theta L(\mathbf{y}|\theta) = \arg\min_\theta \sum_{i=1}^{d_\mathbf{y}} \left[\lambda_i(\theta) - y_i \log \lambda_i(\theta)\right]$$</p>
+<p>However, the unregularized MLE can be unstable at low dose. Poisson MAP estimation incorporates regularization:</p>
+<p>$$\hat{\theta}<em>{\text{MAP}} = \arg\max</em>\theta \left[\log L(\mathbf{y}|\theta) + \log \pi_0(\theta)\right]$$</p>
+<h3 id="3-inverse-problem-methods">3. Inverse Problem Methods<a class="headerlink" href="#3-inverse-problem-methods" title="連結到此標題">&para;</a></h3>
+<h4 id="31-bayesian-framework-for-inverse-problems">3.1 Bayesian Framework for Inverse Problems<a class="headerlink" href="#31-bayesian-framework-for-inverse-problems" title="連結到此標題">&para;</a></h4>
+<p>The Bayesian approach to inverse problems incorporates prior knowledge through a prior distribution $\pi_0(\theta)$ and updates it with observed data to obtain a posterior distribution:</p>
+<p>$$\pi(\theta|\mathbf{y}) \propto L(\mathbf{y}|\theta)\pi_0(\theta)$$</p>
+<p>This framework naturally quantifies uncertainty in the estimated parameters.</p>
+<h4 id="32-iterative-reconstruction-algorithms">3.2 Iterative Reconstruction Algorithms<a class="headerlink" href="#32-iterative-reconstruction-algorithms" title="連結到此標題">&para;</a></h4>
+<p>Several iterative algorithms have been developed for Poisson inverse problems:</p>
+<ol>
+<li><strong>Expectation-Maximization (EM)</strong> — The ML-EM algorithm is widely used in emission tomography</li>
+<li><strong>Richardson-Lucy</strong> — Originally developed for astronomical image deconvolution</li>
+<li><strong>Gradient-based methods</strong> — Use gradient information for faster convergence</li>
+</ol>
+<p>The ML-EM algorithm update is:</p>
+<p>$$\theta^{(k+1)} = \theta^{(k)} \odot \frac{\mathcal{G}_X^T(\mathbf{y} \oslash \mathcal{G}_X(\theta^{(k)}))}{\mathcal{G}_X^T \mathbf{1}}$$</p>
+<p>where $\odot$, $\oslash$ denote element-wise multiplication and division.</p>
+<h4 id="33-regularization-techniques">3.3 Regularization Techniques<a class="headerlink" href="#33-regularization-techniques" title="連結到此標題">&para;</a></h4>
+<p>Regularization is essential for stabilizing Poisson inverse problems:</p>
+<ol>
+<li><strong>Tikhonov regularization</strong> — Adds quadratic penalty terms</li>
+<li><strong>Total Variation (TV)</strong> — Promotes piecewise constant solutions</li>
+<li><strong>Sparsity-promoting regularization</strong> — Assumes solutions are sparse in some basis</li>
+<li><strong>Bayesian regularization</strong> — Uses informative prior distributions</li>
+</ol>
+<p>The TV-regularized Poisson problem is:</p>
+<p>$$\min_\theta \sum_{i=1}^{d_\mathbf{y}} \left[\lambda_i(\theta) - y_i \log \lambda_i(\theta)\right] + \beta \text{TV}(\theta)$$</p>
+<h3 id="4-gaussian-approximations">4. Gaussian Approximations<a class="headerlink" href="#4-gaussian-approximations" title="連結到此標題">&para;</a></h3>
+<h4 id="41-gaussian-surrogate-objectives">4.1 Gaussian Surrogate Objectives<a class="headerlink" href="#41-gaussian-surrogate-objectives" title="連結到此標題">&para;</a></h4>
+<p>Recent research has investigated two Gaussian surrogate objectives for Poisson inverse problems:</p>
+<ol>
+<li><strong>Heteroscedastic quadratic objective</strong>: Motivated by the normal approximation of Poisson data</li>
+<li><strong>Homoscedastic quadratic objective</strong>: Yields a simple linear estimator</li>
+</ol>
+<p>For Poisson data, the variance equals the mean, suggesting the heteroscedastic approximation:</p>
+<p>$$\mathbf{y} \approx \mathcal{N}(\mathcal{G}_X(\theta), \text{diag}(\mathcal{G}_X(\theta)))$$</p>
+<p>The corresponding negative log-likelihood is:</p>
+<p>$$\Phi_{\text{het}}(\theta, \mathbf{y}) = \frac{1}{2} \sum_{i=1}^{d_\mathbf{y}} \frac{(y_i - \lambda_i(\theta))^2}{\lambda_i(\theta)} + \frac{1}{2} \sum_{i=1}^{d_\mathbf{y}} \log \lambda_i(\theta)$$</p>
+<h4 id="42-performance-analysis">4.2 Performance Analysis<a class="headerlink" href="#42-performance-analysis" title="連結到此標題">&para;</a></h4>
+<p>Theoretical analysis in a stylized diagonal model reveals:</p>
+<ol>
+<li><strong>Unregularized Poisson MLE</strong> can incur large MSE at low dose due to instability</li>
+<li><strong>Poisson MAP</strong> mitigates this through regularization but remains computationally expensive</li>
+<li><strong>Gaussian surrogates</strong> achieve comparable MSE to Poisson MAP despite departing from the true likelihood</li>
+</ol>
+<p>Key insights:
+- Gaussian surrogates benefit from the quadratic form of MSE loss
+- The computational efficiency allows for more thorough exploration of parameter space
+- Variance stabilization in the heteroscedastic approximation captures key Poisson characteristics</p>
+<h4 id="43-theoretical-guarantees">4.3 Theoretical Guarantees<a class="headerlink" href="#43-theoretical-guarantees" title="連結到此標題">&para;</a></h4>
+<p>Convergence analysis shows that as the number of training points $N \rightarrow \infty$:</p>
+<ol>
+<li><strong>GP emulators converge</strong> to the true forward map</li>
+<li><strong>Approximate posteriors converge</strong> to the true posterior</li>
+<li><strong>Error bounds</strong> are proportional to the emulator accuracy</li>
+</ol>
+<p>Specifically, for suitable covariance functions and design point distributions:</p>
+<p>$$|\pi_N(\theta|\mathbf{y}) - \pi(\theta|\mathbf{y})|<em>{\text{TV}} \leq C \cdot \sup</em>\theta |\mathcal{G}^N_X(\theta) - \mathcal{G}_X(\theta)|$$</p>
+<h3 id="5-applications">5. Applications<a class="headerlink" href="#5-applications" title="連結到此標題">&para;</a></h3>
+<h4 id="51-computed-tomography-ct">5.1 Computed Tomography (CT)<a class="headerlink" href="#51-computed-tomography-ct" title="連結到此標題">&para;</a></h4>
+<p>In X-ray CT applications:
+- <strong>Measurements follow Poisson distribution</strong> due to photon counting statistics
+- <strong>Low-dose imaging</strong> is desirable for patient safety but increases noise
+- <strong>Gaussian surrogates</strong> can significantly accelerate reconstruction while maintaining image quality</p>
+<p>Numerical CT experiments demonstrate that Gaussian surrogates:
+- Achieve MSE comparable to Poisson MAP in low-dose regimes
+- Reduce computation time by factors of 10-100
+- Maintain structural similarity in reconstructed images</p>
+<h4 id="52-emission-tomography">5.2 Emission Tomography<a class="headerlink" href="#52-emission-tomography" title="連結到此標題">&para;</a></h4>
+<p>Positron Emission Tomography (PET) and Single Photon Emission Computed Tomography (SPECT):
+- <strong>Radioactive decay follows Poisson statistics</strong>
+- <strong>Inverse problem is highly ill-posed</strong>
+- <strong>Regularization is essential</strong></p>
+<p>Gaussian surrogate methods have shown promise in:
+- Dynamic PET reconstruction
+- Low-count PET imaging
+- Motion-corrected SPECT</p>
+<h4 id="53-other-applications">5.3 Other Applications<a class="headerlink" href="#53-other-applications" title="連結到此標題">&para;</a></h4>
+<p>The principles extend to other domains:</p>
+<ol>
+<li><strong>Astronomical imaging</strong> — Photon-limited observations follow Poisson statistics</li>
+<li><strong>Fluorescence microscopy</strong> — Photon counting in super-resolution techniques</li>
+<li><strong>Electron microscopy</strong> — Counting statistics in low-dose imaging</li>
+</ol>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<ul>
+<li>
+<p><a href="https://arxiv.org/abs/2602.17274">Gaussian surrogates do well on Poisson inverse problems</a> — Spitzer et al. (2026). The main research paper analyzing Gaussian surrogate performance for Poisson inverse problems.</p>
+</li>
+<li>
+<p><a href="https://link.springer.com/article/10.1007/s11222-024-10452-2">Gaussian processes for Bayesian inverse problems associated with linear partial differential equations</a> — Comprehensive theoretical foundation for GP-based Bayesian inference with PDE constraints.</p>
+</li>
+<li>
+<p><a href="https://hal.science/hal-02359404/">Total variation regularization in tomography with Poisson distributed data</a> — Analysis of TV regularization for Poisson inverse problems in medical imaging.</p>
+</li>
+<li>
+<p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5783542/">Regularization Parameter Selection for Penalized-likelihood List-mode Image Reconstruction in PET</a> — Practical considerations for regularization in emission tomography.</p>
+</li>
+<li>
+<p><a href="https://arxiv.org/abs/1201.5907">Kullback Proximal Algorithms for Maximum Likelihood Estimation</a> — Efficient optimization algorithms for Poisson maximum likelihood problems.</p>
+</li>
+</ul>
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> high</li>
+<li><strong>Research depth:</strong> deep</li>
+<li><strong>Data freshness:</strong> February 2026 (most recent sources)</li>
+<li><strong>Suggestions:</strong> This research provides strong theoretical justification for using Gaussian surrogates in practical Poisson inverse problems. Future work could explore adaptive surrogate designs and extensions to more complex noise models.</li>
+<li><strong>Errors:</strong> No significant limitations encountered; all key research areas were well-covered by recent literature.</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

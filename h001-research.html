@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Frequency Microstructure Analysis with Machine Learning - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>High-Frequency Microstructure Analysis with Machine Learning</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="high-frequency-microstructure-analysis-with-machine-learning">High-Frequency Microstructure Analysis with Machine Learning<a class="headerlink" href="#high-frequency-microstructure-analysis-with-machine-learning" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> h001-research
+<strong>Agent:</strong> Charlie Research
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T03:31:00Z</p>
+<hr />
+<h2 id="research-summary">Research Summary<a class="headerlink" href="#research-summary" title="連結到此標題">&para;</a></h2>
+<p>This report provides a comprehensive analysis of high-frequency market microstructure using machine learning techniques. The research covers order book data structures, deep learning applications (LSTM, Transformer), feature engineering methods, model training and validation approaches, and practical trading applications. Findings indicate that while modern deep learning models achieve significant predictive accuracy, their real-world applicability is constrained by transaction costs, market efficiency, and distribution shifts over time.</p>
+<hr />
+<h2 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Limit Order Book (LOB) Data Structure</strong> — LOB is a centralized system recording buy/sell orders aggregated at discrete price levels. Each record contains price and volume for multiple levels on bid/ask sides (e.g., top 10-40 levels). Key metrics include mid-price (average of best bid/ask) and bid-ask spread. Order types include market orders (immediate execution), limit orders (conditional execution), and cancellation orders. | Source: PMC12315853 (Deep LOB Forecasting: Microstructural Guide)</p>
+</li>
+<li>
+<p><strong>Deep Learning Model Efficacy</strong> — State-of-the-art models (DeepLOB, TLOB, LiT) achieve F1-scores of 59-66% on short-horizon predictions (10-100 LOB updates). Transformer-based architectures with dual-attention mechanisms (spatial + temporal) outperform CNN-LSTM hybrids by 3-7 F1-score points on average. Simple MLP architectures with bilinear normalization can match complex models on certain datasets, challenging assumptions that complexity is always necessary. | Source: arXiv TLOB (2025), Frontiers LiT (2025), PMC DeepLOB (2025)</p>
+</li>
+<li>
+<p><strong>Feature Engineering for LOB</strong> — Effective features include: (a) normalized price differences across levels, (b) volume imbalances, (c) order flow events, (d) spread dynamics, (e) depth-weighted metrics. Rolling z-score normalization (5-day window) is critical for non-stationary LOB data. Input representation typically uses L levels × 4 features (bid price/ask price, bid volume/ask volume) per time step. | Source: PMC DeepLOB, Amberdata Blog</p>
+</li>
+<li>
+<p><strong>Microstructural Classification</strong> — Stocks can be categorized by tick-size regimes: small-tick (spread ≥3 ticks), medium-tick (1.5-3 ticks), large-tick (≤1.5 ticks). Predictability correlates with tick regime—large-tick stocks show more stable spreads but lower signal diversity. | Source: PMC DeepLOB (2025)</p>
+</li>
+<li>
+<p><strong>Market Efficiency Evolution</strong> — Empirical evidence shows stock price predictability declining over time (-6.68 F1-score points between 2012 and 2015). As patterns are discovered and exploited, they erode due to Efficient Market Hypothesis—alpha seeds self-destruction. NASDAQ stocks (Tesla, Intel) are significantly harder to predict than Finnish stocks (FI-2010 dataset). | Source: arXiv TLOB (2025)</p>
+</li>
+<li>
+<p><strong>Transaction Cost Impact</strong> — When trend classification thresholds incorporate average spread (primary transaction cost), model performance deteriorates significantly. Profitability requires prediction margins to exceed transaction costs. F1-scores alone are insufficient for evaluating practical trading viability. | Source: arXiv TLOB (2025)</p>
+</li>
+<li>
+<p><strong>Practical Training Considerations</strong> — Fine-tuning pretrained models on recent market conditions outperforms both from-scratch and zero-shot transfer by 5-15 F1-score points, demonstrating adaptability value in evolving markets. Bilinear normalization layers address non-stationarity better than fixed z-score normalization under distribution shifts. | Source: arXiv LiT (2025), Frontiers LiT</p>
+</li>
+</ol>
+<hr />
+<h2 id="detailed-analysis">Detailed Analysis<a class="headerlink" href="#detailed-analysis" title="連結到此標題">&para;</a></h2>
+<h3 id="1-microstructure-fundamentals">1. Microstructure Fundamentals<a class="headerlink" href="#1-microstructure-fundamentals" title="連結到此標題">&para;</a></h3>
+<h4 id="11-limit-order-book-structure">1.1 Limit Order Book Structure<a class="headerlink" href="#11-limit-order-book-structure" title="連結到此標題">&para;</a></h4>
+<p>The Limit Order Book is a dynamic data structure that records all pending buy (bid) and sell (ask) orders at discrete price levels. Modern electronic exchanges use Continuous Double Auction (CDA) mechanisms where orders execute whenever best bid and ask prices overlap.</p>
+<p><strong>Order Book Representation:</strong></p>
+<pre><code>L(τ) = {pℓ^ask(τ), vℓ^ask(τ), pℓ^bid(τ), vℓ^bid(τ)} for ℓ=1,...,L
+</code></pre>
+<p>Where:
+- <code>pℓ^ask(τ)</code> — ask price at level ℓ
+- <code>pℓ^bid(τ)</code> — bid price at level ℓ
+- <code>vℓ^ask(τ)</code> — ask volume at level ℓ
+- <code>vℓ^bid(τ)</code> — bid volume at level ℓ
+- <code>L</code> — number of price levels (typically 10-40)
+- <code>τ</code> — timestamp</p>
+<p><strong>Key Metrics:</strong>
+- <strong>Mid-price:</strong> <code>mτ = (p₁^ask + p₁^bid) / 2</code>
+- <strong>Bid-ask spread:</strong> <code>στ = p₁^ask - p₁^bid</code>
+- <strong>Tick size:</strong> Minimum price increment (e.g., $0.01 on NASDAQ)</p>
+<p><strong>Order Types:</strong>
+1. <strong>Limit orders</strong> — Conditional execution at specified price, lower transaction cost (provides liquidity)
+2. <strong>Market orders</strong> — Immediate execution at best available price, higher transaction cost (consumes liquidity)
+3. <strong>Cancellation orders</strong> — Remove active limit orders, no transaction cost</p>
+<h4 id="12-transaction-flow-and-price-discovery">1.2 Transaction Flow and Price Discovery<a class="headerlink" href="#12-transaction-flow-and-price-discovery" title="連結到此標題">&para;</a></h4>
+<p>Price formation is a self-organized process driven by order submission and cancellation. Key dynamics:</p>
+<ul>
+<li><strong>Order Flow Imbalance:</strong> Net difference between buy and sell orders predicts short-term price movements</li>
+<li><strong>Volume-Spread Relationship:</strong> Deeper liquidity (larger volumes at best levels) correlates with tighter spreads</li>
+<li><strong>Information Arrival:</strong> Large trades or order bursts trigger price adjustments as market incorporates new information</li>
+<li><strong>Execution Priority:</strong> Most exchanges use First-In-First-Out (FIFO), influencing queue dynamics</li>
+</ul>
+<h4 id="13-market-depth-and-liquidity-analysis">1.3 Market Depth and Liquidity Analysis<a class="headerlink" href="#13-market-depth-and-liquidity-analysis" title="連結到此標題">&para;</a></h4>
+<p><strong>Market Depth Characteristics:</strong>
+- <strong>Depth Profiles:</strong> Number of active orders at each price level, representing available liquidity
+- <strong>Depth Asymmetry:</strong> Often deeper on one side than the other, indicating directional pressure
+- <strong>Liquidity Clustering:</strong> Orders concentrate near best bid/ask for liquid stocks, disperse for illiquid stocks</p>
+<p><strong>Liquidity Metrics:</strong>
+- <strong>Average Depth:</strong> Mean volume in first N levels (commonly N=10)
+- <strong>Depth Variance:</strong> Volatility of depth over time indicates liquidity risk
+- <strong>Spread-Depth Correlation:</strong> Tighter spreads typically accompany greater depth
+- <strong>Order Imbalance Ratio:</strong> <code>(bid volume - ask volume) / (bid volume + ask volume)</code> predicts short-term direction</p>
+<p><strong>Tick-Size Regime Classification (PMC DeepLOB, 2025):</strong>
+| Regime | Criteria | Characteristics | Predictability |
+|---------|-----------|----------------|---------------|
+| Small-tick | Avg spread ≥3 ticks | Higher volatility, more signal diversity | Higher complexity to predict |
+| Medium-tick | 1.5-3 ticks | Balanced volatility | Moderate |
+| Large-tick | ≤1.5 ticks | Stable spreads, lower information diversity | Lower signal content |</p>
+<hr />
+<h3 id="2-machine-learning-method-applications">2. Machine Learning Method Applications<a class="headerlink" href="#2-machine-learning-method-applications" title="連結到此標題">&para;</a></h3>
+<h4 id="21-deep-learning-architectures">2.1 Deep Learning Architectures<a class="headerlink" href="#21-deep-learning-architectures" title="連結到此標題">&para;</a></h4>
+<p><strong>CNN-Based Models:</strong>
+- <strong>DeepLOB (Zhang et al., 2019):</strong> Combines convolutional layers with LSTM
+  - Convolutional layers extract spatial features across price levels
+  - LSTM captures temporal dependencies
+  - Uses Inception Module for multi-scale feature extraction
+  - Limitation: Spatial inductive bias misaligns with LOB hierarchical structure</p>
+<ul>
+<li><strong>Limitation:</strong> CNNs assume local spatial relationships, but LOB levels near mid-price update more frequently than deeper levels, creating hierarchical dynamics that CNNs struggle to model effectively.</li>
+</ul>
+<p><strong>LSTM-Based Models:</strong>
+- <strong>Advantages:</strong> Capture long-term temporal dependencies, effective for sequential LOB dynamics
+- <strong>Applications:</strong> Mid-price movement classification, volatility forecasting
+- <strong>Challenges:</strong> Vanishing gradients for very long sequences, training data requirements</p>
+<p><strong>Transformer-Based Models:</strong></p>
+<p><strong>LiT - Limit Order Book Transformer (Frontiers, 2025):</strong>
+- Uses structured patches instead of random square patches
+- Employs self-attention for spatial and temporal modeling
+- Adds LSTM layers after transformer for enhanced sequential processing
+- Outperforms CNN+LSTM hybrids by 3-7 F1-score points
+- Key innovation: Eliminates convolutional layers entirely while maintaining performance</p>
+<p><strong>TLOB - Transformer with Dual Attention (arXiv, 2025):</strong>
+- <strong>Temporal Self-Attention:</strong> Captures relationships between different LOB snapshots
+- <strong>Spatial Self-Attention:</strong> Captures relationships between LOB features (price/volume levels)
+- <strong>MLP-based feed-forward:</strong> Enhances capacity for combining signals
+- <strong>Performance:</strong> Achieves 59-66% F1-score on FI-2010 dataset; 3.7% improvement over previous SOTA
+- <strong>Ablation Findings:</strong> Both attention types necessary—removing either degrades performance</p>
+<p><strong>MLPLOB - Simple Architecture (arXiv TLOB, 2025):</strong>
+- <strong>Finding:</strong> Challenges assumption that complex architectures are required
+- Uses bilinear normalization instead of fixed z-score
+- Feature-mixing MLPs along feature axis
+- Temporal-mixing MLPs along time axis
+- <strong>Result:</strong> Outperforms complex models on shorter horizons (10-20 LOB updates), demonstrating that proper architecture design matters more than complexity</p>
+<p><strong>Model Performance Comparison (FI-2010 Dataset):</strong>
+| Model | F1-Score (%) | Accuracy (%) | Architecture Type |
+|--------|--------------|----------------|------------------|
+| SVM | 56-60 | 58.77 | Traditional ML |
+| Random Forest | 57.46 | 58.66 | Ensemble |
+| MLP | 59.99 | 61.55 | Baseline |
+| LSTM | 57.31 | 57.14 | Recurrent |
+| CNN | 62.46 | 64.58 | Convolutional |
+| DeepLOB | 63.26 | 66.23 | CNN + LSTM |
+| TransLOB | 63.12 | 63.64 | CNN + Transformer |
+| LiT | <strong>66.40</strong> | <strong>68.34</strong> | Transformer + LSTM |
+| TLOB | <strong>66.20</strong> | <strong>68.06</strong> | Dual-Attention Transformer |</p>
+<h4 id="22-feature-engineering">2.2 Feature Engineering<a class="headerlink" href="#22-feature-engineering" title="連結到此標題">&para;</a></h4>
+<p><strong>Effective LOB Feature Categories:</strong></p>
+<p><strong>1. Raw Order Book Features:</strong>
+- Price levels: <code>p₁, p₂, ..., p_L</code> on both bid/ask sides
+- Volumes: <code>v₁, v₂, ..., v_L</code> on both bid/ask sides
+- Mid-price: <code>mτ = (p₁^ask + p₁^bid) / 2</code>
+- Spread: <code>στ = p₁^ask - p₁^bid</code></p>
+<p><strong>2. Derived Statistical Features:</strong>
+- <strong>Price differences:</strong> <code>Δpℓ = pℓ^ask - pℓ^bid</code> across levels (price pressure)
+- <strong>Volume imbalances:</strong> <code>V_imb = Σ(v_i^bid) - Σ(v_j^ask)</code> (order flow)
+- <strong>Depth-weighted metrics:</strong> Weighted averages by volume at each level
+- <strong>Order flow autocorrelation:</strong> Correlation of order flow over time windows
+- <strong>Spread dynamics:</strong> Mean, variance, and rate of spread changes</p>
+<p><strong>3. Normalization Methods:</strong>
+- <strong>Rolling z-score normalization (5-day window):</strong> Critical for non-stationary LOB data
+  - Prevents look-ahead bias from global statistics
+  - Adapts to changing market conditions
+  - More robust than dataset-wide normalization</p>
+<ul>
+<li><strong>Bilinear Normalization (Tran et al., 2021):</strong></li>
+<li>Shifts data by batch-specific statistics</li>
+<li>Scales features adaptively</li>
+<li>Suppresses irrelevant features via gating</li>
+<li>Better handles distribution shifts than standard normalization</li>
+</ul>
+<p><strong>4. Temporal Representations:</strong>
+- <strong>Input sequence:</strong> Last N LOB snapshots (typically N=100)
+- <strong>History length:</strong> Variable based on prediction horizon
+- <strong>Horizon definitions:</strong> H ∈ {10, 20, 30, 50, 100} LOB updates
+- <strong>Structured patching:</strong> Preserve spatial structure (e.g., H/2 levels per patch) instead of random patches</p>
+<p><strong>5. Labeling Strategies:</strong></p>
+<p><strong>Method 1 - Standard Percentage Change:</strong></p>
+<pre><code>l(t) = [m(t+h) - m(t)] / m(t)
+Classification:
+- Up if l(t) &gt; θ
+- Down if l(t) &lt; -θ
+- Stable if -θ ≤ l(t) ≤ θ
+</code></pre>
+<p><strong>Method 2 - Smoothed Mid-Price (Tsantekidis et al., 2017):</strong></p>
+<pre><code>m_+(t,k) = (1/(k+1)) × Σ(i=0 to k) p(t+i)
+m_-(t,k) = (1/(k+1)) × Σ(i=0 to k) p(t-i)
+l(t) = [m_+(t,k) - m_-(t,k)] / m_-(t,k)
+</code></pre>
+<p>Issue: Window length (k) tied to prediction horizon (h), causing bias.</p>
+<p><strong>Method 3 - Independent Smoothing (TLOB 2025 proposal):</strong></p>
+<pre><code>w_+(t,h,k) = (1/(k+1)) × Σ(i=0 to k) p(t+h-i)
+w_-(t,h,k) = (1/(k+1)) × Σ(i=0 to k) p(t-i)
+l(t) = [w_+(t,h,k) - w_-(t,h,k)] / w_-(t,h,k)
+</code></pre>
+<p>Advantage: Decouples smoothing window (k) from prediction horizon (h), reducing bias.</p>
+<p><strong>Method 4 - Spread-Based Threshold:</strong></p>
+<pre><code>θ = average spread as % of mid-price (reflects transaction cost)
+</code></pre>
+<p>Rationale: Aligns prediction threshold with primary trading cost.</p>
+<p><strong>Feature Selection Guidelines:</strong>
+- Start with raw LOB data (prices + volumes for top 10 levels)
+- Add derived features: spreads, imbalances, price differences
+- Normalize features using rolling statistics (avoid look-ahead)
+- Select horizon-appropriate features (shorter horizons need different features)
+- Validate feature importance through ablation studies</p>
+<h4 id="23-model-training-and-validation">2.3 Model Training and Validation<a class="headerlink" href="#23-model-training-and-validation" title="連結到此標題">&para;</a></h4>
+<p><strong>Training Strategies:</strong></p>
+<p><strong>Data Splitting:</strong>
+- <strong>Temporal splits:</strong> Training (e.g., days 1-45), Validation (days 46-50), Test (days 51-60)
+- <strong>Cross-validation:</strong> Time-series aware to prevent data leakage
+- <strong>Out-of-sample evaluation:</strong> Test on future data not seen during training</p>
+<p><strong>Optimization Approaches:</strong>
+- <strong>Optimizer:</strong> AdamW with decoupled weight decay
+  - Learning rate: 6×10⁻⁵
+  - β₁: 0.9, β₂: 0.95
+- <strong>Early stopping:</strong> Patience of 15 epochs to prevent overfitting
+- <strong>Batch size:</strong> 32 (standard for LOB models)</p>
+<p><strong>Loss Functions:</strong>
+- <strong>Cross-entropy loss</strong> for multi-class classification (up/down/stable)
+- <strong>Class-weighted loss</strong> to handle imbalanced label distributions
+- <strong>Focal loss</strong> variant to focus on difficult examples</p>
+<p><strong>Hyperparameter Tuning:</strong>
+- <strong>Grid search</strong> or Bayesian optimization for key parameters
+- Learning rate schedule (warmup + decay)
+- Dropout rate (0.1-0.5) for regularization
+- Layer normalization placement (bilinear vs. batch)</p>
+<p><strong>Validation Metrics:</strong>
+- <strong>Primary:</strong> F1-score (harmonic mean of precision and recall)
+  - Robust to class imbalance
+  - Most common in LOB literature</p>
+<ul>
+<li><strong>Secondary:</strong></li>
+<li>Precision: TP / (TP + FP) — exactness of positive predictions</li>
+<li>Recall: TP / (TP + FN) — completeness of positive predictions</li>
+<li>AUC-ROC: Area under ROC curve</li>
+<li>Log-loss: Cross-entropy value</li>
+</ul>
+<p><strong>Sampling Considerations:</strong>
+- <strong>Event-based sampling:</strong> Sample every N events (e.g., 10 LOB updates)
+  - Captures varying transaction impacts
+  - Consistent temporal resolution</p>
+<ul>
+<li><strong>Volume-based sampling:</strong> Sample after V shares traded</li>
+<li>Reflects magnitude of market activity</li>
+<li>
+<p>Better for high-liquidity stocks</p>
+</li>
+<li>
+<p><strong>Time-based sampling:</strong> Sample at fixed time intervals</p>
+</li>
+<li>Simpler implementation</li>
+<li>May miss important events</li>
+</ul>
+<p><strong>Model Evaluation Framework:</strong></p>
+<p><strong>LOBFrame Framework (PMC DeepLOB, 2025):</strong>
+- Open-source pipeline for LOB forecasting
+- Integrated data processing, training, and backtesting
+- Enables model-agnostic benchmarking
+- Provides operational evaluation via simulation</p>
+<p><strong>Prediction Probability Metric (PMC DeepLOB):</strong>
+- Traditional metrics (accuracy, F1) insufficient for trading viability
+- Alternative: <code>p_T</code> = probability of correctly executing a complete transaction
+- Incorporates: Execution price, slippage, transaction costs</p>
+<hr />
+<h3 id="3-practical-scenarios">3. Practical Scenarios<a class="headerlink" href="#3-practical-scenarios" title="連結到此標題">&para;</a></h3>
+<h4 id="31-high-frequency-trading-strategies">3.1 High-Frequency Trading Strategies<a class="headerlink" href="#31-high-frequency-trading-strategies" title="連結到此標題">&para;</a></h4>
+<p><strong>Market-Making Strategies:</strong>
+- <strong>Quote-driven:</strong> Continuously maintain bid/ask quotes based on LOB predictions
+- <strong>Spread capture:</strong> Profit from bid-ask spread while managing inventory risk
+- <strong>Adverse selection:</strong> Accept informed counterpart orders to earn spread</p>
+<p><strong>Directional Trading:</strong>
+- <strong>Trend-following:</strong> Enter positions aligned with predicted mid-price direction
+- <strong>Mean reversion:</strong> Short-term reversals from predicted overreactions
+- <strong>Event-driven:</strong> Trade on predicted large order flow imbalances</p>
+<p><strong>Execution Algorithms:</strong>
+- <strong>TWAP (Time-Weighted Average Price):</strong> Execute over time horizon minimizing tracking error
+- <strong>VWAP (Volume-Weighted Average Price):</strong> Target average execution price weighted by traded volume
+- <strong>Implementation:</strong> Use predicted LOB changes to pace orders and minimize market impact</p>
+<p><strong>Risk Management in HFT:</strong></p>
+<p><strong>Position Limits:</strong>
+- Maximum exposure per instrument
+- Dynamic adjustment based on volatility predictions
+- Sector-level diversification to reduce systematic risk</p>
+<p><strong>Stop-Loss Mechanisms:</strong>
+- <strong>Fixed stop-loss:</strong> Exit when price moves against position by threshold
+- <strong>Trailing stop:</strong> Maintain distance from highest price
+- <strong>Volatility-adjusted stops:</strong> Widen stops during high-volatility periods</p>
+<p><strong>Real-time Risk Monitoring:</strong>
+- <strong>P&amp;L drawdown:</strong> Peak-to-trough decline in real-time
+- <strong>Value at Risk (VaR):</strong> Potential loss at confidence level (e.g., 95%)
+- <strong>Expected Shortfall (ES):</strong> Expected loss beyond VaR threshold</p>
+<p><strong>Capital Allocation:</strong>
+- <strong>Kelly Criterion:</strong> Optimal bet sizing based on edge
+- <strong>Risk-adjusted returns:</strong> Sharpe ratio optimization
+- <strong>Drawdown constraints:</strong> Limit position sizing after losses</p>
+<h4 id="32-execution-optimization">3.2 Execution Optimization<a class="headerlink" href="#32-execution-optimization" title="連結到此標題">&para;</a></h4>
+<p><strong>Order Slicing:</strong>
+- <strong>Child orders:</strong> Break large orders into smaller pieces
+- <strong>Randomized placement:</strong> Avoid predictable patterns
+- <strong>Time dispersion:</strong> Spread over trading window</p>
+<p><strong>Smart Order Routing:</strong>
+- <strong>Venue selection:</strong> Send to exchanges with best liquidity/pricing
+- <strong>Hidden liquidity:</strong> Access dark pools for large orders
+- <strong>Cross-exchange arbitrage:</strong> Exploit price differences across venues</p>
+<p><strong>Execution Schedule Optimization:</strong></p>
+<p><strong>Arrival Price (Almgren-Chriss, 2003):</strong></p>
+<pre><code>PA = (P_0 × V_1 + P_1 × V_2 + ... + P_n × V_{n+1}) / V_total
+</code></pre>
+<p>Where:
+- <code>PA</code> — Arrival price
+- <code>P_i</code> — Execution price for segment i
+- <code>V_i</code> — Volume executed for segment i
+- Minimizes market impact by balancing execution across price levels</p>
+<p><strong>Implementation (POV):</strong>
+1. Slice order into N child orders
+2. Execute sequentially, tracking actual VWAP
+3. Compare execution VWAP to arrival price
+4. Measure slippage: <code>Execution VWAP - Arrival Price</code></p>
+<p><strong>POV vs. VWAP:</strong>
+- <strong>POV (Percentage of Volume):</strong> (Arrival Price - Execution VWAP) / Arrival Price
+- <strong>VWAP:</strong> (Execution VWAP - Mid-price) / Mid-price
+- <strong>Goal:</strong> Minimize POV and VWAP through optimal timing/slicing</p>
+<p><strong>Liquidity-Aware Execution:</strong>
+- <strong>Depth-aware:</strong> Place orders where sufficient volume exists
+- <strong>Spread-conscious:</strong> Avoid tight spread periods for large orders
+- <strong>Imbalance exploitation:</strong> Trade during temporary order imbalances</p>
+<h4 id="33-risk-management">3.3 Risk Management<a class="headerlink" href="#33-risk-management" title="連結到此標題">&para;</a></h4>
+<p><strong>Microstructure-Based Risk Metrics:</strong></p>
+<p><strong>Liquidity Risk:</strong>
+- <strong>Depth volatility:</strong> Standard deviation of depth at best levels
+- <strong>Spread widening risk:</strong> Probability of spread expansion
+- <strong>Order flow regime shifts:</strong> Sudden changes in order patterns</p>
+<p><strong>Information Risk:</strong>
+- <strong>Toxic order flow:</strong> Aggressive orders from informed traders
+- <strong>Quote stuffing:</strong> Large cancellations creating artificial depth
+- <strong>Layering:</strong> Hidden large orders revealed incrementally</p>
+<p><strong>Execution Risk:</strong>
+- <strong>Market impact model:</strong> <code>ΔP ≈ α × V^β</code>
+  - α: Impact coefficient
+  - V: Trade volume
+  - β: Sensitivity parameter (typically 0.5-1)</p>
+<ul>
+<li><strong>Execution shortfall:</strong> Difference between benchmark and actual execution</li>
+<li><strong>Slippage analysis:</strong> Variance of execution costs across orders</li>
+</ul>
+<p><strong>Risk Controls:</strong></p>
+<p><strong>Position-Level Controls:</strong></p>
+<pre><code class="language-python"># Pseudo-code for position sizing
+def position_size(signal, volatility, capital, max_risk):
+    edge = signal.confidence  # From model probability
+    risk_adjustment = 1 / (1 + volatility)
+    kelly_size = edge * capital / volatility
+    return min(kelly_size, max_risk * capital, kelly_size)
+</code></pre>
+<p><strong>Portfolio-Level Controls:</strong>
+- <strong>Correlation limits:</strong> Cap exposure to correlated instruments
+- <strong>Beta hedging:</strong> Offset systematic market exposure
+- <strong>Sector diversification:</strong> Limit concentration in single sectors</p>
+<p><strong>Real-time Risk Mitigation:</strong></p>
+<p><strong>Circuit Breakers:</strong>
+- <strong>Position-level:</strong> Auto-liquidate on loss threshold
+- <strong>Strategy-level:</strong> Halt all trading on adverse conditions
+- <strong>Account-level:</strong> Daily loss limit across all strategies</p>
+<p><strong>Stress Testing:</strong>
+- <strong>Historical scenarios:</strong> Replay during known stress periods (e.g., 2008 crisis)
+- <strong>Synthetic stress:</strong> Simulate extreme conditions (±3σ moves)
+- <strong>Liquidity stress:</strong> Model trading with 50% depth reduction</p>
+<p><strong>Backtesting with Realistic Costs:</strong>
+- <strong>Transaction costs:</strong> Commission + exchange fees + spread
+- <strong>Financing costs:</strong> Interest for leveraged positions
+- <strong>Market impact:</strong> Realistic execution slippage models
+- <strong>Operational costs:</strong> Latency, colocation, technology expenses</p>
+<hr />
+<h2 id="methodology-framework">Methodology Framework<a class="headerlink" href="#methodology-framework" title="連結到此標題">&para;</a></h2>
+<h3 id="end-to-end-pipeline">End-to-End Pipeline<a class="headerlink" href="#end-to-end-pipeline" title="連結到此標題">&para;</a></h3>
+<pre><code>1. Data Collection &amp; Cleaning
+   ├─ LOB reconstruction from exchange feeds
+   ├─ Crossed quote removal
+   ├─ State aggregation at same timestamp
+   └─ Auction period exclusion (first/last 10 min)
+
+2. Feature Engineering
+   ├─ Raw LOB extraction (10-40 levels)
+   ├─ Derived feature computation (spreads, imbalances, etc.)
+   ├─ Rolling normalization (5-day z-score)
+   └─ Label generation with smoothing
+
+3. Model Development
+   ├─ Architecture selection (TLOB/LiT/DeepLOB)
+   ├─ Hyperparameter optimization
+   ├─ Training with early stopping
+   └─ Validation on out-of-sample data
+
+4. Evaluation
+   ├─ F1-score computation
+   ├─ Profitability simulation with transaction costs
+   ├─ Statistical significance testing
+   └─ Robustness analysis across regimes
+
+5. Deployment
+   ├─ Model serving (real-time inference)
+   ├─ Monitoring (drift detection)
+   ├─ A/B testing vs. baseline
+   └─ Continuous retraining schedule
+</code></pre>
+<h3 id="research-design-principles">Research Design Principles<a class="headerlink" href="#research-design-principles" title="連結到此標題">&para;</a></h3>
+<p><strong>1. Avoid Common Pitfalls:</strong>
+- <strong>Look-ahead bias:</strong> Ensure features computed from historical data only
+- <strong>Overfitting:</strong> Use separate validation/test sets, regularization
+- <strong>Data leakage:</strong> Prevent information from future labels entering features
+- <strong>Survivorship bias:</strong> Include delisted/merged assets in historical testing</p>
+<p><strong>2. Reproducibility Standards:</strong>
+- <strong>Open datasets:</strong> Use FI-2010, LOBSTER samples where available
+- <strong>Code sharing:</strong> Release implementations on GitHub
+- <strong>Random seeds:</strong> Report all seeds used
+- <strong>Hyperparameter documentation:</strong> Document all choices</p>
+<p><strong>3. Benchmarking Protocol:</strong>
+- <strong>Multiple baselines:</strong> Compare against MLP, LSTM, CNN, Random Forest
+- <strong>Multiple horizons:</strong> Evaluate across 10, 20, 30, 50, 100 LOB updates
+- <strong>Multiple stocks:</strong> Test across diverse tick regimes
+- <strong>Temporal splits:</strong> Train on earlier data, test on later periods</p>
+<hr />
+<h2 id="practical-recommendations">Practical Recommendations<a class="headerlink" href="#practical-recommendations" title="連結到此標題">&para;</a></h2>
+<h3 id="for-researchers">For Researchers<a class="headerlink" href="#for-researchers" title="連結到此標題">&para;</a></h3>
+<p><strong>1. Dataset Selection:</strong>
+- Use LOBSTER or equivalent high-quality LOB data providers
+- Include diverse stocks across sectors and capitalization
+- Span multiple time periods to capture market regimes
+- Ensure message files available for order flow analysis</p>
+<p><strong>2. Model Architecture:</strong>
+- Start with simple MLP as baseline—surprisingly effective
+- Progress to Transformer-based architectures for long horizons
+- Include bilinear normalization for non-stationary LOB data
+- Use dual-attention (temporal + spatial) for best performance</p>
+<p><strong>3. Evaluation Rigor:</strong>
+- Report F1-score, not just accuracy
+- Perform temporal train-test splits (no future leakage)
+- Test on multiple market conditions (volatile vs. calm periods)
+- Evaluate with realistic transaction costs, not just prediction accuracy</p>
+<p><strong>4. Research Questions to Address:</strong>
+- How does predictability vary across tick-size regimes?
+- What is the degradation rate as models become widely known?
+- Can we design models that adapt automatically to regime changes?
+- How do we translate F1-scores to expected trading profits?</p>
+<h3 id="for-practitioners">For Practitioners<a class="headerlink" href="#for-practitioners" title="連結到此標題">&para;</a></h3>
+<p><strong>1. Market Selection:</strong>
+- Focus on high-liquidity stocks for reduced execution costs
+- Consider tick regime—large-tick stocks show more stability
+- Avoid stocks with known structural issues (takeovers, restructuring)
+- Monitor for regime shifts (predictability changes over time)</p>
+<p><strong>2. Strategy Implementation:</strong>
+- Start with simple market-making or liquidity provision
+- Use directional predictions only when edge exceeds transaction costs by 2-3×
+- Implement robust risk management (position limits, stop-losses)
+- Monitor real-time P&amp;L and drawdown continuously</p>
+<p><strong>3. Operational Infrastructure:</strong>
+- Colocation at exchange for minimum latency
+- High-performance compute for inference &lt;1ms
+- Redundant data feeds from multiple venues
+- Order management system with sub-millisecond execution</p>
+<p><strong>4. Risk Management Priority:</strong>
+- Never exceed position limits regardless of signal strength
+- Implement mandatory daily loss limits
+- Diversify across uncorrelated strategies
+- Maintain cash reserves for margin calls</p>
+<p><strong>5. Continuous Improvement:</strong>
+- Track prediction accuracy vs. realized P&amp;L
+- Investigate degraded performance periods
+- Retrain models on recent data quarterly or monthly
+- A/B test new models against production baseline</p>
+<h3 id="model-development-best-practices">Model Development Best Practices<a class="headerlink" href="#model-development-best-practices" title="連結到此標題">&para;</a></h3>
+<p><strong>Data Processing:</strong></p>
+<pre><code>1. Remove crossed quotes (bid &gt; ask)
+2. Collapse duplicate timestamps to last state
+3. Exclude auction periods (first/last 10 minutes)
+4. Apply 5-day rolling z-score normalization
+5. Create balanced sampling (if needed)
+</code></pre>
+<p><strong>Training Configuration:</strong></p>
+<pre><code>Batch size: 32
+Learning rate: 6e-5 with AdamW
+Optimizer: AdamW (β₁=0.9, β₂=0.95)
+Early stopping: Patience=15 epochs
+Max epochs: 100 (typical convergence in &lt;50)
+Regularization: Dropout 0.1-0.3 + Weight decay 1e-4
+</code></pre>
+<p><strong>Label Design:</strong>
+- Use independent smoothing window from prediction horizon
+- Set thresholds to average spread × safety margin
+- Consider class balance but prioritize economic significance
+- Test multiple thresholds for robustness</p>
+<p><strong>Evaluation Protocol:</strong>
+1. Primary metric: F1-score (macro-average)
+2. Report: Precision, recall, accuracy, AUC
+3. Economic evaluation: Simulate trading with realistic costs
+4. Statistical tests: Bootstrapped confidence intervals
+5. Sensitivity analysis: Performance across horizons/stocks</p>
+<hr />
+<h2 id="challenges-and-open-problems">Challenges and Open Problems<a class="headerlink" href="#challenges-and-open-problems" title="連結到此標題">&para;</a></h2>
+<h3 id="1-simulation-to-reality-gap">1. Simulation-to-Reality Gap<a class="headerlink" href="#1-simulation-to-reality-gap" title="連結到此標題">&para;</a></h3>
+<p><strong>Problem Description:</strong>
+Models achieve high F1-scores (60-70%) on benchmark datasets but fail to translate into profitable strategies in live trading due to:
+- Higher transaction costs in reality
+- Market impact of own orders
+- Latency constraints
+- Regime shifts not captured in historical training</p>
+<p><strong>Quantification:</strong>
+- FI-2010 (Finnish stocks, 2010): Lower complexity, higher predictability
+- NASDAQ (Tesla/Intel, 2015): More efficient, 5-10 F1-score points lower
+- Degradation over time: -6.68 F1-score points from 2012 to 2015</p>
+<p><strong>Mitigation Strategies:</strong>
+- Train on more recent data
+- Use transfer learning with fine-tuning
+- Incorporate market regime detection
+- Design models with explicit uncertainty estimation</p>
+<h3 id="2-non-stationarity-and-distribution-shift">2. Non-Stationarity and Distribution Shift<a class="headerlink" href="#2-non-stationarity-and-distribution-shift" title="連結到此標題">&para;</a></h3>
+<p><strong>Challenge:</strong>
+LOB data exhibits:
+- <strong>Volatility clustering:</strong> Periods of high/low volatility
+- <strong>Regime changes:</strong> Sudden shifts in order patterns
+- <strong>Distribution drift:</strong> Parameters evolve over time</p>
+<p><strong>Solutions:</strong>
+- Bilinear normalization for adaptive scaling
+- Online learning with concept drift detection
+- Ensemble methods trained on different regimes
+- Rolling training windows (retrain on recent N days)</p>
+<h3 id="3-computational-efficiency">3. Computational Efficiency<a class="headerlink" href="#3-computational-efficiency" title="連結到此標題">&para;</a></h3>
+<p><strong>Scale Requirements:</strong>
+- LOB data: Millions to billions of events per day
+- Models: Transformer architectures with millions of parameters
+- Latency: Sub-millisecond inference required for HFT</p>
+<p><strong>Approaches:</strong>
+- Model distillation: Smaller student models from large teacher
+- Quantization: Reduced precision (FP16, INT8) for faster inference
+- Specialized hardware: TPU/GPU optimizations for transformers
+- Caching: Precompute features, use incremental updates</p>
+<h3 id="4-data-quality-and-access">4. Data Quality and Access<a class="headerlink" href="#4-data-quality-and-access" title="連結到此標題">&para;</a></h3>
+<p><strong>Challenges:</strong>
+- Proprietary data access (LOBSTER limited samples)
+- Exchange-specific formats and rules
+- Synchronization across multiple venues
+- Historical data availability limits backtesting depth</p>
+<p><strong>Solutions:</strong>
+- Use public datasets (FI-2010, LOBSTER samples)
+- Build internal data collection from live feeds
+- Synthetic data generation for rare events
+- Partnerships with data providers</p>
+<hr />
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="連結到此標題">&para;</a></h2>
+<h3 id="academic-papers">Academic Papers<a class="headerlink" href="#academic-papers" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Deep Limit Order Book Forecasting: A Microstructural Guide</strong> (PMC, 2025)</li>
+<li>Authors: Multiple contributors, published in Quantitative Finance</li>
+<li>Content: LOBFrame framework, DeepLOB evaluation, microstructural analysis</li>
+<li>
+<p>URL: https://pmc.ncbi.nlm.nih.gov/articles/PMC12315853/</p>
+</li>
+<li>
+<p><strong>TLOB: A Novel Transformer Model with Dual Attention</strong> (arXiv, 2025)</p>
+</li>
+<li>Authors: Leonardo Berti et al.</li>
+<li>Content: Dual-attention transformer, MLPLOB baseline, spread-based thresholds</li>
+<li>
+<p>URL: https://arxiv.org/html/2502.15757v2</p>
+</li>
+<li>
+<p><strong>LiT: Limit Order Book Transformer</strong> (Frontiers, 2025)</p>
+</li>
+<li>Authors: Multiple contributors</li>
+<li>Content: Structured patches, transformer without CNNs</li>
+<li>
+<p>URL: https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1616485/full</p>
+</li>
+<li>
+<p><strong>DeepLOB</strong> (Zhang et al., 2019)</p>
+</li>
+<li>Content: CNN + LSTM architecture, Inception Module</li>
+<li>Citation count: 1000+, foundational in LOB deep learning</li>
+</ol>
+<h3 id="industry-resources">Industry Resources<a class="headerlink" href="#industry-resources" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Machine Learning for Crypto Market Microstructure Analysis</strong> (Amberdata Blog, 2025)</li>
+<li>Content: LSTM/GRU, Random Forest, Transformer applications</li>
+<li>
+<p>URL: https://blog.amberdata.io/machine-learning-for-crypto-market-microstructure-analysis</p>
+</li>
+<li>
+<p><strong>LOBSTER Data Provider</strong></p>
+</li>
+<li>Content: Historical LOB data for academic research</li>
+<li>URL: https://lobsterdata.com/</li>
+</ol>
+<h3 id="datasets">Datasets<a class="headerlink" href="#datasets" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>FI-2010 Dataset</strong></li>
+<li>10 trading days from 5 Finnish stocks</li>
+<li>~395K samples after 10-event sampling</li>
+<li>
+<p>Benchmark for LOB forecasting research</p>
+</li>
+<li>
+<p><strong>NASDAQ Dataset (TSLA-INTC)</strong></p>
+</li>
+<li>Tesla and Intel stocks, January 2015</li>
+<li>~24M samples, more complex than FI-2010</li>
+<li>Demonstrates real-world prediction challenges</li>
+</ol>
+<hr />
+<h2 id="metadata">Metadata<a class="headerlink" href="#metadata" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>Confidence:</strong> High</li>
+<li><strong>Research depth:</strong> Deep (comprehensive literature review + multiple paper analyses)</li>
+<li><strong>Data freshness:</strong> August 2025 (Frontiers), February 2025 (arXiv), 2025 (PMC DeepLOB)</li>
+<li><strong>Suggestions:</strong> </li>
+<li>Focus on practical evaluation metrics beyond F1-score—incorporate transaction costs explicitly</li>
+<li>Investigate regime detection and adaptive model updating</li>
+<li>Explore ensemble methods combining predictions with fundamental signals</li>
+<li>Develop economic evaluation frameworks connecting predictions to actual profitability</li>
+<li><strong>Errors:</strong> None encountered; all sources successfully fetched and analyzed</li>
+</ul>
+<hr />
+<p><em>Research completed. For implementation details, code examples, and extended analysis, refer to cited papers and LOBFrame framework.</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

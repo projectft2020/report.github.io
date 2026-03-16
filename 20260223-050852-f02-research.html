@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fama-French 三因子/五因子模型完整解析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Fama-French 三因子/五因子模型完整解析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="fama-french">Fama-French 三因子/五因子模型完整解析<a class="headerlink" href="#fama-french" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> 20260223-050852-f02<br />
+<strong>Agent:</strong> Charlie Research<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-23T05:09:00Z</p>
+<h2 id="_1">研究摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>本研究提供了 Fama-French 三因子和五因子模型的完整解析，包含數學原理、Python 實作程式碼、以及實際數據範例。研究涵蓋了從 CAPM 到多因子模型的理論發展，詳細說明了每個因子的構建方法和經濟意義，並提供了完整的統計分析框架。</p>
+<h2 id="1-ff3">1. 三因子模型（FF3）詳細解析<a class="headerlink" href="#1-ff3" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 理論背景與發展<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p>Fama-French 三因子模型由 Eugene Fama 和 Kenneth French 於 1993 年提出，是對傳統 CAPM 模型的重大擴展。該模型旨在解釋 CAPM 無法完全說明的股票報酬異常現象，特別是規模效應和價值效應。</p>
+<h3 id="12">1.2 數學公式<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<h4 id="121-capm-ff3">1.2.1 CAPM 到 FF3 的擴展<a class="headerlink" href="#121-capm-ff3" title="連結到此標題">&para;</a></h4>
+<p><strong>傳統 CAPM 模型：</strong></p>
+<pre><code>R_i - R_f = α_i + β_i(R_m - R_f) + ε_i
+</code></pre>
+<p><strong>Fama-French 三因子模型：</strong></p>
+<pre><code>R_i - R_f = α_i + β_i(R_m - R_f) + s_i·SMB + h_i·HML + ε_i
+</code></pre>
+<p>其中：
+- <code>R_i</code>：資產 i 的報酬率
+- <code>R_f</code>：無風險利率
+- <code>R_m</code>：市場投資組合報酬率
+- <code>R_m - R_f</code>：市場溢價（MKT 因子）
+- <code>SMB</code>：規模因子（Small Minus Big）
+- <code>HML</code>：價值因子（High Minus Low）
+- <code>β_i</code>：市場風險係數
+- <code>s_i</code>：規模風險係數
+- <code>h_i</code>：價值風險係數
+- <code>α_i</code>：異常報酬（Jensen's alpha）
+- <code>ε_i</code>：誤差項</p>
+<h3 id="13">1.3 因子構建與經濟意義<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<h4 id="131-mkt">1.3.1 市場風險因子（MKT）<a class="headerlink" href="#131-mkt" title="連結到此標題">&para;</a></h4>
+<p><strong>數學定義：</strong></p>
+<pre><code>MKT = R_m - R_f
+</code></pre>
+<p><strong>構建方法：</strong>
+- 使用所有在 NYSE、AMEX、NASDAQ 上市的美國公司
+- 市場報酬率為加權平均報酬率
+- 無風險利率使用一個月期國庫券利率</p>
+<p><strong>經濟意義：</strong>
+- 代表市場系統性風險
+- 反映整體市場的波動性</p>
+<h4 id="132-smb-small-minus-big">1.3.2 規模因子（SMB - Small Minus Big）<a class="headerlink" href="#132-smb-small-minus-big" title="連結到此標題">&para;</a></h4>
+<p><strong>數學定義：</strong></p>
+<pre><code>SMB = 1/3 (Small Value + Small Neutral + Small Growth) 
+       - 1/3 (Big Value + Big Neutral + Big Growth)
+</code></pre>
+<p><strong>構建步驟：</strong>
+1. <strong>規模分組：</strong> 根據市值大小將股票分為小型（Small）和大型（Big）兩組
+2. <strong>價值分組：</strong> 根據帳面市值比（Book-to-Market）將股票分為價值型（Value）、中立型（Neutral）、成長型（Growth）三組
+3. <strong>投資組合形成：</strong> 形成 2×3 = 6 個投資組合
+4. <strong>因子計算：</strong> 小型股票平均報酬減去大型股票平均報酬</p>
+<p><strong>經濟意義：</strong>
+- 捕捉規模效應：小型股票平均而言比大型股票有更高的報酬
+- 反映小公司的流動性風險和資訊不對稱性</p>
+<h4 id="133-hml-high-minus-low">1.3.3 價值因子（HML - High Minus Low）<a class="headerlink" href="#133-hml-high-minus-low" title="連結到此標題">&para;</a></h4>
+<p><strong>數學定義：</strong></p>
+<pre><code>HML = 1/2 (Small Value + Big Value) 
+       - 1/2 (Small Growth + Big Growth)
+</code></pre>
+<p><strong>構建方法：</strong>
+1. 使用相同的 6 個投資組合
+2. 計算高價值股票與低價值股票的平均報酬差異</p>
+<p><strong>經濟意義：</strong>
+- 捕捉價值效應：高帳面市值比股票（價值股）平均而言比低帳面市值比股票（成長股）有更高的報酬
+- 反映市場對價值股的風險溢價</p>
+<h3 id="14-python">1.4 Python 實作程式碼<a class="headerlink" href="#14-python" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+import statsmodels.formula.api as smf
+import pandas_datareader.data as web
+
+# 載入 Ken French 數據庫
+def load_fama_french_factors(start_date='1970-01-01', end_date='2025-12-31'):
+    &quot;&quot;&quot;
+    載入 Fama-French 三因子數據
+    &quot;&quot;&quot;
+    # 載入三因子數據
+    factors_3 = web.DataReader('F-F_Research_Data_Factors_daily', 'famafrench', start_date, end_date)
+    factors_3.columns = ['MKT-RF', 'SMB', 'HML', 'RF']
+
+    # 載入五因子數據
+    factors_5 = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', start_date, end_date)
+    factors_5.columns = ['MKT-RF', 'SMB', 'HML', 'RMW', 'CMA', 'RF']
+
+    return factors_3, factors_5
+
+# 因子回歸分析
+def fama_french_regression(returns, factors):
+    &quot;&quot;&quot;
+    執行 Fama-French 回歸分析
+
+    Parameters:
+    returns: pd.Series - 資產超額報酬
+    factors: pd.DataFrame - 因子數據
+
+    Returns:
+    回歸結果
+    &quot;&quot;&quot;
+    # 合併數據
+    data = pd.concat([returns, factors], axis=1).dropna()
+
+    # 執行三因子回歸
+    model_3 = smf.ols('returns ~ Q(&quot;MKT-RF&quot;) + SMB + HML', data=data).fit()
+
+    # 執行五因子回歸（如果數據可用）
+    if 'RMW' in factors.columns and 'CMA' in factors.columns:
+        model_5 = smf.ols('returns ~ Q(&quot;MKT-RF&quot;) + SMB + HML + RMW + CMA', data=data).fit()
+        return model_3, model_5
+    else:
+        return model_3
+
+# 載入範例數據
+factors_3, factors_5 = load_fama_french_factors()
+
+# 使用 S&amp;P 500 作為市場基準
+sp500_returns = web.DataReader('SP500', 'fred', '1970-01-01', '2025-12-31')
+sp500_returns = sp500_returns.pct_change().dropna() * 100  # 轉換為百分比
+
+# 執行回歸分析
+model_3, model_5 = fama_french_regression(sp500_returns, factors_5)
+</code></pre>
+<h2 id="2-ff5">2. 五因子模型（FF5）詳細解析<a class="headerlink" href="#2-ff5" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 理論背景<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<p>Fama-French 五因子模型於 2015 年提出，在三因子模型的基礎上增加了兩個新因子：盈利能力因子（RMW）和投資因子（CMA）。這個擴展旨在解釋三因子模型無法完全捕捉的報酬異常現象。</p>
+<h3 id="22">2.2 數學公式<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<pre><code>R_i - R_f = α_i + β_i(R_m - R_f) + s_i·SMB + h_i·HML + r_i·RMW + c_i·CMA + ε_i
+</code></pre>
+<p>新增因子說明：
+- <code>RMW</code>：盈利能力因子（Robust Minus Weak）
+- <code>CMA</code>：投資因子（Conservative Minus Aggressive）
+- <code>r_i</code>：盈利能力風險係數
+- <code>c_i</code>：投資風險係數</p>
+<h3 id="23">2.3 新增因子構建與經濟意義<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<h4 id="231-rmw-robust-minus-weak">2.3.1 盈利能力因子（RMW - Robust Minus Weak）<a class="headerlink" href="#231-rmw-robust-minus-weak" title="連結到此標題">&para;</a></h4>
+<p><strong>數學定義：</strong></p>
+<pre><code>RMW = 1/2 (Robust_Small + Robust_Big) 
+        - 1/2 (Weak_Small + Weak_Big)
+</code></pre>
+<p><strong>構建方法：</strong>
+1. <strong>盈利能力分組：</strong> 根據營業盈利能力（Operating Profitability）將股票分為強健（Robust）和疲弱（Weak）兩組
+2. <strong>投資組合形成：</strong> 在規模分組的基礎上，形成 2×3×3 = 18 個投資組合
+3. <strong>因子計算：</strong> 高盈利能力股票平均報酬減去低盈利能力股票平均報酬</p>
+<p><strong>經濟意義：</strong>
+- 捕捉盈利能力效應：高盈利能力公司平均而言比低盈利能力公司有更高的報酬
+- 反映市場對盈利穩定性的溢價</p>
+<h4 id="232-cma-conservative-minus-aggressive">2.3.2 投資因子（CMA - Conservative Minus Aggressive）<a class="headerlink" href="#232-cma-conservative-minus-aggressive" title="連結到此標題">&para;</a></h4>
+<p><strong>數學定義：</strong></p>
+<pre><code>CMA = 1/2 (Conservative_Small + Conservative_Big) 
+        - 1/2 (Aggressive_Small + Aggressive_Big)
+</code></pre>
+<p><strong>構建方法：</strong>
+1. <strong>投資水平分組：</strong> 根據投資資產比率（Asset Growth）將股票分為保守（Conservative）和積極（Aggressive）兩組
+2. <strong>投資組合形成：</strong> 在規模和盈利能力分組的基礎上，形成更細分的投資組合
+3. <strong>因子計算：</strong> 低投資公司平均報酬減去高投資公司平均報酬</p>
+<p><strong>經濟意義：</strong>
+- 捕捉投資效應：保守型投資公司平均而言比積極型投資公司有更高的報酬
+- 反映市場對投資效率的評價</p>
+<h3 id="24-ff3-ff5">2.4 FF3 與 FF5 的差異<a class="headerlink" href="#24-ff3-ff5" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>三因子模型</th>
+<th>五因子模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>因子數量</td>
+<td>3個</td>
+<td>5個</td>
+</tr>
+<tr>
+<td>新增因子</td>
+<td>無</td>
+<td>RMW、CMA</td>
+</tr>
+<tr>
+<td>解釋能力</td>
+<td>約90%</td>
+<td>約95%</td>
+</tr>
+<tr>
+<td>理論基礎</td>
+<td>規模和價值效應</td>
+<td>規模、價值、盈利能力和投資效應</td>
+</tr>
+<tr>
+<td>實用性</td>
+<td>適合一般分析</td>
+<td>適合深度研究</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-python">2.5 Python 實作擴展<a class="headerlink" href="#25-python" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def construct_fama_french_portfolios(crsp_data, compustat_data):
+    &quot;&quot;&quot;
+    構建 Fama-French 投資組合
+
+    Parameters:
+    crsp_data: DataFrame - CRSP 報酬數據
+    compustat_data: DataFrame - Compustat 財務數據
+
+    Returns:
+    包含所有因子的 DataFrame
+    &quot;&quot;&quot;
+    # 1. 準備數據
+    # 規模數據（6月份市值）
+    size_data = crsp_data[crsp_data['date'].dt.month == 6].copy()
+    size_data['sorting_date'] = size_data['date'] + pd.DateOffset(months=1)
+
+    # 帳面市值比數據（12月份市值 + t-1年帳面價值）
+    market_equity = crsp_data[crsp_data['date'].dt.month == 12].copy()
+    market_equity['sorting_date'] = market_equity['date'] + pd.DateOffset(months=7)
+
+    # 合併財務數據
+    book_to_market = compustat_data.merge(market_equity, on=['gvkey', 'sorting_date'])
+    book_to_market['bm'] = book_to_market['be'] / book_to_market['me']
+
+    # 2. 投資組合分組
+    def assign_portfolio(data, sorting_variable, percentiles):
+        &quot;&quot;&quot;分配投資組合&quot;&quot;&quot;
+        breakpoints = data[sorting_variable].quantile(percentiles)
+        assigned = pd.cut(data[sorting_variable], bins=breakpoints, 
+                          labels=range(1, len(breakpoints)))
+        return assigned
+
+    # 規模分組（中位數分為兩組）
+    size_data['portfolio_size'] = assign_portfolio(size_data, 'mktcap', [0, 0.5, 1])
+
+    # 價值分組（30% 和 70% 分位數）
+    book_to_market['portfolio_bm'] = assign_portfolio(book_to_market, 'bm', [0, 0.3, 0.7, 1])
+
+    # 盈利能力分組
+    book_to_market['portfolio_op'] = assign_portfolio(book_to_market, 'op', [0, 0.3, 0.7, 1])
+
+    # 投資分組
+    book_to_market['portfolio_inv'] = assign_portfolio(book_to_market, 'inv', [0, 0.3, 0.7, 1])
+
+    # 3. 計算因子報酬
+    def calculate_factor_returns(portfolios, factor_type):
+        &quot;&quot;&quot;計算因子報酬&quot;&quot;&quot;
+        returns = portfolios.groupby(['portfolio_size', f'portfolio_{factor_type}', 'date']).apply(
+            lambda x: np.average(x['ret_excess'], weights=x['mktcap_lag'])
+        ).reset_index()
+
+        if factor_type == 'size':
+            # SMB 因子
+            smb = returns.groupby('date').apply(
+                lambda x: x[x['portfolio_size'] == 1]['ret'].mean() - 
+                          x[x['portfolio_size'] == 2]['ret'].mean()
+            )
+            return smb
+        elif factor_type == 'bm':
+            # HML 因子
+            hml = returns.groupby('date').apply(
+                lambda x: x[x['portfolio_bm'] == 3]['ret'].mean() - 
+                          x[x['portfolio_bm'] == 1]['ret'].mean()
+            )
+            return hml
+        elif factor_type == 'op':
+            # RMW 因子
+            rmw = returns.groupby('date').apply(
+                lambda x: x[x['portfolio_op'] == 3]['ret'].mean() - 
+                          x[x['portfolio_op'] == 1]['ret'].mean()
+            )
+            return rmw
+        elif factor_type == 'inv':
+            # CMA 因子
+            cma = returns.groupby('date').apply(
+                lambda x: x[x['portfolio_inv'] == 1]['ret'].mean() - 
+                          x[x['portfolio_inv'] == 3]['ret'].mean()
+            )
+            return cma
+
+    # 計算所有因子
+    smb = calculate_factor_returns(size_data, 'size')
+    hml = calculate_factor_returns(book_to_market, 'bm')
+    rmw = calculate_factor_returns(book_to_market, 'op')
+    cma = calculate_factor_returns(book_to_market, 'inv')
+
+    # 合併結果
+    factors = pd.DataFrame({
+        'SMB': smb,
+        'HML': hml,
+        'RMW': rmw,
+        'CMA': cma
+    })
+
+    return factors
+</code></pre>
+<h2 id="3">3. 模型數學推導<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31-capm-ff3">3.1 CAPM 到 FF3 的擴展理論<a class="headerlink" href="#31-capm-ff3" title="連結到此標題">&para;</a></h3>
+<h4 id="311-capm">3.1.1 CAPM 的局限性<a class="headerlink" href="#311-capm" title="連結到此標題">&para;</a></h4>
+<p>傳統 CAPM 模型假設只有市場風險影響資產報酬：</p>
+<pre><code>E(R_i) - R_f = β_i[E(R_m) - R_f]
+</code></pre>
+<p>然而實證研究發現許多異常現象：
+- 小公司規模效應
+- 價值股溢價效應
+- 動量效應等</p>
+<h4 id="312-ff3">3.1.2 FF3 的理論基礎<a class="headerlink" href="#312-ff3" title="連結到此標題">&para;</a></h4>
+<p>Fama-French 提出這些異常現象反映了系統性風險，而非市場無效率。三因子模型將 CAPM 擴展為：</p>
+<pre><code>E(R_i) - R_f = β_i[E(R_m) - R_f] + s_i·E(SMB) + h_i·E(HML)
+</code></pre>
+<h3 id="32">3.2 因子收益計算公式<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="321">3.2.1 時間序列回歸<a class="headerlink" href="#321" title="連結到此標題">&para;</a></h4>
+<p>對於每個資產 i，我們執行以下回歸：</p>
+<pre><code>R_{i,t} - R_{f,t} = α_i + β_i(R_{m,t} - R_{f,t}) + s_i·SMB_t + h_i·HML_t + ε_{i,t}
+</code></pre>
+<h4 id="322">3.2.2 交叉截面回歸<a class="headerlink" href="#322" title="連結到此標題">&para;</a></h4>
+<p>在多資產分析中，我們可以進行交叉截面回歸：</p>
+<pre><code>E(R_i) - R_f = γ_0 + γ_1·β_i + γ_2·s_i + γ_3·h_i + η_i
+</code></pre>
+<h3 id="33">3.3 統計顯著性檢驗<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="331">3.3.1 單一係數檢驗<a class="headerlink" href="#331" title="連結到此標題">&para;</a></h4>
+<p>對於每個因子係數，我們執行 t 檢驗：</p>
+<pre><code>H_0: β_i = 0
+H_1: β_i ≠ 0
+
+t = (β̂_i - 0) / SE(β̂_i)
+</code></pre>
+<h4 id="332">3.3.2 整體模型檢驗<a class="headerlink" href="#332" title="連結到此標題">&para;</a></h4>
+<p>使用 F 檢驗評估模型整體顯著性：</p>
+<pre><code>F = (R²/(k-1)) / ((1-R²)/(n-k))
+</code></pre>
+<p>其中 k 為參數數量，n 為樣本數。</p>
+<h3 id="34">3.4 模型評估指標<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<h4 id="341-r2">3.4.1 調整後 R²<a class="headerlink" href="#341-r2" title="連結到此標題">&para;</a></h4>
+<pre><code>R²_adj = 1 - [(1-R²)(n-1)/(n-k-1)]
+</code></pre>
+<h4 id="342-information-ratio">3.4.2 訊息比（Information Ratio）<a class="headerlink" href="#342-information-ratio" title="連結到此標題">&para;</a></h4>
+<pre><code>IR = α̂ / σ(ε̂)
+</code></pre>
+<h2 id="4">4. 實作方法<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 投資組合構建步驟<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<h4 id="411">4.1.1 數據準備<a class="headerlink" href="#411" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def prepare_factor_data(start_date, end_date):
+    &quot;&quot;&quot;準備因子數據&quot;&quot;&quot;
+    # 載入市場數據
+    market_data = web.DataReader('SP500', 'fred', start_date, end_date)
+
+    # 載入無風險利率
+    rf_data = web.DataReader('DGS3MO', 'fred', start_date, end_date)
+
+    # 載入因子數據
+    factors_3 = web.DataReader('F-F_Research_Data_Factors_daily', 'famafrench', start_date, end_date)
+    factors_5 = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', start_date, end_date)
+
+    return market_data, rf_data, factors_3, factors_5
+</code></pre>
+<h4 id="412">4.1.2 因子暴露度計算<a class="headerlink" href="#412" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def calculate_factor_exposure(returns, factors):
+    &quot;&quot;&quot;計算因子暴露度&quot;&quot;&quot;
+    # 標準化數據
+    returns_std = (returns - returns.mean()) / returns.std()
+    factors_std = (factors - factors.mean()) / factors.std()
+
+    # 計算相關係數矩陣
+    correlation_matrix = pd.concat([returns_std, factors_std], axis=1).corr()
+
+    # 提取因子暴露度
+    factor_exposure = correlation_matrix.iloc[0, 1:]
+
+    return factor_exposure
+</code></pre>
+<h3 id="42">4.2 因子收益分解<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def decompose_returns(returns, factors, factor_betas):
+    &quot;&quot;&quot;分解報酬為因子貢獻&quot;&quot;&quot;
+    # 計算每個因子的貢獻
+    factor_contributions = {}
+    for factor in factors.columns:
+        factor_contributions[factor] = factor_betas[factor] * factors[factor]
+
+    # 計算總因子報酬
+    total_factor_return = sum(factor_contributions.values())
+
+    # 計算特定風險報酬
+    specific_return = returns - total_factor_return
+
+    return factor_contributions, specific_return
+</code></pre>
+<h3 id="43">4.3 回測方法<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def backtest_factor_model(strategy_returns, factors, lookback_period=252):
+    &quot;&quot;&quot;回測因子模型&quot;&quot;&quot;
+    results = []
+
+    for i in range(lookback_period, len(strategy_returns)):
+        # 訓練期數據
+        train_returns = strategy_returns.iloc[i-lookback_period:i]
+        train_factors = factors.iloc[i-lookback_period:i]
+
+        # 估計因子係數
+        model = fama_french_regression(train_returns, train_factors)
+
+        # 測試期預測
+        test_factors = factors.iloc[i:i+1]
+        predicted_returns = model.predict(test_factors)
+
+        # 儲存結果
+        results.append({
+            'date': strategy_returns.index[i],
+            'actual_return': strategy_returns.iloc[i],
+            'predicted_return': predicted_returns.iloc[0],
+            'model_r2': model.rsquared,
+            'model_adj_r2': model.rsquared_adj
+        })
+
+    return pd.DataFrame(results)
+</code></pre>
+<h2 id="5">5. 模型局限性和改進<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51-ff3ff5">5.1 FF3/FF5 的不足<a class="headerlink" href="#51-ff3ff5" title="連結到此標題">&para;</a></h3>
+<h4 id="511">5.1.1 理論局限性<a class="headerlink" href="#511" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>因子定義主觀性</strong>：投資組合構建方法（如分組點、權重計算）具有一定主觀性</li>
+<li><strong>樣本依賴性</strong>：因子表現可能受到特定樣本期間的影響</li>
+<li><strong>時變性</strong>：因子風險溢價可能隨時間變化</li>
+</ol>
+<h4 id="512">5.1.2 實證局限性<a class="headerlink" href="#512" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>動量效應缺失</strong>：FF3/FF5 無法完全解釋動量效應</li>
+<li><strong>流動性忽略</strong>：未考慮流動性風險溢價</li>
+<li><strong>國際適用性</strong>：因子在其他國家的表現可能不同</li>
+</ol>
+<h3 id="52">5.2 現代因子模型擴展<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="521-carhart">5.2.1 Carhart 四因子模型<a class="headerlink" href="#521-carhart" title="連結到此標題">&para;</a></h4>
+<pre><code>R_i - R_f = α_i + β_i(R_m - R_f) + s_i·SMB + h_i·HML + m_i·MOM + ε_i
+</code></pre>
+<p>新增動量因子（MOM）：</p>
+<pre><code>MOM = 過去 12 個月（扣除最近一個月）報酬最高的股票組合 - 
+      過去 12 個月（扣除最近一個月）報酬最低的股票組合
+</code></pre>
+<h4 id="522-fama-french">5.2.2 Fama-French 六因子模型<a class="headerlink" href="#522-fama-french" title="連結到此標題">&para;</a></h4>
+<p>在五因子基礎上增加動量因子：</p>
+<pre><code>R_i - R_f = α_i + β_i(R_m - R_f) + s_i·SMB + h_i·HML + r_i·RMW + c_i·CMA + m_i·MOM + ε_i
+</code></pre>
+<h4 id="523-q-factor-modelhou-xue-zhang">5.2.3 Q-Factor Model（Hou-Xue-Zhang）<a class="headerlink" href="#523-q-factor-modelhou-xue-zhang" title="連結到此標題">&para;</a></h4>
+<p>基於投資理論的 q 因子模型：
+- 市場因子（MKT）
+- 規模因子（ME）
+- 投資因子（I/A）
+- 盈利能力因子（ROE）</p>
+<h3 id="53">5.3 實證研究發現<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="531">5.3.1 因子表現分析<a class="headerlink" href="#531" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def analyze_factor_performance(factors, start_year=2000, end_year=2025):
+    &quot;&quot;&quot;分析因子表現&quot;&quot;&quot;
+    # 篩選期間
+    factors_period = factors[factors.index.year &gt;= start_year]
+    factors_period = factors_period[factors_period.index.year &lt;= end_year]
+
+    # 計算統計量
+    stats = pd.DataFrame({
+        'Mean_Return': factors_period.mean() * 12,  # 年化報酬
+        'Std_Dev': factors_period.std() * np.sqrt(12),  # 年化標準差
+        'Sharpe_Ratio': factors_period.mean() / factors_period.std() * np.sqrt(12),
+        'Max_Drawdown': (factors_period.cummax() - factors_period).max(),
+        'Skewness': factors_period.skew(),
+        'Kurtosis': factors_period.kurtosis()
+    })
+
+    return stats
+</code></pre>
+<h4 id="532">5.3.2 因子相關性分析<a class="headerlink" href="#532" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def analyze_factor_correlation(factors):
+    &quot;&quot;&quot;分析因子相關性&quot;&quot;&quot;
+    correlation_matrix = factors.corr()
+
+    # 繪製熱力圖（需要 matplotlib/seaborn）
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
+    plt.title('Factor Correlation Matrix')
+    plt.show()
+
+    return correlation_matrix
+</code></pre>
+<h2 id="6">6. 結論與建議<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 主要發現<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>理論貢獻</strong>：Fama-French 模型成功將 CAPM 從單因子擴展到多因子，大幅提升了資產定價的解釋能力</li>
+<li><strong>實證效果</strong>：三因子模型解釋約 90% 的股票報酬變異，五因子模型可達 95%</li>
+<li><strong>實用價值</strong>：該模型被廣泛應用於投資組合管理、風險管理和績效評估</li>
+</ol>
+<h3 id="62">6.2 實務應用建議<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>因子投資</strong>：可基於因子暴露度構建智慧型投資組合</li>
+<li><strong>風險管理</strong>：使用因子模型進行更精確的風險分解和管理</li>
+<li><strong>績效歸因</strong>：分析投資組合報酬的來源，評估投資經理的技能</li>
+</ol>
+<h3 id="63">6.3 未來研究方向<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>因子動態性</strong>：研究因子風險溢價的時間變化特性</li>
+<li><strong>另類數據</strong>：探索使用另類數據構建新型因子的可能性</li>
+<li><strong>機器學習</strong>：應用機器學習技術優化因子構建和預測</li>
+</ol>
+<h2 id="_2">參考文獻<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<ol>
+<li>
+<p>Fama, E. F., &amp; French, K. R. (1993). Common risk factors in the returns on stocks and bonds. <em>Journal of Financial Economics</em>, 33(1), 3-56.</p>
+</li>
+<li>
+<p>Fama, E. F., &amp; French, K. R. (2015). A five-factor asset pricing model. <em>Journal of Financial Economics</em>, 116(1), 1-22.</p>
+</li>
+<li>
+<p>French, K. R. (2025). Data Library. Tuck School of Business at Dartmouth. https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html</p>
+</li>
+<li>
+<p>Carhart, M. M. (1997). On persistence in mutual fund performance. <em>The Journal of Finance</em>, 52(1), 57-82.</p>
+</li>
+<li>
+<p>Hou, K., Xue, C., &amp; Zhang, L. (2015). Digesting anomalies: An investment approach. <em>The Review of Financial Studies</em>, 28(3), 650-705.</p>
+</li>
+</ol>
+<h2 id="python">附錄：完整 Python 程式碼<a class="headerlink" href="#python" title="連結到此標題">&para;</a></h2>
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+import statsmodels.formula.api as smf
+import pandas_datareader.data as web
+import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+class FamaFrenchModel:
+    &quot;&quot;&quot;Fama-French 模型完整實作類別&quot;&quot;&quot;
+
+    def __init__(self, start_date='1970-01-01', end_date='2025-12-31'):
+        self.start_date = start_date
+        self.end_date = end_date
+        self.factors_3 = None
+        self.factors_5 = None
+        self.market_data = None
+        self.rf_data = None
+
+    def load_data(self):
+        &quot;&quot;&quot;載入所有必要數據&quot;&quot;&quot;
+        # 載入市場數據
+        self.market_data = web.DataReader('SP500', 'fred', self.start_date, self.end_date)
+
+        # 載入無風險利率
+        self.rf_data = web.DataReader('DGS3MO', 'fred', self.start_date, self.end_date)
+
+        # 載入因子數據
+        self.factors_3 = web.DataReader('F-F_Research_Data_Factors_daily', 'famafrench', self.start_date, self.end_date)
+        self.factors_5 = web.DataReader('F-F_Research_Data_5_Factors_2x3_daily', 'famafrench', self.start_date, self.end_date)
+
+        # 標準化欄位名稱
+        self.factors_3.columns = ['MKT-RF', 'SMB', 'HML', 'RF']
+        self.factors_5.columns = ['MKT-RF', 'SMB', 'HML', 'RMW', 'CMA', 'RF']
+
+        return self
+
+    def analyze_portfolio(self, portfolio_returns, model_type='3-factor'):
+        &quot;&quot;&quot;分析投資組合的因子暴露度&quot;&quot;&quot;
+        if model_type == '3-factor':
+            factors = self.factors_3
+            formula = 'portfolio_returns ~ Q(&quot;MKT-RF&quot;) + SMB + HML'
+        else:
+            factors = self.factors_5
+            formula = 'portfolio_returns ~ Q(&quot;MKT-RF&quot;) + SMB + HML + RMW + CMA'
+
+        # 合併數據
+        data = pd.DataFrame({
+            'portfolio_returns': portfolio_returns,
+            **{col: factors[col] for col in factors.columns if col != 'RF'}
+        }).dropna()
+
+        # 執行回歸分析
+        model = smf.ols(formula, data=data).fit()
+
+        return model
+
+    def factor_performance_analysis(self):
+        &quot;&quot;&quot;分析因子表現&quot;&quot;&quot;
+        if self.factors_5 is not None:
+            factors = self.factors_5.drop('RF', axis=1)
+        else:
+            factors = self.factors_3.drop('RF', axis=1)
+
+        # 計算年化統計量
+        stats = pd.DataFrame({
+            'Annualized_Return': factors.mean() * 252,
+            'Annualized_Std': factors.std() * np.sqrt(252),
+            'Sharpe_Ratio': factors.mean() / factors.std() * np.sqrt(252),
+            'Max_Drawdown': (factors.cummax() - factors).max(),
+            'Skewness': factors.skew(),
+            'Kurtosis': factors.kurtosis()
+        })
+
+        return stats
+
+    def plot_factor_performance(self):
+        &quot;&quot;&quot;繪製因子表現圖表&quot;&quot;&quot;
+        if self.factors_5 is not None:
+            factors = self.factors_5.drop('RF', axis=1)
+        else:
+            factors = self.factors_3.drop('RF', axis=1)
+
+        # 計算累積報酬
+        cumulative_returns = (1 + factors/100).cumprod()
+
+        # 繪製圖表
+        plt.figure(figsize=(12, 8))
+        for column in cumulative_returns.columns:
+            plt.plot(cumulative_returns.index, cumulative_returns[column], label=column)
+
+        plt.title('Factor Cumulative Returns')
+        plt.xlabel('Date')
+        plt.ylabel('Cumulative Return')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+        return cumulative_returns
+
+    def backtest_strategy(self, strategy_returns, lookback_period=252):
+        &quot;&quot;&quot;回測投資策略&quot;&quot;&quot;
+        results = []
+
+        for i in range(lookback_period, len(strategy_returns)):
+            # 訓練期數據
+            train_returns = strategy_returns.iloc[i-lookback_period:i]
+            train_factors = self.factors_5.iloc[i-lookback_period:i].drop('RF', axis=1)
+
+            # 估計因子係數
+            data = pd.concat([train_returns, train_factors], axis=1).dropna()
+            if len(data) &lt; 100:  # 確保有足夠數據
+                continue
+
+            model = smf.ols('train_returns ~ Q(&quot;MKT-RF&quot;) + SMB + HML + RMW + CMA', data=data).fit()
+
+            # 測試期預測
+            test_factors = self.factors_5.iloc[i:i+1].drop('RF', axis=1)
+            if len(test_factors) &gt; 0:
+                try:
+                    predicted_returns = model.predict(test_factors)
+
+                    results.append({
+                        'date': strategy_returns.index[i],
+                        'actual_return': strategy_returns.iloc[i],
+                        'predicted_return': predicted_returns.iloc[0],
+                        'model_r2': model.rsquared,
+                        'model_adj_r2': model.rsquared_adj
+                    })
+                except:
+                    continue
+
+        return pd.DataFrame(results)
+
+# 使用範例
+if __name__ == &quot;__main__&quot;:
+    # 初始化模型
+    ff_model = FamaFrenchModel(start_date='2000-01-01', end_date='2025-12-31')
+
+    # 載入數據
+    ff_model.load_data()
+
+    # 分析因子表現
+    factor_stats = ff_model.factor_performance_analysis()
+    print(&quot;Factor Performance Statistics:&quot;)
+    print(factor_stats)
+
+    # 繪製因子表現圖表
+    cumulative_returns = ff_model.plot_factor_performance()
+
+    # 範例：分析 S&amp;P 500 的因子暴露度
+    sp500_returns = web.DataReader('SP500', 'fred', '2000-01-01', '2025-12-31')
+    sp500_returns = sp500_returns.pct_change().dropna() * 100
+
+    # 執行三因子回歸
+    model_3 = ff_model.analyze_portfolio(sp500_returns, '3-factor')
+    print(&quot;\nThree-Factor Model Results:&quot;)
+    print(model_3.summary())
+
+    # 執行五因子回歸
+    model_5 = ff_model.analyze_portfolio(sp500_returns, '5-factor')
+    print(&quot;\nFive-Factor Model Results:&quot;)
+    print(model_5.summary())
+</code></pre>
+<hr />
+<p><strong>研究完成</strong><br />
+本報告提供了 Fama-French 三因子和五因子模型的完整解析，包含理論基礎、數學推導、Python 實作程式碼，以及實證分析方法。該研究可作為因子投資策略制定和風險管理的重要參考。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

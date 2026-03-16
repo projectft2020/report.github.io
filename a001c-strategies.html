@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 策略系統分析報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 策略系統分析報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard">Dashboard 策略系統分析報告<a class="headerlink" href="#dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>任務 ID:</strong> a001c
+<strong>代理:</strong> Charlie Analyst
+<strong>狀態:</strong> completed
+<strong>時間戳:</strong> 2026-02-20T23:38:00+08:00</p>
+<hr />
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>Dashboard 策略系統採用模組化架構，將策略相關的 API 端點分離為 12 個獨立模組，透過統一的策略註冊機制和緩存層提供高效服務。系統支援多種策略類型（技術指標、動量、分配策略等），並提供回測、Monte Carlo 模擬、執行敏感度分析等進階功能。核心設計採用 FastAPI + DuckDB 架構，使用 Pydantic 模型進行數據驗證，並實現了多層緩存機制以提升性能。</p>
+<p><strong>關鍵發現:</strong>
+- 系統已從單一 1335 行路由文件重構為模組化架構
+- 實現了策略實例管理、回測執行、Monte Carlo 分析的完整鏈路
+- 採用策略註冊模式和聚合器模式，支援動態策略擴展
+- 緩存層涵蓋模板、市場、宇宙、showcase、resonance 等多個維度</p>
+<hr />
+<h2 id="1">1. 策略文件清單<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 核心模組<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要端點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>__init__.py</code></strong></td>
+<td>統一入口，組合所有子路由</td>
+<td><code>/api/strategies/*</code></td>
+</tr>
+<tr>
+<td><strong><code>models.py</code></strong></td>
+<td>Pydantic 請求/響應模型</td>
+<td>統一 API 數據格式</td>
+</tr>
+<tr>
+<td><strong><code>utils.py</code></strong></td>
+<td>緩存類和工具函數</td>
+<td>StrategyCache, get_aggregator</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 業務模組<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要端點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>backtest.py</code></strong></td>
+<td>回測執行</td>
+<td><code>POST /run</code>, <code>POST /run-saved</code></td>
+</tr>
+<tr>
+<td><strong><code>monte_carlo.py</code></strong></td>
+<td>Monte Carlo 模擬</td>
+<td><code>GET /status</code>, <code>POST /trigger</code>, <code>GET /result</code></td>
+</tr>
+<tr>
+<td><strong><code>comparison.py</code></strong></td>
+<td>策略比較</td>
+<td><code>GET /</code></td>
+</tr>
+<tr>
+<td><strong><code>execution_sensitivity.py</code></strong></td>
+<td>執行敏感度分析</td>
+<td><code>GET /analyze</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 配置與管理模組<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要端點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>templates.py</code></strong></td>
+<td>策略模板、市場、宇宙</td>
+<td><code>GET /</code>, <code>GET /{id}</code>, markets/<em>, universes/</em></td>
+</tr>
+<tr>
+<td><strong><code>instances.py</code></strong></td>
+<td>策略實例管理</td>
+<td><code>GET /</code>, <code>POST /</code>, <code>GET /{id}</code></td>
+</tr>
+<tr>
+<td><strong><code>crud.py</code></strong></td>
+<td>用戶策略 CRUD 操作</td>
+<td><code>GET /strategies</code>, <code>POST /strategies</code>, <code>PUT /strategies/{id}</code>, <code>DELETE /strategies/{id}</code></td>
+</tr>
+<tr>
+<td><strong><code>history.py</code></strong></td>
+<td>回測歷史記錄</td>
+<td><code>GET /</code>, <code>GET /{id}</code>, <code>DELETE /{id}</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">1.4 進階功能模組<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>職責</th>
+<th>主要端點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>resonance.py</code></strong></td>
+<td>共振策略掃描</td>
+<td><code>GET /strategies</code>, <code>GET /symbol/{symbol}</code>, <code>GET /discover</code>, <code>GET /summary</code>, <code>GET /home</code>, <code>POST /scan</code></td>
+</tr>
+<tr>
+<td><strong><code>showcase.py</code></strong></td>
+<td>預計算展示數據</td>
+<td><code>GET /configs</code>, <code>GET /{strategy_type}</code>, <code>DELETE /cache</code></td>
+</tr>
+<tr>
+<td><strong><code>cache.py</code></strong></td>
+<td>緩存管理</td>
+<td><code>GET /stats</code>, <code>DELETE /</code>, <code>POST /cleanup</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 策略接口和抽象類定義<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<h3 id="21-api">2.1 統一 API 響應模型<a class="headerlink" href="#21-api" title="連結到此標題">&para;</a></h3>
+<p>系統使用 <code>APIResponse</code> 泛型類作為統一響應格式：</p>
+<pre><code class="language-python">class APIResponse(BaseModel, Generic[T]):
+    data: Optional[T] = None
+    error: Optional[str] = None
+    meta: Optional[Dict[str, Any]] = None
+    code: int = 200
+</code></pre>
+<p><strong>優點:</strong>
+- 統一的錯誤處理格式
+- 支援泛型，適用於所有響應類型
+- 包含元數據（如執行時間）</p>
+<h3 id="22">2.2 策略請求/響應模型<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<h4 id="221">2.2.1 策略創建模型<a class="headerlink" href="#221" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class StrategyCreateRequest(BaseModel):
+    name: str
+    type: StrategyType  # INDICATOR, MOMENTUM, COMPOSITE, CUSTOM
+    params: Dict[str, Any]
+    template_name: Optional[str]
+    market: MarketType  # US, TW, CN, CRYPTO
+    universe_id: Optional[str]
+    description: Optional[str]
+    home_enabled: bool = False
+    catalog_enabled: bool = False
+</code></pre>
+<h4 id="222">2.2.2 回測請求模型<a class="headerlink" href="#222" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BacktestRequest(BaseModel):
+    strategy_id: str
+    symbols: List[str]
+    start_date: str  # YYYY-MM-DD
+    end_date: str
+    initial_cash: float = 100000
+    commission: float = 0.001
+    benchmark: Optional[str]
+    position_size_pct: Optional[float] = 100
+    max_positions: Optional[int] = 0
+    fees_enabled: Optional[bool] = True
+    volatility_brake_enabled: Optional[bool] = False
+</code></pre>
+<h4 id="223">2.2.3 回測響應模型<a class="headerlink" href="#223" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BacktestResponse(BaseModel):
+    strategy_id: str
+    metrics: BacktestMetrics
+    equity_curve: List[EquityPoint]
+    drawdown_curve: Optional[List[EquityPoint]]
+    trades: Optional[List[Dict[str, Any]]]
+    positions: Optional[List[Dict[str, Any]]]
+    final_value: float
+    initial_capital: float
+    start_date: str
+    end_date: str
+</code></pre>
+<h3 id="23">2.3 策略類型枚舉<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class StrategyType(str, Enum):
+    INDICATOR = &quot;indicator&quot;
+    MOMENTUM = &quot;momentum&quot;
+    COMPOSITE = &quot;composite&quot;
+    CUSTOM = &quot;custom&quot;
+
+class MarketType(str, Enum):
+    US = &quot;US&quot;
+    TW = &quot;TW&quot;
+    CN = &quot;CN&quot;
+    CRYPTO = &quot;CRYPTO&quot;
+</code></pre>
+<h3 id="24">2.4 服務層依賴注入<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<p>系統使用 FastAPI 的依賴注入機制獲取服務實例：</p>
+<pre><code class="language-python">def get_aggregator(conn: duckdb.DuckDBPyConnection = Depends(get_db)) -&gt; StrategyAggregator:
+    &quot;&quot;&quot;獲取策略聚合器，自動註冊策略&quot;&quot;&quot;
+    registry = StrategyRegistry()
+    if not registry.list_ids():
+        register_all_strategies(conn)
+    return StrategyAggregator(conn)
+</code></pre>
+<hr />
+<h2 id="3">3. 策略執行流程圖<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 整體架構流程<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              FRONTEND (React)                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │ BacktestPage │  │ MonteCarlo   │  │ Comparison   │  │ ResonancePage       │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘ │
+└─────────┼──────────────────┼──────────────────┼─────────────────────┼───────────┘
+          │ POST /api/strategies/ │ POST /api/strategies/ │ GET /api/strategies/  │
+          │ backtest/run          │ monte-carlo/trigger    │ resonance/...         │
+          ▼                      ▼                      ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ROUTERS (FastAPI)                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │ backtest.py  │  │monte_carlo.py│  │comparison.py │  │resonance.py          │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘ │
+└─────────┼──────────────────┼──────────────────┼─────────────────────┼───────────┘
+          │                      │                  │                       │
+          ▼                      ▼                  ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              SERVICES LAYER                                      │
+│                                                                                  │
+│  ┌───────────────────┐   ┌───────────────────┐   ┌───────────────────────────┐  │
+│  │TechnicalStrategy  │   │MonteCarloService │   │ScanningService            │  │
+│  │Service            │   │                   │   │                           │  │
+│  │• generate_strategy│   │• trigger_compute  │   │• discover_high_resonance │  │
+│  │• calc_metrics     │   │• get_status       │   │• get_daily_summary       │  │
+│  └─────────┬─────────┘   └─────────┬─────────┘   └─────────────┬─────────────┘  │
+│            │                       │                           │                 │
+│            │                       │                           │                 │
+│            ▼                       ▼                           ▼                 │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │ StrategyRegistry &amp; StrategyAggregator (Unified Strategy Management)     │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DATABASE (DuckDB)                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │strategy_     │  │backtest_runs │  │daily_prices  │  │strategy_showcase    │ │
+│  │configs       │  │              │  │              │  │                      │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="32">3.2 回測執行流程<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         BACKTEST EXECUTION FLOW                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+  [1] REQUEST                    [2] VALIDATE               [3] LOAD CONFIG
+  ──────────                    ──────────                ──────────────
+
+  ┌──────────────┐              ┌──────────────┐           ┌──────────────┐
+  │ POST /run    │ ──────────▶ │ Check        │ ────────▶ │ StrategyConfig│
+  │ {            │              │ strategy_id  │           │ Service.get() │
+  │  strategy_id │              │ exists?      │           │              │
+  │  symbols: [] │              │              │           │ params = {...}│
+  │  start_date  │              │              │           │ market = 'US'│
+  │  end_date    │              │              │           │ template =...│
+  │ }            │              └──────────────┘           └──────┬───────┘
+  └──────────────┘                                                │
+                                                                  ▼
+  [4] NORMALIZE TEMPLATE           [5] BUILD SERVICE           [6] EXECUTE
+  ────────────────────────         ──────────────               ──────────
+
+  ┌──────────────┐                ┌──────────────┐            ┌──────────────┐
+  │ template_name │                │ Technical   │            │ generate_    │
+  │ &quot;rsi_tw&quot;     │ ─────────────▶ │ Strategy    │ ─────────▶ │ strategy()   │
+  │        ↓     │                │ Service     │            │              │
+  │ &quot;rsi&quot;        │                │              │            │ raw_result = │
+  └──────────────┘                └──────────────┘            │ {            │
+                                                                  │  stats: {}  │
+                                                                  │  return_    │
+                                                                  │  series: [] │
+                                                                  │  trades: [] │
+                                                                  │ }           │
+                                                                  └──────┬───────┘
+                                                                         │
+  [7] TRANSFORM RESULT            [8] GENERATE RUN_ID          [9] SAVE TO DB
+  ─────────────────────            ─────────────────            ────────────
+
+  ┌──────────────┐                ┌──────────────┐            ┌──────────────┐
+  │ metrics = {  │                │ run_id =     │            │ INSERT INTO  │
+  │  total_return│                │ uuid.uuid4() │            │ backtest_    │
+  │  cagr: 0.15  │ ─────────────▶ │ created_at = │ ─────────▶ │ runs (       │
+  │  sharpe: 1.2 │                │ now()        │            │   run_id,    │
+  │  mdd: -0.08  │                │ completed_at │            │   strategy_id│
+  │ }            │                │ = now()      │            │   metrics,   │
+  └──────┬───────┘                └──────────────┘            │   equity_    │
+         │                                                    │   curve,     │
+         ▼                                                    │   ...        │
+  ┌──────────────┐                                              └──────────────┘
+  │ response = { │
+  │  run_id: &quot;...│
+  │  metrics: {} │
+  │  final_value│
+  │  equity_curve│
+  │ }            │
+  └──────┬───────┘
+         │
+         ▼
+  [10] RETURN RESPONSE
+       ─────────────────
+       JSON response to frontend
+</code></pre>
+<h3 id="33-monte-carlo">3.3 Monte Carlo 模擬流程<a class="headerlink" href="#33-monte-carlo" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      MONTE CARLO SIMULATION FLOW                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+  [1] TRIGGER                    [2] CHECK STATUS           [3] ACQUIRE LOCK
+  ──────────                    ─────────────────          ──────────────
+
+  ┌──────────────┐              ┌──────────────┐           ┌──────────────┐
+  │ POST /trigger│ ──────────▶ │ Is already   │ ────────▶ │ Acquire DB  │
+  │ {            │              │ running?     │           │ lock         │
+  │  num_sim: 10 │              │ status =     │           │             │
+  │ }            │              │ &quot;running&quot;?   │           │             │
+  └──────────────┘              └──────────────┘           └──────┬───────┘
+                                                                 │
+  [4] START COMPUTATION         [5] RUN SIMULATIONS          [6] SAVE RESULT
+  ─────────────────────        ──────────────────           ────────────
+
+  ┌──────────────┐              ┌──────────────┐           ┌──────────────┐
+  │ Set status = │              │ FOR i in     │           │ UPDATE       │
+  │ &quot;running&quot;    │ ─────────────│ 1..num_sim:  │ ────────▶ │ backtest_    │
+  │              │              │   shuffle    │           │ runs SET     │
+  │              │              │   returns[]  │           │ monte_carlo  │
+  │              │              │   calc NAV   │           │ = {...}      │
+  │              │              │   collect    │           │ status =     │
+  │              │              │   metrics     │           │ &quot;completed&quot;  │
+  └──────────────┘              └──────────────┘           └──────┬───────┘
+                                                                 │
+  [7] RELEASE LOCK              [8] POLL STATUS              [9] GET RESULT
+  ─────────────────              ──────────────               ──────────
+
+  ┌──────────────┐              ┌──────────────┐           ┌──────────────┐
+  │ Release DB   │              │ GET /status  │           │ GET /result  │
+  │ lock         │              │ returns      │           │ returns      │
+  │              │              │ {            │           │ {            │
+  │              │              │  status:     │           │  status:     │
+  │              │              │  &quot;completed&quot; │           │  &quot;completed&quot; │
+  │              │              │  progress: 100│           │  simulations:│
+  │              │              │ }            │           │  [...]       │
+  └──────────────┘              └──────────────┘           │  statistics: │
+                                                          │  {...}       │
+                                                          │ }            │
+                                                          └──────────────┘
+</code></pre>
+<h3 id="34">3.4 策略比較流程<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         STRATEGY COMPARISON FLOW                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+  [1] REQUEST                    [2] VALIDATE               [3] FETCH METRICS
+  ──────────                    ──────────                ──────────────
+
+  ┌──────────────┐              ┌──────────────┐           ┌──────────────┐
+  │ GET /?       │ ──────────▶ │ 2-5 strategies│ ────────▶ │ Query each   │
+  │ strategy_ids │              │ required?    │           │ strategy from│
+  │ = [id1, id2] │              │              │           │ DB / cache   │
+  └──────────────┘              └──────────────┘           └──────┬───────┘
+                                                                 │
+  [4] BUILD METRICS TABLE         [5] CALCULATE RANKINGS      [6] RETURN
+  ────────────────────────       ──────────────────         ─────────
+
+  ┌──────────────┐                ┌──────────────┐            ┌──────────────┐
+  │ metrics = {  │                │ For each     │            │ {            │
+  │  total_return│                │ metric:      │            │  strategies: │
+  │  cagr:       │                │   sort(desc) │            │  [...]       │
+  │  mdd:        │ ─────────────▶ │   assign     │ ─────────▶ │  metrics: {} │
+  │  sharpe:     │                │   ranking    │            │  rankings: {}│
+  │  win_rate:   │                │              │            │ }            │
+  │ }            │                └──────────────┘            └──────────────┘
+  └──────────────┘
+</code></pre>
+<hr />
+<h2 id="4">4. 策略設計模式和擴展機制<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 設計模式<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<h4 id="411-strategy-registry-pattern">4.1.1 策略註冊模式 (Strategy Registry Pattern)<a class="headerlink" href="#411-strategy-registry-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># services/strategy_registry.py
+class StrategyRegistry:
+    &quot;&quot;&quot;全局策略註冊表，管理所有可用策略&quot;&quot;&quot;
+
+    def register(self, strategy_id: str, strategy: Strategy):
+        self._strategies[strategy_id] = strategy
+
+    def unregister(self, strategy_id: str):
+        if strategy_id in self._strategies:
+            del self._strategies[strategy_id]
+
+    def get(self, strategy_id: str) -&gt; Optional[Strategy]:
+        return self._strategies.get(strategy_id)
+
+    def list_ids(self) -&gt; List[str]:
+        return list(self._strategies.keys())
+</code></pre>
+<p><strong>優點:</strong>
+- 集中式策略管理
+- 動態註冊/註銷
+- 統一策略訪問接口</p>
+<h4 id="412-strategy-aggregator-pattern">4.1.2 策略聚合器模式 (Strategy Aggregator Pattern)<a class="headerlink" href="#412-strategy-aggregator-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># services/strategy_registry.py
+class StrategyAggregator:
+    &quot;&quot;&quot;跨策略分析和聚合操作&quot;&quot;&quot;
+
+    def __init__(self, conn: duckdb.DuckDBPyConnection):
+        self.conn = conn
+        self.registry = StrategyRegistry()
+
+    def check_symbol_resonance(self, symbol: str, strategy_types: List[str]):
+        &quot;&quot;&quot;檢查符號在多個策略中的共振情況&quot;&quot;&quot;
+        results = {}
+        for strategy_type in strategy_types:
+            strategy = self.registry.get(strategy_type)
+            if strategy:
+                results[strategy_type] = strategy.analyze_symbol(symbol)
+        return results
+
+    def compare_strategies(self, strategy_ids: List[str]):
+        &quot;&quot;&quot;比較多個策略的績效&quot;&quot;&quot;
+        strategies = []
+        for sid in strategy_ids:
+            strategy = self.registry.get(sid)
+            if strategy:
+                strategies.append(strategy)
+        return self._compute_comparison(strategies)
+</code></pre>
+<h4 id="413-adapter-pattern">4.1.3 適配器模式 (Adapter Pattern)<a class="headerlink" href="#413-adapter-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># services/strategies/adapters.py
+def register_all_strategies(conn: duckdb.DuckDBPyConnection):
+    &quot;&quot;&quot;從數據庫註冊所有策略實例&quot;&quot;&quot;
+    configs = StrategyConfigService.get_all_active_configs(conn)
+
+    for config in configs:
+        strategy_adapter = StrategyAdapter(
+            instance_id=config['instance_id'],
+            template_name=config['template_name'],
+            params=config['params'],
+            market=config['market']
+        )
+        registry.register(config['instance_id'], strategy_adapter)
+</code></pre>
+<h4 id="414-factory-pattern">4.1.4 工廠模式 (Factory Pattern)<a class="headerlink" href="#414-factory-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># services/strategies/technical_strategy.py
+class TechnicalStrategyService:
+    &quot;&quot;&quot;技術策略工廠，生成不同類型的策略&quot;&quot;&quot;
+
+    VALID_STRATEGIES = [
+        'rsi', 'macd', 'supertrend', 'bollinger',
+        'momentum', 'dual_momentum', 'sector_rotation',
+        'extremes', 'rsi_trend'
+    ]
+
+    def generate_strategy(self, strategy_type: str, universe: str, params: dict):
+        &quot;&quot;&quot;根據策略類型生成策略結果&quot;&quot;&quot;
+        if strategy_type not in self.VALID_STRATEGIES:
+            raise ValueError(f&quot;Invalid strategy type: {strategy_type}&quot;)
+
+        # 調用具體策略實現
+        strategy_impl = self._get_strategy_implementation(strategy_type)
+        return strategy_impl.generate(universe, params)
+</code></pre>
+<h4 id="415-cache-pattern">4.1.5 緩存模式 (Cache Pattern)<a class="headerlink" href="#415-cache-pattern" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># backend/routers/strategies/utils.py
+class StrategyCache:
+    &quot;&quot;&quot;帶 TTL 的線程安全緩存&quot;&quot;&quot;
+
+    def __init__(self, name: str, ttl: timedelta, max_size: int = 1000):
+        self._name = name
+        self._cache: Dict[str, tuple[Any, datetime]] = {}
+        self._ttl = ttl
+        self._max_size = max_size
+        self._lock = threading.RLock()
+
+    def get(self, key: str) -&gt; Optional[Any]:
+        &quot;&quot;&quot;獲取緩存數據（檢查過期）&quot;&quot;&quot;
+        with self._lock:
+            if key in self._cache:
+                data, timestamp = self._cache[key]
+                if datetime.now() - timestamp &lt; self._ttl:
+                    self._hits += 1
+                    return data
+                else:
+                    del self._cache[key]
+                    self._misses += 1
+            else:
+                self._misses += 1
+        return None
+
+    def set(self, key: str, value: Any, ttl: Optional[timedelta] = None):
+        &quot;&quot;&quot;設置緩存數據（強制最大大小）&quot;&quot;&quot;
+        with self._lock:
+            if len(self._cache) &gt;= self._max_size and key not in self._cache:
+                # 移除最舊的 10% 條目
+                keys_to_remove = list(self._cache.keys())[:self._max_size // 10]
+                for k in keys_to_remove:
+                    del self._cache[k]
+
+            cache_ttl = ttl or self._ttl
+            self._cache[key] = (value, datetime.now())
+</code></pre>
+<h3 id="42">4.2 擴展機制<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="421">4.2.1 添加新策略類型<a class="headerlink" href="#421" title="連結到此標題">&para;</a></h4>
+<p><strong>步驟 1: 實現策略邏輯</strong></p>
+<pre><code class="language-python"># services/strategies/my_new_strategy.py
+class MyNewStrategy(StrategyBase):
+    def generate(self, universe: str, params: dict):
+        # 實現策略邏輯
+        pass
+</code></pre>
+<p><strong>步驟 2: 註冊策略</strong></p>
+<pre><code class="language-python"># services/strategies/adapters.py
+def register_all_strategies(conn: duckdb.DuckDBPyConnection):
+    # ... 現有註冊邏輯 ...
+
+    # 添加新策略
+    registry.register('my_new_strategy', MyNewStrategy())
+</code></pre>
+<p><strong>步驟 3: 添加模板配置</strong></p>
+<pre><code class="language-python"># 在 strategy_templates 表中添加記錄
+INSERT INTO strategy_templates (
+    template_name,
+    strategy_type,
+    display_name,
+    default_params
+) VALUES (
+    'my_new_strategy',
+    'custom',
+    'My New Strategy',
+    '{&quot;period&quot;: 20, &quot;threshold&quot;: 0.5}'
+);
+</code></pre>
+<h4 id="422-api">4.2.2 添加新 API 端點<a class="headerlink" href="#422-api" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># backend/routers/strategies/my_new_feature.py
+from fastapi import APIRouter, Depends
+
+router = APIRouter(
+    prefix=&quot;/my-new-feature&quot;,
+    tags=[&quot;my-new-feature&quot;]
+)
+
+@router.get(&quot;&quot;)
+async def get_my_feature(conn = Depends(get_db)):
+    # 實現新功能
+    return {&quot;data&quot;: &quot;...&quot;}
+</code></pre>
+<p>在 <code>__init__.py</code> 中引入：</p>
+<pre><code class="language-python">from .my_new_feature import router as my_new_feature_router
+
+router.include_router(my_new_feature_router)
+</code></pre>
+<h4 id="423">4.2.3 添加新的響應模型<a class="headerlink" href="#423" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># backend/routers/strategies/models.py
+class MyNewResponse(BaseModel):
+    &quot;&quot;&quot;新的響應模型&quot;&quot;&quot;
+    feature_metric: float
+    additional_data: Dict[str, Any]
+
+__all__ = [..., 'MyNewResponse']
+</code></pre>
+<h3 id="43">4.3 策略實例生命周期<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     STRATEGY INSTANCE LIFECYCLE                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+  [1] CREATION                  [2] REGISTRATION          [3] ACTIVATION
+  ──────────                    ───────────────          ────────────
+
+  ┌──────────────┐              ┌──────────────┐          ┌──────────────┐
+  │ POST /crud/  │ ──────────▶ │ Strategy     │ ────────▶ │ Update       │
+  │ strategies   │              │ Registry     │          │ home_enabled │
+  │ {            │              │ .register()  │          │ = True       │
+  │  name: &quot;...&quot; │              │              │          │ catalog_     │
+  │  params: {}  │              │              │          │ enabled = T  │
+  │ }            │              └──────────────┘          └──────┬───────┘
+  └──────────────┘                                                │
+                                                                 │
+  [4] BACKTEST                    [5] SAVE RESULT              [6] QUERY
+  ──────────                    ───────────────               ──────────
+
+  ┌──────────────┐              ┌──────────────┐            ┌──────────────┐
+  │ POST /run-saved│ ──────────▶ │ Save to      │ ─────────▶ │ GET /history │
+  │ {instance_id}│              │ backtest_runs│            │ GET /showcase│
+  │ }            │              │ table        │            │ GET /instances│
+  └──────────────┘              └──────────────┘            └──────────────┘
+                                                                 │
+  [7] UPDATE                     [8] DELETE                   [9] CLEANUP
+  ──────────                    ───────────                   ──────────
+
+  ┌──────────────┐              ┌──────────────┐            ┌──────────────┐
+  │ PUT /crud/   │ ──────────▶ │ DELETE /crud/│ ─────────▶ │ Unregister   │
+  │ strategies/  │              │ strategies/  │            │ from Registry│
+  │ {id}         │              │ {id}         │            │             │
+  │ {params: {...}│             │              │            │             │
+  │ }            │              │              │            │             │
+  └──────────────┘              └──────────────┘            └──────────────┘
+</code></pre>
+<hr />
+<h2 id="5">5. 關鍵策略詳細說明<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51-backtest-backtestpy">5.1 Backtest 端點 (<code>backtest.py</code>)<a class="headerlink" href="#51-backtest-backtestpy" title="連結到此標題">&para;</a></h3>
+<h4 id="511-post-run">5.1.1 <code>POST /run</code><a class="headerlink" href="#511-post-run" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 執行策略回測，生成完整的績效指標</p>
+<p><strong>參數:</strong></p>
+<pre><code class="language-json">{
+  &quot;strategy_id&quot;: &quot;rsi_14_e92168c4&quot;,
+  &quot;symbols&quot;: [&quot;AAPL&quot;, &quot;MSFT&quot;, &quot;GOOGL&quot;],
+  &quot;start_date&quot;: &quot;2020-01-01&quot;,
+  &quot;end_date&quot;: &quot;2023-12-31&quot;,
+  &quot;initial_cash&quot;: 100000,
+  &quot;commission&quot;: 0.001,
+  &quot;position_size_pct&quot;: 10,
+  &quot;max_positions&quot;: 10,
+  &quot;fees_enabled&quot;: true,
+  &quot;volatility_brake_enabled&quot;: false
+}
+</code></pre>
+<p><strong>執行邏輯:</strong>
+1. 生成唯一 <code>run_id</code> (UUID)
+2. 從數據庫加載策略配置 (<code>StrategyConfigService.get</code>)
+3. 解析 <code>template_name</code>，提取基礎策略類型（如 <code>rsi_tw</code> → <code>rsi</code>）
+4. 計算 <code>backtest_years</code>（基於日期範圍）
+5. 構建策略參數字典
+6. 創建 <code>TechnicalStrategyService</code> 實例
+7. 調用 <code>generate_strategy()</code> 執行回測
+8. 轉換結果格式（匹配前端期望）
+9. 保存結果到 <code>backtest_runs</code> 表（異步，不阻塞響應）</p>
+<p><strong>響應格式:</strong></p>
+<pre><code class="language-json">{
+  &quot;run_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;metrics&quot;: {
+    &quot;total_return&quot;: 0.45,
+    &quot;cagr&quot;: 0.12,
+    &quot;sharpe&quot;: 1.5,
+    &quot;sharpe_ratio&quot;: 1.5,
+    &quot;mdd&quot;: -0.15,
+    &quot;max_drawdown&quot;: -0.15,
+    &quot;win_rate&quot;: 0.6,
+    &quot;profit_factor&quot;: 1.8,
+    &quot;trades_count&quot;: 50,
+    &quot;trades&quot;: 50,
+    &quot;avg_trade&quot;: 0.009
+  },
+  &quot;final_value&quot;: 145000,
+  &quot;initial_capital&quot;: 100000,
+  &quot;start_date&quot;: &quot;2020-01-01&quot;,
+  &quot;end_date&quot;: &quot;2023-12-31&quot;,
+  &quot;equity_curve&quot;: [
+    {&quot;date&quot;: &quot;2020-01-01&quot;, &quot;value&quot;: 100000},
+    {&quot;date&quot;: &quot;2020-01-02&quot;, &quot;value&quot;: 100500},
+    ...
+  ],
+  &quot;drawdown_curve&quot;: [...],
+  &quot;trades&quot;: [
+    {
+      &quot;symbol&quot;: &quot;AAPL&quot;,
+      &quot;action&quot;: &quot;BUY&quot;,
+      &quot;date&quot;: &quot;2020-01-15&quot;,
+      &quot;price&quot;: 150.0,
+      &quot;quantity&quot;: 100
+    },
+    ...
+  ],
+  &quot;stats&quot;: {...},
+  &quot;return_series&quot;: [...]
+}
+</code></pre>
+<h4 id="512-post-run-saved">5.1.2 <code>POST /run-saved</code><a class="headerlink" href="#512-post-run-saved" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 使用保存的策略配置執行回測，支援波動率減少覆蓋</p>
+<p><strong>參數:</strong></p>
+<pre><code class="language-json">{
+  &quot;strategy_id&quot;: &quot;extremes_e92168c4&quot;,
+  &quot;volatility_reduce_enabled&quot;: true,
+  &quot;volatility_threshold&quot;: 0.04,
+  &quot;reduction_ratio&quot;: 0.5
+}
+</code></pre>
+<p>或簡化形式：</p>
+<pre><code class="language-json">&quot;extremes_e92168c4&quot;
+</code></pre>
+<p><strong>執行邏輯:</strong>
+1. 加載策略配置
+2. 解析策略類型和參數
+3. 應用可選的波動率減少覆蓋
+4. 執行回測
+5. 生成 <code>run_id</code> 並保存到 <code>backtest_runs</code></p>
+<p><strong>特殊處理:</strong>
+- 如果 <code>volatility_filter_enabled</code> 為 True，自動啟用 <code>volatility_reduce_enabled</code>
+- 支援從百分比轉換為小數（如 <code>position_size_pct: 10</code> → <code>0.1</code>）
+- 確保 <code>backtest_years</code> 等關鍵參數存在</p>
+<h3 id="52-monte-carlo-monte_carlopy">5.2 Monte Carlo 端點 (<code>monte_carlo.py</code>)<a class="headerlink" href="#52-monte-carlo-monte_carlopy" title="連結到此標題">&para;</a></h3>
+<h4 id="521-get-statusinstance_id">5.2.1 <code>GET /status/{instance_id}</code><a class="headerlink" href="#521-get-statusinstance_id" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 查詢 Monte Carlo 計算狀態</p>
+<p><strong>狀態值:</strong>
+- <code>not_started</code>: 未觸發計算
+- <code>running</code>: 計算進行中
+- <code>completed</code>: 計算完成
+- <code>failed</code>: 計算失敗</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;num_simulations&quot;: 100,
+  &quot;completed_simulations&quot;: 100,
+  &quot;progress&quot;: 100
+}
+</code></pre>
+<h4 id="522-post-triggerinstance_id">5.2.2 <code>POST /trigger/{instance_id}</code><a class="headerlink" href="#522-post-triggerinstance_id" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 觸發 Monte Carlo 計算，實施鎖定機制防止重複觸發</p>
+<p><strong>參數:</strong>
+- <code>num_simulations</code>: 模擬次數 (1-10000)</p>
+<p><strong>執行邏輯:</strong>
+1. 檢查是否已運行（鎖定機制）
+2. 如果正在運行，返回 <code>status: 'rejected'</code>
+3. 否則，設置狀態為 <code>running</code>，啟動異步計算
+4. 立即返回（不阻塞）</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;message&quot;: &quot;Monte Carlo computation triggered&quot;,
+  &quot;num_simulations&quot;: 100
+}
+</code></pre>
+<h4 id="523-get-resultinstance_id">5.2.3 <code>GET /result/{instance_id}</code><a class="headerlink" href="#523-get-resultinstance_id" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 獲取緩存的 Monte Carlo 結果</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;instance_id&quot;: &quot;rsi_14_e92168c4&quot;,
+  &quot;num_simulations&quot;: 100,
+  &quot;statistics&quot;: {
+    &quot;mean_final_value&quot;: 145000,
+    &quot;std_final_value&quot;: 25000,
+    &quot;percentile_5&quot;: 105000,
+    &quot;percentile_25&quot;: 130000,
+    &quot;percentile_50&quot;: 145000,
+    &quot;percentile_75&quot;: 160000,
+    &quot;percentile_95&quot;: 185000
+  },
+  &quot;simulations&quot;: [
+    {
+      &quot;simulation_id&quot;: 1,
+      &quot;final_value&quot;: 142000,
+      &quot;equity_curve&quot;: [...]
+    },
+    ...
+  ]
+}
+</code></pre>
+<h3 id="53-comparison-comparisonpy">5.3 Comparison 端點 (<code>comparison.py</code>)<a class="headerlink" href="#53-comparison-comparisonpy" title="連結到此標題">&para;</a></h3>
+<h4 id="531-get">5.3.1 <code>GET /</code><a class="headerlink" href="#531-get" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 比較多個策略的績效指標</p>
+<p><strong>參數:</strong>
+- <code>strategy_ids</code>: 策略 ID 列表 (2-5 個)
+- <code>metrics</code>: 指定要比較的指標（可選）</p>
+<p><strong>默認指標:</strong>
+- <code>total_return</code>
+- <code>cagr</code>
+- <code>mdd</code>
+- <code>sharpe</code>
+- <code>volatility</code>
+- <code>win_rate</code></p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;strategies&quot;: [&quot;rsi_14&quot;, &quot;macd_12&quot;, &quot;supertrend&quot;],
+  &quot;metrics&quot;: {
+    &quot;total_return&quot;: [0.45, 0.38, 0.52],
+    &quot;cagr&quot;: [0.12, 0.10, 0.14],
+    &quot;mdd&quot;: [-0.15, -0.12, -0.18],
+    &quot;sharpe&quot;: [1.5, 1.3, 1.6],
+    &quot;volatility&quot;: [0.20, 0.18, 0.22],
+    &quot;win_rate&quot;: [0.6, 0.55, 0.65]
+  },
+  &quot;rankings&quot;: {
+    &quot;total_return&quot;: [&quot;supertrend&quot;, &quot;rsi_14&quot;, &quot;macd_12&quot;],
+    &quot;cagr&quot;: [&quot;supertrend&quot;, &quot;rsi_14&quot;, &quot;macd_12&quot;],
+    &quot;mdd&quot;: [&quot;macd_12&quot;, &quot;rsi_14&quot;, &quot;supertrend&quot;],
+    &quot;sharpe&quot;: [&quot;supertrend&quot;, &quot;rsi_14&quot;, &quot;macd_12&quot;]
+  }
+}
+</code></pre>
+<h3 id="54-resonance-resonancepy">5.4 Resonance 端點 (<code>resonance.py</code>)<a class="headerlink" href="#54-resonance-resonancepy" title="連結到此標題">&para;</a></h3>
+<h4 id="541-get-discover">5.4.1 <code>GET /discover</code><a class="headerlink" href="#541-get-discover" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 發現高共振分數的符號</p>
+<p><strong>參數:</strong>
+- <code>limit</code>: 最大結果數 (默認 20)
+- <code>min_score</code>: 最小共振分數 (默認 0.5)</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;symbols&quot;: [
+    {
+      &quot;symbol&quot;: &quot;AAPL&quot;,
+      &quot;resonance_score&quot;: 0.85,
+      &quot;matching_strategies&quot;: [&quot;rsi&quot;, &quot;macd&quot;, &quot;momentum&quot;]
+    },
+    {
+      &quot;symbol&quot;: &quot;MSFT&quot;,
+      &quot;resonance_score&quot;: 0.78,
+      &quot;matching_strategies&quot;: [&quot;rsi&quot;, &quot;supertrend&quot;]
+    }
+  ],
+  &quot;count&quot;: 2
+}
+</code></pre>
+<h4 id="542-get-summary">5.4.2 <code>GET /summary</code><a class="headerlink" href="#542-get-summary" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 獲取每日共振摘要</p>
+<p><strong>參數:</strong>
+- <code>date</code>: 目標日期 (YYYY-MM-DD，默認今天)</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;date&quot;: &quot;2026-02-20&quot;,
+  &quot;total_symbols_scanned&quot;: 500,
+  &quot;high_resonance_count&quot;: 45,
+  &quot;avg_resonance_score&quot;: 0.65,
+  &quot;top_performing_strategies&quot;: [&quot;rsi&quot;, &quot;momentum&quot;],
+  &quot;market_trend&quot;: &quot;bullish&quot;
+}
+</code></pre>
+<h3 id="55-showcase-showcasepy">5.5 Showcase 端點 (<code>showcase.py</code>)<a class="headerlink" href="#55-showcase-showcasepy" title="連結到此標題">&para;</a></h3>
+<h4 id="551-get-configs">5.5.1 <code>GET /configs</code><a class="headerlink" href="#551-get-configs" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 獲取所有可用的 showcase 配置</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;configs&quot;: [
+    {
+      &quot;strategy_type&quot;: &quot;rsi&quot;,
+      &quot;display_name&quot;: &quot;RSI Strategy&quot;,
+      &quot;category&quot;: &quot;technical&quot;
+    },
+    {
+      &quot;strategy_type&quot;: &quot;macd&quot;,
+      &quot;display_name&quot;: &quot;MACD Strategy&quot;,
+      &quot;category&quot;: &quot;technical&quot;
+    },
+    {
+      &quot;strategy_type&quot;: &quot;momentum&quot;,
+      &quot;display_name&quot;: &quot;Momentum Strategy&quot;,
+      &quot;category&quot;: &quot;trend&quot;
+    }
+  ]
+}
+</code></pre>
+<h4 id="552-get-strategy_type">5.5.2 <code>GET /{strategy_type}</code><a class="headerlink" href="#552-get-strategy_type" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 獲取策略類型或實例的 showcase 數據</p>
+<p><strong>參數:</strong>
+- <code>strategy_type</code>: 策略類型（如 <code>macd</code>）或實例 ID（如 <code>macd_16d30cf8</code>）
+- <code>market</code>: 市場過濾器 (US/TW)
+- <code>years</code>: 回測期間（默認 3 年）</p>
+<p><strong>執行邏輯:</strong>
+1. 檢查是否為實例 ID（包含下劃線）
+2. 如果是實例 ID：
+   - 從數據庫加載配置
+   - 按需執行回測
+   - 緩存結果（僅生產環境）
+3. 如果是策略類型：
+   - 從 <code>strategy_showcase</code> 表查詢預計算數據
+   - 緩存結果</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;strategy_type&quot;: &quot;macd&quot;,
+  &quot;instance_id&quot;: &quot;macd_16d30cf8&quot;,
+  &quot;market&quot;: &quot;US&quot;,
+  &quot;years&quot;: 3,
+  &quot;showcase_meta&quot;: {
+    &quot;display_name&quot;: &quot;MACD Strategy&quot;,
+    &quot;category&quot;: &quot;technical&quot;
+  },
+  &quot;stats&quot;: {
+    &quot;total_return&quot;: 0.42,
+    &quot;cagr&quot;: 0.11,
+    &quot;sharpe&quot;: 1.4,
+    &quot;mdd&quot;: -0.14,
+    &quot;win_rate&quot;: 0.58
+  },
+  &quot;params&quot;: {
+    &quot;fast_period&quot;: 12,
+    &quot;slow_period&quot;: 26,
+    &quot;signal_period&quot;: 9
+  },
+  &quot;trades&quot;: [...],
+  &quot;return_series&quot;: [...]
+}
+</code></pre>
+<h3 id="56-execution-sensitivity-execution_sensitivitypy">5.6 Execution Sensitivity 端點 (<code>execution_sensitivity.py</code>)<a class="headerlink" href="#56-execution-sensitivity-execution_sensitivitypy" title="連結到此標題">&para;</a></h3>
+<h4 id="561-get-analyze">5.6.1 <code>GET /analyze</code><a class="headerlink" href="#561-get-analyze" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 分析策略對執行模式的敏感度</p>
+<p><strong>參數:</strong>
+- <code>strategy_type</code>: 策略類型或實例 ID
+- <code>years</code>: 回測期間（默認 3 年）</p>
+<p><strong>執行邏輯:</strong>
+1. 檢查是否為實例 ID
+2. 如果是實例 ID，從數據庫加載配置
+3. 否則使用默認參數
+4. 執行多種執行模式的回測
+5. 比較性能並計算穩定性指標</p>
+<p><strong>執行模式:</strong>
+- <code>open</code>: 以開盤價執行
+- <code>close</code>: 以收盤價執行
+- <code>worst</code>: 以當日最差價格執行</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;strategy_type&quot;: &quot;macd&quot;,
+  &quot;years&quot;: 3,
+  &quot;execution_modes&quot;: {
+    &quot;open&quot;: {
+      &quot;total_return&quot;: 0.42,
+      &quot;cagr&quot;: 0.11,
+      &quot;sharpe&quot;: 1.4,
+      &quot;mdd&quot;: -0.14
+    },
+    &quot;close&quot;: {
+      &quot;total_return&quot;: 0.40,
+      &quot;cagr&quot;: 0.10,
+      &quot;sharpe&quot;: 1.3,
+      &quot;mdd&quot;: -0.13
+    },
+    &quot;worst&quot;: {
+      &quot;total_return&quot;: 0.35,
+      &quot;cagr&quot;: 0.09,
+      &quot;sharpe&quot;: 1.1,
+      &quot;mdd&quot;: -0.16
+    }
+  },
+  &quot;stability_metrics&quot;: {
+    &quot;return_variance&quot;: 0.0012,
+    &quot;stability_score&quot;: 0.85,
+    &quot;sensitivity_level&quot;: &quot;medium&quot;
+  }
+}
+</code></pre>
+<h3 id="57-cache-cachepy">5.7 Cache 端點 (<code>cache.py</code>)<a class="headerlink" href="#57-cache-cachepy" title="連結到此標題">&para;</a></h3>
+<h4 id="571-get-stats">5.7.1 <code>GET /stats</code><a class="headerlink" href="#571-get-stats" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 獲取所有策略緩存的統計信息</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;stats&quot;: {
+    &quot;showcase&quot;: {
+      &quot;hits&quot;: 150,
+      &quot;misses&quot;: 30,
+      &quot;size&quot;: 50,
+      &quot;hit_rate&quot;: 0.833
+    },
+    &quot;templates&quot;: {
+      &quot;hits&quot;: 200,
+      &quot;misses&quot;: 10,
+      &quot;size&quot;: 20,
+      &quot;hit_rate&quot;: 0.952
+    },
+    &quot;markets&quot;: {
+      &quot;hits&quot;: 180,
+      &quot;misses&quot;: 5,
+      &quot;size&quot;: 5,
+      &quot;hit_rate&quot;: 0.973
+    },
+    &quot;universes&quot;: {
+      &quot;hits&quot;: 120,
+      &quot;misses&quot;: 8,
+      &quot;size&quot;: 15,
+      &quot;hit_rate&quot;: 0.938
+    }
+  }
+}
+</code></pre>
+<h4 id="572-delete">5.7.2 <code>DELETE /</code><a class="headerlink" href="#572-delete" title="連結到此標題">&para;</a></h4>
+<p><strong>功能:</strong> 清除所有策略緩存</p>
+<p><strong>響應:</strong></p>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;Cleared 90 items from all caches&quot;,
+  &quot;cleared_count&quot;: 90
+}
+</code></pre>
+<hr />
+<h2 id="6">6. 緩存機制詳解<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 緩存類型<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>緩存名稱</th>
+<th>TTL</th>
+<th>最大大小</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>template_cache</code></td>
+<td>10 分鐘</td>
+<td>100</td>
+<td>策略模板配置</td>
+</tr>
+<tr>
+<td><code>market_cache</code></td>
+<td>15 分鐘</td>
+<td>50</td>
+<td>市場配置</td>
+</tr>
+<tr>
+<td><code>universe_cache</code></td>
+<td>10 分鐘</td>
+<td>50</td>
+<td>股票宇宙配置</td>
+</tr>
+<tr>
+<td><code>showcase_cache</code></td>
+<td>2 小時</td>
+<td>200</td>
+<td>展示數據</td>
+</tr>
+<tr>
+<td><code>resonance_cache</code></td>
+<td>5 分鐘</td>
+<td>500</td>
+<td>共振分析結果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 緩存鍵設計<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># Showcase 緩存鍵
+cache_key = f&quot;{strategy_type}_{market}_{years}&quot;
+# 示例: &quot;macd_US_3&quot;
+
+# 實例緩存鍵
+instance_cache_key = f&quot;instance_{instance_id}&quot;
+# 示例: &quot;instance_macd_16d30cf8&quot;
+
+# Resonance 緩存鍵
+resonance_cache_key = f&quot;symbol_{symbol}_{','.join(strategy_types) or 'all'}&quot;
+# 示例: &quot;symbol_AAPL_rsi,macd&quot;
+</code></pre>
+<h3 id="63">6.3 緩存控制<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># 環境變量控制
+ENABLE_SHOWCASE_CACHE = os.getenv(&quot;ENABLE_SHOWCASE_CACHE&quot;, &quot;False&quot;).lower() == &quot;true&quot;
+
+# 開發環境禁用緩存
+if os.getenv(&quot;ENV&quot;, &quot;production&quot;) == &quot;development&quot;:
+    logger.info(&quot;Showcase cache DISABLED (development mode)&quot;)
+else:
+    logger.info(&quot;Showcase cache ENABLED (production mode)&quot;)
+</code></pre>
+<h3 id="64">6.4 緩存命中率監控<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def stats(self) -&gt; Dict[str, Any]:
+    &quot;&quot;&quot;獲取緩存統計&quot;&quot;&quot;
+    with self._lock:
+        total_requests = self._hits + self._misses
+        hit_rate = self._hits / total_requests if total_requests &gt; 0 else 0
+        return {
+            'name': self._name,
+            'size': len(self._cache),
+            'max_size': self._max_size,
+            'ttl_seconds': int(self._ttl.total_seconds()),
+            'hits': self._hits,
+            'misses': self._misses,
+            'hit_rate': round(hit_rate * 100, 2)
+        }
+</code></pre>
+<hr />
+<h2 id="7">7. 數據庫架構<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 核心表<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<h4 id="711-strategy_configs">7.1.1 <code>strategy_configs</code><a class="headerlink" href="#711-strategy_configs" title="連結到此標題">&para;</a></h4>
+<p>存儲用戶創建的策略配置：</p>
+<pre><code class="language-sql">CREATE TABLE strategy_configs (
+    instance_id VARCHAR PRIMARY KEY,
+    template_name VARCHAR,
+    display_name VARCHAR,
+    params JSON,
+    market VARCHAR,
+    universe VARCHAR,
+    home_enabled BOOLEAN,
+    catalog_enabled BOOLEAN,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+</code></pre>
+<h4 id="712-backtest_runs">7.1.2 <code>backtest_runs</code><a class="headerlink" href="#712-backtest_runs" title="連結到此標題">&para;</a></h4>
+<p>存儲回測結果：</p>
+<pre><code class="language-sql">CREATE TABLE backtest_runs (
+    run_id VARCHAR PRIMARY KEY,
+    strategy_id VARCHAR,
+    instance_id VARCHAR,
+    user_id VARCHAR,
+    run_name VARCHAR,
+    status VARCHAR,
+    parameters JSON,
+    start_date DATE,
+    end_date DATE,
+    initial_capital DECIMAL,
+    commission DECIMAL,
+    position_size_pct DECIMAL,
+    max_positions INTEGER,
+    fees_enabled BOOLEAN,
+    volatility_brake_enabled BOOLEAN,
+    final_value DECIMAL,
+    total_return DECIMAL,
+    cagr DECIMAL,
+    sharpe DECIMAL,
+    max_drawdown DECIMAL,
+    win_rate DECIMAL,
+    trades_count INTEGER,
+    profit_factor DECIMAL,
+    avg_trade DECIMAL,
+    equity_curve JSON,
+    drawdown_curve JSON,
+    trades JSON,
+    created_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+</code></pre>
+<h4 id="713-strategy_showcase">7.1.3 <code>strategy_showcase</code><a class="headerlink" href="#713-strategy_showcase" title="連結到此標題">&para;</a></h4>
+<p>存儲預計算的展示數據：</p>
+<pre><code class="language-sql">CREATE TABLE strategy_showcase (
+    id INTEGER PRIMARY KEY,
+    strategy_type VARCHAR,
+    market VARCHAR,
+    years INTEGER,
+    stats JSON,
+    params JSON,
+    trades JSON,
+    return_series JSON
+);
+</code></pre>
+<hr />
+<h2 id="8">8. 關鍵實現細節<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 策略類型規範化<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<p>系統支持帶市場後綴的策略類型（如 <code>rsi_tw</code>），在內部自動規範化為基礎類型：</p>
+<pre><code class="language-python">valid_strategies = ['rsi', 'macd', 'supertrend', 'bollinger', 'momentum',
+                   'dual_momentum', 'sector_rotation', 'extremes', 'rsi_trend']
+
+# 規範化邏輯
+strategy_type = template_name
+for valid_type in valid_strategies:
+    if template_name.startswith(valid_type):
+        strategy_type = valid_type
+        break
+</code></pre>
+<h3 id="82">8.2 波動率剎車機制<a class="headerlink" href="#82" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># 在策略參數中啟用
+params['volatility_brake_enabled'] = True
+
+# 當市場分數 &lt; 50 時減少持倉
+# 實現在 TechnicalStrategyService.generate_strategy() 中
+</code></pre>
+<h3 id="83">8.3 位置大小處理<a class="headerlink" href="#83" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># 支援百分比和小數格式
+saved_pos_size = params.get('position_size_pct', 10)
+
+if saved_pos_size &gt; 1:  # 用戶保存為百分比 (10, 20, etc.)
+    params['position_size_pct'] = saved_pos_size / 100
+else:  # 已經是小數格式
+    params['position_size_pct'] = saved_pos_size if saved_pos_size &gt; 0 else 0.1
+</code></pre>
+<h3 id="84">8.4 交易費用控制<a class="headerlink" href="#84" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># 根據 fees_enabled 設置費用
+if request.fees_enabled is not None:
+    strategy_params['fees_enabled'] = request.fees_enabled
+    if not request.fees_enabled:
+        strategy_params['fees'] = 0  # 禁用費用
+</code></pre>
+<h3 id="85">8.5 動態策略註冊<a class="headerlink" href="#85" title="連結到此標題">&para;</a></h3>
+<p>當創建或更新策略時，自動重新載入策略註冊表：</p>
+<pre><code class="language-python">from services.strategies.adapters import register_all_strategies
+from services.strategy_registry import StrategyRegistry
+
+registry = StrategyRegistry()
+# 清除現有策略
+for inst_id in registry.list_ids():
+    registry.unregister(inst_id)
+# 從數據庫重新註冊
+register_all_strategies(conn)
+</code></pre>
+<hr />
+<h2 id="9">9. 依賴關係圖<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        DEPENDENCY GRAPH                                         │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              ROUTERS                                            │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ backtest │  │ monte_   │  │comparison│  │resonance │  │showcase  │          │
+│  │ .py      │  │carlo.py  │  │ .py      │  │ .py      │  │ .py      │          │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘          │
+│       │              │              │              │              │                 │
+└───────┼──────────────┼──────────────┼──────────────┼──────────────┼────────────────┘
+        │              │              │              │              │
+        ▼              ▼              ▼              ▼              ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              SERVICES                                           │
+│                                                                                  │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                   Strategy Config Service                                │  │
+│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐           │  │
+│  │  │ get()    │    │ create() │    │ update() │    │ delete() │           │  │
+│  │  └──────────┘    └──────────┘    └──────────┘    └──────────┘           │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│        │                                                        │             │
+│        ▼                                                        ▼             │
+│  ┌──────────────────────────┐                  ┌──────────────────────────┐   │
+│  │ Technical Strategy        │                  │ Monte Carlo Service       │   │
+│  │ Service                   │                  │                           │   │
+│  │ • generate_strategy()     │                  │ • trigger_computation()   │   │
+│  │ • calc_metrics()          │                  │ • get_status()            │   │
+│  └──────────┬───────────────┘                  └──────────┬────────────────┘   │
+│             │                                              │                   │
+│             ▼                                              ▼                   │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                   Strategy Registry &amp; Aggregator                           │  │
+│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐           │  │
+│  │  │register()│    │ get()    │    │ list_ids │    │ check_   │           │  │
+│  │  │          │    │          │    │ ()       │    │resonance│           │  │
+│  │  └──────────┘    └──────────┘    └──────────┘    └──────────┘           │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DATABASE                                           │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
+│  │ strategy │    │ backtest │    │ strategy │    │ daily_   │                  │
+│  │ _configs │    │ _runs    │    │ _showcase│    │ prices   │                  │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2 id="10">10. 擴展建議<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h2>
+<h3 id="101-programmer-sub-agent">10.1 為 Programmer Sub-Agent 提供的接口<a class="headerlink" href="#101-programmer-sub-agent" title="連結到此標題">&para;</a></h3>
+<p>基於以上分析，為 programmer sub-agent 設計時應考慮以下接口：</p>
+<h4 id="1011">10.1.1 策略生成接口<a class="headerlink" href="#1011" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class StrategyGenerator:
+    &quot;&quot;&quot;策略生成接口，供 programmer sub-agent 使用&quot;&quot;&quot;
+
+    def create_strategy(
+        self,
+        template_name: str,
+        params: Dict[str, Any],
+        market: MarketType,
+        universe: Optional[str] = None
+    ) -&gt; str:
+        &quot;&quot;&quot;創建新策略實例，返回 instance_id&quot;&quot;&quot;
+        pass
+
+    def update_strategy(
+        self,
+        instance_id: str,
+        params: Dict[str, Any]
+    ) -&gt; bool:
+        &quot;&quot;&quot;更新策略參數&quot;&quot;&quot;
+        pass
+
+    def delete_strategy(self, instance_id: str) -&gt; bool:
+        &quot;&quot;&quot;刪除策略&quot;&quot;&quot;
+        pass
+</code></pre>
+<h4 id="1012">10.1.2 回測執行接口<a class="headerlink" href="#1012" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BacktestExecutor:
+    &quot;&quot;&quot;回測執行接口&quot;&quot;&quot;
+
+    def run_backtest(
+        self,
+        strategy_id: str,
+        start_date: str,
+        end_date: str,
+        initial_cash: float = 100000,
+        **kwargs
+    ) -&gt; BacktestResponse:
+        &quot;&quot;&quot;執行回測，返回結果&quot;&quot;&quot;
+        pass
+
+    def get_backtest_history(
+        self,
+        strategy_id: str,
+        limit: int = 50
+    ) -&gt; List[Dict]:
+        &quot;&quot;&quot;獲取回測歷史&quot;&quot;&quot;
+        pass
+</code></pre>
+<h4 id="1013">10.1.3 策略分析接口<a class="headerlink" href="#1013" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class StrategyAnalyzer:
+    &quot;&quot;&quot;策略分析接口&quot;&quot;&quot;
+
+    def compare_strategies(
+        self,
+        strategy_ids: List[str]
+    ) -&gt; ComparisonResponse:
+        &quot;&quot;&quot;比較多個策略&quot;&quot;&quot;
+        pass
+
+    def analyze_sensitivity(
+        self,
+        strategy_id: str,
+        analysis_type: str  # 'execution', 'rebalance', etc.
+    ) -&gt; Dict:
+        &quot;&quot;&quot;分析策略敏感度&quot;&quot;&quot;
+        pass
+
+    def run_monte_carlo(
+        self,
+        strategy_id: str,
+        num_simulations: int = 100
+    ) -&gt; MonteCarloResponse:
+        &quot;&quot;&quot;執行 Monte Carlo 模擬&quot;&quot;&quot;
+        pass
+</code></pre>
+<h3 id="102">10.2 推薦的工作流程<a class="headerlink" href="#102" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────────────────┐
+│                  PROGRAMMER SUB-AGENT WORKFLOW                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+  [1] GENERATE STRATEGY           [2] RUN BACKTEST          [3] ANALYZE
+  ───────────────────             ───────────────            ──────────
+
+  ┌──────────────┐                ┌──────────────┐          ┌──────────────┐
+  │ User: &quot;Create│                │ StrategyGen  │          │ StrategyAna  │
+  │  an RSI      │ ─────────────▶ │ .run_backtest│ ───────▶ │ .compare()   │
+  │  strategy    │                │              │          │              │
+  │  with period │                │              │          │              │
+  │  = 20&quot;       │                │              │          │              │
+  └──────────────┘                └──────────────┘          └──────┬───────┘
+                                                                 │
+  [4] ITERATE                    [5] OPTIMIZE                 [6] SAVE
+  ──────────                    ───────────                  ───────
+
+  ┌──────────────┐              ┌──────────────┐            ┌──────────────┐
+  │ User: &quot;Adjust│              │ User: &quot;Find   │            │ StrategyGen  │
+  │  to period = │ ───────────▶ │  optimal     │ ─────────▶ │ .update()    │
+  │  15&quot;         │              │  parameters&quot; │            │              │
+  │              │              │              │            │              │
+  └──────────────┘              └──────────────┘            └──────────────┘
+</code></pre>
+<h3 id="103">10.3 錯誤處理建議<a class="headerlink" href="#103" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class StrategyError(Exception):
+    &quot;&quot;&quot;策略操作錯誤基類&quot;&quot;&quot;
+    pass
+
+class StrategyNotFoundError(StrategyError):
+    &quot;&quot;&quot;策略不存在&quot;&quot;&quot;
+    pass
+
+class InvalidParameterError(StrategyError):
+    &quot;&quot;&quot;無效參數&quot;&quot;&quot;
+    pass
+
+class BacktestExecutionError(StrategyError):
+    &quot;&quot;&quot;回測執行失敗&quot;&quot;&quot;
+    pass
+
+class MonteCarloComputationError(StrategyError):
+    &quot;&quot;&quot;Monte Carlo 計算失敗&quot;&quot;&quot;
+    pass
+</code></pre>
+<hr />
+<h2 id="_2">信心度和局限性<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">信心度<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>信心度:</strong> high</li>
+<li><strong>數據質量:</strong> 優秀（完整讀取所有 12 個策略模組源碼）</li>
+<li><strong>架構理解:</strong> 全面（從路由層到服務層到數據庫層）</li>
+</ul>
+<h3 id="_4">主要發現<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>模組化設計:</strong> 系統成功從單體路由重構為 12 個模組化組件</li>
+<li><strong>統一接口:</strong> Pydantic 模型提供標準化的請求/響應格式</li>
+<li><strong>緩存機制:</strong> 多層緩存有效提升性能，支持動態配置</li>
+<li><strong>策略註冊:</strong> 通過 StrategyRegistry 和 StrategyAggregator 實現動態策略擴展</li>
+<li><strong>進階功能:</strong> Monte Carlo、執行敏感度分析、共振掃描等功能完善</li>
+</ol>
+<h3 id="_5">假設<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>數據庫表結構（<code>strategy_configs</code>、<code>backtest_runs</code>、<code>strategy_showcase</code>）基於插入語句推斷</li>
+<li>服務層（<code>TechnicalStrategyService</code>、<code>MonteCarloService</code>、<code>ScanningService</code>）的實現邏輯基於使用方式推斷</li>
+<li>策略註冊機制基於 <code>adapters.py</code> 的使用模式推斷</li>
+</ul>
+<h3 id="_6">局限性<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>未訪問服務層實現源碼（<code>services/strategies/*.py</code>）</li>
+<li>未訪問數據庫架構定義文件</li>
+<li>部分端點（如 <code>comparison.py</code>）的實現是佔位符</li>
+<li>未包含前端集成細節</li>
+<li>未包含測試覆蓋情況</li>
+</ol>
+<h3 id="_7">建議後續工作<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>讀取服務層源碼以完善執行流程分析</li>
+<li>獲取數據庫架構定義（DDL 文件）</li>
+<li>分析前端集成模式（React 組件和 API 調用）</li>
+<li>研究單元測試和集成測試覆蓋</li>
+<li>分析性能監控和日誌記錄機制</li>
+</ol>
+<hr />
+<h2 id="_8">元數據<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>分析框架:</strong> 系統架構分析 + 設計模式識別</li>
+<li><strong>建議用途:</strong> programmer sub-agent 設計、策略系統擴展、API 集成開發</li>
+<li><strong>關鍵文件:</strong> 12 個策略路由模組 + 1 個架構文檔</li>
+<li><strong>分析時間:</strong> ~2 小時（源碼閱讀 + 文檔撰寫）</li>
+<li><strong>代碼行數:</strong> ~3000+ 行策略路由代碼</li>
+</ul>
+<hr />
+<p><em>報告生成時間: 2026-02-20T23:38:00+08:00</em>
+<em>分析代理: Charlie Analyst</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

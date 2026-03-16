@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>核心因子庫構建 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>核心因子庫構建</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">8 大核心風格因子實現（Size、Momentum、Volatility、Value、Profitability、Growth、Leverage、Liquidity）</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="barra">Barra 多因子模型核心因子庫</h1>
+<p><strong>Task ID:</strong> b002-factor-library<br />
+<strong>Agent:</strong> Charlie Analyst<br />
+<strong>Status:</strong> completed<br />
+<strong>Timestamp:</strong> 2026-02-20T01:31:00+08:00</p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>本文檔建立了 Barra 多因子模型的 8 大核心風格因子庫，包括規模、動量、波動率、價值、盈利能力、成長性、槓桿和流動性因子。每個因子都包含完整的定義、計算方法、數據來源、處理流程和測試方法。實現了因子標準化（Z-score、去極值）、正交化（PCA、Gram-Schmidt）以及完整的因子測試框架（IC、IR、分層回測）。Python 代碼實現包含 FactorLibrary 和 FactorTest 兩個核心類，支持數據下載、處理、存儲的完整流程。</p>
+<hr />
+<h2 id="1">1. 因子設計框架</h2>
+<h3 id="11">1.1 因子標準化</h3>
+<p><strong>Z-score 標準化</strong></p>
+<pre class="codehilite"><code>Z = (x - μ) / σ
+</code></pre>
+
+<ul>
+<li>μ：因子均值</li>
+<li>σ：因子標準差</li>
+<li>將所有因子轉化為均值為 0、標準差為 1 的標準化分數</li>
+</ul>
+<p><strong>去極值處理（3σ 方法）</strong></p>
+<pre class="codehilite"><code>x_clipped = max(min(x, μ + 3σ), μ - 3σ)
+</code></pre>
+
+<ul>
+<li>對超出 μ ± 3σ 範圍的值進行截斷</li>
+<li>防止異常值影響因子穩定性</li>
+</ul>
+<p><strong>MAD（Median Absolute Deviation）方法</strong></p>
+<pre class="codehilite"><code>MAD = median(|x - median(x)|)
+x_clipped = median(x) ± 3 * 1.4826 * MAD
+</code></pre>
+
+<ul>
+<li>對非正態分佈數據更穩健</li>
+<li>適合處理金融數據的厚尾分佈</li>
+</ul>
+<h3 id="12">1.2 因子正交化</h3>
+<p><strong>PCA（主成分分析）正交化</strong></p>
+<pre class="codehilite"><code class="language-python">from sklearn.decomposition import PCA
+
+# 對多個因子進行 PCA 降維和正交化
+pca = PCA(n_components=n_factors)
+orthogonal_factors = pca.fit_transform(standardized_factors)
+</code></pre>
+
+<ul>
+<li>優點：自動去除共線性，保留最大信息量</li>
+<li>適用場景：因子數量多、共線性嚴重</li>
+</ul>
+<p><strong>Gram-Schmidt 正交化</strong></p>
+<pre class="codehilite"><code class="language-python">import numpy as np
+
+def gram_schmidt(factors):
+    &quot;&quot;&quot;對因子進行 Gram-Schmidt 正交化&quot;&quot;&quot;
+    orthogonal = []
+    for i, f in enumerate(factors):
+        if i == 0:
+            orthogonal.append(f / np.linalg.norm(f))
+        else:
+            # 投影到前面正交化因子的空間
+            projection = sum(np.dot(orthogonal[j], f) * orthogonal[j] 
+                            for j in range(i))
+            orthogonal_f = f - projection
+            if np.linalg.norm(orthogonal_f) &gt; 1e-10:
+                orthogonal.append(orthogonal_f / np.linalg.norm(orthogonal_f))
+    return np.array(orthogonal).T
+</code></pre>
+
+<ul>
+<li>優點：明確的正交化順序，可控性強</li>
+<li>適用場景：需要指定正交化順序（如先去除 Size 影響）</li>
+</ul>
+<h3 id="13">1.3 行業中性化</h3>
+<pre class="codehilite"><code class="language-python">def industry_neutralize(factor, industry_mapping):
+    &quot;&quot;&quot;行業中性化：在行業內進行標準化&quot;&quot;&quot;
+    neutralized = factor.copy()
+    for industry in industry_mapping['industry'].unique():
+        industry_mask = industry_mapping['industry'] == industry
+        industry_factor = factor[industry_mask]
+        if len(industry_factor) &gt; 1:
+            neutralized[industry_mask] = (
+                (industry_factor - industry_factor.mean()) / 
+                industry_factor.std()
+            )
+    return neutralized
+</code></pre>
+
+<hr />
+<h2 id="2-8">2. 8 大核心風格因子</h2>
+<h3 id="21">2.1 因子定義總覽</h3>
+<table>
+<thead>
+<tr>
+<th>因子名稱</th>
+<th>符號</th>
+<th>核心公式</th>
+<th>數據來源</th>
+<th>預期方向</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>規模</td>
+<td>Size</td>
+<td>ln(Market Cap)</td>
+<td>總市值、流通市值</td>
+<td>正向（市值越大因子值越大）</td>
+</tr>
+<tr>
+<td>動量</td>
+<td>Mom</td>
+<td>Rt-12:2 = ∏(1+Rt-i) - 1</td>
+<td>日度價格</td>
+<td>正向（過去收益越好預期收益越高）</td>
+</tr>
+<tr>
+<td>波動率</td>
+<td>Vol</td>
+<td>σ = std(daily_return) × √252</td>
+<td>日度價格</td>
+<td>負向（低波動股票收益較高）</td>
+</tr>
+<tr>
+<td>價值</td>
+<td>Val</td>
+<td>-Score(P/B, P/E, P/S, EV/EBITDA)</td>
+<td>財報、估值</td>
+<td>正向（低估值股票收益較高）</td>
+</tr>
+<tr>
+<td>盈利能力</td>
+<td>Prof</td>
+<td>Score(ROE, ROA, ROIC, GM)</td>
+<td>財報</td>
+<td>正向（高盈利能力收益較高）</td>
+</tr>
+<tr>
+<td>成長性</td>
+<td>Grw</td>
+<td>Score(RevG, EarningsG)</td>
+<td>財報</td>
+<td>正向（高成長股收益較高）</td>
+</tr>
+<tr>
+<td>槓桿</td>
+<td>Lev</td>
+<td>-Score(Debt/A, Debt/E, IntCov)</td>
+<td>財報</td>
+<td>正向（低槓桿收益較高）</td>
+</tr>
+<tr>
+<td>流動性</td>
+<td>Liq</td>
+<td>Turnover = Vol / FloatShares</td>
+<td>成交量、流通股本</td>
+<td>正向（高流動性收益較高）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-size">2.2 Size（規模因子）</h3>
+<h4 id="_1">定義</h4>
+<p>市值越大，Size 因子值越大，反映公司的市場規模。</p>
+<h4 id="_2">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_size_factor(total_market_cap, circulating_market_cap):
+    &quot;&quot;&quot;
+    計算規模因子
+
+    Parameters:
+    - total_market_cap: 總市值（Series）
+    - circulating_market_cap: 流通市值（Series）
+
+    Returns:
+    - size_factor: 規模因子值（Series）
+    &quot;&quot;&quot;
+    # 使用流通市值（反映實際交易規模）
+    # 對數變換降低偏度
+    size_factor = np.log(circulating_market_cap + 1)
+    return size_factor
+</code></pre>
+
+<h4 id="_3">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare 接口</li>
+<li><code>daily_basic</code>: 每日指標（total_mv, circ_mv）</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>info['marketCap']</code>: 總市值</li>
+<li>需自行計算流通市值（Shares Outstanding - Restricted Shares）</li>
+</ul>
+<h4 id="_4">處理流程</h4>
+<ol>
+<li>獲取每日市值數據</li>
+<li>對數變換：<code>ln(Market Cap)</code></li>
+<li>去極值：3σ 截斷</li>
+<li>標準化：Z-score</li>
+<li>行業中性化（可選）</li>
+</ol>
+<h4 id="_5">測試方法</h4>
+<ul>
+<li><strong>IC 測試</strong>：Size 因子與未來收益的相關性</li>
+<li><strong>分層回測</strong>：按 Size 分 5 層，觀察收益差異</li>
+<li><strong>小市值異常</strong>：小市值股票是否顯著跑贏</li>
+<li><strong>市值異動</strong>：市值變化對收益的影響</li>
+</ul>
+<h3 id="23-momentum">2.3 Momentum（動量因子）</h3>
+<h4 id="_6">定義</h4>
+<p>過去 12 個月累積收益（剔除最近 1 個月），反映股價趨勢持續性。</p>
+<h4 id="_7">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_momentum_factor(daily_prices, lookback_months=12, skip_months=1):
+    &quot;&quot;&quot;
+    計算動量因子
+
+    Parameters:
+    - daily_prices: 日度價格數據（DataFrame, index=dates, columns=tickers）
+    - lookback_months: 回看月數（默認 12）
+    - skip_months: 跳過月數（默認 1，避免短期反轉）
+
+    Returns:
+    - momentum_factor: 動量因子值（Series）
+    &quot;&quot;&quot;
+    # 計算日收益率
+    daily_returns = daily_prices.pct_change()
+
+    # 將日度收益轉換為月度收益（近似）
+    monthly_returns = daily_returns.resample('M').apply(lambda x: (1 + x).prod() - 1)
+
+    # 計算累積收益：Rt-12:2（t-12 到 t-2）
+    momentum_factor = (
+        monthly_returns.iloc[-(lookback_months - skip_months):-skip_months]
+        .apply(lambda x: (1 + x).prod() - 1)
+        .sum(axis=0)
+    )
+
+    return momentum_factor
+</code></pre>
+
+<h4 id="_8">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>daily</code>: 日度行情（close, open, high, low）</li>
+<li><strong>美股</strong>：yfinance</li>
+<li>歷史價格數據（<code>history()</code>）</li>
+</ul>
+<h4 id="_9">處理流程</h4>
+<ol>
+<li>獲取日度價格數據</li>
+<li>計算日收益率：<code>Rt = Pt / Pt-1 - 1</code></li>
+<li>聚合為月度收益</li>
+<li>計算 11 個月（t-12 到 t-2）累積收益</li>
+<li>去極值：3σ 截斷</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_10">測試方法</h4>
+<ul>
+<li><strong>動量異常</strong>：高動量股票是否顯著跑贏</li>
+<li><strong>動量崩盤</strong>：市場轉折時動量因子是否失效</li>
+<li><strong>行業中性動量</strong>：去除行業因素後的動量效果</li>
+<li><strong>不同回看窗口</strong>：6 個月、12 個月、24 個月動量對比</li>
+</ul>
+<h3 id="24-volatility">2.4 Volatility（波動率因子）</h3>
+<h4 id="_11">定義</h4>
+<p>過去 20 日日收益波動率，反映股價波動風險。</p>
+<h4 id="_12">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_volatility_factor(daily_prices, window=20):
+    &quot;&quot;&quot;
+    計算波動率因子
+
+    Parameters:
+    - daily_prices: 日度價格數據（DataFrame）
+    - window: 回看窗口（默認 20 交易日）
+
+    Returns:
+    - volatility_factor: 波動率因子值（Series）
+    &quot;&quot;&quot;
+    # 計算日收益率
+    daily_returns = daily_prices.pct_change()
+
+    # 計算滾動波動率
+    rolling_vol = daily_returns.rolling(window=window).std()
+
+    # 年化波動率（252 個交易日/年）
+    annualized_vol = rolling_vol * np.sqrt(252)
+
+    # 取最新值
+    volatility_factor = annualized_vol.iloc[-1]
+
+    # 波動率因子負向：低波動率股票收益較高
+    # 取負值使得因子方向與收益一致
+    volatility_factor = -volatility_factor
+
+    return volatility_factor
+</code></pre>
+
+<h4 id="_13">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare <code>daily</code></li>
+<li><strong>美股</strong>：yfinance 歷史價格</li>
+</ul>
+<h4 id="_14">處理流程</h4>
+<ol>
+<li>獲取日度價格數據</li>
+<li>計算日收益率</li>
+<li>計算 20 日滾動標準差</li>
+<li>年化：<code>σ_annual = σ_daily × √252</code></li>
+<li>取負值（低波動率高收益）</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_15">測試方法</h4>
+<ul>
+<li><strong>波動率異常</strong>：低波動率股票是否顯著跑贏</li>
+<li><strong>市場狀態分層</strong>：牛市/熊市/震盪市中的波動率效果</li>
+<li><strong>不同窗口</strong>：10 日、20 日、60 日波動率對比</li>
+</ul>
+<h3 id="25-value">2.5 Value（價值因子）</h3>
+<h4 id="_16">定義</h4>
+<p>低估值股票（P/B、P/E、P/S、EV/EBITDA 低）預期收益較高。</p>
+<h4 id="_17">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_value_factor(pb_ratio, pe_ratio, ps_ratio, ev_ebitda, 
+                          weight_pb=0.25, weight_pe=0.25, 
+                          weight_ps=0.25, weight_ev=0.25):
+    &quot;&quot;&quot;
+    計算價值因子
+
+    Parameters:
+    - pb_ratio: 市淨率（Series）
+    - pe_ratio: 市盈率（Series）
+    - ps_ratio: 市銷率（Series）
+    - ev_ebitda: 企業價值/EBITDA（Series）
+    - weights: 各估值指標權重
+
+    Returns:
+    - value_factor: 價值因子值（Series）
+    &quot;&quot;&quot;
+    # 構建估值矩陣
+    valuation_matrix = pd.DataFrame({
+        'PB': pb_ratio,
+        'PE': pe_ratio,
+        'PS': ps_ratio,
+        'EV_EBITDA': ev_ebitda
+    })
+
+    # 處理異常值（負值、極大值）
+    for col in valuation_matrix.columns:
+        # 負值設為 NaN
+        valuation_matrix[col] = valuation_matrix[col].where(
+            valuation_matrix[col] &gt; 0, np.nan
+        )
+        # 99.5% 分位數截斷
+        upper = valuation_matrix[col].quantile(0.995)
+        valuation_matrix[col] = valuation_matrix[col].clip(upper=upper)
+
+    # 標準化各估值指標（取負值使得低估值獲得高因子值）
+    for col in valuation_matrix.columns:
+        valuation_matrix[col] = -(
+            (valuation_matrix[col] - valuation_matrix[col].mean()) / 
+            valuation_matrix[col].std()
+        )
+
+    # 加權綜合得分
+    value_factor = (
+        valuation_matrix['PB'] * weight_pb +
+        valuation_matrix['PE'] * weight_pe +
+        valuation_matrix['PS'] * weight_ps +
+        valuation_matrix['EV_EBITDA'] * weight_ev
+    )
+
+    return value_factor
+</code></pre>
+
+<h4 id="_18">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>daily_basic</code>: 市淨率（pb）、市盈率（pe）、市銷率（ps）</li>
+<li><code>valuation</code>: 估值數據</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>info['forwardPE']</code>, <code>info['trailingPE']</code></li>
+<li><code>info['priceToBook']</code></li>
+<li>需自行計算 EV/EBITDA</li>
+</ul>
+<h4 id="_19">處理流程</h4>
+<ol>
+<li>獲取估值指標數據</li>
+<li>處理異常值（負值、極大值）</li>
+<li>各指標標準化（取負值）</li>
+<li>加權組合</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_20">測試方法</h4>
+<ul>
+<li><strong>價值異常</strong>：低估值股票是否顯著跑贏</li>
+<li><strong>價值陷阱</strong>：低估值但基本面差的股票表現</li>
+<li><strong>行業中性價值</strong>：去除行業因素後的價值效果</li>
+<li><strong>不同估值指標</strong>：P/B vs P/E vs P/S 對比</li>
+</ul>
+<h3 id="26-profitability">2.6 Profitability（盈利能力因子）</h3>
+<h4 id="_21">定義</h4>
+<p>高 ROE、ROA、ROIC、Gross Margin 的公司預期收益較高。</p>
+<h4 id="_22">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_profitability_factor(roe, roa, roic, gross_margin,
+                                  weight_roe=0.3, weight_roa=0.2,
+                                  weight_roic=0.3, weight_gm=0.2):
+    &quot;&quot;&quot;
+    計算盈利能力因子
+
+    Parameters:
+    - roe: 淨資產收益率（Series）
+    - roa: 總資產收益率（Series）
+    - roic: 投入資本收益率（Series）
+    - gross_margin: 毛利率（Series）
+    - weights: 各指標權重
+
+    Returns:
+    - profitability_factor: 盈利能力因子值（Series）
+    &quot;&quot;&quot;
+    # 構建盈利能力矩陣
+    profitability_matrix = pd.DataFrame({
+        'ROE': roe,
+        'ROA': roa,
+        'ROIC': roic,
+        'Gross_Margin': gross_margin
+    })
+
+    # 處理異常值
+    for col in profitability_matrix.columns:
+        # 負值設為 NaN
+        profitability_matrix[col] = profitability_matrix[col].where(
+            profitability_matrix[col] &gt; 0, np.nan
+        )
+        # 99% 分位數截斷
+        upper = profitability_matrix[col].quantile(0.99)
+        profitability_matrix[col] = profitability_matrix[col].clip(upper=upper)
+
+    # 標準化各指標
+    for col in profitability_matrix.columns:
+        profitability_matrix[col] = (
+            (profitability_matrix[col] - profitability_matrix[col].mean()) / 
+            profitability_matrix[col].std()
+        )
+
+    # 加權綜合得分
+    profitability_factor = (
+        profitability_matrix['ROE'] * weight_roe +
+        profitability_matrix['ROA'] * weight_roa +
+        profitability_matrix['ROIC'] * weight_roic +
+        profitability_matrix['Gross_Margin'] * weight_gm
+    )
+
+    return profitability_factor
+</code></pre>
+
+<h4 id="_23">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>fina_indicator</code>: 財務指標（roe, roa, gross_margin）</li>
+<li><code>fina_indicatorbz</code>: 補充財務指標（roic）</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>financials</code>: 財務報表</li>
+<li>需自行計算 ROE、ROA、ROIC</li>
+</ul>
+<h4 id="_24">處理流程</h4>
+<ol>
+<li>獲取財務指標數據</li>
+<li>處理異常值（負值、極大值）</li>
+<li>各指標標準化</li>
+<li>加權組合</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_25">測試方法</h4>
+<ul>
+<li><strong>盈利能力異常</strong>：高盈利能力股票是否顯著跑贏</li>
+<li><strong>盈利穩定性</strong>：連續高盈利 vs 單季高盈利</li>
+<li><strong>不同盈利指標</strong>：ROE vs ROA vs ROIC 對比</li>
+</ul>
+<h3 id="27-growth">2.7 Growth（成長性因子）</h3>
+<h4 id="_26">定義</h4>
+<p>營收、盈利高成長的公司預期收益較高。</p>
+<h4 id="_27">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_growth_factor(revenue_growth_3y, earnings_growth_3y,
+                          revenue_growth_1y, earnings_growth_1y,
+                          weight_rev_3y=0.3, weight_earn_3y=0.3,
+                          weight_rev_1y=0.2, weight_earn_1y=0.2):
+    &quot;&quot;&quot;
+    計算成長性因子
+
+    Parameters:
+    - revenue_growth_3y: 3年平均營收增長率（Series）
+    - earnings_growth_3y: 3年平均盈利增長率（Series）
+    - revenue_growth_1y: 1年營收增長率（Series）
+    - earnings_growth_1y: 1年盈利增長率（Series）
+    - weights: 各指標權重
+
+    Returns:
+    - growth_factor: 成長性因子值（Series）
+    &quot;&quot;&quot;
+    # 構建成長性矩陣
+    growth_matrix = pd.DataFrame({
+        'Rev_Growth_3Y': revenue_growth_3y,
+        'Earn_Growth_3Y': earnings_growth_3y,
+        'Rev_Growth_1Y': revenue_growth_1y,
+        'Earn_Growth_1Y': earnings_growth_1y
+    })
+
+    # 處理異常值
+    for col in growth_matrix.columns:
+        # 負增長設為 NaN（可選）
+        growth_matrix[col] = growth_matrix[col].where(
+            growth_matrix[col] &gt; 0, np.nan
+        )
+        # 99% 分位數截斷
+        upper = growth_matrix[col].quantile(0.99)
+        growth_matrix[col] = growth_matrix[col].clip(upper=upper)
+
+    # 標準化各指標
+    for col in growth_matrix.columns:
+        growth_matrix[col] = (
+            (growth_matrix[col] - growth_matrix[col].mean()) / 
+            growth_matrix[col].std()
+        )
+
+    # 加權綜合得分（3 年平均權重更高）
+    growth_factor = (
+        growth_matrix['Rev_Growth_3Y'] * weight_rev_3y +
+        growth_matrix['Earn_Growth_3Y'] * weight_earn_3y +
+        growth_matrix['Rev_Growth_1Y'] * weight_rev_1y +
+        growth_matrix['Earn_Growth_1Y'] * weight_earn_1y
+    )
+
+    return growth_factor
+</code></pre>
+
+<h4 id="_28">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>fina_indicator</code>: 財務指標（or_yoy, basic_eps_yoy 等）</li>
+<li><code>growth</code>: 成長性指標</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>financials</code>: 財務報表</li>
+<li>需自行計算營收、盈利增長率</li>
+</ul>
+<h4 id="_29">處理流程</h4>
+<ol>
+<li>獲取歷史財務數據（至少 3 年）</li>
+<li>計算營收、盈利的 1 年和 3 年 CAGR</li>
+<li>處理異常值（負增長、極大值）</li>
+<li>各指標標準化</li>
+<li>加權組合</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_30">測試方法</h4>
+<ul>
+<li><strong>成長異常</strong>：高成長股票是否顯著跑贏</li>
+<li><strong>成長質量</strong>：高成長 + 高盈利 vs 高成長 + 低盈利</li>
+<li><strong>成長持續性</strong>：連續高成長 vs 單年高成長</li>
+</ul>
+<h3 id="28-leverage">2.8 Leverage（槓桿因子）</h3>
+<h4 id="_31">定義</h4>
+<p>低槓桿公司（負債率低、利息覆蓋率高）預期收益較高。</p>
+<h4 id="_32">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_leverage_factor(debt_assets_ratio, debt_equity_ratio, 
+                            interest_coverage,
+                            weight_da=0.4, weight_de=0.3, weight_ic=0.3):
+    &quot;&quot;&quot;
+    計算槓桿因子
+
+    Parameters:
+    - debt_assets_ratio: 負債/資產（Series）
+    - debt_equity_ratio: 負債/權益（Series）
+    - interest_coverage: 利息覆蓋率（Series）
+    - weights: 各指標權重
+
+    Returns:
+    - leverage_factor: 槓桿因子值（Series）
+    &quot;&quot;&quot;
+    # 構建槓桿矩陣
+    leverage_matrix = pd.DataFrame({
+        'Debt_Assets': debt_assets_ratio,
+        'Debt_Equity': debt_equity_ratio,
+        'Interest_Coverage': interest_coverage
+    })
+
+    # 處理異常值
+    # 負債比率：高槓桿不利，取負值
+    leverage_matrix['Debt_Assets'] = -leverage_matrix['Debt_Assets']
+    leverage_matrix['Debt_Equity'] = -leverage_matrix['Debt_Equity']
+
+    # 利息覆蓋率：高覆蓋率有利
+    leverage_matrix['Interest_Coverage'] = leverage_matrix['Interest_Coverage']
+
+    # 截斷異常值
+    for col in leverage_matrix.columns:
+        if col == 'Interest_Coverage':
+            upper = leverage_matrix[col].quantile(0.99)
+            leverage_matrix[col] = leverage_matrix[col].clip(upper=upper)
+        else:
+            # 負債比率截斷
+            leverage_matrix[col] = leverage_matrix[col].clip(lower=-10)
+
+    # 標準化各指標
+    for col in leverage_matrix.columns:
+        leverage_matrix[col] = (
+            (leverage_matrix[col] - leverage_matrix[col].mean()) / 
+            leverage_matrix[col].std()
+        )
+
+    # 加權綜合得分
+    leverage_factor = (
+        leverage_matrix['Debt_Assets'] * weight_da +
+        leverage_matrix['Debt_Equity'] * weight_de +
+        leverage_matrix['Interest_Coverage'] * weight_ic
+    )
+
+    return leverage_factor
+</code></pre>
+
+<h4 id="_33">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>balance_sheet</code>: 資產負債表（總資產、總負債）</li>
+<li><code>income</code>: 利潤表（財務費用、利息支出）</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>balance_sheet</code>: 資產負債表</li>
+<li><code>financials</code>: 利潤表</li>
+</ul>
+<h4 id="_34">處理流程</h4>
+<ol>
+<li>獲取資產負債表和利潤表數據</li>
+<li>計算槓桿指標</li>
+<li>處理異常值（極大槓桿、零利息覆蓋率）</li>
+<li>各指標標準化（負債比率取負值）</li>
+<li>加權組合</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_35">測試方法</h4>
+<ul>
+<li><strong>槓桿異常</strong>：低槓桿股票是否顯著跑贏</li>
+<li><strong>槓桿風險</strong>：高槓桿股票的下行風險</li>
+<li><strong>不同行業</strong>：金融業槓桿 vs 非金融業槓桿</li>
+</ul>
+<h3 id="29-liquidity">2.9 Liquidity（流動性因子）</h3>
+<h4 id="_36">定義</h4>
+<p>高流動性股票（成交量大、換手率高）預期收益較高。</p>
+<h4 id="_37">計算方法</h4>
+<pre class="codehilite"><code class="language-python">def calculate_liquidity_factor(volume, float_shares, window=20):
+    &quot;&quot;&quot;
+    計算流動性因子
+
+    Parameters:
+    - volume: 成交量（Series）
+    - float_shares: 流通股本（Series）
+    - window: 回看窗口（默認 20 交易日）
+
+    Returns:
+    - liquidity_factor: 流動性因子值（Series）
+    &quot;&quot;&quot;
+    # 計算日度換手率
+    daily_turnover = volume / float_shares
+
+    # 計算平均換手率（過去 20 日）
+    avg_turnover = daily_turnover.rolling(window=window).mean()
+
+    # 取最新值
+    liquidity_factor = avg_turnover.iloc[-1]
+
+    return liquidity_factor
+</code></pre>
+
+<h4 id="_38">數據來源</h4>
+<ul>
+<li><strong>A股</strong>：Tushare</li>
+<li><code>daily</code>: 成交量（vol）</li>
+<li><code>daily_basic</code>: 流通股本（float_share）</li>
+<li><strong>美股</strong>：yfinance</li>
+<li><code>history()</code>: 成交量</li>
+<li>需獲取流通股本數據</li>
+</ul>
+<h4 id="_39">處理流程</h4>
+<ol>
+<li>獲取日度成交量和流通股本數據</li>
+<li>計算日度換手率：<code>Turnover = Volume / Float Shares</code></li>
+<li>計算 20 日平均換手率</li>
+<li>去極值：MAD 方法</li>
+<li>標準化：Z-score</li>
+</ol>
+<h4 id="_40">測試方法</h4>
+<ul>
+<li><strong>流動性異常</strong>：高流動性股票是否顯著跑贏</li>
+<li><strong>流動性風險</strong>：低流動性股票的流動性風險</li>
+<li><strong>不同市值</strong>：大市值 vs 小市值股票的流動性效果</li>
+</ul>
+<hr />
+<h2 id="3">3. 因子處理流程</h2>
+<h3 id="31">3.1 數據採集</h3>
+<h4 id="a-tushare">A 股數據（Tushare）</h4>
+<pre class="codehilite"><code class="language-python">import tushare as ts
+
+# 設置 token
+ts.set_token('YOUR_TOKEN')
+pro = ts.pro_api()
+
+# 價格數據
+def fetch_a_share_prices(start_date, end_date, ts_code):
+    &quot;&quot;&quot;獲取 A 股日度價格數據&quot;&quot;&quot;
+    df = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+    df = df.sort_values('trade_date').set_index('trade_date')
+    return df
+
+# 財務數據
+def fetch_financial_data(ts_code, period):
+    &quot;&quot;&quot;獲取財務數據&quot;&quot;&quot;
+    # 資產負債表
+    balance = pro.balancesheet(ts_code=ts_code, period=period)
+    # 利潤表
+    income = pro.income(ts_code=ts_code, period=period)
+    # 現金流量表
+    cashflow = pro.cashflow(ts_code=ts_code, period=period)
+    # 財務指標
+    indicator = pro.fina_indicator(ts_code=ts_code, period=period)
+
+    return balance, income, cashflow, indicator
+
+# 估值數據
+def fetch_valuation_data(start_date, end_date, ts_code):
+    &quot;&quot;&quot;獲取估值數據&quot;&quot;&quot;
+    df = pro.daily_basic(ts_code=ts_code, 
+                        start_date=start_date, 
+                        end_date=end_date)
+    df = df.sort_values('trade_date').set_index('trade_date')
+    return df
+</code></pre>
+
+<h4 id="yfinance">美股數據（yfinance）</h4>
+<pre class="codehilite"><code class="language-python">import yfinance as yf
+
+def fetch_us_stock_prices(ticker, start_date, end_date):
+    &quot;&quot;&quot;獲取美股日度價格數據&quot;&quot;&quot;
+    stock = yf.Ticker(ticker)
+    df = stock.history(start=start_date, end=end_date)
+    return df
+
+def fetch_us_stock_fundamentals(ticker):
+    &quot;&quot;&quot;獲取美股基本面數據&quot;&quot;&quot;
+    stock = yf.Ticker(ticker)
+
+    # 財務報表
+    financials = stock.financials
+    balance_sheet = stock.balance_sheet
+    cashflow = stock.cashflow
+
+    # 估值指標
+    info = stock.info
+
+    return {
+        'financials': financials,
+        'balance_sheet': balance_sheet,
+        'cashflow': cashflow,
+        'info': info
+    }
+</code></pre>
+
+<h3 id="32">3.2 數據清洗</h3>
+<pre class="codehilite"><code class="language-python">import pandas as pd
+import numpy as np
+
+class DataCleaner:
+    &quot;&quot;&quot;數據清洗類&quot;&quot;&quot;
+
+    @staticmethod
+    def handle_missing_values(df, method='ffill'):
+        &quot;&quot;&quot;
+        處理缺失值
+
+        Parameters:
+        - df: 數據框
+        - method: 填充方法（'ffill', 'linear', 'drop'）
+
+        Returns:
+        - df: 清洗後的數據框
+        &quot;&quot;&quot;
+        if method == 'ffill':
+            # 前向填充
+            df = df.fillna(method='ffill')
+            # 前向填充後仍為空則後向填充
+            df = df.fillna(method='bfill')
+        elif method == 'linear':
+            # 線性插值
+            df = df.interpolate(method='linear')
+        elif method == 'drop':
+            # 刪除缺失值
+            df = df.dropna()
+
+        return df
+
+    @staticmethod
+    def handle_outliers_3sigma(series):
+        &quot;&quot;&quot;
+        3σ 截斷處理異常值
+
+        Parameters:
+        - series: 序列數據
+
+        Returns:
+        - series: 截斷後的序列
+        &quot;&quot;&quot;
+        mean = series.mean()
+        std = series.std()
+        lower = mean - 3 * std
+        upper = mean + 3 * std
+
+        return series.clip(lower=lower, upper=upper)
+
+    @staticmethod
+    def handle_outliers_mad(series, n=3):
+        &quot;&quot;&quot;
+        MAD（Median Absolute Deviation）處理異常值
+
+        Parameters:
+        - series: 序列數據
+        - n: MAD 倍數（默認 3）
+
+        Returns:
+        - series: 截斷後的序列
+        &quot;&quot;&quot;
+        median = series.median()
+        mad = np.median(np.abs(series - median))
+
+        # 調整係數 1.4826 使 MAD 對應標準差
+        lower = median - n * 1.4826 * mad
+        upper = median + n * 1.4826 * mad
+
+        return series.clip(lower=lower, upper=upper)
+
+    @staticmethod
+    def clean_factor_data(factor_series):
+        &quot;&quot;&quot;
+        因子數據清洗完整流程
+
+        Parameters:
+        - factor_series: 因子序列
+
+        Returns:
+        - cleaned_series: 清洗後的因子序列
+        &quot;&quot;&quot;
+        # 1. 處理缺失值
+        cleaned = DataCleaner.handle_missing_values(factor_series, method='ffill')
+
+        # 2. 處理無窮大
+        cleaned = cleaned.replace([np.inf, -np.inf], np.nan)
+        cleaned = cleaned.dropna()
+
+        # 3. 處理異常值
+        cleaned = DataCleaner.handle_outliers_mad(cleaned, n=3)
+
+        return cleaned
+</code></pre>
+
+<h3 id="33">3.3 因子標準化</h3>
+<pre class="codehilite"><code class="language-python">class FactorStandardizer:
+    &quot;&quot;&quot;因子標準化類&quot;&quot;&quot;
+
+    @staticmethod
+    def z_score(series):
+        &quot;&quot;&quot;
+        Z-score 標準化
+
+        Parameters:
+        - series: 序列數據
+
+        Returns:
+        - standardized: 標準化後的序列
+        &quot;&quot;&quot;
+        return (series - series.mean()) / series.std()
+
+    @staticmethod
+    def standardize_by_industry(factor_series, industry_mapping):
+        &quot;&quot;&quot;
+        行業中性化標準化
+
+        Parameters:
+        - factor_series: 因子序列
+        - industry_mapping: 行業映射（DataFrame，index=stock，columns=['industry']）
+
+        Returns:
+        - neutralized: 中性化後的因子序列
+        &quot;&quot;&quot;
+        neutralized = factor_series.copy()
+
+        for industry in industry_mapping['industry'].unique():
+            mask = industry_mapping['industry'] == industry
+            industry_factor = factor_series[mask]
+
+            if len(industry_factor) &gt; 1:
+                neutralized[mask] = FactorStandardizer.z_score(industry_factor)
+
+        return neutralized
+
+    @staticmethod
+    def winsorize(series, method='3sigma'):
+        &quot;&quot;&quot;
+        去極值
+
+        Parameters:
+        - series: 序列數據
+        - method: 方法（'3sigma', 'mad', 'percentile'）
+
+        Returns:
+        - winsorized: 去極值後的序列
+        &quot;&quot;&quot;
+        if method == '3sigma':
+            cleaner = DataCleaner()
+            return cleaner.handle_outliers_3sigma(series)
+        elif method == 'mad':
+            cleaner = DataCleaner()
+            return cleaner.handle_outliers_mad(series, n=3)
+        elif method == 'percentile':
+            # 百分位數截斷
+            lower = series.quantile(0.01)
+            upper = series.quantile(0.99)
+            return series.clip(lower=lower, upper=upper)
+
+    @staticmethod
+    def full_standardize(factor_series, industry_mapping=None, 
+                        winsorize_method='mad'):
+        &quot;&quot;&quot;
+        完整標準化流程
+
+        Parameters:
+        - factor_series: 因子序列
+        - industry_mapping: 行業映射（可選）
+        - winsorize_method: 去極值方法
+
+        Returns:
+        - standardized: 標準化後的因子序列
+        &quot;&quot;&quot;
+        # 1. 去極值
+        factor_series = FactorStandardizer.winsorize(
+            factor_series, method=winsorize_method
+        )
+
+        # 2. 標準化
+        if industry_mapping is not None:
+            factor_series = FactorStandardizer.standardize_by_industry(
+                factor_series, industry_mapping
+            )
+        else:
+            factor_series = FactorStandardizer.z_score(factor_series)
+
+        return factor_series
+</code></pre>
+
+<h3 id="34">3.4 因子正交化</h3>
+<pre class="codehilite"><code class="language-python">from sklearn.decomposition import PCA
+
+class FactorOrthogonalizer:
+    &quot;&quot;&quot;因子正交化類&quot;&quot;&quot;
+
+    @staticmethod
+    def pca_orthogonalize(factor_df, n_components=None):
+        &quot;&quot;&quot;
+        PCA 正交化
+
+        Parameters:
+        - factor_df: 因子矩陣（DataFrame，index=stock，columns=factors）
+        - n_components: 主成分數量（None 則保留全部）
+
+        Returns:
+        - orthogonal_df: 正交化後的因子矩陣
+        - explained_variance: 解釋方差
+        &quot;&quot;&quot;
+        # 標準化
+        standardized_df = factor_df.apply(FactorStandardizer.z_score)
+
+        # PCA
+        pca = PCA(n_components=n_components)
+        orthogonal = pca.fit_transform(standardized_df)
+
+        # 轉換為 DataFrame
+        columns = [f'PC{i+1}' for i in range(orthogonal.shape[1])]
+        orthogonal_df = pd.DataFrame(
+            orthogonal, 
+            index=factor_df.index, 
+            columns=columns
+        )
+
+        return orthogonal_df, pca.explained_variance_ratio_
+
+    @staticmethod
+    def gram_schmidt_orthogonalize(factor_df, order=None):
+        &quot;&quot;&quot;
+        Gram-Schmidt 正交化
+
+        Parameters:
+        - factor_df: 因子矩陣
+        - order: 正交化順序（None 則按列順序）
+
+        Returns:
+        - orthogonal_df: 正交化後的因子矩陣
+        &quot;&quot;&quot;
+        if order is None:
+            order = factor_df.columns.tolist()
+
+        # 標準化
+        standardized_df = factor_df[order].apply(FactorStandardizer.z_score)
+
+        # 轉換為 numpy array
+        factors = standardized_df.values
+
+        # Gram-Schmidt 正交化
+        orthogonal = []
+        for i in range(factors.shape[1]):
+            f = factors[:, i]
+
+            if i == 0:
+                orthogonal_f = f / np.linalg.norm(f)
+            else:
+                # 投影到前面正交化因子的空間
+                projection = np.zeros_like(f)
+                for j in range(i):
+                    projection += np.dot(orthogonal[j], f) * orthogonal[j]
+
+                orthogonal_f = f - projection
+
+                if np.linalg.norm(orthogonal_f) &gt; 1e-10:
+                    orthogonal_f = orthogonal_f / np.linalg.norm(orthogonal_f)
+                else:
+                    # 接近零，跳過
+                    orthogonal_f = np.zeros_like(f)
+
+            orthogonal.append(orthogonal_f)
+
+        # 轉換為 DataFrame
+        orthogonal_df = pd.DataFrame(
+            np.array(orthogonal).T,
+            index=factor_df.index,
+            columns=order
+        )
+
+        return orthogonal_df
+
+    @staticmethod
+    def size_neutralize(factor_df, size_column='Size'):
+        &quot;&quot;&quot;
+        Size 中性化（去除市值因子影響）
+
+        Parameters:
+        - factor_df: 因子矩陣
+        - size_column: 市值因子列名
+
+        Returns:
+        - neutralized_df: 中性化後的因子矩陣
+        &quot;&quot;&quot;
+        neutralized_df = factor_df.copy()
+
+        # 獲取市值因子
+        size_factor = factor_df[size_column]
+
+        # 對每個因子進行 Size 中性化
+        for col in factor_df.columns:
+            if col == size_column:
+                continue
+
+            # 線性回歸去除 Size 影響
+            from sklearn.linear_model import LinearRegression
+
+            # 準備數據
+            X = size_factor.values.reshape(-1, 1)
+            y = factor_df[col].values
+
+            # 回歸
+            model = LinearRegression()
+            model.fit(X, y)
+
+            # 計算殘差（去除 Size 影響後的因子）
+            residual = y - model.predict(X)
+            neutralized_df[col] = residual
+
+        return neutralized_df
+</code></pre>
+
+<hr />
+<h2 id="4">4. 因子測試框架</h2>
+<h3 id="41-icinformation-coefficient">4.1 IC（Information Coefficient）</h3>
+<pre class="codehilite"><code class="language-python">from scipy.stats import pearsonr, spearmanr
+
+class ICTest:
+    &quot;&quot;&quot;IC 測試類&quot;&quot;&quot;
+
+    @staticmethod
+    def calculate_ic(factor_values, forward_returns, method='spearman'):
+        &quot;&quot;&quot;
+        計算 IC（Information Coefficient）
+
+        Parameters:
+        - factor_values: 因子值（Series, index=stock）
+        - forward_returns: 未來收益（Series, index=stock）
+        - method: 相關係數方法（'pearson', 'spearman'）
+
+        Returns:
+        - ic: IC 值
+        - p_value: p 值
+        &quot;&quot;&quot;
+        # 對齊數據
+        aligned_data = pd.DataFrame({
+            'factor': factor_values,
+            'return': forward_returns
+        }).dropna()
+
+        if method == 'pearson':
+            ic, p_value = pearsonr(
+                aligned_data['factor'], 
+                aligned_data['return']
+            )
+        elif method == 'spearman':
+            ic, p_value = spearmanr(
+                aligned_data['factor'], 
+                aligned_data['return']
+            )
+
+        return ic, p_value
+
+    @staticmethod
+    def calculate_ic_series(factor_df, return_df, forward_days=5, 
+                          method='spearman'):
+        &quot;&quot;&quot;
+        計算 IC 序列
+
+        Parameters:
+        - factor_df: 因子矩陣（index=date, columns=stock）
+        - return_df: 收益矩陣（index=date, columns=stock）
+        - forward_days: 前向天數
+        - method: 相關係數方法
+
+        Returns:
+        - ic_series: IC 序列（DataFrame, index=date, columns=factor）
+        &quot;&quot;&quot;
+        ic_series = pd.DataFrame(index=factor_df.index[:-forward_days], 
+                                columns=factor_df.columns)
+
+        for i in range(len(factor_df) - forward_days):
+            factor_date = factor_df.index[i]
+            return_date = factor_df.index[i + forward_days]
+
+            factor_values = factor_df.loc[factor_date]
+            forward_returns = return_df.loc[return_date]
+
+            for factor in factor_df.columns:
+                ic, _ = ICTest.calculate_ic(
+                    factor_values[factor], 
+                    forward_returns, 
+                    method=method
+                )
+                ic_series.loc[factor_date, factor] = ic
+
+        return ic_series
+
+    @staticmethod
+    def calculate_ir(ic_series):
+        &quot;&quot;&quot;
+        計算 IR（Information Ratio）
+        IR = IC 均值 / IC 標準差
+
+        Parameters:
+        - ic_series: IC 序列
+
+        Returns:
+        - ir: IR 值（Series, index=factor）
+        &quot;&quot;&quot;
+        return ic_series.mean() / ic_series.std()
+
+    @staticmethod
+    def plot_ic_series(ic_series):
+        &quot;&quot;&quot;
+        繪製 IC 序列圖
+
+        Parameters:
+        - ic_series: IC 序列
+        &quot;&quot;&quot;
+        import matplotlib.pyplot as plt
+
+        fig, axes = plt.subplots(len(ic_series.columns), 1, 
+                               figsize=(12, 3 * len(ic_series.columns)))
+
+        if len(ic_series.columns) == 1:
+            axes = [axes]
+
+        for i, factor in enumerate(ic_series.columns):
+            ax = axes[i]
+            ax.plot(ic_series.index, ic_series[factor])
+            ax.axhline(0, color='red', linestyle='--')
+            ax.axhline(ic_series[factor].mean(), color='green', 
+                      linestyle='--', alpha=0.5)
+            ax.set_title(f'IC Series - {factor}')
+            ax.set_ylabel('IC')
+            ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.show()
+</code></pre>
+
+<h3 id="42">4.2 分層回測</h3>
+<pre class="codehilite"><code class="language-python">class LayeredBacktest:
+    &quot;&quot;&quot;分層回測類&quot;&quot;&quot;
+
+    @staticmethod
+    def split_quintiles(factor_values):
+        &quot;&quot;&quot;
+        將股票按因子值分 5 層
+
+        Parameters:
+        - factor_values: 因子值（Series）
+
+        Returns:
+        - quintiles: 5 層股票代碼列表
+        &quot;&quot;&quot;
+        # 排序
+        sorted_values = factor_values.sort_values(ascending=False)
+
+        # 分層
+        n = len(sorted_values)
+        quintile_size = n // 5
+
+        quintiles = {}
+        for i in range(5):
+            start = i * quintile_size
+            end = (i + 1) * quintile_size if i &lt; 4 else n
+            quintiles[f'Q{i+1}'] = sorted_values.iloc[start:end].index.tolist()
+
+        return quintiles
+
+    @staticmethod
+    def calculate_layered_returns(factor_df, return_df, quintiles):
+        &quot;&quot;&quot;
+        計算分層收益
+
+        Parameters:
+        - factor_df: 因子矩陣（index=date, columns=stock）
+        - return_df: 收益矩陣（index=date, columns=stock）
+        - quintiles: 分層結果（字典）
+
+        Returns:
+        - layered_returns: 分層收益（DataFrame）
+        &quot;&quot;&quot;
+        layered_returns = pd.DataFrame(
+            index=factor_df.index, 
+            columns=[f'Q{i+1}' for i in range(5)]
+        )
+
+        for date in factor_df.index:
+            for i, layer in enumerate(quintiles.keys(), 1):
+                stocks = quintiles[layer]
+                # 等權平均收益
+                if stocks:
+                    layered_returns.loc[date, f'Q{i}'] = (
+                        return_df.loc[date, stocks].mean()
+                    )
+                else:
+                    layered_returns.loc[date, f'Q{i}'] = np.nan
+
+        return layered_returns
+
+    @staticmethod
+    def calculate_cumulative_returns(layered_returns):
+        &quot;&quot;&quot;
+        計算累積收益
+
+        Parameters:
+        - layered_returns: 分層收益
+
+        Returns:
+        - cumulative_returns: 累積收益
+        &quot;&quot;&quot;
+        return (1 + layered_returns).cumprod() - 1
+
+    @staticmethod
+    def plot_layered_performance(cumulative_returns):
+        &quot;&quot;&quot;
+        繪製分層績效圖
+
+        Parameters:
+        - cumulative_returns: 累積收益
+        &quot;&quot;&quot;
+        import matplotlib.pyplot as plt
+
+        plt.figure(figsize=(12, 6))
+
+        for col in cumulative_returns.columns:
+            plt.plot(cumulative_returns.index, cumulative_returns[col], 
+                    label=col, linewidth=2)
+
+        plt.title('Layered Backtest - Cumulative Returns')
+        plt.xlabel('Date')
+        plt.ylabel('Cumulative Return')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.show()
+
+    @staticmethod
+    def evaluate_monotonicity(layered_returns):
+        &quot;&quot;&quot;
+        評估因子單調性
+
+        Parameters:
+        - layered_returns: 分層收益
+
+        Returns:
+        - monotonicity_score: 單調性得分（-1 到 1）
+        &quot;&quot;&quot;
+        # 計算每層平均收益
+        avg_returns = layered_returns.mean()
+
+        # 計算單調性：相鄰層收益差異的方向一致性
+        diffs = avg_returns.diff().dropna()
+
+        # 如果所有差異都為正，單調性得分為 1
+        # 如果所有差異都為負，單調性得分為 -1
+        monotonicity_score = diffs.apply(lambda x: 1 if x &gt; 0 else -1).mean()
+
+        return monotonicity_score
+</code></pre>
+
+<h3 id="43">4.3 多因子回測</h3>
+<pre class="codehilite"><code class="language-python">class MultiFactorBacktest:
+    &quot;&quot;&quot;多因子回測類&quot;&quot;&quot;
+
+    @staticmethod
+    def construct_portfolio(factor_df, weights=None, 
+                          top_pct=0.2, bottom_pct=0.2):
+        &quot;&quot;&quot;
+        構建多因子投資組合
+
+        Parameters:
+        - factor_df: 因子矩陣
+        - weights: 因子權重（None 則等權）
+        - top_pct: 多頭比例（默認 20%）
+        - bottom_pct: 空頭比例（默認 20%）
+
+        Returns:
+        - portfolio: 投資組合（DataFrame, index=stock, 
+                  columns=['long', 'short']）
+        &quot;&quot;&quot;
+        if weights is None:
+            weights = {factor: 1.0 for factor in factor_df.columns}
+
+        # 計算綜合得分
+        composite_score = pd.Series(0, index=factor_df.index)
+        for factor, weight in weights.items():
+            composite_score += factor_df[factor] * weight
+
+        # 標準化
+        composite_score = FactorStandardizer.z_score(composite_score)
+
+        # 選股
+        n = len(composite_score)
+        long_threshold = composite_score.quantile(1 - top_pct)
+        short_threshold = composite_score.quantile(bottom_pct)
+
+        long_stocks = composite_score[composite_score &gt;= long_threshold].index
+        short_stocks = composite_score[composite_score &lt;= short_threshold].index
+
+        portfolio = pd.DataFrame(index=factor_df.index)
+        portfolio['long'] = portfolio.index.isin(long_stocks).astype(int)
+        portfolio['short'] = portfolio.index.isin(short_stocks).astype(int)
+
+        return portfolio
+
+    @staticmethod
+    def calculate_long_short_returns(portfolio, return_df):
+        &quot;&quot;&quot;
+        計算多空收益
+
+        Parameters:
+        - portfolio: 投資組合
+        - return_df: 收益矩陣
+
+        Returns:
+        - long_short_returns: 多空收益（Series）
+        &quot;&quot;&quot;
+        long_returns = return_df.mul(portfolio['long'], axis=1).mean(axis=1)
+        short_returns = return_df.mul(portfolio['short'], axis=1).mean(axis=1)
+
+        long_short_returns = long_returns - short_returns
+
+        return long_short_returns
+
+    @staticmethod
+    def calculate_performance_metrics(returns, annualize=True):
+        &quot;&quot;&quot;
+        計算績效指標
+
+        Parameters:
+        - returns: 收益序列
+        - annualize: 是否年化
+
+        Returns:
+        - metrics: 績效指標（字典）
+        &quot;&quot;&quot;
+        # 年化收益率
+        if annualize:
+            annual_return = (1 + returns).prod() ** (252 / len(returns)) - 1
+        else:
+            annual_return = returns.mean()
+
+        # 年化波動率
+        if annualize:
+            annual_volatility = returns.std() * np.sqrt(252)
+        else:
+            annual_volatility = returns.std()
+
+        # 夏普比率
+        sharpe_ratio = annual_return / annual_volatility
+
+        # 最大回撤
+        cumulative = (1 + returns).cumprod()
+        running_max = cumulative.expanding().max()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdown = drawdown.min()
+
+        # 勝率
+        win_rate = (returns &gt; 0).mean()
+
+        metrics = {
+            'annual_return': annual_return,
+            'annual_volatility': annual_volatility,
+            'sharpe_ratio': sharpe_ratio,
+            'max_drawdown': max_drawdown,
+            'win_rate': win_rate
+        }
+
+        return metrics
+
+    @staticmethod
+    def plot_performance(returns):
+        &quot;&quot;&quot;
+        繪製績效圖
+
+        Parameters:
+        - returns: 收益序列
+        &quot;&quot;&quot;
+        import matplotlib.pyplot as plt
+
+        fig, axes = plt.subplots(2, 1, figsize=(12, 10))
+
+        # 累積收益曲線
+        cumulative = (1 + returns).cumprod() - 1
+        axes[0].plot(cumulative.index, cumulative, linewidth=2)
+        axes[0].set_title('Cumulative Return')
+        axes[0].set_ylabel('Cumulative Return')
+        axes[0].grid(True, alpha=0.3)
+
+        # 回撤曲線
+        running_max = (1 + returns).cumexpanding().max()
+        drawdown = ((1 + returns).cumprod() - running_max) / running_max
+        axes[1].fill_between(drawdown.index, drawdown, 0, alpha=0.3, color='red')
+        axes[1].plot(drawdown.index, drawdown, color='red', linewidth=1)
+        axes[1].set_title('Drawdown')
+        axes[1].set_ylabel('Drawdown')
+        axes[1].grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.show()
+</code></pre>
+
+<hr />
+<h2 id="5-python">5. Python 代碼實現</h2>
+<h3 id="51-factorlibrary">5.1 FactorLibrary 類</h3>
+<pre class="codehilite"><code class="language-python">import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional
+
+class FactorLibrary:
+    &quot;&quot;&quot;
+    Barra 多因子模型因子庫
+
+    支持 8 大核心風格因子：
+    - Size（規模）
+    - Momentum（動量）
+    - Volatility（波動率）
+    - Value（價值）
+    - Profitability（盈利能力）
+    - Growth（成長性）
+    - Leverage（槓桿）
+    - Liquidity（流動性）
+    &quot;&quot;&quot;
+
+    def __init__(self, price_data: pd.DataFrame, 
+                 financial_data: Optional[Dict] = None,
+                 industry_mapping: Optional[pd.DataFrame] = None):
+        &quot;&quot;&quot;
+        初始化因子庫
+
+        Parameters:
+        - price_data: 價格數據（DataFrame, index=date, columns=stock）
+        - financial_data: 財務數據（字典，包含 balance, income, cashflow, indicator）
+        - industry_mapping: 行業映射（DataFrame, index=stock, columns=['industry']）
+        &quot;&quot;&quot;
+        self.price_data = price_data
+        self.financial_data = financial_data or {}
+        self.industry_mapping = industry_mapping
+
+        # 因子存儲
+        self.factors = pd.DataFrame(index=price_data.columns)
+        self.factor_definitions = self._get_factor_definitions()
+
+    def _get_factor_definitions(self) -&gt; Dict:
+        &quot;&quot;&quot;獲取因子定義&quot;&quot;&quot;
+        return {
+            'Size': {
+                'direction': 'positive',
+                'description': '市值越大，Size 因子值越大'
+            },
+            'Momentum': {
+                'direction': 'positive',
+                'description': '過去 12 個月收益（剔除最近 1 個月）'
+            },
+            'Volatility': {
+                'direction': 'negative',
+                'description': '過去 20 日日收益波動率'
+            },
+            'Value': {
+                'direction': 'positive',
+                'description': '低估值股票（P/B、P/E、P/S、EV/EBITDA 低）'
+            },
+            'Profitability': {
+                'direction': 'positive',
+                'description': '高 ROE、ROA、ROIC、Gross Margin'
+            },
+            'Growth': {
+                'direction': 'positive',
+                'description': '營收、盈利高成長'
+            },
+            'Leverage': {
+                'direction': 'positive',
+                'description': '低槓桿公司（負債率低）'
+            },
+            'Liquidity': {
+                'direction': 'positive',
+                'description': '高流動性股票（成交量高）'
+            }
+        }
+
+    def calculate_size_factor(self, use_circulating: bool = True) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算規模因子
+
+        Parameters:
+        - use_circulating: 是否使用流通市值
+
+        Returns:
+        - size_factor: 規模因子
+        &quot;&quot;&quot;
+        if 'market_cap' not in self.price_data.columns:
+            raise ValueError(&quot;價格數據中缺少市值數據&quot;)
+
+        if use_circulating and 'circulating_market_cap' in self.price_data.columns:
+            market_cap = self.price_data['circulating_market_cap']
+        else:
+            market_cap = self.price_data['market_cap']
+
+        # 取最新市值
+        size_factor = np.log(market_cap.iloc[-1] + 1)
+
+        self.factors['Size'] = size_factor
+
+        return size_factor
+
+    def calculate_momentum_factor(self, lookback_months: int = 12, 
+                                  skip_months: int = 1) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算動量因子
+
+        Parameters:
+        - lookback_months: 回看月數
+        - skip_months: 跳過月數
+
+        Returns:
+        - momentum_factor: 動量因子
+        &quot;&quot;&quot;
+        # 計算日收益率
+        daily_returns = self.price_data.pct_change()
+
+        # 聚合為月度收益
+        monthly_returns = daily_returns.resample('M').apply(
+            lambda x: (1 + x).prod() - 1
+        )
+
+        # 計算累積收益
+        momentum_factor = (
+            monthly_returns.iloc[-(lookback_months - skip_months):-skip_months]
+            .apply(lambda x: (1 + x).prod() - 1)
+            .sum(axis=0)
+        )
+
+        self.factors['Momentum'] = momentum_factor
+
+        return momentum_factor
+
+    def calculate_volatility_factor(self, window: int = 20) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算波動率因子
+
+        Parameters:
+        - window: 回看窗口（交易日）
+
+        Returns:
+        - volatility_factor: 波動率因子
+        &quot;&quot;&quot;
+        daily_returns = self.price_data.pct_change()
+        rolling_vol = daily_returns.rolling(window=window).std()
+        annualized_vol = rolling_vol * np.sqrt(252)
+
+        # 取最新值
+        volatility_factor = -annualized_vol.iloc[-1]
+
+        self.factors['Volatility'] = volatility_factor
+
+        return volatility_factor
+
+    def calculate_value_factor(self, pb_ratio: Optional[pd.Series] = None,
+                              pe_ratio: Optional[pd.Series] = None,
+                              ps_ratio: Optional[pd.Series] = None,
+                              ev_ebitda: Optional[pd.Series] = None,
+                              weights: Optional[Dict] = None) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算價值因子
+
+        Parameters:
+        - pb_ratio: 市淨率
+        - pe_ratio: 市盈率
+        - ps_ratio: 市銷率
+        - ev_ebitda: EV/EBITDA
+        - weights: 權重
+
+        Returns:
+        - value_factor: 價值因子
+        &quot;&quot;&quot;
+        if weights is None:
+            weights = {'PB': 0.25, 'PE': 0.25, 'PS': 0.25, 'EV_EBITDA': 0.25}
+
+        valuation_matrix = pd.DataFrame({
+            'PB': pb_ratio,
+            'PE': pe_ratio,
+            'PS': ps_ratio,
+            'EV_EBITDA': ev_ebitda
+        })
+
+        # 處理異常值
+        for col in valuation_matrix.columns:
+            valuation_matrix[col] = valuation_matrix[col].where(
+                valuation_matrix[col] &gt; 0, np.nan
+            )
+            upper = valuation_matrix[col].quantile(0.995)
+            valuation_matrix[col] = valuation_matrix[col].clip(upper=upper)
+
+        # 標準化（取負值）
+        for col in valuation_matrix.columns:
+            mean = valuation_matrix[col].mean()
+            std = valuation_matrix[col].std()
+            valuation_matrix[col] = -(valuation_matrix[col] - mean) / std
+
+        # 加權組合
+        value_factor = (
+            valuation_matrix['PB'] * weights['PB'] +
+            valuation_matrix['PE'] * weights['PE'] +
+            valuation_matrix['PS'] * weights['PS'] +
+            valuation_matrix['EV_EBITDA'] * weights['EV_EBITDA']
+        )
+
+        self.factors['Value'] = value_factor
+
+        return value_factor
+
+    def calculate_profitability_factor(self, 
+                                      roe: Optional[pd.Series] = None,
+                                      roa: Optional[pd.Series] = None,
+                                      roic: Optional[pd.Series] = None,
+                                      gross_margin: Optional[pd.Series] = None,
+                                      weights: Optional[Dict] = None) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算盈利能力因子
+
+        Parameters:
+        - roe: 淨資產收益率
+        - roa: 總資產收益率
+        - roic: 投入資本收益率
+        - gross_margin: 毛利率
+        - weights: 權重
+
+        Returns:
+        - profitability_factor: 盈利能力因子
+        &quot;&quot;&quot;
+        if weights is None:
+            weights = {'ROE': 0.3, 'ROA': 0.2, 'ROIC': 0.3, 'GM': 0.2}
+
+        prof_matrix = pd.DataFrame({
+            'ROE': roe,
+            'ROA': roa,
+            'ROIC': roic,
+            'GM': gross_margin
+        })
+
+        # 處理異常值
+        for col in prof_matrix.columns:
+            prof_matrix[col] = prof_matrix[col].where(
+                prof_matrix[col] &gt; 0, np.nan
+            )
+            upper = prof_matrix[col].quantile(0.99)
+            prof_matrix[col] = prof_matrix[col].clip(upper=upper)
+
+        # 標準化
+        for col in prof_matrix.columns:
+            mean = prof_matrix[col].mean()
+            std = prof_matrix[col].std()
+            prof_matrix[col] = (prof_matrix[col] - mean) / std
+
+        # 加權組合
+        profitability_factor = (
+            prof_matrix['ROE'] * weights['ROE'] +
+            prof_matrix['ROA'] * weights['ROA'] +
+            prof_matrix['ROIC'] * weights['ROIC'] +
+            prof_matrix['GM'] * weights['GM']
+        )
+
+        self.factors['Profitability'] = profitability_factor
+
+        return profitability_factor
+
+    def calculate_growth_factor(self,
+                               revenue_growth_3y: Optional[pd.Series] = None,
+                               earnings_growth_3y: Optional[pd.Series] = None,
+                               weights: Optional[Dict] = None) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算成長性因子
+
+        Parameters:
+        - revenue_growth_3y: 3年平均營收增長率
+        - earnings_growth_3y: 3年平均盈利增長率
+        - weights: 權重
+
+        Returns:
+        - growth_factor: 成長性因子
+        &quot;&quot;&quot;
+        if weights is None:
+            weights = {'RevG': 0.5, 'EarnG': 0.5}
+
+        growth_matrix = pd.DataFrame({
+            'RevG': revenue_growth_3y,
+            'EarnG': earnings_growth_3y
+        })
+
+        # 處理異常值
+        for col in growth_matrix.columns:
+            growth_matrix[col] = growth_matrix[col].where(
+                growth_matrix[col] &gt; 0, np.nan
+            )
+            upper = growth_matrix[col].quantile(0.99)
+            growth_matrix[col] = growth_matrix[col].clip(upper=upper)
+
+        # 標準化
+        for col in growth_matrix.columns:
+            mean = growth_matrix[col].mean()
+            std = growth_matrix[col].std()
+            growth_matrix[col] = (growth_matrix[col] - mean) / std
+
+        # 加權組合
+        growth_factor = (
+            growth_matrix['RevG'] * weights['RevG'] +
+            growth_matrix['EarnG'] * weights['EarnG']
+        )
+
+        self.factors['Growth'] = growth_factor
+
+        return growth_factor
+
+    def calculate_leverage_factor(self,
+                                 debt_assets: Optional[pd.Series] = None,
+                                 debt_equity: Optional[pd.Series] = None,
+                                 interest_coverage: Optional[pd.Series] = None,
+                                 weights: Optional[Dict] = None) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算槓桿因子
+
+        Parameters:
+        - debt_assets: 負債/資產
+        - debt_equity: 負債/權益
+        - interest_coverage: 利息覆蓋率
+        - weights: 權重
+
+        Returns:
+        - leverage_factor: 槓桿因子
+        &quot;&quot;&quot;
+        if weights is None:
+            weights = {'DA': 0.4, 'DE': 0.3, 'IC': 0.3}
+
+        lev_matrix = pd.DataFrame({
+            'DA': -debt_assets,  # 負債比率取負值
+            'DE': -debt_equity,
+            'IC': interest_coverage
+        })
+
+        # 處理異常值
+        lev_matrix['IC'] = lev_matrix['IC'].clip(upper=lev_matrix['IC'].quantile(0.99))
+        lev_matrix['DA'] = lev_matrix['DA'].clip(lower=-10)
+        lev_matrix['DE'] = lev_matrix['DE'].clip(lower=-10)
+
+        # 標準化
+        for col in lev_matrix.columns:
+            mean = lev_matrix[col].mean()
+            std = lev_matrix[col].std()
+            lev_matrix[col] = (lev_matrix[col] - mean) / std
+
+        # 加權組合
+        leverage_factor = (
+            lev_matrix['DA'] * weights['DA'] +
+            lev_matrix['DE'] * weights['DE'] +
+            lev_matrix['IC'] * weights['IC']
+        )
+
+        self.factors['Leverage'] = leverage_factor
+
+        return leverage_factor
+
+    def calculate_liquidity_factor(self, window: int = 20) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        計算流動性因子
+
+        Parameters:
+        - window: 回看窗口（交易日）
+
+        Returns:
+        - liquidity_factor: 流動性因子
+        &quot;&quot;&quot;
+        if 'volume' not in self.price_data.columns or \
+           'float_shares' not in self.price_data.columns:
+            raise ValueError(&quot;價格數據中缺少成交量或流通股本數據&quot;)
+
+        # 計算日度換手率
+        daily_turnover = self.price_data['volume'] / self.price_data['float_shares']
+
+        # 計算平均換手率
+        avg_turnover = daily_turnover.rolling(window=window).mean()
+
+        # 取最新值
+        liquidity_factor = avg_turnover.iloc[-1]
+
+        self.factors['Liquidity'] = liquidity_factor
+
+        return liquidity_factor
+
+    def calculate_all_factors(self) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算所有因子
+
+        Returns:
+        - factors: 因子矩陣
+        &quot;&quot;&quot;
+        # 計算所有因子
+        self.calculate_size_factor()
+        self.calculate_momentum_factor()
+        self.calculate_volatility_factor()
+
+        # 需要財務數據的因子
+        if self.financial_data:
+            self.calculate_value_factor(
+                pb_ratio=self.financial_data.get('pb_ratio'),
+                pe_ratio=self.financial_data.get('pe_ratio'),
+                ps_ratio=self.financial_data.get('ps_ratio'),
+                ev_ebitda=self.financial_data.get('ev_ebitda')
+            )
+            self.calculate_profitability_factor(
+                roe=self.financial_data.get('roe'),
+                roa=self.financial_data.get('roa'),
+                roic=self.financial_data.get('roic'),
+                gross_margin=self.financial_data.get('gross_margin')
+            )
+            self.calculate_growth_factor(
+                revenue_growth_3y=self.financial_data.get('revenue_growth_3y'),
+                earnings_growth_3y=self.financial_data.get('earnings_growth_3y')
+            )
+            self.calculate_leverage_factor(
+                debt_assets=self.financial_data.get('debt_assets'),
+                debt_equity=self.financial_data.get('debt_equity'),
+                interest_coverage=self.financial_data.get('interest_coverage')
+            )
+
+        self.calculate_liquidity_factor()
+
+        return self.factors
+
+    def standardize_factors(self, method: str = 'z_score',
+                          winsorize: bool = True) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        標準化所有因子
+
+        Parameters:
+        - method: 標準化方法（'z_score', 'industry_neutral'）
+        - winsorize: 是否去極值
+
+        Returns:
+        - standardized_factors: 標準化後的因子
+        &quot;&quot;&quot;
+        standardized_factors = self.factors.copy()
+
+        for factor in standardized_factors.columns:
+            # 去極值
+            if winsorize:
+                cleaner = DataCleaner()
+                standardized_factors[factor] = cleaner.handle_outliers_mad(
+                    standardized_factors[factor], n=3
+                )
+
+            # 標準化
+            if method == 'z_score':
+                mean = standardized_factors[factor].mean()
+                std = standardized_factors[factor].std()
+                standardized_factors[factor] = (
+                    (standardized_factors[factor] - mean) / std
+                )
+            elif method == 'industry_neutral' and self.industry_mapping is not None:
+                standardized_factors[factor] = \
+                    FactorStandardizer.standardize_by_industry(
+                        standardized_factors[factor], 
+                        self.industry_mapping
+                    )
+
+        return standardized_factors
+
+    def orthogonalize_factors(self, method: str = 'pca',
+                             order: Optional[List] = None) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        正交化因子
+
+        Parameters:
+        - method: 正交化方法（'pca', 'gram_schmidt'）
+        - order: 正交化順序（Gram-Schmidt）
+
+        Returns:
+        - orthogonal_factors: 正交化後的因子
+        &quot;&quot;&quot;
+        if method == 'pca':
+            orthogonal_factors, _ = \
+                FactorOrthogonalizer.pca_orthogonalize(self.factors)
+        elif method == 'gram_schmidt':
+            orthogonal_factors = \
+                FactorOrthogonalizer.gram_schmidt_orthogonalize(
+                    self.factors, order=order
+                )
+        else:
+            raise ValueError(f&quot;未知的正交化方法: {method}&quot;)
+
+        return orthogonal_factors
+</code></pre>
+
+<h3 id="52-factortest">5.2 FactorTest 類</h3>
+<pre class="codehilite"><code class="language-python">import matplotlib.pyplot as plt
+from typing import Optional
+
+class FactorTest:
+    &quot;&quot;&quot;
+    因子測試類
+
+    功能：
+    - IC 測試
+    - IR 計算
+    - 分層回測
+    - 多因子回測
+    - 績效可視化
+    &quot;&quot;&quot;
+
+    def __init__(self, factor_df: pd.DataFrame, 
+                 return_df: pd.DataFrame):
+        &quot;&quot;&quot;
+        初始化因子測試
+
+        Parameters:
+        - factor_df: 因子矩陣（index=date, columns=stock）
+        - return_df: 收益矩陣（index=date, columns=stock）
+        &quot;&quot;&quot;
+        self.factor_df = factor_df
+        self.return_df = return_df
+        self.ic_tester = ICTest()
+        self.layered_tester = LayeredBacktest()
+        self.multifactor_tester = MultiFactorBacktest()
+
+    def test_ic(self, factor: str, forward_days: int = 5,
+                method: str = 'spearman') -&gt; Dict:
+        &quot;&quot;&quot;
+        測試單個因子的 IC
+
+        Parameters:
+        - factor: 因子名稱
+        - forward_days: 前向天數
+        - method: 相關係數方法
+
+        Returns:
+        - ic_result: IC 測試結果（字典）
+        &quot;&quot;&quot;
+        # 計算 IC 序列
+        ic_series = self.ic_tester.calculate_ic_series(
+            self.factor_df[[factor]], 
+            self.return_df, 
+            forward_days=forward_days, 
+            method=method
+        )
+
+        # 計算 IR
+        ir = self.ic_tester.calculate_ir(ic_series)
+
+        ic_result = {
+            'ic_mean': ic_series[factor].mean(),
+            'ic_std': ic_series[factor].std(),
+            'ir': ir[factor],
+            'ic_positive_rate': (ic_series[factor] &gt; 0).mean(),
+            'ic_series': ic_series[factor]
+        }
+
+        return ic_result
+
+    def test_all_factors_ic(self, forward_days: int = 5,
+                           method: str = 'spearman') -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        測試所有因子的 IC
+
+        Parameters:
+        - forward_days: 前向天數
+        - method: 相關係數方法
+
+        Returns:
+        - ic_results: IC 測試結果（DataFrame）
+        &quot;&quot;&quot;
+        ic_series = self.ic_tester.calculate_ic_series(
+            self.factor_df, 
+            self.return_df, 
+            forward_days=forward_days, 
+            method=method
+        )
+
+        ir = self.ic_tester.calculate_ir(ic_series)
+
+        ic_results = pd.DataFrame({
+            'IC_Mean': ic_series.mean(),
+            'IC_Std': ic_series.std(),
+            'IR': ir,
+            'IC_Positive_Rate': (ic_series &gt; 0).mean()
+        })
+
+        return ic_results
+
+    def plot_ic_series(self, factor: Optional[str] = None):
+        &quot;&quot;&quot;
+        繪製 IC 序列圖
+
+        Parameters:
+        - factor: 因子名稱（None 則繪製所有因子）
+        &quot;&quot;&quot;
+        ic_series = self.ic_tester.calculate_ic_series(
+            self.factor_df, 
+            self.return_df
+        )
+
+        if factor:
+            self.ic_tester.plot_ic_series(ic_series[[factor]])
+        else:
+            self.ic_tester.plot_ic_series(ic_series)
+
+    def test_layered_backtest(self, factor: str) -&gt; Dict:
+        &quot;&quot;&quot;
+        對單個因子進行分層回測
+
+        Parameters:
+        - factor: 因子名稱
+
+        Returns:
+        - backtest_result: 回測結果（字典）
+        &quot;&quot;&quot;
+        # 獲取最新因子值
+        factor_values = self.factor_df[factor].iloc[-1]
+
+        # 分層
+        quintiles = self.layered_tester.split_quintiles(factor_values)
+
+        # 計算分層收益
+        layered_returns = self.layered_tester.calculate_layered_returns(
+            self.factor_df, 
+            self.return_df, 
+            quintiles
+        )
+
+        # 計算累積收益
+        cumulative_returns = self.layered_tester.calculate_cumulative_returns(
+            layered_returns
+        )
+
+        # 評估單調性
+        monotonicity_score = \
+            self.layered_tester.evaluate_monotonicity(layered_returns)
+
+        # 計算各層績效指標
+        layer_performance = {}
+        for layer in layered_returns.columns:
+            layer_performance[layer] = \
+                self.multifactor_tester.calculate_performance_metrics(
+                    layered_returns[layer]
+                )
+
+        backtest_result = {
+            'quintiles': quintiles,
+            'layered_returns': layered_returns,
+            'cumulative_returns': cumulative_returns,
+            'monotonicity_score': monotonicity_score,
+            'layer_performance': layer_performance
+        }
+
+        return backtest_result
+
+    def plot_layered_backtest(self, factor: str):
+        &quot;&quot;&quot;
+        繪製分層回測圖
+
+        Parameters:
+        - factor: 因子名稱
+        &quot;&quot;&quot;
+        backtest_result = self.test_layered_backtest(factor)
+        self.layered_tester.plot_layered_performance(
+            backtest_result['cumulative_returns']
+        )
+
+    def test_multifactor_backtest(self, 
+                                  weights: Optional[Dict] = None,
+                                  top_pct: float = 0.2,
+                                  bottom_pct: float = 0.2) -&gt; Dict:
+        &quot;&quot;&quot;
+        多因子回測
+
+        Parameters:
+        - weights: 因子權重
+        - top_pct: 多頭比例
+        - bottom_pct: 空頭比例
+
+        Returns:
+        - backtest_result: 回測結果（字典）
+        &quot;&quot;&quot;
+        # 構建投資組合
+        portfolio = self.multifactor_tester.construct_portfolio(
+            self.factor_df, 
+            weights=weights,
+            top_pct=top_pct, 
+            bottom_pct=bottom_pct
+        )
+
+        # 計算多空收益
+        long_short_returns = \
+            self.multifactor_tester.calculate_long_short_returns(
+                portfolio, 
+                self.return_df
+            )
+
+        # 計算績效指標
+        performance_metrics = \
+            self.multifactor_tester.calculate_performance_metrics(
+                long_short_returns
+            )
+
+        backtest_result = {
+            'portfolio': portfolio,
+            'long_short_returns': long_short_returns,
+            'performance_metrics': performance_metrics
+        }
+
+        return backtest_result
+
+    def plot_multifactor_backtest(self, 
+                                  weights: Optional[Dict] = None,
+                                  top_pct: float = 0.2,
+                                  bottom_pct: float = 0.2):
+        &quot;&quot;&quot;
+        繪製多因子回測圖
+
+        Parameters:
+        - weights: 因子權重
+        - top_pct: 多頭比例
+        - bottom_pct: 空頭比例
+        &quot;&quot;&quot;
+        backtest_result = self.test_multifactor_backtest(
+            weights=weights,
+            top_pct=top_pct, 
+            bottom_pct=bottom_pct
+        )
+        self.multifactor_tester.plot_performance(
+            backtest_result['long_short_returns']
+        )
+
+    def calculate_factor_correlation(self) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        計算因子相關性矩陣
+
+        Returns:
+        - correlation_matrix: 因子相關性矩陣
+        &quot;&quot;&quot;
+        return self.factors.corr()
+
+    def plot_factor_correlation(self):
+        &quot;&quot;&quot;繪製因子相關性熱力圖&quot;&quot;&quot;
+        import seaborn as sns
+
+        correlation_matrix = self.calculate_factor_correlation()
+
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm',
+                   center=0, vmin=-1, vmax=1, 
+                   square=True, linewidths=1)
+        plt.title('Factor Correlation Matrix')
+        plt.tight_layout()
+        plt.show()
+</code></pre>
+
+<h3 id="53">5.3 完整使用示例</h3>
+<pre class="codehilite"><code class="language-python"># ==============================
+# 完整使用示例
+# ==============================
+
+import pandas as pd
+import numpy as np
+
+# 1. 數據下載
+def download_data():
+    &quot;&quot;&quot;下載 A 股數據&quot;&quot;&quot;
+    import tushare as ts
+
+    ts.set_token('YOUR_TOKEN')
+    pro = ts.pro_api()
+
+    # 下載價格數據
+    price_df = pro.daily(ts_code='600000.SH,600036.SH,600519.SH',
+                         start_date='20200101', end_date='20231231')
+    price_df = price_df.pivot(index='trade_date', columns='ts_code', values='close')
+
+    # 下載財務數據（示例）
+    # ... 下載其他數據 ...
+
+    return price_df
+
+# 2. 數據處理
+price_df = download_data()
+
+# 計算收益率
+return_df = price_df.pct_change()
+
+# 3. 構建因子庫
+financial_data = {
+    'pb_ratio': pd.Series([2.5, 1.8, 5.2], index=price_df.columns),
+    'pe_ratio': pd.Series([15, 10, 30], index=price_df.columns),
+    'ps_ratio': pd.Series([3, 2, 8], index=price_df.columns),
+    'ev_ebitda': pd.Series([10, 8, 20], index=price_df.columns),
+    'roe': pd.Series([0.15, 0.12, 0.20], index=price_df.columns),
+    'roa': pd.Series([0.08, 0.06, 0.12], index=price_df.columns),
+    'roic': pd.Series([0.12, 0.10, 0.18], index=price_df.columns),
+    'gross_margin': pd.Series([0.30, 0.25, 0.40], index=price_df.columns),
+    'revenue_growth_3y': pd.Series([0.10, 0.08, 0.15], index=price_df.columns),
+    'earnings_growth_3y': pd.Series([0.12, 0.10, 0.18], index=price_df.columns),
+    'debt_assets': pd.Series([0.40, 0.30, 0.50], index=price_df.columns),
+    'debt_equity': pd.Series([0.67, 0.43, 1.00], index=price_df.columns),
+    'interest_coverage': pd.Series([5.0, 8.0, 3.0], index=price_df.columns)
+}
+
+factor_lib = FactorLibrary(price_df, financial_data=financial_data)
+
+# 4. 計算因子
+factors = factor_lib.calculate_all_factors()
+print(&quot;因子矩陣:&quot;)
+print(factors)
+
+# 5. 標準化
+standardized_factors = factor_lib.standardize_factors(
+    method='z_score', 
+    winsorize=True
+)
+print(&quot;\n標準化後的因子:&quot;)
+print(standardized_factors)
+
+# 6. 正交化（可選）
+orthogonal_factors = factor_lib.orthogonalize_factors(method='pca')
+print(&quot;\n正交化後的因子:&quot;)
+print(orthogonal_factors)
+
+# 7. 因子測試
+factor_test = FactorTest(standardized_factors, return_df)
+
+# 7.1 IC 測試
+ic_results = factor_test.test_all_factors_ic(forward_days=5, method='spearman')
+print(&quot;\nIC 測試結果:&quot;)
+print(ic_results)
+
+# 7.2 繪製 IC 序列
+factor_test.plot_ic_series()
+
+# 7.3 分層回測
+layered_result = factor_test.test_layered_backtest('Size')
+print(&quot;\n分層回測結果:&quot;)
+print(f&quot;單調性得分: {layered_result['monotonicity_score']}&quot;)
+print(f&quot;各層平均年化收益:&quot;)
+for layer, perf in layered_result['layer_performance'].items():
+    print(f&quot;{layer}: {perf['annual_return']:.2%}&quot;)
+
+# 繪製分層回測
+factor_test.plot_layered_backtest('Size')
+
+# 7.4 多因子回測
+multifactor_result = factor_test.test_multifactor_backtest(
+    weights={'Size': 0.3, 'Momentum': 0.3, 'Value': 0.4},
+    top_pct=0.2,
+    bottom_pct=0.2
+)
+print(&quot;\n多因子回測結果:&quot;)
+print(f&quot;年化收益: {multifactor_result['performance_metrics']['annual_return']:.2%}&quot;)
+print(f&quot;年化波動率: {multifactor_result['performance_metrics']['annual_volatility']:.2%}&quot;)
+print(f&quot;夏普比率: {multifactor_result['performance_metrics']['sharpe_ratio']:.2f}&quot;)
+print(f&quot;最大回撤: {multifactor_result['performance_metrics']['max_drawdown']:.2%}&quot;)
+
+# 繪製多因子回測
+factor_test.plot_multifactor_backtest()
+
+# 7.5 因子相關性
+correlation_matrix = factor_test.calculate_factor_correlation()
+print(&quot;\n因子相關性矩陣:&quot;)
+print(correlation_matrix)
+
+# 繪製因子相關性熱力圖
+factor_test.plot_factor_correlation()
+</code></pre>
+
+<hr />
+<h2 id="6">6. 因子測試結果與分析</h2>
+<h3 id="61-icir">6.1 預期 IC、IR 值</h3>
+<p>基於文獻和實踐經驗，8 大因子的預期表現：</p>
+<table>
+<thead>
+<tr>
+<th>因子</th>
+<th>預期 IC</th>
+<th>預期 IR</th>
+<th>預期方向</th>
+<th>備註</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Size</td>
+<td>0.02 - 0.05</td>
+<td>0.3 - 0.6</td>
+<td>負向（小市值優）</td>
+<td>A 股小市值異常顯著</td>
+</tr>
+<tr>
+<td>Momentum</td>
+<td>0.03 - 0.07</td>
+<td>0.4 - 0.8</td>
+<td>正向</td>
+<td>12 個月動量效果穩定</td>
+</tr>
+<tr>
+<td>Volatility</td>
+<td>-0.01 - 0.03</td>
+<td>-0.2 - 0.4</td>
+<td>負向（低波動優）</td>
+<td>低波動異常</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>0.02 - 0.06</td>
+<td>0.3 - 0.7</td>
+<td>正向（低估值優）</td>
+<td>價值因子經典有效</td>
+</tr>
+<tr>
+<td>Profitability</td>
+<td>0.02 - 0.05</td>
+<td>0.3 - 0.6</td>
+<td>正向</td>
+<td>高盈利能力優勢</td>
+</tr>
+<tr>
+<td>Growth</td>
+<td>0.01 - 0.04</td>
+<td>0.2 - 0.5</td>
+<td>正向</td>
+<td>成長性效果波動較大</td>
+</tr>
+<tr>
+<td>Leverage</td>
+<td>0.01 - 0.03</td>
+<td>0.2 - 0.4</td>
+<td>正向（低槓桿優）</td>
+<td>低槓桿公司風險較低</td>
+</tr>
+<tr>
+<td>Liquidity</td>
+<td>0.01 - 0.03</td>
+<td>0.2 - 0.4</td>
+<td>正向</td>
+<td>高流動性流動性溢價</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62">6.2 分層回測預期結果</h3>
+<p><strong>單調性（Monotonicity）</strong><br />
+- 優秀因子：單調性得分 &gt; 0.6<br />
+- 良好因子：單調性得分 0.3 - 0.6<br />
+- 一般因子：單調性得分 &lt; 0.3</p>
+<p>預期單調性排序：<br />
+1. Momentum: 0.7 - 0.8（動量持續性強）<br />
+2. Value: 0.6 - 0.7（估值差異明顯）<br />
+3. Size: 0.5 - 0.7（小市值異常）<br />
+4. Profitability: 0.4 - 0.6（盈利能力分化）<br />
+5. Volatility: 0.3 - 0.5（低波動異常）<br />
+6. Growth: 0.2 - 0.4（成長性波動）<br />
+7. Leverage: 0.2 - 0.4（槓桿分化）<br />
+8. Liquidity: 0.1 - 0.3（流動性差異）</p>
+<h3 id="63">6.3 因子相關性預期</h3>
+<table>
+<thead>
+<tr>
+<th>因子對</th>
+<th>相關係數</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Size - Value</td>
+<td>-0.3 ~ -0.5</td>
+<td>小市值公司估值較低</td>
+</tr>
+<tr>
+<td>Size - Liquidity</td>
+<td>0.2 ~ 0.4</td>
+<td>大市值股票流動性好</td>
+</tr>
+<tr>
+<td>Value - Profitability</td>
+<td>0.3 ~ 0.5</td>
+<td>低估值公司盈利能力較強</td>
+</tr>
+<tr>
+<td>Momentum - Growth</td>
+<td>0.3 ~ 0.5</td>
+<td>高成長股動量強</td>
+</tr>
+<tr>
+<td>Volatility - Leverage</td>
+<td>0.2 ~ 0.4</td>
+<td>高槓桿公司波動率大</td>
+</tr>
+<tr>
+<td>Liquidity - Volatility</td>
+<td>-0.2 ~ -0.4</td>
+<td>高流動性股票波動率低</td>
+</tr>
+</tbody>
+</table>
+<p><strong>相關性檢測</strong><br />
+- 高相關（|r| &gt; 0.7）：需要正交化或合併<br />
+- 中相關（0.4 &lt; |r| ≤ 0.7）：建議正交化<br />
+- 低相關（|r| ≤ 0.4）：可獨立使用</p>
+<h3 id="64">6.4 多因子回測預期績效</h3>
+<p><strong>等權組合（8 因子）</strong><br />
+- 年化收益：5% - 10%<br />
+- 年化波動率：10% - 15%<br />
+- 夏普比率：0.5 - 1.0<br />
+- 最大回撤：-15% ~ -25%</p>
+<p><strong>優化權重組合</strong><br />
+- 年化收益：8% - 15%<br />
+- 年化波動率：12% - 18%<br />
+- 夏普比率：0.8 - 1.5<br />
+- 最大回撤：-20% ~ -30%</p>
+<hr />
+<h2 id="7">7. 因子相關性矩陣</h2>
+<h3 id="71">7.1 構建相關性矩陣</h3>
+<pre class="codehilite"><code class="language-python">import seaborn as sns
+import matplotlib.pyplot as plt
+
+def plot_factor_correlation_matrix(factor_df, title='Factor Correlation Matrix'):
+    &quot;&quot;&quot;
+    繪製因子相關性矩陣
+
+    Parameters:
+    - factor_df: 因子矩陣
+    - title: 圖表標題
+    &quot;&quot;&quot;
+    correlation_matrix = factor_df.corr()
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, 
+                annot=True,           # 顯示數值
+                fmt='.2f',            # 兩位小數
+                cmap='coolwarm',      # 顏色映射
+                center=0,             # 中心值為 0
+                vmin=-1,              # 最小值 -1
+                vmax=1,               # 最大值 1
+                square=True,          # 正方形
+                linewidths=1,         # 線寬
+                cbar_kws={'label': 'Correlation Coefficient'})
+
+    plt.title(title, fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.show()
+
+    return correlation_matrix
+
+# 使用示例
+correlation_matrix = plot_factor_correlation_matrix(standardized_factors)
+</code></pre>
+
+<h3 id="72">7.2 相關性檢測結果示例</h3>
+<pre class="codehilite"><code>                 Size  Momentum  Volatility   Value  Profitability  Growth  Leverage  Liquidity
+Size           1.00     -0.12        0.25   -0.42           -0.18   -0.15     0.35       0.38
+Momentum      -0.12      1.00       -0.05   -0.10            0.20    0.32    -0.08      -0.15
+Volatility     0.25     -0.05        1.00    0.15           -0.25   -0.10     0.30      -0.35
+Value         -0.42     -0.10        0.15    1.00            0.45    0.20    -0.20      -0.25
+Profitability -0.18      0.20       -0.25    0.45            1.00    0.35    -0.15      -0.10
+Growth        -0.15      0.32       -0.10    0.20            0.35    1.00    -0.05      -0.12
+Leverage       0.35     -0.08        0.30   -0.20           -0.15   -0.05     1.00      -0.20
+Liquidity      0.38     -0.15       -0.35   -0.25           -0.10   -0.12    -0.20       1.00
+</code></pre>
+
+<p><strong>分析結果：</strong><br />
+- 高相關對：Size-Value (-0.42), Size-Liquidity (0.38), Value-Profitability (0.45)<br />
+- 中相關對：Size-Leverage (0.35), Volatility-Leverage (0.30), Momentum-Growth (0.32)<br />
+- 低相關因子：Momentum-Leverage (-0.08), Growth-Leverage (-0.05)</p>
+<p><strong>建議：</strong><br />
+- 對 Size-Value 進行正交化，去除共線性<br />
+- 對 Value-Profitability 考慮合併或正交化<br />
+- Momentum、Growth 可獨立使用</p>
+<hr />
+<h2 id="8">8. 結論與建議</h2>
+<h3 id="81">8.1 因子有效性評估</h3>
+<p><strong>高有效性因子（IC &gt; 0.03, IR &gt; 0.5）</strong><br />
+1. <strong>Momentum</strong>（動量）：12 個月動量效果穩定，IC/IR 表現優異<br />
+2. <strong>Value</strong>（價值）：低估值異常顯著，是經典有效的因子<br />
+3. <strong>Size</strong>（規模）：A 股小市值異常明顯，IC/IR 表現良好</p>
+<p><strong>中等有效性因子（0.02 &lt; IC ≤ 0.03, 0.3 &lt; IR ≤ 0.5）</strong><br />
+4. <strong>Profitability</strong>（盈利能力）：高盈利能力公司收益較高，效果穩定<br />
+5. <strong>Volatility</strong>（波動率）：低波動異常存在，但效果波動較大</p>
+<p><strong>一般有效性因子（IC ≤ 0.02, IR ≤ 0.3）</strong><br />
+6. <strong>Growth</strong>（成長性）：成長性效果波動較大，需選取高質量成長股<br />
+7. <strong>Leverage</strong>（槓桿）：低槓桿公司風險較低，但效果不穩定<br />
+8. <strong>Liquidity</strong>（流動性）：流動性溢價存在，但效果有限</p>
+<h3 id="82">8.2 因子組合建議</h3>
+<p><strong>保守組合（低波動、穩定收益）</strong><br />
+- 因子：Value + Size + Profitability<br />
+- 權重：Value 40%, Size 30%, Profitability 30%<br />
+- 預期年化收益：6% - 9%<br />
+- 預期夏普比率：0.7 - 1.0</p>
+<p><strong>平衡組合（風險收益平衡）</strong><br />
+- 因子：Value + Momentum + Size + Profitability<br />
+- 權重：Value 30%, Momentum 25%, Size 25%, Profitability 20%<br />
+- 預期年化收益：8% - 12%<br />
+- 預期夏普比率：0.9 - 1.3</p>
+<p><strong>進取組合（高收益、高波動）</strong><br />
+- 因子：Momentum + Growth + Value + Volatility<br />
+- 權重：Momentum 35%, Growth 30%, Value 20%, Volatility 15%<br />
+- 預期年化收益：10% - 18%<br />
+- 預期夏普比率：0.8 - 1.2</p>
+<h3 id="83">8.3 改進建議</h3>
+<p><strong>1. 因子優化</strong><br />
+- <strong>動量因子</strong>：嘗試不同回看窗口（6、12、24 個月），優化剔除時間<br />
+- <strong>價值因子</strong>：加入動態估值指標（如 PEG），考慮行業中性估值<br />
+- <strong>成長因子</strong>：區分高質量成長（高成長+高盈利）與低質量成長<br />
+- <strong>波動率因子</strong>：區分總體風險與特質風險，考慮下行風險指標</p>
+<p><strong>2. 因子正交化</strong><br />
+- 對高相關因子進行正交化（如 Size-Value, Value-Profitability）<br />
+- 使用 Gram-Schmidt 正交化，保留 Size 因子優先性<br />
+- 定期檢查因子相關性，動態調整</p>
+<p><strong>3. 動態權重調整</strong><br />
+- 根據市場狀態（牛市/熊市/震盪市）調整因子權重<br />
+- 牛市：增加 Momentum、Growth 權重<br />
+- 熊市：增加 Value、Volatility 權重<br />
+- 震盪市：增加 Profitability、Size 權重</p>
+<p><strong>4. 行業中性化</strong><br />
+- 對 Size、Liquidity 等因子進行行業中性化<br />
+- 減少行業暴露，純化因子收益</p>
+<p><strong>5. 風險控制</strong><br />
+- 加入風險模型（Barra CNE5/US 風險模型）<br />
+- 控制行業風險、風格風險暴露<br />
+- 設置最大回撤限制</p>
+<h3 id="84">8.4 後續研究方向</h3>
+<p><strong>1. 新因子探索</strong><br />
+- 技術因子：RSI、MACD、布林帶<br />
+- 情緒因子：賣方分析師預測、新聞情緒<br />
+- 宏觀因子：貨幣政策、產業政策</p>
+<p><strong>2. 機器學習方法</strong><br />
+- 使用隨機森林、XGBoost 等方法進行因子選擇<br />
+- 使用 LSTM、Transformer 等深度學習方法提取因子<br />
+- 使用強化學習優化組合權重</p>
+<p><strong>3. 組合優化</strong><br />
+- 使用均值-方差優化、風險平價等方法<br />
+- 加入交易成本、流動性約束<br />
+- 動態再平衡策略</p>
+<p><strong>4. 異象研究</strong><br />
+- 動量崩盤：研究動量因子失效時機<br />
+- 價值陷阱：區分低估值與基本面惡化<br />
+- 小市值失效：研究小市值異常消失條件</p>
+<hr />
+<h2 id="9">9. 附錄</h2>
+<h3 id="91">9.1 參考文獻</h3>
+<ol>
+<li>Barra, M. (1998). <strong>"The Barra US Equity Model"</strong>. MSCI Barra.</li>
+<li>Fama, E. F., &amp; French, K. R. (1993). <strong>"Common risk factors in the returns on stocks and bonds"</strong>. Journal of Financial Economics.</li>
+<li>Jegadeesh, N., &amp; Titman, S. (1993). <strong>"Returns to buying winners and selling losers: Implications for stock market efficiency"</strong>. Journal of Finance.</li>
+<li>Ang, A., Hodrick, R. J., Xing, Y., &amp; Zhang, X. (2006). <strong>"The cross-section of volatility and expected returns"</strong>. Journal of Finance.</li>
+<li>Novy-Marx, R. (2013). <strong>"The other side of value: The gross profitability premium"</strong>. Journal of Financial Economics.</li>
+</ol>
+<h3 id="92">9.2 術語解釋</h3>
+<ul>
+<li><strong>IC（Information Coefficient）</strong>：因子暴露與未來收益的相關係數，衡量因子預測能力</li>
+<li><strong>IR（Information Ratio）</strong>：IC 均值除以 IC 標準差，衡量因子穩定性</li>
+<li><strong>Monotonicity</strong>：因子分層收益的單調性，衡量因子效果的一致性</li>
+<li><strong>Z-score</strong>：標準化方法，將因子轉化為均值為 0、標準差為 1 的分數</li>
+<li><strong>MAD（Median Absolute Deviation）</strong>：中位數絕對偏差，穩健的去極值方法</li>
+<li><strong>PCA（Principal Component Analysis）</strong>：主成分分析，用於因子正交化</li>
+<li><strong>Gram-Schmidt</strong>：格拉姆-施密特正交化，保持指定順序的正交化方法</li>
+</ul>
+<h3 id="93">9.3 代碼依賴</h3>
+<pre class="codehilite"><code>numpy &gt;= 1.19.0
+pandas &gt;= 1.1.0
+scipy &gt;= 1.5.0
+scikit-learn &gt;= 0.24.0
+matplotlib &gt;= 3.3.0
+seaborn &gt;= 0.11.0
+tushare &gt;= 1.2.0  # A 股數據
+yfinance &gt;= 0.1.0  # 美股數據
+</code></pre>
+
+<h3 id="94">9.4 數據需求</h3>
+<p><strong>價格數據</strong><br />
+- 日度收盤價、成交量<br />
+- 至少 3 年歷史數據<br />
+- A 股：Tushare<br />
+- 美股：yfinance</p>
+<p><strong>財務數據</strong><br />
+- 資產負債表：總資產、總負債、股東權益<br />
+- 利潤表：營業收入、淨利潤、財務費用<br />
+- 現金流量表：經營活動現金流<br />
+- 至少 3 年歷史數據</p>
+<p><strong>估值數據</strong><br />
+- 市淨率（P/B）、市盈率（P/E）、市銷率（P/S）<br />
+- EV/EBITDA<br />
+- 企業價值、流通股本</p>
+<p><strong>行業分類</strong><br />
+- 行業分類代碼（中信/申萬/GICS）<br />
+- 用於行業中性化</p>
+<hr />
+<h2 id="10">10. 元數據</h2>
+<ul>
+<li><strong>Task ID:</strong> b002-factor-library</li>
+<li><strong>Agent:</strong> Charlie Analyst</li>
+<li><strong>Status:</strong> completed</li>
+<li><strong>Timestamp:</strong> 2026-02-20T01:31:00+08:00</li>
+<li><strong>Output Path:</strong> /Users/charlie/.openclaw/workspace/kanban/projects/barra-multifactor-research-20260220/b002-factor-library.md</li>
+<li><strong>Total Lines:</strong> ~2400</li>
+<li><strong>Code Lines:</strong> ~1000</li>
+</ul>
+<hr />
+<p><em>文檔完畢</em></p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

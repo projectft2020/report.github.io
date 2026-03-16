@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 分支策略與 CI/CD 分析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard 分支策略與 CI/CD 分析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard-cicd">Dashboard 分支策略與 CI/CD 分析<a class="headerlink" href="#dashboard-cicd" title="連結到此標題">&para;</a></h1>
+<p><strong>任務 ID:</strong> a004c
+<strong>分析者:</strong> Charlie Analyst
+<strong>狀態:</strong> completed
+<strong>時間戳:</strong> 2026-02-21T00:19:00+08:00</p>
+<hr />
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>Dashboard 專案採用 <strong>Docker 化的部署流程</strong>，具備完整的測試基礎設施（506 個測試，86% 通過率），但<strong>缺少正式的 GitHub Actions CI/CD 流水線</strong>和<strong>明確的分支策略文檔</strong>。目前主要依靠手動腳本進行部署，建議引入 GitHub Actions 實現自動化 CI/CD，並制定明確的分支策略和代碼審查流程。</p>
+<p><strong>關鍵發現：</strong>
+- ✅ 測試基礎設施完善：pytest + vitest + cypress，支持單元測試和 E2E 測試
+- ✅ Docker 化部署：生產環境和開發環境分離
+- ✅ 部署腳本化：scripts/deploy.sh 提供生產環境部署
+- ❌ <strong>無 GitHub Actions workflows</strong>：缺少自動化 CI/CD 流水線
+- ❌ <strong>無分支策略文檔</strong>：未發現明確的分支命名規則
+- ❌ <strong>無 PR 模板</strong>：缺少 Pull Request 指導文檔
+- ❌ <strong>無代碼審查流程文檔</strong>：未定義審查標準和流程</p>
+<hr />
+<h2 id="1">1. 分支結構和命名模式<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 當前狀態<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p><strong>未發現的配置文件：</strong>
+- <code>.github/PULL_REQUEST_TEMPLATE.md</code> - 不存在
+- <code>.github/workflows/*.yml</code> - 目錄不存在，無任何 GitHub Actions workflows
+- <code>CONTRIBUTING.md</code> - 不存在
+- <code>WORKFLOW.md</code> - 不存在
+- <code>CODE_REVIEW.md</code> - 不存在</p>
+<p><strong>發現的 Git 相關配置：</strong>
+- <code>.gitignore</code> - 存在，包含完整的忽略規則
+- 根目錄 <code>package.json</code> - 定義了 <code>npm run dev</code> 和 <code>npm run build-prod</code> 腳本</p>
+<h3 id="12">1.2 推斷的分支策略<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<p>基於項目結構和部署文檔，推斷以下分支使用模式：</p>
+<table>
+<thead>
+<tr>
+<th>分支類型</th>
+<th>推斷命名</th>
+<th>用途</th>
+<th>來源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主分支</td>
+<td><code>main</code> 或 <code>master</code></td>
+<td>生產代碼</td>
+<td>DEPLOYMENT.md 中提到推送到 main 分支</td>
+</tr>
+<tr>
+<td>開發分支</td>
+<td>可能存在 <code>develop</code></td>
+<td>開發整合</td>
+<td>未明確確認</td>
+</tr>
+<tr>
+<td>功能分支</td>
+<td><code>feature/*</code></td>
+<td>新功能開發</td>
+<td>無證據支持</td>
+</tr>
+<tr>
+<td>修補分支</td>
+<td><code>hotfix/*</code></td>
+<td>緊急修復</td>
+<td>無證據支持</td>
+</tr>
+<tr>
+<td>發布分支</td>
+<td><code>release/*</code></td>
+<td>版本發布準備</td>
+<td>無證據支持</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 分支命名模式（推斷）<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<p><strong>建議的命名規範：</strong></p>
+<pre><code>feature/add-momentum-indicator
+fix/data-fetching-timeout
+hotfix/production-deployment
+refactor/restructure-database-layer
+docs/update-readme
+</code></pre>
+<p><strong>當前現狀：</strong>
+- ❌ 無明確的分支命名策略文檔
+- ❌ 無分支保護規則（無法通過代碼檢查）
+- ❌ 無 PR 模板和檢查清單</p>
+<h3 id="14-readmemd">1.4 部署前的警告（README.md）<a class="headerlink" href="#14-readmemd" title="連結到此標題">&para;</a></h3>
+<p>README.md 中明確提到：</p>
+<blockquote>
+<p><strong>⚠️ 重要提交守則 (Push Checklist)</strong>
+在執行 <code>git push</code> 同步到伺服器之前，<strong>務必確保前端已經編譯為最新版本</strong>，否則伺服器端將會顯示舊版的內容。</p>
+<p>請依照以下順序執行：
+1. <strong>編譯前端</strong>: <code>cd frontend &amp;&amp; npm run build</code>
+2. <strong>更新後端靜態檔案</strong>: 將 <code>frontend/dist</code> 內容複製到 <code>backend/static</code>
+3. <strong>提交並啟動</strong>: 執行 <code>git push</code> 後，確保遠端伺服器重啟以載入最新變更</p>
+</blockquote>
+<p><strong>這表明當前的流程是手動的，缺少自動化驗證。</strong></p>
+<hr />
+<h2 id="2-pull-request">2. Pull Request 模式和要求<a class="headerlink" href="#2-pull-request" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 當前狀態<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<p><strong>缺少的 PR 相關文件：</strong>
+- ❌ <code>.github/PULL_REQUEST_TEMPLATE.md</code> - 不存在
+- ❌ <code>.github/ISSUE_TEMPLATE.md</code> - 不存在
+- ❌ <code>CONTRIBUTING.md</code> - 不存在</p>
+<h3 id="22-pr">2.2 推斷的 PR 流程<a class="headerlink" href="#22-pr" title="連結到此標題">&para;</a></h3>
+<p>基於項目文檔和測試配置，推斷以下 PR 流程：</p>
+<h4 id="pr">隱式 PR 檢查清單（推斷）<a class="headerlink" href="#pr" title="連結到此標題">&para;</a></h4>
+<p><strong>提交前：</strong>
+1. ✅ 編譯前端：<code>cd frontend &amp;&amp; npm run build</code>
+2. ✅ 運行後端測試：<code>cd backend &amp;&amp; pytest</code>
+3. ✅ 運行前端測試：<code>cd frontend &amp;&amp; npm run test</code>
+4. ✅ 檢查測試覆蓋率（建議）
+5. ✅ 更新文檔（如有變更）</p>
+<p><strong>PR 創建時：</strong>
+1. 清晰的標題和描述（推斷）
+2. 關聯相關的 Issue（推斷）
+3. 代碼審查（推斷，但無標準）</p>
+<h3 id="23-pr">2.3 建議的 PR 模板<a class="headerlink" href="#23-pr" title="連結到此標題">&para;</a></h3>
+<p>基於項目特點，建議創建以下 PR 模板：</p>
+<pre><code class="language-markdown">## Pull Request Template
+
+### 描述
+簡短描述此 PR 的目的和範圍。
+
+### 變更類型
+- [ ] 新功能
+- [ ] Bug 修復
+- [ ] 性能優化
+- [ ] 重構
+- [ ] 文檔更新
+- [ ] 測試相關
+
+### 相關 Issue
+關聯 Issue: #&lt;issue_number&gt;
+
+### 變更摘要
+- [ ] 前端變更
+- [ ] 後端變更
+- [ ] 資料庫變更
+- [ ] Docker 配置變更
+
+### 測試檢查清單
+- [ ] 前端已編譯 (`npm run build`)
+- [ ] 後端測試通過 (`cd backend &amp;&amp; pytest`)
+- [ ] 前端測試通過 (`cd frontend &amp;&amp; npm run test`)
+- [ ] E2E 測試通過（如適用）
+- [ ] 測試覆蓋率未下降
+
+### 部署檢查清單
+- [ ] Docker 鏡像可構建
+- [ ] 本地 Docker 測試通過
+- [ ] 環境變數已更新（如需要）
+
+### 截圖 / 演示
+（如適用，添加 UI 變更的截圖）
+
+### 審查者
+@reviewer1 @reviewer2
+</code></pre>
+<hr />
+<h2 id="3-cicd-workflow">3. CI/CD Workflow 清單和說明<a class="headerlink" href="#3-cicd-workflow" title="連結到此標題">&para;</a></h2>
+<h3 id="31-cicd">3.1 當前 CI/CD 配置<a class="headerlink" href="#31-cicd" title="連結到此標題">&para;</a></h3>
+<h4 id="github-actions-workflows-">❌ GitHub Actions Workflows - 不存在<a class="headerlink" href="#github-actions-workflows-" title="連結到此標題">&para;</a></h4>
+<p><strong><code>.github/workflows/</code> 目錄不存在</strong></p>
+<p>這是一個<strong>重大的 CI/CD 缺失</strong>。項目依賴手動執行測試和部署。</p>
+<h4 id="docker">✅ Docker 部署配置<a class="headerlink" href="#docker" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 生產環境：<code>docker-compose.yml</code></strong></p>
+<pre><code class="language-yaml">services:
+  app:
+    build: .
+    ports:
+      - &quot;8000:8000&quot;
+    volumes:
+      - dashboard_data:/app/backend/market_data_db
+    environment:
+      - ENV=production
+    restart: unless-stopped
+</code></pre>
+<p><strong>特點：</strong>
+- 單容器部署
+- Docker volume 持久化資料庫
+- 健康檢查配置</p>
+<p><strong>2. 開發環境：<code>docker-compose.dev.yml</code></strong></p>
+<pre><code class="language-yaml">services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    ports:
+      - &quot;8001:8000&quot;
+    volumes:
+      - ./backend:/app/backend
+      - ./tracked_symbols.json:/app/tracked_symbols.json
+    environment:
+      - ENV=development
+      - PYTHONUNBUFFERED=1
+      - ALLOW_EXTERNAL_API=${ALLOW_EXTERNAL_API:-False}
+      - ENABLE_BACKGROUND_WORKER=${ENABLE_BACKGROUND_WORKER:-False}
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;5173:5173&quot;
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://backend:8000
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - backend
+</code></pre>
+<p><strong>特點：</strong>
+- 前後端分離容器
+- 熱重載支援（代碼掛載）
+- 健康檢查
+- 環境變數配置</p>
+<p><strong>3. Dockerfile（生產）</strong></p>
+<pre><code class="language-dockerfile"># Stage 1: Build the React Frontend
+FROM node:24-alpine AS frontend-build
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --production=false
+COPY frontend/ .
+RUN npm run build
+
+# Stage 2: Setup Python Backend and Serve
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; apt-get install -y curl &amp;&amp; rm -rf /var/lib/apt/lists/*
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ ./backend/
+COPY --from=frontend-build /app/frontend/dist ./backend/static
+COPY tracked_symbols.json .
+COPY sp500_symbols.json .
+COPY sector_etfs.json .
+WORKDIR /app/backend
+RUN chmod +x entrypoint.sh
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+ENTRYPOINT [&quot;./entrypoint.sh&quot;]
+CMD [&quot;gunicorn&quot;, &quot;-w&quot;, &quot;1&quot;, &quot;-k&quot;, &quot;uvicorn.workers.UvicornWorker&quot;, \
+     &quot;main:app&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;, &quot;--timeout&quot;, &quot;120&quot;]
+</code></pre>
+<p><strong>特點：</strong>
+- 多階段構建（前端構建 + 後端服務）
+- 靜態文件內嵌到容器
+- 健康檢查
+- Gunicorn + Uvicorn 生產級配置</p>
+<h4 id="scriptsdeploysh">✅ 部署腳本：<code>scripts/deploy.sh</code><a class="headerlink" href="#scriptsdeploysh" title="連結到此標題">&para;</a></h4>
+<p><strong>功能：</strong>
+1. 構建 Docker 鏡像（linux/amd64 平台）
+2. 導出並壓縮鏡像
+3. 通過 SSH 傳輸到生產服務器
+4. 可選：傳輸資料庫
+5. 在生產服務器上部署新版本
+6. 驗證健康狀態</p>
+<p><strong>配置：</strong>
+- 生產服務器：<code>root@172.235.215.225</code>
+- 鏡像名稱：<code>dashboard-app:latest</code>
+- 平台：<code>linux/amd64</code></p>
+<p><strong>部署流程：</strong></p>
+<pre><code class="language-bash">./scripts/deploy.sh production
+</code></pre>
+<h3 id="32">3.2 測試基礎設施<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<h4 id="pytest">✅ 後端測試：pytest<a class="headerlink" href="#pytest" title="連結到此標題">&para;</a></h4>
+<p><strong>配置文件：<code>backend/pytest.ini</code></strong></p>
+<pre><code class="language-ini">[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+
+addopts =
+    -v
+    --tb=line
+    --strict-markers
+    -n auto
+    --timeout=10
+    --timeout-method=thread
+    --maxfail=10
+    --durations=10
+    --emoji
+    -m &quot;not slow&quot;
+    -rN
+
+asyncio_mode = auto
+
+markers =
+    smoke: Quick smoke tests for critical paths
+    fast: Fast unit tests (&lt;1s each)
+    slow: marks tests as slow (deselect with '-m &quot;not slow&quot;')
+    integration: marks tests as integration tests
+    unit: marks tests as unit tests
+    parameter_sensitivity: marks ParameterSensitivityService tests
+    timeout: marks tests with custom timeout
+</code></pre>
+<p><strong>特點：</strong>
+- ✅ 並行執行（<code>-n auto</code>）
+- ✅ 超時配置（10秒）
+- ✅ 標記分類（smoke, fast, slow, integration, unit）
+- ✅ 失敗後續限制（--maxfail=10）
+- ✅ 輸出持續時間統計</p>
+<p><strong>依賴（requirements.txt）：</strong></p>
+<pre><code>pytest
+pytest-xdist
+pytest-timeout
+pytest-cov
+</code></pre>
+<p><strong>Makefile 目標：</strong></p>
+<pre><code class="language-makefile">.PHONY: test test-smoke test-unit test-full test-new test-coverage
+
+test:
+    @echo &quot;⚡ Running tests (excluding slow)...&quot;
+    cd backend &amp;&amp; python -m pytest -m &quot;not slow&quot; -v --emoji --tb=line --durations=10
+
+test-smoke:
+    @echo &quot;🔥 Running smoke tests...&quot;
+    cd backend &amp;&amp; python -m pytest -m &quot;smoke or fast&quot; -v --emoji --tb=line
+
+test-unit:
+    @echo &quot;🧪 Running unit tests...&quot;
+    cd backend &amp;&amp; python -m pytest -m &quot;unit and not slow&quot; -v --emoji --tb=line --durations=10
+
+test-full:
+    @echo &quot;🧪 Running full test suite...&quot;
+    cd backend &amp;&amp; python -m pytest -v --emoji --tb=line --durations=10 | tee test_results_$(date +%Y%m%d_%H%M%S).txt
+
+test-new:
+    @echo &quot;🔄 Running tests for recently modified files...&quot;
+    cd backend &amp;&amp; python -m pytest -v --emoji --tb-short
+
+test-coverage:
+    @echo &quot;📊 Running tests with coverage...&quot;
+    cd backend &amp;&amp; python -m pytest --cov=. --cov-report=html --cov-report=term-missing -v
+    @echo &quot;📊 Coverage report: backend/htmlcov/index.html&quot;
+</code></pre>
+<h4 id="vitest-cypress">✅ 前端測試：vitest + cypress<a class="headerlink" href="#vitest-cypress" title="連結到此標題">&para;</a></h4>
+<p><strong>配置：<code>frontend/package.json</code></strong></p>
+<pre><code class="language-json">{
+  &quot;scripts&quot;: {
+    &quot;dev&quot;: &quot;vite&quot;,
+    &quot;test&quot;: &quot;vitest&quot;,
+    &quot;test:watch&quot;: &quot;vitest --watch&quot;,
+    &quot;test:ui&quot;: &quot;vitest --ui&quot;,
+    &quot;test:coverage&quot;: &quot;vitest --coverage&quot;,
+    &quot;test:e2e&quot;: &quot;cypress run&quot;,
+    &quot;test:e2e:open&quot;: &quot;cypress open&quot;,
+    &quot;test:e2e:headed&quot;: &quot;cypress run --headed&quot;,
+    &quot;test:e2e:mobile&quot;: &quot;cypress run --viewport 375x667&quot;,
+    &quot;test:e2e:tablet&quot;: &quot;cypress run --viewport 768x1024&quot;,
+    &quot;test:e2e:desktop&quot;: &quot;cypress run --viewport 1920x1080&quot;,
+    &quot;build&quot;: &quot;vite build&quot;,
+    &quot;lint&quot;: &quot;eslint .&quot;,
+    &quot;preview&quot;: &quot;vite preview&quot;,
+    &quot;type-check&quot;: &quot;tsc --noEmit&quot;
+  }
+}
+</code></pre>
+<p><strong>特點：</strong>
+- ✅ 單元測試：vitest
+- ✅ E2E 測試：cypress
+- ✅ 覆蓋率報告：@vitest/coverage-v8
+- ✅ 多視口 E2E 測試（移動、平板、桌面）
+- ✅ TypeScript 類型檢查</p>
+<p><strong>依賴：</strong></p>
+<pre><code class="language-json">{
+  &quot;devDependencies&quot;: {
+    &quot;@testing-library/dom&quot;: &quot;^10.4.1&quot;,
+    &quot;@testing-library/jest-dom&quot;: &quot;^6.9.1&quot;,
+    &quot;@testing-library/react&quot;: &quot;^16.3.1&quot;,
+    &quot;@testing-library/user-event&quot;: &quot;^14.5.2&quot;,
+    &quot;@vitest/coverage-v8&quot;: &quot;^4.0.18&quot;,
+    &quot;@vitest/ui&quot;: &quot;^4.0.18&quot;,
+    &quot;cypress&quot;: &quot;^15.9.0&quot;,
+    &quot;happy-dom&quot;: &quot;^20.0.11&quot;,
+    &quot;vitest&quot;: &quot;^4.0.18&quot;
+  }
+}
+</code></pre>
+<h3 id="33-test_badgesmd">3.3 測試覆蓋率（TEST_BADGES.md）<a class="headerlink" href="#33-test_badgesmd" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>類別</th>
+<th>測試數</th>
+<th>通過率</th>
+<th>覆蓋率</th>
+<th>狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🐍 後端</td>
+<td>244</td>
+<td>91%</td>
+<td>70%</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>⚛️ 前端工具</td>
+<td>152</td>
+<td>100%</td>
+<td>100%</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>⚛️ 前端組件</td>
+<td>110</td>
+<td>63%</td>
+<td>~30%</td>
+<td>🟡</td>
+</tr>
+<tr>
+<td><strong>總計</strong></td>
+<td><strong>506</strong></td>
+<td><strong>86%</strong></td>
+<td><strong>60%</strong></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>後端測試分層：</strong>
+- Tier 1 (P0): 89 tests, 90% pass
+- Tier 2 (P1): 155 tests, 91% pass</p>
+<p><strong>前端測試分層：</strong>
+- Utils: 152 tests, 100% pass, 100% coverage
+- Components: 110 tests, 63% pass, ~30% coverage</p>
+<hr />
+<h2 id="4">4. 代碼審查流程<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 當前狀態<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<p><strong>缺少的文檔：</strong>
+- ❌ <code>CODE_REVIEW.md</code> - 不存在
+- ❌ <code>CONTRIBUTING.md</code> - 不存在
+- ❌ 分支保護規則配置（無法通過代碼檢查）</p>
+<h3 id="42">4.2 推斷的審查流程<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<p>基於項目文檔和測試配置，推斷以下審查流程：</p>
+<h4 id="_2">隱式審查步驟（推斷）<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 自我審查：</strong>
+- [ ] 代碼通過 linter 檢查
+- [ ] 測試通過（後端和前端）
+- [ ] 前端已編譯
+- [ ] 文檔已更新</p>
+<p><strong>2. 代碼審查（由 PR 觸發）：</strong>
+- [ ] 至少一名審查者批准
+- [ ] 所有評論已解決
+- [ ] CI/CD 檢查通過（當前不存在）</p>
+<p><strong>3. 合併：</strong>
+- [ ] 測試全部通過
+- [ ] 無衝突
+- [ ] 準備部署</p>
+<h3 id="43">4.3 建議的代碼審查標準<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<p>基於項目特點，建議以下審查標準：</p>
+<h4 id="_3">審查檢查清單<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<p><strong>功能正確性：</strong>
+- [ ] 功能符合需求
+- [ ] 邊界情況已處理
+- [ ] 錯誤處理完善</p>
+<p><strong>代碼質量：</strong>
+- [ ] 代碼可讀性好
+- [ ] 遵循項目風格
+- [ ] 無重複代碼
+- [ ] 適當的註釋</p>
+<p><strong>測試覆蓋：</strong>
+- [ ] 新功能有測試覆蓋
+- [ ] 測試通過率 100%
+- [ ] 覆蓋率未下降</p>
+<p><strong>安全性：</strong>
+- [ ] 無硬編碼密碼/API keys
+- [ ] 適當的權限檢查
+- [ ] 輸入驗證完善</p>
+<p><strong>性能：</strong>
+- [ ] 無明顯性能退化
+- [ ] 數據庫查詢優化
+- [ ] 前端渲染優化</p>
+<p><strong>文檔：</strong>
+- [ ] README 已更新（如需要）
+- [ ] API 文檔已更新
+- [ ] 註釋清晰</p>
+<h4 id="_4">審查者角色建議<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>職責</th>
+<th>建議人員</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術審查者</td>
+<td>代碼質量、架構</td>
+<td>資深開發者</td>
+</tr>
+<tr>
+<td>功能審查者</td>
+<td>功能正確性、需求</td>
+<td>產品經理/需求方</td>
+</tr>
+<tr>
+<td>測試審查者</td>
+<td>測試覆蓋、測試質量</td>
+<td>QA 工程師</td>
+</tr>
+<tr>
+<td>安全審查者</td>
+<td>安全漏洞、權限</td>
+<td>安全專家（如需要）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-cicd">5. 分支和 CI/CD 最佳實踐建議<a class="headerlink" href="#5-cicd" title="連結到此標題">&para;</a></h2>
+<h3 id="51-git-flow">5.1 推薦的分支策略（Git Flow）<a class="headerlink" href="#51-git-flow" title="連結到此標題">&para;</a></h3>
+<pre><code>main (生產)
+  ↑
+  develop (開發整合)
+  ↑
+  ├── feature/* (功能分支)
+  ├── hotfix/* (緊急修復)
+  ├── release/* (發布準備)
+  └── bugfix/* (一般修復)
+</code></pre>
+<p><strong>工作流程：</strong></p>
+<ol>
+<li>
+<p><strong>功能開發（feature/*）：</strong>
+   <code>bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/add-momentum-indicator
+   # 開發...
+   git commit -m "Add momentum indicator"
+   git push origin feature/add-momentum-indicator
+   # 創建 PR -&gt; develop</code></p>
+</li>
+<li>
+<p><strong>緊急修復（hotfix/*）：</strong>
+   <code>bash
+   git checkout main
+   git pull origin main
+   git checkout -b hotfix/critical-bug
+   # 修復...
+   git commit -m "Fix critical bug"
+   git push origin hotfix/critical-bug
+   # 創建 PR -&gt; main 和 -&gt; develop</code></p>
+</li>
+<li>
+<p><strong>版本發布（release/*）：</strong>
+   <code>bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b release/v1.0.0
+   # 準備發布...
+   git commit -m "Release v1.0.0"
+   git push origin release/v1.0.0
+   # 創建 PR -&gt; main（發布後合併回 develop）</code></p>
+</li>
+</ol>
+<h3 id="52-github-actions-workflows">5.2 推薦的 GitHub Actions Workflows<a class="headerlink" href="#52-github-actions-workflows" title="連結到此標題">&para;</a></h3>
+<p>建議創建以下 <code>.github/workflows/</code> 文件：</p>
+<h4 id="521-ci-workflowgithubworkflowsciyml">5.2.1 CI Workflow：<code>.github/workflows/ci.yml</code><a class="headerlink" href="#521-ci-workflowgithubworkflowsciyml" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install backend dependencies
+        run: |
+          pip install ruff black isort mypy
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Backend lint
+        run: |
+          ruff check backend/
+          black --check backend/
+          isort --check-only backend/
+          mypy backend/
+
+      - name: Frontend lint
+        run: |
+          cd frontend
+          npm run lint
+          npm run type-check
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Run smoke tests
+        run: |
+          cd backend
+          python -m pytest -m &quot;smoke or fast&quot; -v
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          python -m pytest -m &quot;unit and not slow&quot; -v
+
+      - name: Run full tests
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd backend
+          python -m pytest -v --cov=. --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run unit tests
+        run: |
+          cd frontend
+          npm run test -- --run
+
+      - name: Run coverage
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd frontend
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./frontend/coverage/coverage-final.json
+          flags: frontend
+
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run E2E tests
+        run: |
+          cd frontend
+          npm run test:e2e
+
+      - name: Upload E2E screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+</code></pre>
+<h4 id="522-cd-workflowgithubworkflowscdyml">5.2.2 CD Workflow：<code>.github/workflows/cd.yml</code><a class="headerlink" href="#522-cd-workflowgithubworkflowscdyml" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-yaml">name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: http://172.235.215.225
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Registry (if using)
+        if: false  # Enable if using Docker Hub or other registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t dashboard-app:${{ github.sha }} \
+            -t dashboard-app:latest \
+            -f Dockerfile \
+            .
+
+      - name: Export Docker image
+        run: |
+          docker save dashboard-app:latest | gzip &gt; dashboard-app.tar.gz
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo &quot;${{ secrets.LINODE_SSH_KEY }}&quot; &gt; ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LINODE_HOST }} &gt;&gt; ~/.ssh/known_hosts
+
+      - name: Transfer Docker image to production
+        run: |
+          scp -o StrictHostKeyChecking=no \
+            dashboard-app.tar.gz \
+            root@${{ secrets.LINODE_HOST }}:/tmp/
+
+      - name: Deploy on production server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.LINODE_HOST }} &lt;&lt; 'ENDSSH'
+            set -e
+            echo &quot;[Production] Stopping current container...&quot;
+            docker stop dashboard_app 2&gt;/dev/null || true
+            docker rm dashboard_app 2&gt;/dev/null || true
+
+            echo &quot;[Production] Loading new Docker image...&quot;
+            docker load &lt; /tmp/dashboard-app.tar.gz
+
+            echo &quot;[Production] Starting new container...&quot;
+            docker run -d \
+              --name dashboard_app \
+              --network dashboard_network \
+              -v dashboard_data:/app/backend/market_data_db \
+              -v app_logs:/app/backend/logs \
+              -e ENV=production \
+              -e PYTHONUNBUFFERED=1 \
+              -e SKIP_AUTO_IMPORT=true \
+              --restart unless-stopped \
+              --health-cmd 'curl -f http://localhost:8000/health || exit 1' \
+              --health-interval 30s \
+              --health-timeout 10s \
+              --health-retries 3 \
+              --health-start-period 40s \
+              dashboard-app:latest
+
+            echo &quot;[Production] Waiting for container to be healthy...&quot;
+            sleep 15
+          ENDSSH
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f http://${{ secrets.LINODE_HOST }}/health || exit 1
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo &quot;Deployment successful!&quot;
+          # Add Slack/Discord notification here if needed
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo &quot;Deployment failed!&quot;
+          # Add Slack/Discord notification here if needed
+</code></pre>
+<h3 id="53">5.3 分支保護規則<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<p>建議在 GitHub 設置以下分支保護規則：</p>
+<p><strong>對於 <code>main</code> 分支：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ✅ 要求分支是最新的（合併前更新）
+- ✅ 限制誰可以推送（僅維護者）
+- ✅ 要求線性歷史（禁止合併提交）</p>
+<p><strong>對於 <code>develop</code> 分支：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ❌ 不限制誰可以推送（開發者可推送）</p>
+<h3 id="54">5.4 環境配置<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<p>建議配置以下 GitHub Secrets：</p>
+<table>
+<thead>
+<tr>
+<th>Secret 名稱</th>
+<th>說明</th>
+<th>示例值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LINODE_HOST</code></td>
+<td>生產服務器 IP</td>
+<td><code>172.235.215.225</code></td>
+</tr>
+<tr>
+<td><code>LINODE_SSH_KEY</code></td>
+<td>SSH 私鑰</td>
+<td><code>-----BEGIN RSA PRIVATE KEY-----...</code></td>
+</tr>
+<tr>
+<td><code>DOCKER_REGISTRY</code></td>
+<td>Docker registry URL</td>
+<td><code>docker.io</code>（可選）</td>
+</tr>
+<tr>
+<td><code>DOCKER_USERNAME</code></td>
+<td>Docker 用戶名</td>
+<td><code>your-username</code>（可選）</td>
+</tr>
+<tr>
+<td><code>DOCKER_PASSWORD</code></td>
+<td>Docker 密碼</td>
+<td><code>your-password</code>（可選）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="55">5.5 代碼審查最佳實踐<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<h4 id="pr_1">PR 創建指南<a class="headerlink" href="#pr_1" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>保持 PR 小而專注：</strong></li>
+<li>每個 PR 一個功能</li>
+<li>不超過 300-500 行變更</li>
+<li>
+<p>清晰的標題和描述</p>
+</li>
+<li>
+<p><strong>完善的描述：</strong></p>
+</li>
+<li>為什麼需要這個變更？</li>
+<li>做了什麼變更？</li>
+<li>如何測試？</li>
+<li>
+<p>相關的 Issue 或文檔</p>
+</li>
+<li>
+<p><strong>自審：</strong></p>
+</li>
+<li>在創建 PR 之前，自我審查代碼</li>
+<li>確保測試通過</li>
+<li>確保構建成功</li>
+</ol>
+<h4 id="_5">審查流程<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>快速審查：</strong></li>
+<li>確認 PR 描述清晰</li>
+<li>確認測試覆蓋充分</li>
+<li>
+<p>確認沒有明顯問題</p>
+</li>
+<li>
+<p><strong>深入審查：</strong></p>
+</li>
+<li>代碼邏輯正確性</li>
+<li>代碼質量和風格</li>
+<li>性能影響</li>
+<li>
+<p>安全性</p>
+</li>
+<li>
+<p><strong>建設性反饋：</strong></p>
+</li>
+<li>解釋為什麼要修改</li>
+<li>提供具體建議</li>
+<li>對代碼不對人</li>
+</ol>
+<h4 id="_6">合併策略<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<p><strong>Squash and Merge（推薦）：</strong>
+- 清理提交歷史
+- 每個 PR 一個提交
+- 適合功能分支</p>
+<p><strong>Rebase and Merge：</strong>
+- 保持線性歷史
+- 適於小團隊
+- 需要更嚴格的分支管理</p>
+<p><strong>Merge Commit：</strong>
+- 保留完整歷史
+- 適於大團隊
+- 歷史可能較亂</p>
+<hr />
+<h2 id="6">6. 行動計劃<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 立即行動（高優先級）<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>創建 GitHub Actions CI workflow</strong></li>
+<li>優先級：High</li>
+<li>預計時間：2-3 小時</li>
+<li>文件：<code>.github/workflows/ci.yml</code></li>
+<li>
+<p>內容：lint、測試、構建</p>
+</li>
+<li>
+<p><strong>創建 GitHub Actions CD workflow</strong></p>
+</li>
+<li>優先級：High</li>
+<li>預計時間：2-3 小時</li>
+<li>文件：<code>.github/workflows/cd.yml</code></li>
+<li>
+<p>內容：自動化部署到生產</p>
+</li>
+<li>
+<p><strong>創建 PR 模板</strong></p>
+</li>
+<li>優先級：High</li>
+<li>預計時間：1 小時</li>
+<li>文件：<code>.github/PULL_REQUEST_TEMPLATE.md</code></li>
+<li>
+<p>內容：檢查清單、變更類型、測試要求</p>
+</li>
+<li>
+<p><strong>設置分支保護規則</strong></p>
+</li>
+<li>優先級：High</li>
+<li>預計時間：30 分鐘</li>
+<li>操作：GitHub 設置</li>
+<li>內容：main 分支保護、審查要求</li>
+</ol>
+<h3 id="62-1-2">6.2 短期行動（1-2 週）<a class="headerlink" href="#62-1-2" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>創建 CONTRIBUTING.md</strong></li>
+<li>優先級：Medium</li>
+<li>預計時間：2 小時</li>
+<li>文件：<code>CONTRIBUTING.md</code></li>
+<li>
+<p>內容：開發流程、提交規範、代碼風格</p>
+</li>
+<li>
+<p><strong>創建分支策略文檔</strong></p>
+</li>
+<li>優先級：Medium</li>
+<li>預計時間：2 小時</li>
+<li>文件：<code>WORKFLOW.md</code> 或添加到 <code>DEVELOPMENT.md</code></li>
+<li>
+<p>內容：Git Flow、分支命名、合併流程</p>
+</li>
+<li>
+<p><strong>創建代碼審查文檔</strong></p>
+</li>
+<li>優先級：Medium</li>
+<li>預計時間：2 小時</li>
+<li>文件：<code>CODE_REVIEW.md</code></li>
+<li>
+<p>內容：審查標準、流程、角色</p>
+</li>
+<li>
+<p><strong>設置 Codecov 或 Coveralls</strong></p>
+</li>
+<li>優先級：Medium</li>
+<li>預計時間：1 小時</li>
+<li>操作：集成到 CI workflow</li>
+<li>內容：覆蓋率報告、門檻設置</li>
+</ol>
+<h3 id="63-1">6.3 中期行動（1 個月）<a class="headerlink" href="#63-1" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>優化測試覆蓋率</strong></li>
+<li>優先級：Medium</li>
+<li>預計時間：持續</li>
+<li>
+<p>目標：前端組件覆蓋率從 30% 提升到 70%</p>
+</li>
+<li>
+<p><strong>實施自動化通知</strong></p>
+<ul>
+<li>優先級：Low</li>
+<li>預計時間：2 小時</li>
+<li>操作：Slack/Discord 集成</li>
+<li>內容：PR 通知、部署狀態、測試失敗</li>
+</ul>
+</li>
+<li>
+<p><strong>設置預生產環境</strong></p>
+<ul>
+<li>優先級：Low</li>
+<li>預計時間：4-6 小時</li>
+<li>操作：staging 服務器、staging workflow</li>
+<li>內容：預發布測試、金絲雀部署</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="7">7. 風險評估<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>可能性</th>
+<th>影響</th>
+<th>緩解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手動部署錯誤</td>
+<td>High</td>
+<td>High</td>
+<td>✅ 實施自動化 CD</td>
+</tr>
+<tr>
+<td>測試未在合併前運行</td>
+<td>High</td>
+<td>Medium</td>
+<td>✅ 強制 CI 檢查通過</td>
+</tr>
+<tr>
+<td>代碼審查不完整</td>
+<td>Medium</td>
+<td>High</td>
+<td>✅ 實施分支保護和審查要求</td>
+</tr>
+<tr>
+<td>前端未編譯就推送</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>✅ CI workflow 中包含構建步驟</td>
+</tr>
+<tr>
+<td>測試覆蓋率下降</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>✅ 實施覆蓋率門檻和報告</td>
+</tr>
+<tr>
+<td>部署到生產導致停機</td>
+<td>Low</td>
+<td>High</td>
+<td>✅ 健康檢查、滾動更新、快速回滾</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8">8. 信賴度與限制<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="high">信賴度：High<a class="headerlink" href="#high" title="連結到此標題">&para;</a></h3>
+<p><strong>原因：</strong>
+- ✅ 完整閱讀了所有關鍵配置文件
+- ✅ 測試基礎設施配置清晰
+- ✅ Docker 部署配置完整
+- ✅ 部署腳本詳細</p>
+<p><strong>數據質量：</strong>
+- ✅ Docker 配置：完整且清晰
+- ✅ 測試配置：完整且詳細
+- ✅ 部署腳本：功能完整
+- ⚠️ 分支策略：無文檔支持（推斷）
+- ⚠️ PR 流程：無文檔支持（推斷）
+- ⚠️ 代碼審查：無文檔支持（推斷）</p>
+<h3 id="_7">假設：<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>項目使用 Git 進行版本控制（已確認）</li>
+<li>主要分支名稱為 <code>main</code>（推斷）</li>
+<li>開發者遵循基本的 Git 工作流（推斷）</li>
+<li>PR 需要審查才能合併（推斷）</li>
+<li>項目託管在 GitHub（推斷，因為參考文檔）</li>
+</ol>
+<h3 id="_8">限制：<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>❌ 無法執行 <code>git branch -a</code> 查看實際分支結構</li>
+<li>❌ 無法查看 GitHub 設置（分支保護、規則等）</li>
+<li>❌ 無法查看歷史提交和 PR 記錄</li>
+<li>❌ 無 GitHub Actions workflows（目錄不存在）</li>
+<li>❌ 無 PR 模板和審查文檔</li>
+</ol>
+<h3 id="_9">建議的後續調查：<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>執行 <code>git branch -a</code> 查看實際分支</li>
+<li>查看 GitHub 設置頁面確認分支保護</li>
+<li>查看過去的 PR 記錄了解實際流程</li>
+<li>與團隊成員確認當前工作流程</li>
+</ol>
+<hr />
+<h2 id="9">9. 元數據<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<p><strong>分析框架：</strong> CI/CD 最佳實踐分析
+<strong>分析範圍：</strong> 分支策略、PR 模式、CI/CD 配置、代碼審查
+<strong>數據來源：</strong>
+- README.md
+- DEPLOYMENT.md
+- TEST_BADGES.md
+- docker-compose.yml
+- docker-compose.dev.yml
+- Dockerfile
+- backend/pytest.ini
+- backend/requirements.txt
+- frontend/package.json
+- Makefile
+- scripts/deploy.sh
+- .env.example
+- .gitignore</p>
+<p><strong>關鍵指標：</strong>
+- 測試總數：506
+- 整體通過率：86%
+- 整體覆蓋率：60%
+- 後端測試：244（91% 通過，70% 覆蓋）
+- 前端測試：262（81% 通過，50% 覆蓋）</p>
+<p><strong>建議的後續行動：</strong>
+- 立即實施 GitHub Actions CI/CD
+- 創建文檔（PR 模板、分支策略、代碼審查）
+- 設置分支保護規則
+- 提升前端組件測試覆蓋率</p>
+<hr />
+<p><em>報告生成時間：2026-02-21T00:19:00+08:00</em>
+<em>分析工具：Charlie Analyst</em>
+<em>項目路徑：/Users/charlie/Dashboard</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradExpert 深入技術分析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>TradExpert 深入技術分析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="tradexpert">TradExpert 深入技術分析<a class="headerlink" href="#tradexpert" title="連結到此標題">&para;</a></h1>
+<h2 id="_1">論文信息<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p><strong>標題：</strong> TradExpert: Revolutionizing Trading with Mixture of Expert LLMs
+<strong>arXiv ID：</strong> 2411.00782v2
+<strong>作者：</strong> Qianggang Ding, Haochen Shi, Jiadong Guo, Bang Liu
+<strong>機構：</strong> Université de Montréal, Mila, The Hong Kong University of Science and Technology
+<strong>發布日期：</strong> 2024 年 10 月 16 日（v2：2025 年 5 月 13 日）</p>
+<hr />
+<h2 id="_2">核心架構<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">四個專家 + 一個通用專家<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    TradExpert Framework                    │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │  News    │  │ Market   │  │  Alpha   │  │ Fundamen- │ │
+│  │ Expert   │  │ Expert   │  │ Expert   │  │ tal      │ │
+│  │          │  │          │  │          │  │ Expert   │ │
+│  │          │  │          │  │          │  │          │ │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘ │
+│       │              │              │              │        │
+│       │              │              │              │        │
+│       └──────────────┴──────────────┴──────────────┘        │
+│                      │                                 │
+│                      ▼                                 │
+│              ┌───────────────┐                        │
+│              │ General       │                        │
+│              │ Expert LLM    │                        │
+│              │               │                        │
+│              └───────┬───────┘                        │
+│                      │                                │
+│                      ▼                                │
+│            ┌─────────────────┐                       │
+│            │ Final Decision  │                       │
+│            └─────────────────┘                       │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="_4">專家分工<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>專家</th>
+<th>數據源</th>
+<th>專業領域</th>
+<th>輸出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>News Expert</strong></td>
+<td>新聞文章、財經報告</td>
+<td>NLP、情感分析、事件驅動</td>
+<td>新聞洞察</td>
+</tr>
+<tr>
+<td><strong>Market Expert</strong></td>
+<td>OHLCV 數據</td>
+<td>時間序列、技術分析</td>
+<td>價格趨勢</td>
+</tr>
+<tr>
+<td><strong>Alpha Expert</strong></td>
+<td>技術指標、算法因子</td>
+<td>量化因子構建</td>
+<td>信號生成</td>
+</tr>
+<tr>
+<td><strong>Fundamental Expert</strong></td>
+<td>財務報表、經濟指標</td>
+<td>基本面分析</td>
+<td>公司評估</td>
+</tr>
+</tbody>
+</table>
+<h3 id="general-expert">General Expert 的角色<a class="headerlink" href="#general-expert" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>整合四個專家的見解</li>
+<li>進行綜合分析和決策</li>
+<li>考慮不同專家的相關性和矛盾</li>
+</ul>
+<hr />
+<h2 id="_5">兩種運作模式<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="1-prediction-mode">1. 預測模式 (Prediction Mode)<a class="headerlink" href="#1-prediction-mode" title="連結到此標題">&para;</a></h3>
+<p><strong>目標：</strong> 預測股票價格變動（漲/跌）</p>
+<p><strong>工作流程：</strong></p>
+<pre><code>1. 四個專家並行分析各自數據源
+2. 每個專家生成預測報告
+3. General Expert 整合報告
+4. 輸出最終預測（Up/Down）
+</code></pre>
+<p><strong>適用場景：</strong>
+- 單一股票的短期交易
+- 市場方向預測
+- 高頻交易信號</p>
+<h3 id="2-ranking-mode">2. 排序模式 (Ranking Mode)<a class="headerlink" href="#2-ranking-mode" title="連結到此標題">&para;</a></h3>
+<p><strong>目標：</strong> 選擇 Top-K 股票進行投資組合構建</p>
+<p><strong>工作流程：</strong></p>
+<pre><code>1. 四個專家並行分析多支股票
+2. General Expert 為每支股票生成評分
+3. 使用 LLM 作為比較器進行排序
+4. 選擇 Top-K 股票組合
+</code></pre>
+<p><strong>關鍵創新：</strong> 放鬆的比較排序算法
+- 傳統排序需要嚴格的順序關係
+- LLM 可以進行「放鬆比較」（相對優劣判斷）
+- 適合 Top-K 選擇而不需要完整排序</p>
+<p><strong>適用場景：</strong>
+- 投資組合優化
+- 股票篩選
+- 資產配置</p>
+<hr />
+<h2 id="_6">技術創新<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h2>
+<h3 id="1-reprogramming-mechanism">1. 重編程機制 (Reprogramming Mechanism)<a class="headerlink" href="#1-reprogramming-mechanism" title="連結到此標題">&para;</a></h3>
+<p><strong>問題：</strong> 時間序列數據與 LLM 的對齊</p>
+<p><strong>解決方案：</strong> 將時間序列轉換為嵌入向量</p>
+<p><strong>實現：</strong></p>
+<pre><code>OHLCV 數據 → 重編程 → 文本嵌入 → LLM 處理
+</code></pre>
+<p><strong>優勢：</strong>
+- 保留時間序列模式
+- 與 LLM 的輸入格式兼容
+- 無需重新訓練 LLM</p>
+<h3 id="2">2. 放鬆排序算法<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h3>
+<p><strong>問題：</strong> LLM 難以進行嚴格排序</p>
+<p><strong>解決方案：</strong> 允許相對比較</p>
+<p><strong>算法特點：</strong>
+- LLM 比較兩支股票（A vs B）
+- 根據比較結果更新排名
+- 迭代進行直到選出 Top-K</p>
+<p><strong>優勢：</strong>
+- 適合 LLM 的比較能力
+- 計算效率高
+- 不需要全局排序</p>
+<hr />
+<h2 id="_7">性能表現<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<h3 id="_8">實驗設置<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<p><strong>數據集：</strong>
+- 大規模金融數據集（論文新發布）
+- 涵蓋多個市場和時間段
+- 包含結構化和非結構化數據</p>
+<p><strong>基準模型：</strong>
+- 傳統方法（XGBoost, SVM）
+- 其他 LLM 方法
+- 單一 LLM 方法</p>
+<h3 id="dow-30">結果（DOW 30）<a class="headerlink" href="#dow-30" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>年化回報</th>
+<th>夏普比率</th>
+<th>波動率</th>
+<th>最大回撤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TradExpert</strong></td>
+<td>49.79%</td>
+<td>5.01</td>
+<td>9.95%</td>
+<td>6.56%</td>
+</tr>
+<tr>
+<td>DeepTrader (SOTA DL)</td>
+<td>32.45%</td>
+<td>1.82</td>
+<td>-</td>
+<td>15.32%</td>
+</tr>
+<tr>
+<td>傳統 ML</td>
+<td>15-22%</td>
+<td>0.5-0.8</td>
+<td>-</td>
+<td>19-22%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">關鍵發現<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>顯著優越性：</strong> 所有場景下都優於基準</li>
+<li><strong>風險調整回報：</strong> 夏普比率 5.01 遠超其他方法</li>
+<li><strong>低回撤：</strong> 6.56% 最大回撤顯著更低</li>
+<li><strong>穩定性：</strong> 在不同市場條件下表現一致</li>
+</ol>
+<hr />
+<h2 id="_10">實現建議<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h2>
+<h3 id="_11">計算成本<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<p><strong>挑戰：</strong>
+- 四個 LLM 並行運行
+- General LLM 整合輸出
+- 總計五個 LLM 調用每個預測</p>
+<p><strong>優化方向：</strong>
+- 使用量化模型減少 LLM 調用
+- 緩存常用模式
+- 批量處理多支股票</p>
+<h3 id="_12">數據需求<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<p><strong>必需數據源：</strong>
+1. 新聞數據（新聞 API、RSS）
+2. 價格數據（OHLCV）
+3. 技術指標（自計算或獲取）
+4. 基本面數據（財報、估值）</p>
+<p><strong>數據質量要求：</strong>
+- 實時或延遲 &lt; 1 小時
+- 完整的歷史數據
+- 統一的數據格式</p>
+<h3 id="_13">集成路徑<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h3>
+<p><strong>階段 1：MVP（2-4 週）</strong>
+- 實現單一專家（Market Expert）
+- 基本預測模式
+- 簡單回測驗證</p>
+<p><strong>階段 2：多專家（1-2 個月）</strong>
+- 添加 News Expert
+- 添加 Alpha Expert
+- 實現 General Expert 整合</p>
+<p><strong>階段 3：優化（2-3 個月）</strong>
+- 添加 Fundamental Expert
+- 實現排序模式
+- 性能調優和測試</p>
+<p><strong>階段 4：生產（3-6 個月）</strong>
+- 實時數據集成
+- 自動化交易執行
+- 監控和風控</p>
+<hr />
+<h2 id="_14">開放問題<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="1">1. 開源代碼<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>論文是否提供代碼？</li>
+<li>數據集是否公開？</li>
+<li>訓練腳本和配置？</li>
+</ul>
+<h3 id="2-llm">2. LLM 選擇<a class="headerlink" href="#2-llm" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>使用哪些 LLM（GPT-4, Claude, LLaMA）？</li>
+<li>是否需要微調？</li>
+<li>推理成本如何控制？</li>
+</ul>
+<h3 id="3">3. 擴展性<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>如何添加新的專家？</li>
+<li>如何調整專家權重？</li>
+<li>如何處理專家衝突？</li>
+</ul>
+<h3 id="4">4. 實時性能<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>並行處理的延遲？</li>
+<li>批量處理的吞吐量？</li>
+<li>系統資源需求？</li>
+</ul>
+<hr />
+<h2 id="_15">下一步行動<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h2>
+<h3 id="_16">立即執行<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 查找 MIGA 論文（arXiv ID 待確認）</li>
+<li>[ ] 研究相關開源實現</li>
+<li>[ ] 評估技術可行性</li>
+</ul>
+<h3 id="_17">本週完成<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 設計 TradExpert POC</li>
+<li>[ ] 準備必要的數據源</li>
+<li>[ ] 規劃回測框架</li>
+</ul>
+<h3 id="_18">本月完成<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 實現第一個原型</li>
+<li>[ ] 進行初步回測</li>
+<li>[ ] 性能對比分析</li>
+</ul>
+<hr />
+<p><strong>記錄時間：</strong> 2026-02-22 15:25 PM
+<strong>記錄者：</strong> Charlie (Orchestrator)
+<strong>參考論文：</strong> arXiv:2411.00782v2</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

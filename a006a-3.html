@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A006a-3 - Strategy Engine Knowledge Base Extraction - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>A006a-3 - Strategy Engine Knowledge Base Extraction</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="a006a-3-strategy-engine-knowledge-base-extraction">A006a-3 - Strategy Engine Knowledge Base Extraction<a class="headerlink" href="#a006a-3-strategy-engine-knowledge-base-extraction" title="連結到此標題">&para;</a></h1>
+<p><strong>Task ID:</strong> a006a-3
+<strong>Agent:</strong> Charlie Analyst (Sub-Agent)
+<strong>Status:</strong> completed
+<strong>Timestamp:</strong> 2026-02-21T02:47:00+08:00
+<strong>Source:</strong> a003-unified-strategy-engine.md</p>
+<hr />
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="連結到此標題">&para;</a></h2>
+<p>This knowledge base extracts essential information from the unified strategy engine analysis to guide the Programmer Sub-Agent in implementing, maintaining, and extending trading strategies. The extraction covers strategy templates, the VectorBT backtesting engine, complete data flow pipelines, core algorithm patterns, and optimization techniques. The unified architecture centers on the <code>IStrategy</code> interface with VectorBT as the primary execution engine, enabling clean separation between strategy logic and execution infrastructure.</p>
+<p>Key findings: The architecture uses proven design patterns (Factory, Adapter, Facade, Composition), supports both individual and composite strategies, provides comprehensive testing strategies, and offers clear migration paths from legacy systems.</p>
+<hr />
+<h2 id="1-strategy-templates">1. Strategy Templates<a class="headerlink" href="#1-strategy-templates" title="連結到此標題">&para;</a></h2>
+<h3 id="11-core-interface-contract">1.1 Core Interface Contract<a class="headerlink" href="#11-core-interface-contract" title="連結到此標題">&para;</a></h3>
+<p>Every strategy must implement the <code>IStrategy</code> interface:</p>
+<pre><code class="language-python">from dataclasses import dataclass
+from enum import Enum
+from typing import List
+from datetime import date
+
+class SignalAction(Enum):
+    BUY = &quot;BUY&quot;
+    SELL = &quot;SELL&quot;
+    HOLD = &quot;HOLD&quot;
+
+@dataclass
+class StrategySignal:
+    symbol: str
+    action: SignalAction
+    confidence: float  # 0.0 to 1.0
+
+    def __post_init__(self):
+        if not (0.0 &lt;= self.confidence &lt;= 1.0):
+            raise ValueError(&quot;Confidence must be 0.0-1.0&quot;)
+
+@dataclass
+class ExecutionContext:
+    portfolio_value: float
+    available_cash: float
+    current_positions: List['PositionState']
+    market_date: date
+    market_status: str  # 'OPEN', 'CLOSED', etc.
+
+@dataclass
+class PositionState:
+    symbol: str
+    quantity: int
+    current_price: float
+    # Optional: entry_price, unrealized_pnl, etc.
+
+class IStrategy:
+    @property
+    def name(self) -&gt; str:
+        &quot;&quot;&quot;Strategy identifier&quot;&quot;&quot;
+        raise NotImplementedError
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        &quot;&quot;&quot;
+        Core method: Generate trading signals
+
+        Constraints:
+        - Return list of signals (one per symbol)
+        - Only BUY/SELL actions (HOLD implied by absence)
+        - Confidence score 0.0-1.0
+        - Must be deterministic for same input
+        - Check market_status before trading
+        - Respect position state and cash constraints
+        &quot;&quot;&quot;
+        raise NotImplementedError
+</code></pre>
+<hr />
+<h3 id="12-strategy-template-mean-reversion-rsi">1.2 Strategy Template: Mean Reversion (RSI)<a class="headerlink" href="#12-strategy-template-mean-reversion-rsi" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class RSIStrategy(IStrategy):
+    &quot;&quot;&quot;Mean reversion strategy using RSI indicator&quot;&quot;&quot;
+
+    name = &quot;rsi_mean_reversion&quot;
+
+    def __init__(
+        self,
+        period: int = 14,
+        buy_threshold: int = 30,
+        sell_threshold: int = 70,
+        min_trade_size: float = 1000.0
+    ):
+        if not (0 &lt; buy_threshold &lt; sell_threshold &lt; 100):
+            raise ValueError(&quot;Invalid threshold values&quot;)
+        self.period = period
+        self.buy_threshold = buy_threshold
+        self.sell_threshold = sell_threshold
+        self.min_trade_size = min_trade_size
+        self.rsi_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # Check market status
+            if context.market_status != 'CLOSED':
+                continue
+
+            # Check if already holding
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # Get RSI value
+            rsi = self._get_rsi(symbol, context.market_date)
+
+            # Generate buy signal (only if not holding)
+            if rsi &lt; self.buy_threshold and not existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=self._calculate_confidence(rsi, self.buy_threshold)
+                ))
+
+            # Generate sell signal (only if holding)
+            elif rsi &gt; self.sell_threshold and existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=self._calculate_confidence(rsi, self.sell_threshold)
+                ))
+
+        return signals
+
+    def _get_rsi(self, symbol: str, date: date) -&gt; float:
+        &quot;&quot;&quot;Get RSI value with caching&quot;&quot;&quot;
+        # Load from cache if available
+        if symbol not in self.rsi_cache:
+            # Calculate RSI using vectorized approach
+            # Implementation depends on data loader
+            pass
+        return self.rsi_cache[symbol].loc[date]
+
+    def _calculate_confidence(self, rsi: float, threshold: float) -&gt; float:
+        &quot;&quot;&quot;
+        Calculate confidence based on distance from threshold.
+
+        Returns: 0.0 to 1.0
+        &quot;&quot;&quot;
+        if rsi &lt; threshold:  # Buy case
+            return min(1.0, (threshold - rsi) / threshold)
+        else:  # Sell case
+            return min(1.0, (rsi - threshold) / (100 - threshold))
+</code></pre>
+<hr />
+<h3 id="13-strategy-template-trend-following-macd">1.3 Strategy Template: Trend Following (MACD)<a class="headerlink" href="#13-strategy-template-trend-following-macd" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class MACDStrategy(IStrategy):
+    &quot;&quot;&quot;Trend following strategy using MACD crossover&quot;&quot;&quot;
+
+    name = &quot;macd_trend_following&quot;
+
+    def __init__(
+        self,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9,
+        min_trade_size: float = 1000.0
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.signal = signal
+        self.min_trade_size = min_trade_size
+        self.indicator_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # Check market status
+            if context.market_status != 'CLOSED':
+                continue
+
+            # Get current and previous MACD values
+            macd, signal_line = self._get_macd(symbol, context.market_date)
+            prev_macd, prev_signal = self._get_macd_previous(symbol, context.market_date)
+
+            # Check existing position
+            existing_position = next(
+                (p for p in context.current_positions if p.symbol == symbol),
+                None
+            )
+
+            # MACD crossover above signal line (bullish)
+            if (macd &gt; signal_line and prev_macd &lt;= prev_signal) and not existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+            # MACD crossover below signal line (bearish)
+            elif (macd &lt; signal_line and prev_macd &gt;= prev_signal) and existing_position:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=min(1.0, abs(macd - signal_line) / abs(signal_line))
+                ))
+
+        return signals
+
+    def _get_macd(self, symbol: str, date: date) -&gt; tuple[float, float]:
+        &quot;&quot;&quot;Get current MACD and signal line values&quot;&quot;&quot;
+        # Implementation with caching
+        pass
+
+    def _get_macd_previous(self, symbol: str, date: date) -&gt; tuple[float, float]:
+        &quot;&quot;&quot;Get previous day's MACD and signal line values&quot;&quot;&quot;
+        pass
+</code></pre>
+<hr />
+<h3 id="14-strategy-template-multi-indicator-confluence">1.4 Strategy Template: Multi-Indicator Confluence<a class="headerlink" href="#14-strategy-template-multi-indicator-confluence" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class ConfluenceStrategy(IStrategy):
+    &quot;&quot;&quot;Strategy requiring multiple indicators to agree&quot;&quot;&quot;
+
+    name = &quot;multi_indicator_confluence&quot;
+
+    def __init__(self, min_agreement: int = 2):
+        self.min_agreement = min_agreement  # Number of indicators required to agree
+        self.rsi_strategy = RSIStrategy()
+        self.macd_strategy = MACDStrategy()
+        self.indicator_cache = {}
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # Get signals from each sub-strategy
+            rsi_signals = self.rsi_strategy.generate_signals(context, [symbol])
+            macd_signals = self.macd_strategy.generate_signals(context, [symbol])
+
+            # Count buy signals
+            buy_votes = sum(
+                1 for s in rsi_signals + macd_signals
+                if s.action == SignalAction.BUY
+            )
+
+            # Count sell signals
+            sell_votes = sum(
+                1 for s in rsi_signals + macd_signals
+                if s.action == SignalAction.SELL
+            )
+
+            # Generate buy signal if minimum agreement reached
+            if buy_votes &gt;= self.min_agreement:
+                avg_confidence = (
+                    sum(s.confidence for s in rsi_signals + macd_signals if s.action == SignalAction.BUY)
+                    / buy_votes
+                )
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=avg_confidence
+                ))
+
+            # Generate sell signal if minimum agreement reached
+            elif sell_votes &gt;= self.min_agreement:
+                avg_confidence = (
+                    sum(s.confidence for s in rsi_signals + macd_signals if s.action == SignalAction.SELL)
+                    / sell_votes
+                )
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=avg_confidence
+                ))
+
+        return signals
+</code></pre>
+<hr />
+<h3 id="15-strategy-template-composite-strategy">1.5 Strategy Template: Composite Strategy<a class="headerlink" href="#15-strategy-template-composite-strategy" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">class CompositeStrategy(IStrategy):
+    &quot;&quot;&quot;Combines multiple strategies with configurable merge algorithm&quot;&quot;&quot;
+
+    name = &quot;composite_strategy&quot;
+
+    MERGE_ALGORITHMS = [
+        'majority_vote',  # Buy if majority says buy
+        'unanimous',      # Buy only if all say buy
+        'weighted',       # Weight by confidence
+        'any'             # Buy if any says buy
+    ]
+
+    def __init__(
+        self,
+        strategies: List[IStrategy],
+        merge_algorithm: str = 'majority_vote'
+    ):
+        if merge_algorithm not in self.MERGE_ALGORITHMS:
+            raise ValueError(f&quot;Invalid merge algorithm: {merge_algorithm}&quot;)
+        self.strategies = strategies
+        self.merge_algorithm = merge_algorithm
+
+    def generate_signals(
+        self,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        # Collect all signals from all strategies
+        all_signals_by_symbol = {symbol: [] for symbol in symbols}
+
+        for strategy in self.strategies:
+            strategy_signals = strategy.generate_signals(context, symbols)
+            for signal in strategy_signals:
+                all_signals_by_symbol[signal.symbol].append(signal)
+
+        # Merge signals for each symbol
+        merged_signals = []
+        for symbol, signals in all_signals_by_symbol.items():
+            if not signals:
+                continue
+
+            merged_signal = self._merge_signals(symbol, signals)
+            if merged_signal:
+                merged_signals.append(merged_signal)
+
+        return merged_signals
+
+    def _merge_signals(self, symbol: str, signals: List[StrategySignal]) -&gt; StrategySignal:
+        &quot;&quot;&quot;Merge multiple signals using configured algorithm&quot;&quot;&quot;
+
+        if self.merge_algorithm == 'majority_vote':
+            buy_count = sum(1 for s in signals if s.action == SignalAction.BUY)
+            sell_count = sum(1 for s in signals if s.action == SignalAction.SELL)
+
+            if buy_count &gt; sell_count:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=buy_count / len(signals)
+                )
+            elif sell_count &gt; buy_count:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=sell_count / len(signals)
+                )
+
+        elif self.merge_algorithm == 'unanimous':
+            actions = [s.action for s in signals]
+            if all(a == SignalAction.BUY for a in actions):
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=1.0
+                )
+            elif all(a == SignalAction.SELL for a in actions):
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=1.0
+                )
+
+        elif self.merge_algorithm == 'weighted':
+            buy_weight = sum(s.confidence for s in signals if s.action == SignalAction.BUY)
+            sell_weight = sum(s.confidence for s in signals if s.action == SignalAction.SELL)
+
+            if buy_weight &gt; sell_weight:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=min(1.0, buy_weight / (buy_weight + sell_weight))
+                )
+            elif sell_weight &gt; buy_weight:
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=min(1.0, sell_weight / (buy_weight + sell_weight))
+                )
+
+        elif self.merge_algorithm == 'any':
+            buy_signals = [s for s in signals if s.action == SignalAction.BUY]
+            sell_signals = [s for s in signals if s.action == SignalAction.SELL]
+
+            if buy_signals:
+                max_conf = max(s.confidence for s in buy_signals)
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=max_conf
+                )
+            elif sell_signals:
+                max_conf = max(s.confidence for s in sell_signals)
+                return StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.SELL,
+                    confidence=max_conf
+                )
+
+        return None
+</code></pre>
+<hr />
+<h2 id="2-backtesting-engine-vectorbt-integration">2. Backtesting Engine: VectorBT Integration<a class="headerlink" href="#2-backtesting-engine-vectorbt-integration" title="連結到此標題">&para;</a></h2>
+<h3 id="21-data-loader-component">2.1 Data Loader Component<a class="headerlink" href="#21-data-loader-component" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pandas as pd
+from typing import List
+from datetime import date
+
+class VBTDataLoader:
+    &quot;&quot;&quot;Load and format data for VectorBT execution&quot;&quot;&quot;
+
+    def __init__(self, connection):
+        self.conn = connection
+        self.data_cache = {}
+
+    def load_ohlcv(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        Load OHLCV data in VectorBT format.
+
+        Returns: MultiIndex DataFrame with (symbol, date) as index
+        &quot;&quot;&quot;
+        cache_key = (tuple(symbols), start_date, end_date)
+        if cache_key in self.data_cache:
+            return self.data_cache[cache_key]
+
+        query = &quot;&quot;&quot;
+        SELECT
+            symbol,
+            date,
+            open,
+            high,
+            low,
+            close,
+            volume
+        FROM prices
+        WHERE symbol IN ({placeholders})
+          AND date BETWEEN ? AND ?
+        ORDER BY symbol, date
+        &quot;&quot;&quot;.format(placeholders=','.join(['?'] * len(symbols)))
+
+        params = symbols + [start_date, end_date]
+        df = pd.read_sql(query, self.conn, params=params)
+
+        # Format for VectorBT: MultiIndex (symbol, date)
+        df = df.set_index(['symbol', 'date'])
+
+        self.data_cache[cache_key] = df
+        return df
+
+    def load_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        Load close prices for portfolio creation.
+
+        Returns: DataFrame with date index and symbol columns
+        &quot;&quot;&quot;
+        ohlcv = self.load_ohlcv(symbols, start_date, end_date)
+        return ohlcv['close'].unstack(level='symbol')
+</code></pre>
+<hr />
+<h3 id="22-signal-adapter-component">2.2 Signal Adapter Component<a class="headerlink" href="#22-signal-adapter-component" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pandas as pd
+from typing import Dict, List
+from datetime import date
+
+class SignalAdapter:
+    &quot;&quot;&quot;Convert IStrategy signals to VectorBT format&quot;&quot;&quot;
+
+    @staticmethod
+    def signals_to_vectorbt(
+        ohlcv_index: pd.MultiIndex,
+        signals_by_date: Dict[date, List[StrategySignal]]
+    ) -&gt; tuple[pd.DataFrame, pd.DataFrame]:
+        &quot;&quot;&quot;
+        Convert strategy signals to VectorBT entry/exit DataFrames.
+
+        Args:
+            ohlcv_index: MultiIndex from VBTDataLoader
+            signals_by_date: Dict mapping date to List[StrategySignal]
+
+        Returns:
+            entries: DataFrame[symbol] = bool (True = buy signal)
+            exits: DataFrame[symbol] = bool (True = sell signal)
+        &quot;&quot;&quot;
+        # Extract all symbols from index
+        symbols = ohlcv_index.get_level_values('symbol').unique()
+
+        # Create empty DataFrames
+        entries = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+        exits = pd.DataFrame(False, index=ohlcv_index.get_level_values('date').unique(), columns=symbols)
+
+        # Populate signals
+        for signal_date, signals in signals_by_date.items():
+            if signal_date not in entries.index:
+                continue
+
+            for signal in signals:
+                if signal.symbol not in symbols:
+                    continue
+
+                if signal.action == SignalAction.BUY:
+                    entries.loc[signal_date, signal.symbol] = True
+                elif signal.action == SignalAction.SELL:
+                    exits.loc[signal_date, signal.symbol] = True
+
+        return entries, exits
+</code></pre>
+<hr />
+<h3 id="23-execution-context-factory">2.3 Execution Context Factory<a class="headerlink" href="#23-execution-context-factory" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">from typing import Dict, List
+
+class ExecutionContextFactory:
+    &quot;&quot;&quot;Create ExecutionContext instances with portfolio state management&quot;&quot;&quot;
+
+    def __init__(self, initial_cash: float = 100000):
+        self.initial_cash = initial_cash
+        self.positions: Dict[str, PositionState] = {}
+
+    def create_context(
+        self,
+        date: date,
+        current_prices: Dict[str, float],
+        cash: float
+    ) -&gt; ExecutionContext:
+        &quot;&quot;&quot;
+        Create execution context for a given date.
+
+        Args:
+            date: Current market date
+            current_prices: Dict mapping symbol to current price
+            cash: Available cash
+
+        Returns:
+            ExecutionContext with current portfolio state
+        &quot;&quot;&quot;
+        # Calculate current portfolio value
+        position_value = sum(
+            pos.quantity * current_prices.get(pos.symbol, pos.current_price)
+            for pos in self.positions.values()
+        )
+        portfolio_value = cash + position_value
+
+        # Update position current prices
+        for symbol, price in current_prices.items():
+            if symbol in self.positions:
+                self.positions[symbol].current_price = price
+
+        return ExecutionContext(
+            portfolio_value=portfolio_value,
+            available_cash=cash,
+            current_positions=list(self.positions.values()),
+            market_date=date,
+            market_status='CLOSED'  # Simplified
+        )
+
+    def update_position(self, signal: StrategySignal, price: float):
+        &quot;&quot;&quot;Update position state based on signal&quot;&quot;&quot;
+        if signal.action == SignalAction.BUY:
+            self.positions[signal.symbol] = PositionState(
+                symbol=signal.symbol,
+                quantity=0,  # Will be calculated based on position sizing
+                current_price=price
+            )
+        elif signal.action == SignalAction.SELL and signal.symbol in self.positions:
+            del self.positions[signal.symbol]
+
+    def reset(self):
+        &quot;&quot;&quot;Reset position state&quot;&quot;&quot;
+        self.positions.clear()
+</code></pre>
+<hr />
+<h3 id="24-unified-strategy-engine">2.4 Unified Strategy Engine<a class="headerlink" href="#24-unified-strategy-engine" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import vectorbt as vbt
+import pandas as pd
+from typing import List, Dict, Any
+from datetime import date
+
+class UnifiedStrategyEngine:
+    &quot;&quot;&quot;Core orchestrator integrating IStrategy with VectorBT&quot;&quot;&quot;
+
+    def __init__(
+        self,
+        data_loader: VBTDataLoader,
+        context_factory: ExecutionContextFactory
+    ):
+        self.data_loader = data_loader
+        self.context_factory = context_factory
+
+    def backtest(
+        self,
+        strategy: IStrategy,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+        initial_cash: float = 100000
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Execute backtest using VectorBT.
+
+        Returns:
+            Dict with performance metrics and results
+        &quot;&quot;&quot;
+        # 1. Load historical data
+        ohlcv = self.data_loader.load_ohlcv(symbols, start_date, end_date)
+        prices = self.data_loader.load_prices(symbols, start_date, end_date)
+
+        # 2. Generate daily signals
+        dates = pd.date_range(start_date, end_date, freq='D')
+        signals_by_date = self._generate_signals_daily(
+            strategy,
+            dates,
+            symbols,
+            start_date,
+            end_date,
+            initial_cash
+        )
+
+        # 3. Convert signals to VectorBT format
+        entries, exits = SignalAdapter.signals_to_vectorbt(
+            ohlcv.index,
+            signals_by_date
+        )
+
+        # 4. Execute VectorBT backtest
+        pf = vbt.Portfolio.from_signals(
+            prices,
+            entries=entries,
+            exits=exits,
+            init_cash=initial_cash,
+            freq='1D',
+            fees=0.001,
+            slippage=0.0001
+        )
+
+        # 5. Extract metrics
+        stats = pf.stats()
+
+        return {
+            'strategy': strategy.name,
+            'symbols': symbols,
+            'start_date': str(start_date),
+            'end_date': str(end_date),
+            'initial_cash': initial_cash,
+            'final_value': float(pf.value().iloc[-1]),
+            'total_return': float(stats['total_return']),
+            'sharpe_ratio': float(stats['sharpe_ratio']),
+            'max_drawdown': float(stats['max_drawdown']),
+            'win_rate': float(stats['win_rate']),
+            'num_trades': int(stats['num_trades']),
+            'equity_curve': pf.value().tolist(),
+            'entries': entries.to_dict(),
+            'exits': exits.to_dict()
+        }
+
+    def _generate_signals_daily(
+        self,
+        strategy: IStrategy,
+        dates: pd.DatetimeIndex,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+        initial_cash: float
+    ) -&gt; Dict[date, List[StrategySignal]]:
+        &quot;&quot;&quot;
+        Generate signals for each date in range.
+
+        Returns:
+            Dict mapping date to List[StrategySignal]
+        &quot;&quot;&quot;
+        signals_by_date = {}
+        cash = initial_cash
+
+        # Reset context factory
+        self.context_factory.reset()
+
+        for date in dates:
+            # Get current prices
+            try:
+                prices_df = self.data_loader.load_prices(symbols, date, date)
+                current_prices = prices_df.iloc[0].to_dict()
+            except Exception:
+                continue
+
+            # Create execution context
+            context = self.context_factory.create_context(
+                date=date.date(),
+                current_prices=current_prices,
+                cash=cash
+            )
+
+            # Generate signals
+            signals = strategy.generate_signals(context, symbols)
+
+            if signals:
+                signals_by_date[date.date()] = signals
+
+                # Simulate position updates
+                for signal in signals:
+                    if signal.action == SignalAction.BUY:
+                        # Simplified position sizing
+                        position_size = min(cash * 0.1, cash)  # 10% of cash
+                        cash -= position_size
+                        self.context_factory.update_position(signal, current_prices[signal.symbol])
+                    elif signal.action == SignalAction.SELL and signal.symbol in self.context_factory.positions:
+                        position_value = (
+                            self.context_factory.positions[signal.symbol].quantity *
+                            current_prices[signal.symbol]
+                        )
+                        cash += position_value
+                        self.context_factory.update_position(signal, current_prices[signal.symbol])
+
+        return signals_by_date
+</code></pre>
+<hr />
+<h3 id="25-strategy-factory">2.5 Strategy Factory<a class="headerlink" href="#25-strategy-factory" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">from typing import Dict, Any
+
+class StrategyFactory:
+    &quot;&quot;&quot;Centralized strategy instantiation&quot;&quot;&quot;
+
+    @staticmethod
+    def create(strategy_type: str, params: Dict[str, Any] = None) -&gt; IStrategy:
+        &quot;&quot;&quot;
+        Create strategy instance by type.
+
+        Args:
+            strategy_type: Strategy identifier
+            params: Strategy parameters
+
+        Returns:
+            IStrategy instance
+        &quot;&quot;&quot;
+        params = params or {}
+
+        # Individual strategies
+        if strategy_type == 'rsi':
+            return RSIStrategy(
+                period=params.get('period', 14),
+                buy_threshold=params.get('buy_threshold', 30),
+                sell_threshold=params.get('sell_threshold', 70),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        elif strategy_type == 'macd':
+            return MACDStrategy(
+                fast=params.get('fast', 12),
+                slow=params.get('slow', 26),
+                signal=params.get('signal', 9),
+                min_trade_size=params.get('min_trade_size', 1000.0)
+            )
+
+        elif strategy_type == 'confluence':
+            return ConfluenceStrategy(
+                min_agreement=params.get('min_agreement', 2)
+            )
+
+        # Composite strategies
+        elif strategy_type == 'composite':
+            strategies = []
+            for strat_type in params.get('strategies', []):
+                strategies.append(StrategyFactory.create(strat_type['type'], strat_type.get('params', {})))
+
+            return CompositeStrategy(
+                strategies=strategies,
+                merge_algorithm=params.get('merge_algorithm', 'majority_vote')
+            )
+
+        else:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+</code></pre>
+<hr />
+<h2 id="3-data-flow-and-processing-pipeline">3. Data Flow and Processing Pipeline<a class="headerlink" href="#3-data-flow-and-processing-pipeline" title="連結到此標題">&para;</a></h2>
+<h3 id="31-complete-execution-pipeline">3.1 Complete Execution Pipeline<a class="headerlink" href="#31-complete-execution-pipeline" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────┐
+│ 1. API Request Layer                                            │
+│    POST /api/strategies/technical/run                          │
+│    {                                                            │
+│      &quot;strategy_type&quot;: &quot;rsi&quot;,                                    │
+│      &quot;universe&quot;: &quot;tw_strategy&quot;,                                │
+│      &quot;params&quot;: { &quot;period&quot;: 14 }                                │
+│    }                                                            │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. Strategy Factory                                            │
+│    strategy = StrategyFactory.create(&quot;rsi&quot;, params)            │
+│    → Instantiates RSIStrategy with configuration                │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. Data Loading (VBTDataLoader)                                │
+│    ohlcv = data_loader.load_ohlcv(symbols, start, end)          │
+│    prices = data_loader.load_prices(symbols, start, end)        │
+│    → Loads historical OHLCV data                               │
+│    → Returns MultiIndex DataFrame (symbol, date)                │
+│    → Caches data for reuse                                      │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. Daily Signal Generation Loop                                 │
+│                                                                 │
+│    For each date in date_range:                                │
+│      a. Fetch current prices for date                          │
+│      b. Calculate portfolio value                              │
+│      c. Create ExecutionContext                                │
+│      d. strategy.generate_signals(context, symbols)             │
+│      e. Store signals for date                                 │
+│      f. Simulate position state updates                        │
+│                                                                 │
+│    → Output: Dict[date, List[StrategySignal]]                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 5. Signal Conversion (SignalAdapter)                           │
+│    entries, exits = SignalAdapter.signals_to_vectorbt(         │
+│        ohlcv_index, signals_by_date                            │
+│    )                                                            │
+│    → Converts to Boolean DataFrames                            │
+│    → entries[date, symbol] = True (buy signal)                 │
+│    → exits[date, symbol] = True (sell signal)                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 6. VectorBT Execution                                          │
+│    pf = vbt.Portfolio.from_signals(                            │
+│        data=prices,                                             │
+│        entries=entries,                                         │
+│        exits=exits,                                             │
+│        init_cash=initial_cash,                                  │
+│        freq='1D',                                               │
+│        fees=0.001,                                              │
+│        slippage=0.0001                                          │
+│    )                                                            │
+│    → Vectorized portfolio simulation                            │
+│    → Computes trades, PnL, drawdowns                           │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 7. Results Formatting                                          │
+│    stats = pf.stats()                                           │
+│    return {                                                    │
+│      'strategy': strategy.name,                                │
+│      'total_return': stats['total_return'],                   │
+│      'sharpe_ratio': stats['sharpe_ratio'],                     │
+│      'max_drawdown': stats['max_drawdown'],                     │
+│      'win_rate': stats['win_rate'],                            │
+│      'num_trades': stats['num_trades'],                        │
+│      'equity_curve': pf.value().tolist(),                      │
+│      ...                                                        │
+│    }                                                            │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h3 id="32-signal-generation-detail">3.2 Signal Generation Detail<a class="headerlink" href="#32-signal-generation-detail" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># Detailed signal generation loop
+for date in dates:
+    # Step 1: Get current prices
+    try:
+        prices_df = self.data_loader.load_prices(symbols, date, date)
+        current_prices = prices_df.iloc[0].to_dict()
+    except Exception:
+        continue
+
+    # Step 2: Calculate portfolio state
+    position_value = sum(
+        pos.quantity * current_prices.get(pos.symbol, pos.current_price)
+        for pos in self.context_factory.positions.values()
+    )
+    portfolio_value = cash + position_value
+
+    # Step 3: Create execution context
+    context = ExecutionContext(
+        portfolio_value=portfolio_value,
+        available_cash=cash,
+        current_positions=list(self.context_factory.positions.values()),
+        market_date=date.date(),
+        market_status='CLOSED'
+    )
+
+    # Step 4: Generate signals (NEW LOGIC - calls strategy)
+    signals = strategy.generate_signals(context, symbols)
+
+    # Step 5: Process signals
+    if signals:
+        signals_by_date[date.date()] = signals
+
+        # Step 6: Simulate position updates
+        for signal in signals:
+            if signal.action == SignalAction.BUY:
+                # Calculate position size (10% of available cash)
+                position_size = min(cash * 0.1, cash)
+                quantity = position_size / current_prices[signal.symbol]
+
+                # Update position
+                self.context_factory.positions[signal.symbol] = PositionState(
+                    symbol=signal.symbol,
+                    quantity=int(quantity),
+                    current_price=current_prices[signal.symbol]
+                )
+                cash -= position_size
+
+            elif signal.action == SignalAction.SELL:
+                if signal.symbol in self.context_factory.positions:
+                    pos = self.context_factory.positions[signal.symbol]
+                    cash += pos.quantity * current_prices[signal.symbol]
+                    del self.context_factory.positions[signal.symbol]
+</code></pre>
+<hr />
+<h3 id="33-composite-strategy-signal-flow">3.3 Composite Strategy Signal Flow<a class="headerlink" href="#33-composite-strategy-signal-flow" title="連結到此標題">&para;</a></h3>
+<pre><code>For each date:
+    ├─ RSI.generate_signals(context, symbols)
+    │   → [Signal(AAPL, BUY, 0.8), Signal(MSFT, HOLD, -)]
+    │
+    ├─ MACD.generate_signals(context, symbols)
+    │   → [Signal(AAPL, SELL, 0.7), Signal(MSFT, BUY, 0.6)]
+    │
+    └─ SignalMerger.merge([rsi_signals, macd_signals])
+        → [Signal(AAPL, HOLD, 0.75), Signal(MSFT, BUY, 0.6)]
+           (using majority_vote algorithm)
+</code></pre>
+<hr />
+<h3 id="34-data-transformation-stages">3.4 Data Transformation Stages<a class="headerlink" href="#34-data-transformation-stages" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python"># Stage 1: Raw Database Data
+raw_data = pd.DataFrame({
+    'symbol': ['AAPL', 'AAPL', 'MSFT', 'MSFT'],
+    'date': ['2024-01-01', '2024-01-02', '2024-01-01', '2024-01-02'],
+    'close': [150.0, 151.0, 300.0, 302.0]
+})
+
+# Stage 2: VectorBT Format (MultiIndex)
+ohlcv = raw_data.set_index(['symbol', 'date'])
+# Index: (AAPL, 2024-01-01), (AAPL, 2024-01-02), ...
+
+# Stage 3: Price DataFrame (unstacked)
+prices = ohlcv['close'].unstack(level='symbol')
+# Columns: AAPL, MSFT
+# Index: 2024-01-01, 2024-01-02
+
+# Stage 4: Strategy Signals (date-grouped)
+signals_by_date = {
+    date(2024, 1, 1): [StrategySignal('AAPL', BUY, 0.8)]
+}
+
+# Stage 5: Boolean Signals (VectorBT)
+entries = pd.DataFrame({
+    'AAPL': [True, False],
+    'MSFT': [False, False]
+}, index=pd.date_range('2024-01-01', periods=2))
+
+exits = pd.DataFrame({
+    'AAPL': [False, False],
+    'MSFT': [False, True]
+}, index=pd.date_range('2024-01-01', periods=2))
+
+# Stage 6: Portfolio Object
+pf = vbt.Portfolio.from_signals(prices, entries, exits)
+
+# Stage 7: Results
+results = pf.stats()
+</code></pre>
+<hr />
+<h2 id="4-core-algorithms-and-optimization-methods">4. Core Algorithms and Optimization Methods<a class="headerlink" href="#4-core-algorithms-and-optimization-methods" title="連結到此標題">&para;</a></h2>
+<h3 id="41-indicator-calculation-algorithms">4.1 Indicator Calculation Algorithms<a class="headerlink" href="#41-indicator-calculation-algorithms" title="連結到此標題">&para;</a></h3>
+<h4 id="vectorized-rsi-calculation">Vectorized RSI Calculation<a class="headerlink" href="#vectorized-rsi-calculation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+class VectorizedRSI:
+    &quot;&quot;&quot;Vectorized RSI calculation for performance optimization&quot;&quot;&quot;
+
+    def calculate(self, prices: pd.Series, period: int = 14) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        Calculate RSI using vectorized operations.
+
+        Args:
+            prices: Price series
+            period: RSI period
+
+        Returns:
+            RSI values
+        &quot;&quot;&quot;
+        # Calculate price changes
+        delta = prices.diff()
+
+        # Separate gains and losses
+        gains = delta.where(delta &gt; 0, 0)
+        losses = -delta.where(delta &lt; 0, 0)
+
+        # Calculate average gains and losses (exponential weighted)
+        avg_gains = gains.ewm(span=period, adjust=False).mean()
+        avg_losses = losses.ewm(span=period, adjust=False).mean()
+
+        # Calculate RSI
+        rs = avg_gains / avg_losses
+        rsi = 100 - (100 / (1 + rs))
+
+        return rsi
+</code></pre>
+<hr />
+<h4 id="vectorized-macd-calculation">Vectorized MACD Calculation<a class="headerlink" href="#vectorized-macd-calculation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class VectorizedMACD:
+    &quot;&quot;&quot;Vectorized MACD calculation&quot;&quot;&quot;
+
+    def calculate(
+        self,
+        prices: pd.Series,
+        fast: int = 12,
+        slow: int = 26,
+        signal: int = 9
+    ) -&gt; tuple[pd.Series, pd.Series]:
+        &quot;&quot;&quot;
+        Calculate MACD using vectorized operations.
+
+        Returns:
+            (macd_line, signal_line)
+        &quot;&quot;&quot;
+        # Calculate EMAs
+        ema_fast = prices.ewm(span=fast, adjust=False).mean()
+        ema_slow = prices.ewm(span=slow, adjust=False).mean()
+
+        # MACD line
+        macd_line = ema_fast - ema_slow
+
+        # Signal line (EMA of MACD)
+        signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+
+        return macd_line, signal_line
+</code></pre>
+<hr />
+<h3 id="42-optimization-strategies">4.2 Optimization Strategies<a class="headerlink" href="#42-optimization-strategies" title="連結到此標題">&para;</a></h3>
+<h4 id="strategy-1-indicator-caching">Strategy 1: Indicator Caching<a class="headerlink" href="#strategy-1-indicator-caching" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from functools import lru_cache
+from typing import Dict, Tuple
+
+class IndicatorCache:
+    &quot;&quot;&quot;Cache indicator calculations for reuse&quot;&quot;&quot;
+
+    def __init__(self):
+        self.cache: Dict[Tuple, pd.Series] = {}
+
+    def get_or_compute(
+        self,
+        symbol: str,
+        indicator_fn: callable,
+        prices: pd.Series,
+        **params
+    ) -&gt; pd.Series:
+        &quot;&quot;&quot;
+        Get indicator from cache or compute.
+
+        Args:
+            symbol: Stock symbol
+            indicator_fn: Function to compute indicator
+            prices: Price series
+            **params: Indicator parameters
+
+        Returns:
+            Indicator values
+        &quot;&quot;&quot;
+        cache_key = (symbol, indicator_fn.__name__, tuple(sorted(params.items())))
+
+        if cache_key not in self.cache:
+            self.cache[cache_key] = indicator_fn(prices, **params)
+
+        return self.cache[cache_key]
+
+    def clear(self):
+        &quot;&quot;&quot;Clear cache&quot;&quot;&quot;
+        self.cache.clear()
+
+    @lru_cache(maxsize=100)
+    def get_rsi_cached(self, symbol: str, period: int) -&gt; pd.Series:
+        &quot;&quot;&quot;LRU-cached RSI retrieval&quot;&quot;&quot;
+        # Implementation
+        pass
+</code></pre>
+<hr />
+<h4 id="strategy-2-batch-data-loading">Strategy 2: Batch Data Loading<a class="headerlink" href="#strategy-2-batch-data-loading" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class BatchDataLoader:
+    &quot;&quot;&quot;Load data in batches for performance&quot;&quot;&quot;
+
+    def __init__(self, connection, batch_size: int = 50):
+        self.conn = connection
+        self.batch_size = batch_size
+
+    def load_symbols_batch(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date
+    ) -&gt; Dict[str, pd.DataFrame]:
+        &quot;&quot;&quot;
+        Load multiple symbols in batch queries.
+
+        Returns:
+            Dict mapping symbol to DataFrame
+        &quot;&quot;&quot;
+        results = {}
+
+        # Process symbols in batches
+        for i in range(0, len(symbols), self.batch_size):
+            batch = symbols[i:i + self.batch_size]
+
+            # Single query for entire batch
+            query = f&quot;&quot;&quot;
+            SELECT symbol, date, open, high, low, close, volume
+            FROM prices
+            WHERE symbol IN ({','.join(['?'] * len(batch))})
+              AND date BETWEEN ? AND ?
+            ORDER BY symbol, date
+            &quot;&quot;&quot;
+            params = batch + [start_date, end_date]
+
+            df = pd.read_sql(query, self.conn, params=params)
+
+            # Split by symbol
+            for symbol in batch:
+                results[symbol] = df[df['symbol'] == symbol].set_index('date')
+
+        return results
+</code></pre>
+<hr />
+<h4 id="strategy-3-parallel-signal-generation">Strategy 3: Parallel Signal Generation<a class="headerlink" href="#strategy-3-parallel-signal-generation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List
+
+class ParallelSignalGenerator:
+    &quot;&quot;&quot;Generate signals in parallel for multiple symbols&quot;&quot;&quot;
+
+    def __init__(self, max_workers: int = 4):
+        self.max_workers = max_workers
+
+    def generate_signals_parallel(
+        self,
+        strategy: IStrategy,
+        context: ExecutionContext,
+        symbols: List[str]
+    ) -&gt; List[StrategySignal]:
+        &quot;&quot;&quot;
+        Generate signals for multiple symbols in parallel.
+
+        Returns:
+            Combined list of signals
+        &quot;&quot;&quot;
+        signals = []
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit tasks
+            futures = {
+                executor.submit(
+                    self._generate_single_symbol_signal,
+                    strategy,
+                    context,
+                    symbol
+                ): symbol
+                for symbol in symbols
+            }
+
+            # Collect results
+            for future in as_completed(futures):
+                symbol = futures[future]
+                try:
+                    result = future.result()
+                    if result:
+                        signals.append(result)
+                except Exception as e:
+                    print(f&quot;Error generating signal for {symbol}: {e}&quot;)
+
+        return signals
+
+    def _generate_single_symbol_signal(
+        self,
+        strategy: IStrategy,
+        context: ExecutionContext,
+        symbol: str
+    ) -&gt; StrategySignal:
+        &quot;&quot;&quot;Generate signal for single symbol&quot;&quot;&quot;
+        signals = strategy.generate_signals(context, [symbol])
+        return signals[0] if signals else None
+</code></pre>
+<hr />
+<h4 id="strategy-4-lazy-indicator-evaluation">Strategy 4: Lazy Indicator Evaluation<a class="headerlink" href="#strategy-4-lazy-indicator-evaluation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class LazyIndicator:
+    &quot;&quot;&quot;Compute indicators only when needed&quot;&quot;&quot;
+
+    def __init__(self, compute_fn, prices: pd.Series, **params):
+        self.compute_fn = compute_fn
+        self.prices = prices
+        self.params = params
+        self._computed = None
+
+    def get(self) -&gt; pd.Series:
+        &quot;&quot;&quot;Get indicator, compute on first access&quot;&quot;&quot;
+        if self._computed is None:
+            self._computed = self.compute_fn(self.prices, **self.params)
+        return self._computed
+
+class StrategyWithLazyIndicators(IStrategy):
+    &quot;&quot;&quot;Strategy using lazy indicator evaluation&quot;&quot;&quot;
+
+    name = &quot;lazy_indicator_strategy&quot;
+
+    def __init__(self, data_loader):
+        self.data_loader = data_loader
+        self.indicators = {}
+
+    def get_rsi(self, symbol: str, period: int = 14) -&gt; LazyIndicator:
+        &quot;&quot;&quot;Get lazy RSI for symbol&quot;&quot;&quot;
+        key = (symbol, 'rsi', period)
+        if key not in self.indicators:
+            prices = self.data_loader.load_prices([symbol], date.today() - timedelta(days=365), date.today())
+            self.indicators[key] = LazyIndicator(
+                lambda p, **kwargs: VectorizedRSI().calculate(p, **kwargs),
+                prices[symbol],
+                period=period
+            )
+        return self.indicators[key]
+
+    def generate_signals(self, context: ExecutionContext, symbols: List[str]) -&gt; List[StrategySignal]:
+        signals = []
+
+        for symbol in symbols:
+            # Indicators only computed if accessed
+            rsi_lazy = self.get_rsi(symbol, period=14)
+            rsi_value = rsi_lazy.get().loc[context.market_date]
+
+            if rsi_value &lt; 30:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=(30 - rsi_value) / 30
+                ))
+
+        return signals
+</code></pre>
+<hr />
+<h4 id="strategy-5-performance-monitoring">Strategy 5: Performance Monitoring<a class="headerlink" href="#strategy-5-performance-monitoring" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">import time
+from typing import Dict, List
+
+class PerformanceMonitor:
+    &quot;&quot;&quot;Monitor and report performance metrics&quot;&quot;&quot;
+
+    def __init__(self):
+        self.metrics: Dict[str, List[float]] = {}
+
+    def measure(self, metric_name: str):
+        &quot;&quot;&quot;Decorator for timing functions&quot;&quot;&quot;
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                start = time.time()
+                result = func(*args, **kwargs)
+                elapsed = time.time() - start
+
+                if metric_name not in self.metrics:
+                    self.metrics[metric_name] = []
+                self.metrics[metric_name].append(elapsed)
+
+                return result
+            return wrapper
+        return decorator
+
+    def report(self) -&gt; Dict[str, Dict[str, float]]:
+        &quot;&quot;&quot;Generate performance report&quot;&quot;&quot;
+        import numpy as np
+
+        report = {}
+        for name, times in self.metrics.items():
+            report[name] = {
+                'count': len(times),
+                'total': sum(times),
+                'mean': np.mean(times),
+                'median': np.median(times),
+                'min': min(times),
+                'max': max(times),
+                'std': np.std(times)
+            }
+        return report
+
+    def reset(self):
+        &quot;&quot;&quot;Reset metrics&quot;&quot;&quot;
+        self.metrics.clear()
+</code></pre>
+<hr />
+<h3 id="43-optimization-priority-matrix">4.3 Optimization Priority Matrix<a class="headerlink" href="#43-optimization-priority-matrix" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Optimization</th>
+<th>Expected Gain</th>
+<th>Complexity</th>
+<th>Priority</th>
+<th>Implementation Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vectorized indicators</td>
+<td>5-10x faster</td>
+<td>Low</td>
+<td>🔴 High</td>
+<td>1-2 days</td>
+</tr>
+<tr>
+<td>Batch data loading</td>
+<td>3-5x faster</td>
+<td>Medium</td>
+<td>🔴 High</td>
+<td>2-3 days</td>
+</tr>
+<tr>
+<td>Indicator caching</td>
+<td>2-3x faster</td>
+<td>Low</td>
+<td>🟠 Medium</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td>Parallel signal gen</td>
+<td>2-4x faster (multi-core)</td>
+<td>Medium</td>
+<td>🟡 Low</td>
+<td>1-2 days</td>
+</tr>
+<tr>
+<td>Lazy evaluation</td>
+<td>1.5-2x faster</td>
+<td>Low</td>
+<td>🟡 Low</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td>Connection pooling</td>
+<td>1.5-2x faster</td>
+<td>Low</td>
+<td>🟡 Low</td>
+<td>0.5 day</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-testing-strategies">5. Testing Strategies<a class="headerlink" href="#5-testing-strategies" title="連結到此標題">&para;</a></h2>
+<h3 id="51-unit-testing-template">5.1 Unit Testing Template<a class="headerlink" href="#51-unit-testing-template" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">import pytest
+from datetime import date
+from unittest.mock import Mock
+
+def test_strategy_interface():
+    &quot;&quot;&quot;Test strategy implements IStrategy correctly&quot;&quot;&quot;
+    strategy = RSIStrategy(period=14)
+
+    # Check name property
+    assert hasattr(strategy, 'name')
+    assert strategy.name == &quot;rsi_mean_reversion&quot;
+
+    # Check generate_signals method exists
+    assert hasattr(strategy, 'generate_signals')
+
+def test_strategy_signal_generation():
+    &quot;&quot;&quot;Test strategy generates valid signals&quot;&quot;&quot;
+    strategy = RSIStrategy(period=14)
+
+    # Create mock context
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[],
+        market_date=date(2024, 1, 15),
+        market_status='CLOSED'
+    )
+    symbols = ['AAPL', 'MSFT']
+
+    # Generate signals
+    signals = strategy.generate_signals(context, symbols)
+
+    # Validate output
+    assert isinstance(signals, list)
+    assert all(isinstance(s, StrategySignal) for s in signals)
+    assert all(s.symbol in symbols for s in signals)
+    assert all(0.0 &lt;= s.confidence &lt;= 1.0 for s in signals)
+
+def test_strategy_position_awareness():
+    &quot;&quot;&quot;Test strategy respects existing positions&quot;&quot;&quot;
+    strategy = RSIStrategy()
+
+    # Create context with existing position
+    existing_pos = PositionState(symbol='AAPL', quantity=100, current_price=150.0)
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[existing_pos],
+        market_date=date(2024, 1, 15),
+        market_status='CLOSED'
+    )
+
+    # Generate signals
+    signals = strategy.generate_signals(context, ['AAPL', 'MSFT'])
+
+    # Should not generate BUY for AAPL (already holding)
+    aapl_buy_signals = [s for s in signals if s.symbol == 'AAPL' and s.action == SignalAction.BUY]
+    assert len(aapl_buy_signals) == 0
+
+def test_strategy_market_status_check():
+    &quot;&quot;&quot;Test strategy respects market status&quot;&quot;&quot;
+    strategy = RSIStrategy()
+
+    # Create context with market OPEN
+    context = ExecutionContext(
+        portfolio_value=100000,
+        available_cash=50000,
+        current_positions=[],
+        market_date=date(2024, 1, 15),
+        market_status='OPEN'
+    )
+
+    # Generate signals
+    signals = strategy.generate_signals(context, ['AAPL'])
+
+    # Should not generate signals when market is OPEN
+    assert len(signals) == 0
+</code></pre>
+<hr />
+<h3 id="52-integration-testing-template">5.2 Integration Testing Template<a class="headerlink" href="#52-integration-testing-template" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">from unittest.mock import Mock, patch
+
+def test_strategy_with_vectorbt():
+    &quot;&quot;&quot;Test strategy integrates with VectorBT&quot;&quot;&quot;
+    strategy = RSIStrategy()
+
+    # Mock data loader
+    mock_loader = Mock(spec=VBTDataLoader)
+    mock_loader.load_ohlcv.return_value = pd.DataFrame(...)  # Test data
+    mock_loader.load_prices.return_value = pd.DataFrame(...)  # Test data
+
+    # Create engine
+    engine = UnifiedStrategyEngine(
+        data_loader=mock_loader,
+        context_factory=ExecutionContextFactory()
+    )
+
+    # Execute backtest
+    result = engine.backtest(
+        strategy=strategy,
+        symbols=['AAPL'],
+        start_date=date(2024, 1, 1),
+        end_date=date(2024, 12, 31),
+        initial_cash=100000
+    )
+
+    # Validate results
+    assert 'strategy' in result
+    assert 'total_return' in result
+    assert 'sharpe_ratio' in result
+    assert 'max_drawdown' in result
+    assert 'equity_curve' in result
+    assert result['strategy'] == strategy.name
+    assert isinstance(result['equity_curve'], list)
+
+def test_signal_adapter_conversion():
+    &quot;&quot;&quot;Test SignalAdapter converts correctly&quot;&quot;&quot;
+    # Create test data
+    ohlcv_index = pd.MultiIndex.from_tuples(
+        [('AAPL', date(2024, 1, 1)), ('MSFT', date(2024, 1, 1))],
+        names=['symbol', 'date']
+    )
+
+    signals_by_date = {
+        date(2024, 1, 1): [
+            StrategySignal('AAPL', SignalAction.BUY, 0.8),
+            StrategySignal('MSFT', SignalAction.SELL, 0.6)
+        ]
+    }
+
+    # Convert
+    entries, exits = SignalAdapter.signals_to_vectorbt(
+        ohlcv_index,
+        signals_by_date
+    )
+
+    # Validate
+    assert isinstance(entries, pd.DataFrame)
+    assert isinstance(exits, pd.DataFrame)
+    assert entries.loc[date(2024, 1, 1), 'AAPL'] == True
+    assert exits.loc[date(2024, 1, 1), 'MSFT'] == True
+
+def test_composite_strategy_merge():
+    &quot;&quot;&quot;Test composite strategy signal merging&quot;&quot;&quot;
+    rsi_strategy = RSIStrategy()
+    macd_strategy = MACDStrategy()
+
+    composite = CompositeStrategy(
+        strategies=[rsi_strategy, macd_strategy],
+        merge_algorithm='majority_vote'
+    )
+
+    # Test merging logic
+    signals = [
+        StrategySignal('AAPL', SignalAction.BUY, 0.8),
+        StrategySignal('AAPL', SignalAction.BUY, 0.7),
+        StrategySignal('AAPL', SignalAction.SELL, 0.6)
+    ]
+
+    merged = composite._merge_signals('AAPL', signals)
+
+    # Should buy (2/3 majority)
+    assert merged.action == SignalAction.BUY
+    assert merged.confidence == 2/3
+</code></pre>
+<hr />
+<h3 id="53-regression-testing">5.3 Regression Testing<a class="headerlink" href="#53-regression-testing" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-python">def test_regression_old_vs_new():
+    &quot;&quot;&quot;Verify new unified engine produces same results as old system&quot;&quot;&quot;
+    # Run old strategy
+    old_result = run_old_backtest(
+        strategy='rsi',
+        symbols=['AAPL'],
+        start_date=date(2024, 1, 1),
+        end_date=date(2024, 12, 31)
+    )
+
+    # Run new unified strategy
+    strategy = RSIStrategy()
+    engine = UnifiedStrategyEngine(...)
+    new_result = engine.backtest(
+        strategy=strategy,
+        symbols=['AAPL'],
+        start_date=date(2024, 1, 1),
+        end_date=date(2024, 12, 31)
+    )
+
+    # Compare results (allow small tolerance)
+    tolerance = 0.01
+    assert abs(old_result['total_return'] - new_result['total_return']) &lt; tolerance
+    assert abs(old_result['sharpe_ratio'] - new_result['sharpe_ratio']) &lt; tolerance
+    assert abs(old_result['max_drawdown'] - new_result['max_drawdown']) &lt; tolerance
+</code></pre>
+<hr />
+<h2 id="6-common-pitfalls-and-best-practices">6. Common Pitfalls and Best Practices<a class="headerlink" href="#6-common-pitfalls-and-best-practices" title="連結到此標題">&para;</a></h2>
+<h3 id="61-common-pitfalls">6.1 Common Pitfalls<a class="headerlink" href="#61-common-pitfalls" title="連結到此標題">&para;</a></h3>
+<h4 id="pitfall-1-not-checking-position-state">Pitfall 1: Not Checking Position State<a class="headerlink" href="#pitfall-1-not-checking-position-state" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ❌ BAD: Always buy, even if already holding
+if rsi &lt; 30:
+    signals.append(StrategySignal(symbol, BUY, 0.8))
+
+# ✅ GOOD: Check if already holding
+existing_position = next(
+    (p for p in context.current_positions if p.symbol == symbol),
+    None
+)
+if rsi &lt; 30 and not existing_position:
+    signals.append(StrategySignal(symbol, BUY, 0.8))
+</code></pre>
+<hr />
+<h4 id="pitfall-2-ignoring-cash-constraints">Pitfall 2: Ignoring Cash Constraints<a class="headerlink" href="#pitfall-2-ignoring-cash-constraints" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ❌ BAD: Always buy regardless of cash availability
+signals.append(StrategySignal(symbol, BUY, 0.8))
+
+# ✅ GOOD: Check cash availability
+if context.available_cash &gt;= self.min_trade_size:
+    signals.append(StrategySignal(symbol, BUY, 0.8))
+</code></pre>
+<hr />
+<h4 id="pitfall-3-non-deterministic-behavior">Pitfall 3: Non-Deterministic Behavior<a class="headerlink" href="#pitfall-3-non-deterministic-behavior" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ❌ BAD: Uses random - not reproducible
+import random
+if random.random() &gt; 0.5:
+    signals.append(StrategySignal(symbol, BUY, 0.8))
+
+# ✅ GOOD: Deterministic logic based on indicators
+if rsi &lt; 30:
+    signals.append(StrategySignal(symbol, BUY, 0.8))
+</code></pre>
+<hr />
+<h4 id="pitfall-4-inefficient-indicator-calculation">Pitfall 4: Inefficient Indicator Calculation<a class="headerlink" href="#pitfall-4-inefficient-indicator-calculation" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ❌ BAD: Recalculate indicators every time (slow!)
+def generate_signals(self, context, symbols):
+    for symbol in symbols:
+        rsi = calculate_rsi(symbol, context.market_date)  # Recomputed every call!
+
+# ✅ GOOD: Pre-calculate and cache
+def __init__(self):
+    self.rsi_cache = {}
+
+def generate_signals(self, context, symbols):
+    for symbol in symbols:
+        if symbol not in self.rsi_cache:
+            self.rsi_cache[symbol] = self._calculate_rsi_all_dates(symbol)
+        rsi = self.rsi_cache[symbol].loc[context.market_date]
+</code></pre>
+<hr />
+<h4 id="pitfall-5-returning-multiple-signals-for-same-symbol">Pitfall 5: Returning Multiple Signals for Same Symbol<a class="headerlink" href="#pitfall-5-returning-multiple-signals-for-same-symbol" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ❌ BAD: Multiple signals for same symbol
+def generate_signals(self, context, symbols):
+    signals = []
+    for symbol in symbols:
+        if rsi &lt; 30:
+            signals.append(StrategySignal(symbol, BUY, 0.8))
+        if macd &gt; 0:
+            signals.append(StrategySignal(symbol, BUY, 0.7))  # Duplicate!
+    return signals
+
+# ✅ GOOD: One signal per symbol
+def generate_signals(self, context, symbols):
+    signals = []
+    for symbol in symbols:
+        should_buy = False
+        confidence = 0.0
+
+        if rsi &lt; 30:
+            should_buy = True
+            confidence += 0.5
+        if macd &gt; 0:
+            should_buy = True
+            confidence += 0.3
+
+        if should_buy:
+            signals.append(StrategySignal(symbol, BUY, confidence))
+    return signals
+</code></pre>
+<hr />
+<h3 id="62-best-practices">6.2 Best Practices<a class="headerlink" href="#62-best-practices" title="連結到此標題">&para;</a></h3>
+<h4 id="best-practice-1-use-descriptive-strategy-names">Best Practice 1: Use Descriptive Strategy Names<a class="headerlink" href="#best-practice-1-use-descriptive-strategy-names" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ✅ GOOD: Clear, descriptive name
+class RSIMeanReversionStrategy(IStrategy):
+    name = &quot;rsi_mean_reversion_v1&quot;
+
+# ❌ BAD: Vague name
+class MyStrategy(IStrategy):
+    name = &quot;strat1&quot;
+</code></pre>
+<hr />
+<h4 id="best-practice-2-validate-inputs-in-constructor">Best Practice 2: Validate Inputs in Constructor<a class="headerlink" href="#best-practice-2-validate-inputs-in-constructor" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ✅ GOOD: Validate parameters
+def __init__(self, period=14, buy_threshold=30, sell_threshold=70):
+    if period &lt;= 0:
+        raise ValueError(&quot;Period must be positive&quot;)
+    if not (0 &lt; buy_threshold &lt; sell_threshold &lt; 100):
+        raise ValueError(&quot;Invalid threshold values&quot;)
+    self.period = period
+    self.buy_threshold = buy_threshold
+    self.sell_threshold = sell_threshold
+</code></pre>
+<hr />
+<h4 id="best-practice-3-document-confidence-scoring">Best Practice 3: Document Confidence Scoring<a class="headerlink" href="#best-practice-3-document-confidence-scoring" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def _calculate_confidence(self, rsi: float, threshold: float) -&gt; float:
+    &quot;&quot;&quot;
+    Calculate confidence based on how far RSI is from threshold.
+
+    Formula: min(1.0, |rsi - threshold| / threshold)
+
+    Args:
+        rsi: Current RSI value
+        threshold: Buy/sell threshold
+
+    Returns:
+        Confidence score 0.0 to 1.0
+    &quot;&quot;&quot;
+    if rsi &lt; threshold:  # Buy case
+        return min(1.0, (threshold - rsi) / threshold)
+    else:  # Sell case
+        return min(1.0, (rsi - threshold) / (100 - threshold))
+</code></pre>
+<hr />
+<h4 id="best-practice-4-use-dataclasses-for-structured-data">Best Practice 4: Use Dataclasses for Structured Data<a class="headerlink" href="#best-practice-4-use-dataclasses-for-structured-data" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ✅ GOOD: Dataclass with validation
+@dataclass
+class StrategySignal:
+    symbol: str
+    action: SignalAction
+    confidence: float
+
+    def __post_init__(self):
+        if not isinstance(self.symbol, str) or len(self.symbol) == 0:
+            raise ValueError(&quot;Symbol must be non-empty string&quot;)
+        if not isinstance(self.action, SignalAction):
+            raise ValueError(f&quot;Action must be SignalAction, got {type(self.action)}&quot;)
+        if not (0.0 &lt;= self.confidence &lt;= 1.0):
+            raise ValueError(f&quot;Confidence must be 0.0-1.0, got {self.confidence}&quot;)
+</code></pre>
+<hr />
+<h4 id="best-practice-5-cache-expensive-computations">Best Practice 5: Cache Expensive Computations<a class="headerlink" href="#best-practice-5-cache-expensive-computations" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># ✅ GOOD: Use functools.lru_cache for memoization
+from functools import lru_cache
+
+class CachedIndicatorStrategy(IStrategy):
+    @lru_cache(maxsize=128)
+    def get_rsi(self, symbol: str, date: date, period: int = 14) -&gt; float:
+        &quot;&quot;&quot;Cached RSI calculation&quot;&quot;&quot;
+        # Expensive calculation here
+        return calculate_rsi(symbol, date, period)
+</code></pre>
+<hr />
+<h2 id="7-migration-guidelines">7. Migration Guidelines<a class="headerlink" href="#7-migration-guidelines" title="連結到此標題">&para;</a></h2>
+<h3 id="71-migration-steps">7.1 Migration Steps<a class="headerlink" href="#71-migration-steps" title="連結到此標題">&para;</a></h3>
+<h4 id="step-1-identify-dependencies">Step 1: Identify Dependencies<a class="headerlink" href="#step-1-identify-dependencies" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># Old strategy might use:
+- Backtrader Cerebro
+- Direct database access
+- Global state variables
+- Custom event loops (next() methods)
+- Backtrader-specific indicators
+
+# Need to replace with:
+- IStrategy interface
+- VBTDataLoader for data access
+- ExecutionContext for state
+- generate_signals() method
+- VectorBT indicators or custom calculations
+</code></pre>
+<hr />
+<h4 id="step-2-extract-signal-logic">Step 2: Extract Signal Logic<a class="headerlink" href="#step-2-extract-signal-logic" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python"># Old: Signal logic embedded in Backtrader next() method
+class OldBacktraderStrategy(bt.Strategy):
+    def next(self):
+        self.rsi = self.indicators.rsi[0]
+        if self.rsi &lt; 30:
+            self.buy(size=100)
+
+# New: Extract to generate_signals()
+class NewUnifiedStrategy(IStrategy):
+    name = &quot;rsi_unified&quot;
+
+    def generate_signals(self, context: ExecutionContext, symbols: List[str]):
+        signals = []
+        for symbol in symbols:
+            rsi = self._get_rsi(symbol, context.market_date)
+            if rsi &lt; 30:
+                signals.append(StrategySignal(
+                    symbol=symbol,
+                    action=SignalAction.BUY,
+                    confidence=(30 - rsi) / 30
+                ))
+        return signals
+</code></pre>
+<hr />
+<h4 id="step-3-register-with-strategyfactory">Step 3: Register with StrategyFactory<a class="headerlink" href="#step-3-register-with-strategyfactory" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">class StrategyFactory:
+    @staticmethod
+    def create(strategy_type: str, params: Dict) -&gt; IStrategy:
+        # Add your migrated strategy here
+        if strategy_type == &quot;my_migrated_strategy&quot;:
+            return MyMigratedStrategy(
+                param1=params.get('param1', default_value),
+                param2=params.get('param2', default_value)
+            )
+        # ... existing strategies
+</code></pre>
+<hr />
+<h4 id="step-4-test-and-verify">Step 4: Test and Verify<a class="headerlink" href="#step-4-test-and-verify" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-python">def test_migration_correctness():
+    &quot;&quot;&quot;Run comparison tests to verify migration&quot;&quot;&quot;
+    # Run old strategy
+    old_result = run_old_strategy('my_strategy', symbols=['AAPL'], ...)
+
+    # Run new unified strategy
+    strategy = StrategyFactory.create('my_strategy', params={...})
+    engine = UnifiedStrategyEngine(...)
+    new_result = engine.backtest(strategy=strategy, symbols=['AAPL'], ...)
+
+    # Verify results match (within tolerance)
+    assert abs(old_result['total_return'] - new_result['total_return']) &lt; 0.001
+    assert abs(old_result['sharpe_ratio'] - new_result['sharpe_ratio']) &lt; 0.01
+
+    print(&quot;Migration verified: Results match!&quot;)
+</code></pre>
+<hr />
+<h3 id="72-migration-checklist">7.2 Migration Checklist<a class="headerlink" href="#72-migration-checklist" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] Extract signal logic from Backtrader next() method</li>
+<li>[ ] Implement IStrategy interface (name property, generate_signals method)</li>
+<li>[ ] Replace database access with VBTDataLoader</li>
+<li>[ ] Replace Backtrader indicators with VectorBT or custom calculations</li>
+<li>[ ] Remove global state, use ExecutionContext</li>
+<li>[ ] Add input validation in constructor</li>
+<li>[ ] Write unit tests for strategy</li>
+<li>[ ] Write integration tests with VectorBT</li>
+<li>[ ] Run regression tests vs old implementation</li>
+<li>[ ] Register strategy in StrategyFactory</li>
+<li>[ ] Update documentation</li>
+<li>[ ] Code review</li>
+</ul>
+<hr />
+<h2 id="8-confidence-limitations">8. Confidence &amp; Limitations<a class="headerlink" href="#8-confidence-limitations" title="連結到此標題">&para;</a></h2>
+<h3 id="confidence-level-high">Confidence Level: <strong>High</strong><a class="headerlink" href="#confidence-level-high" title="連結到此標題">&para;</a></h3>
+<p><strong>Rationale:</strong>
+- Source document provides comprehensive, well-structured architecture
+- Design patterns are standard and proven (Factory, Adapter, Facade, Composition)
+- Code examples are complete and executable
+- Migration path is clearly defined
+- Testing strategies are comprehensive</p>
+<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>Incomplete Interface Definition</strong>: Some IStrategy interface details may vary in actual implementation</li>
+<li><strong>VectorBT-Specific</strong>: Design heavily optimized for VectorBT; Backtrader support minimal</li>
+<li><strong>Simplified Position Simulation</strong>: Position state tracking may not handle complex scenarios (short selling, partial exits)</li>
+<li><strong>No Production Benchmarks</strong>: Performance improvements not quantified with real data</li>
+<li><strong>Database Specifics</strong>: Assumes DuckDB; may require adjustments for other databases</li>
+</ol>
+<h3 id="assumptions-made">Assumptions Made<a class="headerlink" href="#assumptions-made" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>VectorBT is the preferred execution engine</li>
+<li>Position state simulation follows simplified model</li>
+<li>Database access through parameterized queries</li>
+<li>API endpoints remain backward compatible</li>
+<li>Trading only supports long positions (no short selling)</li>
+</ol>
+<hr />
+<h2 id="9-metadata">9. Metadata<a class="headerlink" href="#9-metadata" title="連結到此標題">&para;</a></h2>
+<p><strong>Source Document:</strong> a003-unified-strategy-engine.md
+<strong>Extraction Date:</strong> 2026-02-21
+<strong>Knowledge Base Purpose:</strong> Guide Programmer Sub-Agent in implementing trading strategies</p>
+<p><strong>Key Design Patterns:</strong>
+- Interface Pattern (IStrategy)
+- Factory Pattern (StrategyFactory, ExecutionContextFactory)
+- Adapter Pattern (SignalAdapter)
+- Facade Pattern (UnifiedStrategyEngine)
+- Composition Pattern (CompositeStrategy, SignalMerger)
+- Strategy Pattern (Different merge algorithms)</p>
+<p><strong>Architecture Style:</strong> Layered Architecture with clear separation of concerns</p>
+<p><strong>Execution Engine:</strong> VectorBT (primary), Backtrader (potential future support)</p>
+<p><strong>Performance Profile:</strong>
+- Vectorized calculations: 5-10x speedup
+- Batch loading: 3-5x speedup
+- Caching: 2-3x speedup</p>
+<p><strong>Testing Coverage:</strong>
+- Unit tests for individual strategies
+- Integration tests with VectorBT
+- Regression tests for migration validation
+- Performance benchmarks</p>
+<hr />
+<p><em>Knowledge base extraction complete. This document provides the Programmer Sub-Agent with all essential information to understand, implement, maintain, and extend the unified strategy engine.</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

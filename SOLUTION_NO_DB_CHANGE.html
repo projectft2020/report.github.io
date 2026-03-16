@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解決方案：不修改資料庫實現 Win Rate 和 Profit Factor 顯示 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>解決方案：不修改資料庫實現 Win Rate 和 Profit Factor 顯示</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="win-rate-profit-factor">解決方案：不修改資料庫實現 Win Rate 和 Profit Factor 顯示<a class="headerlink" href="#win-rate-profit-factor" title="連結到此標題">&para;</a></h1>
+<p><strong>日期:</strong> 2026-02-22
+<strong>方案類型:</strong> 臨時解決方案（不修改資料庫架構）
+<strong>狀態:</strong> ✅ 已實現</p>
+<hr />
+<h2 id="_1">📋 問題分析<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<h3 id="_2">現況<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>層級</th>
+<th>狀態</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>後端代碼</td>
+<td>✅ 已準備</td>
+<td><code>history_service.py</code> 已經準備好接收和保存 win_rate 和 profit_factor</td>
+</tr>
+<tr>
+<td>前端代碼</td>
+<td>✅ 已準備</td>
+<td><code>BacktestHistoryPage.jsx</code> 已經準備好顯示這兩個欄位</td>
+</tr>
+<tr>
+<td>數據庫結構</td>
+<td>❌ 缺失</td>
+<td><code>backtest_history</code> 表缺少 win_rate 和 profit_factor 欄位</td>
+</tr>
+<tr>
+<td>保存邏輯</td>
+<td>❌ 未實現</td>
+<td><code>stats_cache_service.py</code> 沒有計算和傳遞這兩個值</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">核心問題<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>代碼已經準備好，但保存時沒有傳遞 win_rate 和 profit_factor</li>
+<li>數據庫缺少這兩個欄位</li>
+<li>用戶要求：<strong>不修改資料庫</strong></li>
+</ul>
+<hr />
+<h2 id="params-json">💡 解決方案：使用 params JSON 作為臨時存儲<a class="headerlink" href="#params-json" title="連結到此標題">&para;</a></h2>
+<h3 id="_4">方案概述<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<p><strong>不修改資料庫架構</strong>，通過以下方式實現：</p>
+<ol>
+<li><strong>保存時</strong>：將 <code>win_rate</code> 和 <code>profit_factor</code> 存入 <code>params</code> JSON 欄位</li>
+<li>Key: <code>_win_rate</code>, <code>_profit_factor</code></li>
+<li>
+<p>同時嘗試保存到數據庫欄位（如果存在）</p>
+</li>
+<li>
+<p><strong>讀取時</strong>：優先從數據庫欄位讀取，如果不存在則從 <code>params</code> JSON 中提取</p>
+</li>
+<li>
+<p>向後兼容：支持未來應用遷移 005 後的數據庫欄位</p>
+</li>
+<li>
+<p><strong>計算時</strong>：在 <code>_run_simulation</code> 中計算 <code>profit_factor</code></p>
+</li>
+</ol>
+<h3 id="_5">優點<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ 完全不需要修改資料庫架構</li>
+<li>✅ 立即可用，無需等待遷移</li>
+<li>✅ 向後兼容，未來可以平滑切換到數據庫欄位</li>
+<li>✅ 符合「數據庫修改的三重審查原則」</li>
+</ul>
+<h3 id="_6">缺點<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>⚠️ 存儲在 JSON 中，查詢性能略低（但對於列表查詢影響很小）</li>
+<li>⚠️ 需要額外的邏輯處理 JSON 解析</li>
+</ul>
+<hr />
+<h2 id="_7">🔧 實現詳情<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<h3 id="1-stats_cache_servicepy">1. stats_cache_service.py 修改<a class="headerlink" href="#1-stats_cache_servicepy" title="連結到此標題">&para;</a></h3>
+<h4 id="11-_run_simulation">1.1 修改 <code>_run_simulation</code> 方法<a class="headerlink" href="#11-_run_simulation" title="連結到此標題">&para;</a></h4>
+<p><strong>添加 <code>profit_factor</code> 計算：</strong></p>
+<pre><code class="language-python"># Calculate profit factor: sum of positive PnL / sum of negative PnL (absolute)
+total_win_pnl = wins['pnl'].sum() if not wins.empty else 0
+total_loss_pnl = abs(losses['pnl'].sum()) if not losses.empty else 0
+profit_factor = total_win_pnl / total_loss_pnl if total_loss_pnl &gt; 0 else None
+
+stats = {
+    'win_rate': len(wins) / len(df),
+    'profit_factor': profit_factor,  # ✅ 新增
+    'expected_return': df['return_pct'].mean(),
+    'sample_count': len(df),
+    'avg_win': wins['return_pct'].mean() if not wins.empty else 0,
+    'avg_loss': losses['return_pct'].mean() if not losses.empty else 0,
+    'forward_20d': holding_stats.get('20D', 0)
+}
+</code></pre>
+<h4 id="12-cache_simulation_result">1.2 修改 <code>cache_simulation_result</code> 方法<a class="headerlink" href="#12-cache_simulation_result" title="連結到此標題">&para;</a></h4>
+<p><strong>傳遞 win_rate 和 profit_factor 給 <code>_save_to_history</code>：</strong></p>
+<pre><code class="language-python">def cache_simulation_result(
+    self,
+    instance_id: str,
+    strategy_type: str,
+    market: str,
+    params: Dict[str, Any],
+    result: Dict[str, Any],
+    stats: Dict[str, Any],
+    years: float
+):
+    try:
+        # 1. Save to Stats Cache
+        self._store_stats(instance_id, market, 'all', 30, stats, years)
+
+        # 2. Save to History (Async)
+        self._save_to_history(
+            instance_id=instance_id,
+            strategy_type=strategy_type,
+            market=market,
+            params=params,
+            result=result,
+            years=years,
+            win_rate=stats.get('win_rate'),      # ✅ 新增
+            profit_factor=stats.get('profit_factor')  # ✅ 新增
+        )
+    except Exception as e:
+        logger.error(f&quot;Error caching simulation result: {e}&quot;)
+</code></pre>
+<h4 id="13-_save_to_history">1.3 修改 <code>_save_to_history</code> 方法<a class="headerlink" href="#13-_save_to_history" title="連結到此標題">&para;</a></h4>
+<p><strong>接收 win_rate 和 profit_factor 參數，存入 params JSON：</strong></p>
+<pre><code class="language-python">def _save_to_history(
+    self,
+    instance_id: str,
+    strategy_type: str,
+    market: str,
+    params: Dict[str, Any],
+    result: Dict[str, Any],
+    years: float,
+    win_rate: float = None,          # ✅ 新增參數
+    profit_factor: float = None       # ✅ 新增參數
+):
+    try:
+        stats = result.get('stats', {})
+        return_series = result.get('return_series', [])
+
+        start_date = return_series[0]['date'] if return_series else None
+        end_date = return_series[-1]['date'] if return_series else None
+
+        # 🔧 TEMPORARY: Store win_rate and profit_factor in params JSON
+        # This avoids database schema changes while maintaining functionality
+        enhanced_params = params.copy()
+        if win_rate is not None:
+            enhanced_params['_win_rate'] = win_rate
+        if profit_factor is not None:
+            enhanced_params['_profit_factor'] = profit_factor
+
+        # Save with enhanced params and stats
+        await history_service.save_backtest_result(
+            conn=fresh_conn,
+            strategy_type=strategy_type,
+            strategy_name=f&quot;{instance_id} (auto-cached)&quot;,
+            market=market,
+            params=enhanced_params,  # ✅ 使用增強的 params
+            stats={
+                'total_return': stats.get('total_return'),
+                'cagr': stats.get('cagr'),
+                'mdd': stats.get('mdd'),
+                'sharpe': stats.get('sharpe'),
+                'volatility': stats.get('volatility'),
+                'win_rate': win_rate,            # ✅ 傳遞給保存
+                'profit_factor': profit_factor   # ✅ 傳遞給保存
+            },
+            backtest_years=int(years),
+            start_date=start_date or '',
+            end_date=end_date or '',
+            notes=f&quot;Auto-saved by StatsCacheService for {market} ({years}Y)&quot;
+        )
+</code></pre>
+<h3 id="2-history_servicepy">2. history_service.py 修改<a class="headerlink" href="#2-history_servicepy" title="連結到此標題">&para;</a></h3>
+<h4 id="21">2.1 新增輔助函數<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h4>
+<p><strong>從 params JSON 中提取指標：</strong></p>
+<pre><code class="language-python">def _extract_metric_from_params(params: Dict[str, Any], metric_key: str, fallback: Any = None) -&gt; Any:
+    &quot;&quot;&quot;
+    Extract a metric from params JSON if database column doesn't exist.
+
+    Temporary solution for win_rate and profit_factor storage
+    without modifying database schema.
+
+    Args:
+        params: Parameters dictionary (JSON)
+        metric_key: Key to extract (e.g., '_win_rate', '_profit_factor')
+        fallback: Default value if key not found
+
+    Returns:
+        Extracted value or fallback
+    &quot;&quot;&quot;
+    if params and isinstance(params, dict):
+        return params.get(metric_key, fallback)
+    return fallback
+</code></pre>
+<h4 id="22-list_backtest_history">2.2 修改 <code>list_backtest_history</code> 方法<a class="headerlink" href="#22-list_backtest_history" title="連結到此標題">&para;</a></h4>
+<p><strong>從 params JSON 中提取 win_rate 和 profit_factor（如果數據庫欄位不存在）：</strong></p>
+<pre><code class="language-python">async def list_backtest_history(
+    conn: duckdb.DuckDBPyConnection,
+    strategy_type: Optional[str] = None,
+    market: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0
+) -&gt; Dict[str, Any]:
+    # ... 查詢邏輯 ...
+
+    records = []
+    for _, row in result.iterrows():
+        params_dict = json.loads(row['params']) if row['params'] else {}
+
+        # Extract win_rate: try database column first, fallback to params
+        win_rate = _clean_float(row.get('win_rate'))
+        if win_rate is None:
+            win_rate = _extract_metric_from_params(params_dict, '_win_rate')
+
+        # Extract profit_factor: try database column first, fallback to params
+        profit_factor = _clean_float(row.get('profit_factor'))
+        if profit_factor is None:
+            profit_factor = _extract_metric_from_params(params_dict, '_profit_factor')
+
+        record = {
+            # ... 其他欄位 ...
+            &quot;win_rate&quot;: win_rate,
+            &quot;profit_factor&quot;: profit_factor
+        }
+        records.append(record)
+
+    return {&quot;records&quot;: records, &quot;count&quot;: len(records), &quot;total&quot;: total, &quot;offset&quot;: offset, &quot;limit&quot;: limit}
+</code></pre>
+<h4 id="23-get_backtest_by_id">2.3 修改 <code>get_backtest_by_id</code> 方法<a class="headerlink" href="#23-get_backtest_by_id" title="連結到此標題">&para;</a></h4>
+<p><strong>使用相同的邏輯提取 win_rate 和 profit_factor：</strong></p>
+<pre><code class="language-python">async def get_backtest_by_id(
+    conn: duckdb.DuckDBPyConnection,
+    record_id: int
+) -&gt; Optional[Dict[str, Any]]:
+    result = conn.execute(&quot;&quot;&quot;...&quot;&quot;&quot;, [record_id]).fetchone()
+
+    if not result:
+        return None
+
+    params_dict = json.loads(result[4]) if result[4] else {}
+
+    # Extract win_rate: try database column first, fallback to params
+    win_rate = _clean_float(result[15])
+    if win_rate is None:
+        win_rate = _extract_metric_from_params(params_dict, '_win_rate')
+
+    # Extract profit_factor: try database column first, fallback to params
+    profit_factor = _clean_float(result[16])
+    if profit_factor is None:
+        profit_factor = _extract_metric_from_params(params_dict, '_profit_factor')
+
+    return {
+        # ... 其他欄位 ...
+        &quot;win_rate&quot;: win_rate,
+        &quot;profit_factor&quot;: profit_factor
+    }
+</code></pre>
+<h4 id="24-compare_backtests">2.4 修改 <code>compare_backtests</code> 方法<a class="headerlink" href="#24-compare_backtests" title="連結到此標題">&para;</a></h4>
+<p><strong>使用相同的邏輯提取 win_rate 和 profit_factor：</strong></p>
+<pre><code class="language-python">async def compare_backtests(
+    conn: duckdb.DuckDBPyConnection,
+    record_ids: List[int]
+) -&gt; List[Dict[str, Any]]:
+    # ... 查詢邏輯 ...
+
+    for _, row in result.iterrows():
+        params_dict = json.loads(row['params']) if row['params'] else {}
+
+        # Extract win_rate: try database column first, fallback to params
+        win_rate = _clean_float(row.get('win_rate'))
+        if win_rate is None:
+            win_rate = _extract_metric_from_params(params_dict, '_win_rate')
+
+        # Extract profit_factor: try database column first, fallback to params
+        profit_factor = _clean_float(row.get('profit_factor'))
+        if profit_factor is None:
+            profit_factor = _extract_metric_from_params(params_dict, '_profit_factor')
+
+        record = {
+            # ... 其他欄位 ...
+            &quot;win_rate&quot;: win_rate,
+            &quot;profit_factor&quot;: profit_factor
+        }
+        records.append(record)
+
+    return records
+</code></pre>
+<hr />
+<h2 id="_8">📊 修改文件清單<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>修改內容</th>
+<th>行數變更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>services/stats_cache_service.py</code></td>
+<td>添加 profit_factor 計算、傳遞參數、存入 params JSON</td>
+<td>~30 行</td>
+</tr>
+<tr>
+<td><code>services/history_service.py</code></td>
+<td>添加輔助函數、修改三個讀取方法</td>
+<td>~40 行</td>
+</tr>
+</tbody>
+</table>
+<p><strong>總計：</strong> ~70 行代碼變更</p>
+<hr />
+<h2 id="_9">🚀 使用說明<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h2>
+<h3 id="_10">新數據（修改後）<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>執行回測</li>
+<li>win_rate 和 profit_factor 會自動計算並保存到 params JSON</li>
+<li>前端立即顯示這兩個指標</li>
+</ol>
+<h3 id="_11">舊數據（修改前）<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>params JSON 中沒有 <code>_win_rate</code> 和 <code>_profit_factor</code></li>
+<li>讀取時返回 <code>None</code></li>
+<li>前端顯示 "-"（已經有這個邏輯）</li>
+</ol>
+<h3 id="_12">未來升級<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>如果需要應用遷移 005（添加數據庫欄位）</li>
+<li>無需修改讀取邏輯（已經優先使用數據庫欄位）</li>
+<li>平滑過渡，無數據遷移問題</li>
+</ol>
+<hr />
+<h2 id="_13">✅ 測試驗證<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="_14">語法檢查<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-bash">cd /Users/charlie/.openclaw/workspace/Dashboard/backend
+python3 -m py_compile services/stats_cache_service.py services/history_service.py
+</code></pre>
+<p>結果：✅ 通過</p>
+<h3 id="_15">功能測試（建議）<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>運行一個新的回測</li>
+<li>檢查 backtest_history 表中的 params JSON</li>
+<li>確認包含 <code>_win_rate</code> 和 <code>_profit_factor</code></li>
+<li>檢查前端 Backtest History 頁面是否正確顯示</li>
+</ol>
+<hr />
+<h2 id="_16">📝 備註<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h2>
+<h3 id="_17">為什麼不修改資料庫？<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<p>根據 SOUL.md 中的「數據庫修改的三重審查原則」：</p>
+<ol>
+<li><strong>優先級：非資料庫方案 &gt; 資料庫修改</strong></li>
+<li>✅ 找到了使用 params JSON 的替代方案</li>
+<li>
+<p>✅ 可以在不修改數據庫的情況下實現功能</p>
+</li>
+<li>
+<p><strong>必須滿足條件才考慮數據庫修改</strong></p>
+</li>
+<li>❌ 不是非動不可的核心功能需求</li>
+<li>
+<p>❌ 沒有用戶明確同意修改數據庫</p>
+</li>
+<li>
+<p><strong>記錄到記憶</strong></p>
+</li>
+<li>✅ 已記錄這次案例（2026-02-22）</li>
+<li>✅ 教訓：永遠先問「能否不改動資料庫」</li>
+</ol>
+<h3 id="_18">性能影響評估<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>JSON 解析開銷：</strong> 對於列表查詢（~400 條記錄），JSON 解析開銷可以忽略</li>
+<li><strong>查詢性能：</strong> 不影響，因為這些欄位不在 WHERE 或 ORDER BY 子句中</li>
+<li><strong>存儲空間：</strong> params JSON 中增加 2 個鍵值對，影響極小</li>
+</ul>
+<h3 id="_19">向後兼容性<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<p>讀取邏輯設計為：
+1. 優先從數據庫欄位讀取
+2. 如果數據庫欄位不存在或為 NULL，則從 params JSON 中提取
+3. 如果都沒有，返回 NULL（前端顯示 "-"）</p>
+<p>這意味著：
+- 未來應用遷移 005 後，無需修改讀取邏輯
+- 舊數據和新數據可以共存
+- 平滑過渡，無數據遷移問題</p>
+<hr />
+<h2 id="_20">🎯 總結<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h2>
+<h3 id="_21">✅ 方案優點<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>完全不需要修改資料庫架構</li>
+<li>立即可用，無需等待遷移</li>
+<li>代碼變更量小（~70 行）</li>
+<li>向後兼容，未來可以平滑切換</li>
+<li>符合最佳實踐原則</li>
+</ul>
+<h3 id="_22">⚠️ 方案限制<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>存儲在 JSON 中，無法直接用於 SQL 查詢條件</li>
+<li>需要額外的邏輯處理 JSON 解析</li>
+<li>不適合需要按 win_rate/profit_factor 排序或篩選的場景</li>
+</ul>
+<h3 id="_23">📌 建議<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>短期：使用此方案立即啟用功能</li>
+<li>長期：如果需要按 win_rate/profit_factor 排序或篩選，再考慮應用遷移 005</li>
+<li>監控：關注性能和用戶反饋，決定是否需要升級</li>
+</ol>
+<hr />
+<p><strong>最後更新：</strong> 2026-02-22 12:35 PM
+<strong>實施者：</strong> Charlie (Orchestrator)
+<strong>狀態：</strong> ✅ 完成，等待測試驗證</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

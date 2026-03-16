@@ -1,0 +1,3099 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git 開發模式整合報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Git 開發模式整合報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="git">Git 開發模式整合報告<a class="headerlink" href="#git" title="連結到此標題">&para;</a></h1>
+<p><strong>任務 ID:</strong> a004e
+<strong>分析者:</strong> Charlie Analyst
+<strong>狀態:</strong> completed
+<strong>時間戳:</strong> 2026-02-21T00:35:00+08:00
+<strong>輸入文件:</strong> a004a, a004b, a004c, a004d
+<strong>專案:</strong> Dashboard (/Users/charlie/Dashboard)</p>
+<hr />
+<h2 id="_1">執行摘要<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<p>本報告整合了 Dashboard 專案的 Git 提交歷史分析、重構計劃、分支策略與 CI/CD 分析，以及開發工具鏈分析，形成完整的 Git 開發模式文檔。專案採用 <strong>Sprint 模式開發</strong>、<strong>100% Conventional Commits 規範</strong>、<strong>漸進式遷移重構策略</strong>，具備<strong>完善的測試基礎設施</strong>（506 個測試，86% 通過率）和<strong>Docker 化部署流程</strong>，但缺少<strong>正式的 GitHub Actions CI/CD 流水線</strong>和<strong>明確的分支策略文檔</strong>。</p>
+<p><strong>關鍵發現：</strong>
+- ✅ <strong>提交規範嚴格：</strong> 100% 遵循 Conventional Commits 規範，子類型使用率 12%，任務標記使用率 16%
+- ✅ <strong>重構策略成熟：</strong> 6 個主要重構文檔，採用漸進式遷移、向後兼容、工廠模式、介面抽象
+- ✅ <strong>測試基礎完善：</strong> pytest + vitest + cypress，多層次測試策略，整體覆蓋率 60%
+- ✅ <strong>工具鏈完整：</strong> 容器化部署、自動化腳本、pre-commit hooks、完整的開發/測試/部署流程
+- ⚠️ <strong>CI/CD 缺失：</strong> 無 GitHub Actions workflows，依賴手動部署腳本
+- ⚠️ <strong>分支策略未定義：</strong> 無分支策略文檔、PR 模板、代碼審查流程文檔</p>
+<hr />
+<h2 id="1-git">1. Git 開發模式總結<a class="headerlink" href="#1-git" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 提交模式和頻率<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<h4 id="50">提交類型分佈（最近 50 次提交）<a class="headerlink" href="#50" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>數量</th>
+<th>比例</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>feat</td>
+<td>17</td>
+<td>34.0%</td>
+<td>新功能開發，佔比最高</td>
+</tr>
+<tr>
+<td>fix</td>
+<td>12</td>
+<td>24.0%</td>
+<td>錯誤修復，第二大類型</td>
+</tr>
+<tr>
+<td>refactor</td>
+<td>8</td>
+<td>16.0%</td>
+<td>代碼重構</td>
+</tr>
+<tr>
+<td>docs</td>
+<td>5</td>
+<td>10.0%</td>
+<td>文檔更新</td>
+</tr>
+<tr>
+<td>test</td>
+<td>3</td>
+<td>6.0%</td>
+<td>測試相關</td>
+</tr>
+<tr>
+<td>debug</td>
+<td>2</td>
+<td>4.0%</td>
+<td>調試記錄</td>
+</tr>
+<tr>
+<td>feat(subtype)</td>
+<td>3</td>
+<td>6.0%</td>
+<td>帶子類型的新功能</td>
+</tr>
+</tbody>
+</table>
+<p><strong>總計：</strong> 50 次提交</p>
+<h4 id="_2">開發節奏特徵<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h4>
+<p><strong>日期分佈：</strong>
+- <strong>2026-02-05:</strong> 14 次提交 - 高強度開發日
+- <strong>2026-02-06:</strong> 34 次提交 - 超高強度開發日（近 24 小時連續開發）
+- <strong>2026-02-07:</strong> 1 次提交 - 維護日
+- <strong>2026-02-19:</strong> 1 次提交 - 維護日</p>
+<p><strong>特點：</strong>
+- 集中式 Sprint 開發：96% 的提交集中在 2 天內
+- 平均提交頻率：約 42 分鐘/次提交（高峰時段）
+- 間歇性維護：非 Sprint 日期偶爾有維護提交</p>
+<p><strong>時間段偏好：</strong>
+- 晚間開發 (18:00-24:00)：60%，主要開發時段
+- 下午開發 (12:00-18:00)：28%，次要開發時段
+- 深夜開發 (00:00-06:00)：10%，深夜調試/趕工
+- 上午開發 (06:00-12:00)：2%，最少</p>
+<h4 id="_3">開發週期模式<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h4>
+<p><strong>三階段 Sprint 模式：</strong></p>
+<pre><code>Phase 1: 基礎架構 (2/5) - 14 commits
+  ├── 策略開發 (volatility filter, ATR Breakout)
+  ├── SSoT 註冊表實現
+  └── 測試套件構建
+
+Phase 2: 系統完善 (2/6) - 34 commits
+  ├── 架構重構 (REF-001 到 REF-005)
+  ├── 代碼質量提升 (ARCH-001 到 ARCH-008)
+  ├── 功能完善 (Market Score 2.0, UI 優化)
+  └── 文檔更新
+
+Phase 3: 維護階段 (2/7, 2/19) - 2 commits
+  ├── 部署配置更新
+  └── 新功能添加 (SKTASR 指標)
+</code></pre>
+<h4 id="_4">開發質量指標<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>數值</th>
+<th>評估</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>重構率</td>
+<td>16% (8/50)</td>
+<td>✅ 積極的代碼維護</td>
+</tr>
+<tr>
+<td>測試覆蓋</td>
+<td>6% (3/50)</td>
+<td>⚠️ 有待提升（建議 15-20%）</td>
+</tr>
+<tr>
+<td>文檔更新</td>
+<td>10% (5/50)</td>
+<td>✅ 適中</td>
+</tr>
+<tr>
+<td>調試比例</td>
+<td>4% (2/50)</td>
+<td>✅ 代碼質量較好</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-conventional-commits">1.2 Conventional Commits 規範說明<a class="headerlink" href="#12-conventional-commits" title="連結到此標題">&para;</a></h3>
+<h4 id="_5">規範遵循情況<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<p><strong>遵循率：</strong> 100% ✅</p>
+<p>所有提交都嚴格遵循 <code>type: description</code> 格式，格式一致性極高。</p>
+<h4 id="_6">提交類型定義<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>用途</th>
+<th>使用頻率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat</code></td>
+<td>新功能開發</td>
+<td>34%</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>Bug 修復</td>
+<td>24%</td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>代碼重構（不改變功能）</td>
+<td>16%</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>文檔更新</td>
+<td>10%</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>測試相關</td>
+<td>6%</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>調試記錄</td>
+<td>4%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_7">子類型使用模式<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<p><strong>常用子類型：</strong>
+- <code>feat(performance)</code> - 性能相關功能
+- <code>feat(models)</code> - 數據模型
+- <code>feat(ssot)</code> - 單一數據源
+- <code>feat(strategies)</code> - 策略相關
+- <code>feat(ui)</code> - 用戶界面
+- <code>refactor(code-quality)</code> - 代碼質量
+- <code>fix(technical)</code> - 技術性修復</p>
+<p><strong>子類型使用率：</strong> 6/50 = 12%，顯示有系統性的模塊化開發</p>
+<h4 id="_8">任務標記使用<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<p><strong>任務標記類型：</strong>
+- <code>ARCH-001</code> 到 <code>ARCH-008</code> - 架構任務
+- <code>Q4-#18</code> - 季度任務
+- <code>REF-001</code> 到 <code>REF-005</code> - 重構任務</p>
+<p><strong>標記使用率：</strong> 8/50 = 16%，顯示有結構化的任務管理</p>
+<h3 id="13">1.3 提交信息格式和最佳實踐<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<h4 id="_9">標準格式<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<pre><code>&lt;type&gt;(&lt;scope&gt;): &lt;description&gt;
+
+[optional body]
+
+[optional footer]
+</code></pre>
+<h4 id="_10">實際範例<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<p><strong>簡短描述（20-40字符）：</strong></p>
+<pre><code class="language-bash">feat: add momentum indicator
+fix: correct API timeout
+docs: update deployment docs
+</code></pre>
+<p><strong>中等長度（41-60字符）：</strong></p>
+<pre><code class="language-bash">feat(performance): implement database operations for daily scheduler
+fix(system): remove duplicate API prefix from system routers
+</code></pre>
+<p><strong>帶子類型：</strong></p>
+<pre><code class="language-bash">feat(ssot): add 5 SSoT registries with comprehensive metadata
+refactor(code-quality): clean debug code from production (ARCH-001)
+fix(technical): handle pandas Series in volatility reduction
+</code></pre>
+<p><strong>帶任務標記：</strong></p>
+<pre><code class="language-bash">feat(tests): add contract tests for critical services (ARCH-005)
+refactor: complete REF-001 through REF-005 plus pytest improvements
+</code></pre>
+<h4 id="_11">提交信息長度分佈<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>長度範圍</th>
+<th>數量</th>
+<th>比例</th>
+<th>特點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>短描述 (20-40字符)</td>
+<td>28</td>
+<td>56%</td>
+<td>簡潔明瞭</td>
+</tr>
+<tr>
+<td>中等長度 (41-60字符)</td>
+<td>15</td>
+<td>30%</td>
+<td>信息完整</td>
+</tr>
+<tr>
+<td>長描述 (61+字符)</td>
+<td>7</td>
+<td>14%</td>
+<td>詳細說明</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_12">最佳實踐建議<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<p><strong>提交前檢查清單：</strong>
+1. ✅ 遵循 Conventional Commits 格式
+2. ✅ 使用正確的 type（feat/fix/refactor/docs/test）
+3. ✅ 描述簡潔明確（50 字符以內主標題）
+4. ✅ 相關功能使用子類型分類
+5. ✅ 關聯任務標記（如 ARCH-001）
+6. ✅ 單次提交範圍適中（不超過 300-500 行）</p>
+<p><strong>提交信息撰寫原則：</strong>
+- 使用命令語氣（如 "add" 而非 "added" 或 "adds"）
+- 首字母小寫
+- 結尾不加句點
+- 描述改變了什麼，而不是為什麼改變
+- 避免使用 "fix bug" 這種模糊描述，說明修復了什麼 bug</p>
+<p><strong>壞例子 vs 好例子：</strong></p>
+<p>❌ 壞例子：</p>
+<pre><code class="language-bash">fix
+update stuff
+doing some refactoring
+</code></pre>
+<p>✅ 好例子：</p>
+<pre><code class="language-bash">fix: correct indentation errors in module loader
+refactor: break down monolithic files into modular components
+feat: add volatility-based position size reduction
+</code></pre>
+<hr />
+<h2 id="2-refactoring-plan">2. Refactoring Plan 分析<a class="headerlink" href="#2-refactoring-plan" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 所有重構計劃概覽<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<h4 id="_13">重構文檔清單<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>文檔</th>
+<th>狀態</th>
+<th>類別</th>
+<th>主要內容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>React Query 遷移計畫</td>
+<td>✅ Adopted</td>
+<td>Frontend</td>
+<td>遷移到 TanStack Query，減少代碼 30-70%</td>
+</tr>
+<tr>
+<td>2</td>
+<td>符號類型統一</td>
+<td>✅ Complete</td>
+<td>Backend</td>
+<td>統一 symbol 類型處理，11 tests passing</td>
+</tr>
+<tr>
+<td>3</td>
+<td>策略系統實作架構</td>
+<td>✅ Ready</td>
+<td>Backend</td>
+<td>統一策略系統，分類實現計劃</td>
+</tr>
+<tr>
+<td>4</td>
+<td>複合策略系統整合指南</td>
+<td>✅ Ready</td>
+<td>Backend</td>
+<td>複合和對沖策略整合，5 種回測模式</td>
+</tr>
+<tr>
+<td>5</td>
+<td>統一策略引擎設計</td>
+<td>✅ Design</td>
+<td>Backend</td>
+<td>IStrategy + VectorBT 統一，4-5 天預估</td>
+</tr>
+<tr>
+<td>6</td>
+<td>期貨多策略組合回測系統</td>
+<td>✅ Complete</td>
+<td>New Feature</td>
+<td>期貨多策略回測，102 tests passing</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_14">重構範圍分類<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<p><strong>Frontend Refactoring:</strong>
+- React Query Migration Plan：從 requestProtection.js 遷移到 React Query</p>
+<p><strong>Backend Architecture:</strong>
+- Symbol Type Unification：統一 symbol 類型處理
+- Strategy System Implementation：統一策略系統架構
+- Unified Strategy Engine Design：新舊策略系統統一
+- Composite Strategy Integration Guide：複合策略整合</p>
+<p><strong>New Feature Implementation:</strong>
+- Futures Multi-Strategy Backtest System：期貨多策略回測</p>
+<h3 id="22">2.2 重構策略和方法<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<h4 id="1progressive-migration">策略 1：漸進式遷移（Progressive Migration）<a class="headerlink" href="#1progressive-migration" title="連結到此標題">&para;</a></h4>
+<p><strong>應用範圍：</strong> React Query、Strategy System、Unified Engine</p>
+<p><strong>核心原則：</strong>
+1. 非破壞性變更 - 新舊代碼共存
+2. 優先級驅動 - 核心/高流量組件優先遷移
+3. 漸進式替換 - 不強制一次性遷移
+4. 向後兼容 - 舊 API 暫時保留</p>
+<p><strong>執行步驟：</strong></p>
+<pre><code class="language-mermaid">Phase 1: Core/Priority → Phase 2: Expansion → Phase 3: Completion
+</code></pre>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python"># 新舊共存時期
+def get_futures_spec(symbol: FuturesSymbol):
+    # 舊函數，發出警告但仍然工作
+    warnings.warn(&quot;Deprecated, use get_spec_for_symbol&quot;, DeprecationWarning)
+    return _get_spec_impl(symbol)
+
+def get_spec_for_symbol(symbol: Union[FuturesSymbol, str]):
+    # 新函數，統一入口點
+    return _get_spec_impl(symbol)
+</code></pre>
+<h4 id="2factory-pattern">策略 2：工廠模式（Factory Pattern）<a class="headerlink" href="#2factory-pattern" title="連結到此標題">&para;</a></h4>
+<p><strong>應用範圍：</strong> Strategy System, Futures Backtest, Composite Integration</p>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python">class StrategyFactory:
+    _strategies = {}
+
+    @classmethod
+    def register(cls, strategy_type: str, strategy_class: Type[IStrategy]):
+        cls._strategies[strategy_type] = strategy_class
+
+    @classmethod
+    def create(cls, strategy_type: str, params: Dict) -&gt; IStrategy:
+        strategy_class = cls._strategies.get(strategy_type)
+        if not strategy_class:
+            raise ValueError(f&quot;Unknown strategy type: {strategy_type}&quot;)
+        return strategy_class(**params)
+
+# 使用裝飾器自動註冊
+@StrategyFactory.register(&quot;rsi&quot;)
+class RSIStrategy(IStrategy):
+    def __init__(self, period: int = 14, **kwargs):
+        super().__init__(period=period, **kwargs)
+        # ...
+</code></pre>
+<p><strong>優勢：</strong>
+- 開閉原則（Open-Closed Principle）：對擴展開放，對修改封閉
+- 動態策略註冊：新策略無需修改引擎代碼
+- 易於測試：可輕鬆替換策略實現</p>
+<h4 id="3interface-abstraction">策略 3：介面抽象（Interface Abstraction）<a class="headerlink" href="#3interface-abstraction" title="連結到此標題">&para;</a></h4>
+<p><strong>應用範圍：</strong> Strategy System, Unified Engine</p>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python">class IStrategy(ABC):
+    @abstractmethod
+    def generate_signals(self, context: StrategyContext) -&gt; List[Signal]:
+        pass
+
+    @abstractmethod
+    def calculate_target_weights(self, context: StrategyContext) -&gt; Dict[str, float]:
+        pass
+
+    @abstractmethod
+    def get_metadata(self) -&gt; StrategyMetadata:
+        pass
+</code></pre>
+<p><strong>優勢：</strong>
+- 所有策略類型一致的 API
+- 可用 mock 實現進行測試
+- 易於替換實現</p>
+<h4 id="4adapter-pattern">策略 4：適配器模式（Adapter Pattern）<a class="headerlink" href="#4adapter-pattern" title="連結到此標題">&para;</a></h4>
+<p><strong>應用範圍：</strong> Composite Integration, Unified Engine</p>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python"># SignalAdapter: IStrategy signals → VectorBT format
+class SignalAdapter:
+    @staticmethod
+    def signals_to_vectorbt(ohlcv_index: pd.DatetimeIndex,
+                           signals_by_date: Dict[date, List[Signal]]) -&gt; pd.Series:
+        &quot;&quot;&quot;Convert IStrategy signals to VectorBT format&quot;&quot;&quot;
+        entries = []
+        for date, signals in signals_by_date.items():
+            for signal in signals:
+                if signal.action == &quot;BUY&quot;:
+                    entries.append((date, 1))
+                elif signal.action == &quot;SELL&quot;:
+                    entries.append((date, -1))
+        return pd.Series([v for d, v in entries],
+                         index=pd.DatetimeIndex([d for d, v in entries]))
+
+# FuturesResultAdapter: futures results → performance module format
+class FuturesResultAdapter:
+    def to_daily_metrics_input(self, futures_result: FuturesResult) -&gt; Dict:
+        &quot;&quot;&quot;Convert futures results to performance module format&quot;&quot;&quot;
+        return {
+            &quot;equity_curve&quot;: futures_result.equity_curve,
+            &quot;returns&quot;: futures_result.returns,
+            &quot;benchmark&quot;: futures_result.benchmark_returns
+        }
+</code></pre>
+<p><strong>優勢：</strong>
+- 橋接不相容的介面
+- 重用現有模組無需修改
+- 清晰的關注點分離</p>
+<h4 id="5mixed-architecture">策略 5：混合架構（Mixed Architecture）<a class="headerlink" href="#5mixed-architecture" title="連結到此標題">&para;</a></h4>
+<p><strong>應用範圍：</strong> Futures Backtest, Composite Integration</p>
+<p><strong>原則：</strong> 專門化組件 + 共享模組</p>
+<pre><code>Specialized: Futures backtest engine (handles multipliers, margins)
+    + Shared: Performance/Analytics modules (reused)
+</code></pre>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python"># 專門化：期貨回測引擎
+class FuturesBacktestEngine:
+    def __init__(self):
+        self.multiplier_lookup = MultiplierRegistry()
+        self.margin_calculator = MarginCalculator()
+
+    def run_backtest(self, strategies: List[IFuturesStrategy]):
+        # 處理期貨特定邏輯（合約乘數、保證金）
+        pass
+
+# 共享：性能分析模組（重用）
+class PerformanceAnalyzer:
+    def analyze(self, equity_curve: pd.Series, **kwargs):
+        # 通用性能分析，適用於所有回測結果
+        pass
+</code></pre>
+<p><strong>優勢：</strong>
+- 正確處理領域特定邏輯
+- 避免重複造輪子
+- 保持系統一致性</p>
+<h3 id="23">2.3 重構最佳實踐<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<h4 id="1backward-compatibility">最佳實踐 1：向後兼容（Backward Compatibility）<a class="headerlink" href="#1backward-compatibility" title="連結到此標題">&para;</a></h4>
+<p><strong>模式：</strong>
+1. 創建新的並行實現
+2. 標記舊實現為 deprecated 並發出警告
+3. 漸進遷移使用
+4. 在未來版本中移除棄用代碼（如 v2.0）</p>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python">def _deprecated(message: str):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@_deprecated(&quot;get_futures_spec is deprecated, use get_spec_for_symbol&quot;)
+def get_futures_spec(symbol: FuturesSymbol):
+    return _get_spec_impl(symbol)
+</code></pre>
+<p><strong>時間線：</strong>
+- 立即：舊函數仍然工作但發出警告
+- v1.6（2 週）：開始替換調用點
+- v2.0（1 個月）：移除棄用函數</p>
+<h4 id="2test-driven-refactoring">最佳實踐 2：測試驅動重構（Test-Driven Refactoring）<a class="headerlink" href="#2test-driven-refactoring" title="連結到此標題">&para;</a></h4>
+<p><strong>方法：</strong>
+1. 先編寫全面的測試
+2. 實施變更
+3. 確保所有測試通過
+4. 添加回歸測試</p>
+<p><strong>覆蓋率範例：</strong>
+- Symbol Type Unification：11 個測試（Enum/string 輸入，棄用警告）
+- Futures Backtest：102 個測試（4 個階段，101 通過）
+- React Query：功能驗證測試</p>
+<p><strong>測試金字塔：</strong></p>
+<pre><code>          ┌──────────────┐
+          │   E2E Tests  │  關鍵流程，數量少
+          ├──────────────┤
+          │ Integration  │  API 層級，中等數量
+          ├──────────────┤
+          │  Unit Tests  │  核心邏輯，數量多
+          └──────────────┘
+</code></pre>
+<h4 id="3configuration-driven-design">最佳實踐 3：配置驅動設計（Configuration-Driven Design）<a class="headerlink" href="#3configuration-driven-design" title="連結到此標題">&para;</a></h4>
+<p><strong>模式：</strong> 外部化參數，允許運行時配置</p>
+<p><strong>實例：</strong></p>
+<pre><code class="language-python"># React Query: Cache presets
+CACHE_PRESETS = {
+    &quot;static&quot;: {&quot;staleTime&quot;: 3600000, &quot;gcTime&quot;: 86400000},  # 1h stale, 1d gc
+    &quot;dynamic&quot;: {&quot;staleTime&quot;: 30000, &quot;gcTime&quot;: 300000}      # 30s stale, 5m gc
+}
+
+# Futures Backtest: Capital management mode
+CAPITAL_MANAGEMENT_MODES = {
+    &quot;constant&quot;: ConstantExposure,
+    &quot;floating&quot;: FloatingExposure
+}
+
+# SRS Scoring: Configurable 5-dimension weights
+SRS_WEIGHTS = {
+    &quot;return&quot;: 0.30,
+    &quot;volatility&quot;: 0.20,
+    &quot;max_drawdown&quot;: 0.25,
+    &quot;sharpe_ratio&quot;: 0.15,
+    &quot;win_rate&quot;: 0.10
+}
+</code></pre>
+<p><strong>優勢：</strong>
+- 易於實驗和 A/B 測試
+- 環境特定配置
+- 參數調優無需重啟</p>
+<h4 id="4clear-documentation">最佳實踐 4：清晰的文檔（Clear Documentation）<a class="headerlink" href="#4clear-documentation" title="連結到此標題">&para;</a></h4>
+<p><strong>每個重構計劃包括：</strong>
+1. <strong>決策記錄（Decision Records）</strong> - 決定了什麼和為什麼
+2. <strong>替代方案分析（Alternative Analysis）</strong> - 考慮的選項和權衡
+3. <strong>實施步驟（Implementation Steps）</strong> - 分階段方法
+4. <strong>代碼範例（Code Examples）</strong> - Before/After 比較
+5. <strong>測試策略（Testing Strategy）</strong> - 如何驗證
+6. <strong>風險評估（Risk Assessment）</strong> - 潛在問題和緩解措施</p>
+<h4 id="5api-api-versioning-strategy">最佳實踐 5：API 版本化策略（API Versioning Strategy）<a class="headerlink" href="#5api-api-versioning-strategy" title="連結到此標題">&para;</a></h4>
+<p><strong>模式：</strong> 新端點使用統一路由，舊端點保留</p>
+<pre><code>New: /api/backtest/unified (auto-selects best mode)
+Old: /api/backtest/run (legacy, forwards internally)
+</code></pre>
+<p><strong>優勢：</strong>
+- 現有客戶端零破壞性變更
+- 漸進採用新功能
+- 未來棄用路徑清晰</p>
+<h3 id="24">2.4 重構工作流程總結<a class="headerlink" href="#24" title="連結到此標題">&para;</a></h3>
+<h4 id="_15">標準重構生命週期<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. 發現與分析 (Discovery &amp; Analysis)                        │
+│  - 識別問題（如高維護成本）                                 │
+│  - 探索替代方案                                             │
+│  - 用權衡記錄決策                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. 設計與規劃 (Design &amp; Planning)                          │
+│  - 定義階段（P0, P1, P2）                                   │
+│  - 指定依賴關係（DAG）                                      │
+│  - 預估工作量和時間線                                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 基礎建設 (Phase 1: Foundation)                          │
+│  - 構建核心組件                                             │
+│  - 編寫全面的測試                                           │
+│  - 建立向後兼容層                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 漸進遷移 (Phase 2+: Incremental Migration)              │
+│  - 遷移高優先級組件                                         │
+│  - 驗證結果（比較測試）                                     │
+│  - 標記舊代碼為 deprecated                                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 驗證與清理 (Validation &amp; Cleanup)                       │
+│  - 回歸測試                                                 │
+│  - 性能驗證                                                 │
+│  - 文檔更新                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 完成與棄用 (Completion &amp; Deprecation)                   │
+│  - 移除棄用代碼（按計劃）                                   │
+│  - 最終報告                                                 │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="_16">常見模式<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h4>
+<p><strong>優先級定義：</strong>
+- P0：核心功能，阻塞性問題
+- P1：重要功能，增強分析
+- P2：擴展功能</p>
+<p><strong>依賴管理：</strong>
+- 強依賴：Phase 2 要求 Phase 1 完成
+- 弱依賴：Phase 5 可與 Phase 1-2 並行運行</p>
+<p><strong>驗證標準：</strong>
+- 功能正確性（如 RSI 計算與 TradingView 誤差 &lt; 1%）
+- 性能基準（如 1000 點 &lt; 100ms）
+- 測試覆蓋率（&gt; 80% 單元測試）</p>
+<hr />
+<h2 id="3">3. 分支策略和工作流程<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 分支結構和命名規範<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<h4 id="_17">當前狀態<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h4>
+<p><strong>未發現的配置文件：</strong>
+- ❌ <code>.github/PULL_REQUEST_TEMPLATE.md</code>
+- ❌ <code>.github/workflows/*.yml</code>
+- ❌ <code>CONTRIBUTING.md</code>
+- ❌ <code>WORKFLOW.md</code>
+- ❌ <code>CODE_REVIEW.md</code></p>
+<p><strong>推斷的分支策略：</strong></p>
+<table>
+<thead>
+<tr>
+<th>分支類型</th>
+<th>推斷命名</th>
+<th>用途</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主分支</td>
+<td><code>main</code></td>
+<td>生產代碼</td>
+<td>DEPLOYMENT.md 中提到推送到 main</td>
+</tr>
+<tr>
+<td>開發分支</td>
+<td><code>develop</code>（可能）</td>
+<td>開發整合</td>
+<td>未明確確認</td>
+</tr>
+<tr>
+<td>功能分支</td>
+<td><code>feature/*</code></td>
+<td>新功能開發</td>
+<td>無證據支持</td>
+</tr>
+<tr>
+<td>修補分支</td>
+<td><code>hotfix/*</code></td>
+<td>緊急修復</td>
+<td>無證據支持</td>
+</tr>
+<tr>
+<td>發布分支</td>
+<td><code>release/*</code></td>
+<td>版本發布準備</td>
+<td>無證據支持</td>
+</tr>
+</tbody>
+</table>
+<h4 id="git-flow">推薦的分支策略（Git Flow）<a class="headerlink" href="#git-flow" title="連結到此標題">&para;</a></h4>
+<pre><code>main (生產)
+  ↑
+  develop (開發整合)
+  ↑
+  ├── feature/* (功能分支)
+  ├── hotfix/* (緊急修復)
+  ├── release/* (發布準備)
+  └── bugfix/* (一般修復)
+</code></pre>
+<h4 id="_18">分支命名規範<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h4>
+<p><strong>格式：</strong> <code>&lt;type&gt;/&lt;short-description&gt;</code></p>
+<p><strong>類型定義：</strong>
+- <code>feature/*</code> - 新功能開發
+- <code>fix/*</code> - Bug 修復
+- <code>hotfix/*</code> - 緊急生產修復
+- <code>refactor/*</code> - 代碼重構
+- <code>docs/*</code> - 文檔更新
+- <code>test/*</code> - 測試相關
+- <code>release/*</code> - 版本發布準備</p>
+<p><strong>命名範例：</strong></p>
+<pre><code class="language-bash">feature/add-momentum-indicator
+fix/data-fetching-timeout
+hotfix/production-deployment
+refactor/restructure-database-layer
+docs/update-readme
+test/add-contract-tests
+release/v1.0.0
+</code></pre>
+<h4 id="_19">分支保護規則（建議）<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h4>
+<p><strong>對於 <code>main</code> 分支：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ✅ 要求分支是最新的（合併前更新）
+- ✅ 限制誰可以推送（僅維護者）
+- ✅ 要求線性歷史（禁止合併提交）</p>
+<p><strong>對於 <code>develop</code> 分支：</strong>
+- ✅ 要求 PR 檢查通過
+- ✅ 要求狀態檢查通過（CI workflow）
+- ✅ 要求代碼審查（至少 1 名審查者批准）
+- ❌ 不限制誰可以推送（開發者可推送）</p>
+<h3 id="32-pull-request">3.2 Pull Request 流程<a class="headerlink" href="#32-pull-request" title="連結到此標題">&para;</a></h3>
+<h4 id="pr">推薦的 PR 模板<a class="headerlink" href="#pr" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-markdown">## Pull Request 模板
+
+### 描述
+簡短描述此 PR 的目的和範圍。
+
+### 變更類型
+- [ ] 新功能 (feat)
+- [ ] Bug 修復 (fix)
+- [ ] 性能優化 (performance)
+- [ ] 重構 (refactor)
+- [ ] 文檔更新 (docs)
+- [ ] 測試相關 (test)
+- [ ] 調試記錄 (debug)
+
+### 相關 Issue
+關聯 Issue: #&lt;issue_number&gt;
+
+### 變更摘要
+- [ ] 前端變更
+- [ ] 後端變更
+- [ ] 資料庫變更
+- [ ] Docker 配置變更
+
+### 測試檢查清單
+- [ ] 前端已編譯 (`cd frontend &amp;&amp; npm run build`)
+- [ ] 後端測試通過 (`cd backend &amp;&amp; pytest -m &quot;not slow&quot;`)
+- [ ] 前端測試通過 (`cd frontend &amp;&amp; npm test -- --run`)
+- [ ] E2E 測試通過（如適用）
+- [ ] 測試覆蓋率未下降
+- [ ] 代碼 lint 通過（`npm run lint`, `ruff check`）
+
+### 部署檢查清單
+- [ ] Docker 鏡像可構建
+- [ ] 本地 Docker 測試通過
+- [ ] 環境變數已更新（如需要）
+
+### 截圖 / 演示
+（如適用，添加 UI 變更的截圖）
+
+### 審查者
+@reviewer1 @reviewer2
+</code></pre>
+<h4 id="pr_1">PR 創建指南<a class="headerlink" href="#pr_1" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 保持 PR 小而專注：</strong>
+- 每個 PR 一個功能
+- 不超過 300-500 行變更
+- 清晰的標題和描述</p>
+<p><strong>2. 完善的描述：</strong>
+- 為什麼需要這個變更？
+- 做了什麼變更？
+- 如何測試？
+- 相關的 Issue 或文檔</p>
+<p><strong>3. 自審：</strong>
+- 在創建 PR 之前，自我審查代碼
+- 確保測試通過
+- 確保構建成功</p>
+<h3 id="33">3.3 代碼審查流程<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<h4 id="_20">推薦的審查標準<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h4>
+<p><strong>功能正確性：</strong>
+- [ ] 功能符合需求
+- [ ] 邊界情況已處理
+- [ ] 錯誤處理完善</p>
+<p><strong>代碼質量：</strong>
+- [ ] 代碼可讀性好
+- [ ] 遵循項目風格
+- [ ] 無重複代碼
+- [ ] 適當的註釋</p>
+<p><strong>測試覆蓋：</strong>
+- [ ] 新功能有測試覆蓋
+- [ ] 測試通過率 100%
+- [ ] 覆蓋率未下降</p>
+<p><strong>安全性：</strong>
+- [ ] 無硬編碼密碼/API keys
+- [ ] 適當的權限檢查
+- [ ] 輸入驗證完善</p>
+<p><strong>性能：</strong>
+- [ ] 無明顯性能退化
+- [ ] 數據庫查詢優化
+- [ ] 前端渲染優化</p>
+<p><strong>文檔：</strong>
+- [ ] README 已更新（如需要）
+- [ ] API 文檔已更新
+- [ ] 註釋清晰</p>
+<h4 id="_21">審查者角色建議<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>職責</th>
+<th>建議人員</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技術審查者</td>
+<td>代碼質量、架構</td>
+<td>資深開發者</td>
+</tr>
+<tr>
+<td>功能審查者</td>
+<td>功能正確性、需求</td>
+<td>產品經理/需求方</td>
+</tr>
+<tr>
+<td>測試審查者</td>
+<td>測試覆蓋、測試質量</td>
+<td>QA 工程師</td>
+</tr>
+<tr>
+<td>安全審查者</td>
+<td>安全漏洞、權限</td>
+<td>安全專家（如需要）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_22">審查流程<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 快速審查：</strong>
+- 確認 PR 描述清晰
+- 確認測試覆蓋充分
+- 確認沒有明顯問題</p>
+<p><strong>2. 深入審查：</strong>
+- 代碼邏輯正確性
+- 代碼質量和風格
+- 性能影響
+- 安全性</p>
+<p><strong>3. 建設性反饋：</strong>
+- 解釋為什麼要修改
+- 提供具體建議
+- 對代碼不對人</p>
+<h4 id="_23">合併策略<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h4>
+<p><strong>Squash and Merge（推薦）：</strong>
+- 清理提交歷史
+- 每個 PR 一個提交
+- 適合功能分支</p>
+<p><strong>Rebase and Merge：</strong>
+- 保持線性歷史
+- 適於小團隊
+- 需要更嚴格的分支管理</p>
+<p><strong>Merge Commit：</strong>
+- 保留完整歷史
+- 適於大團隊
+- 歷史可能較亂</p>
+<hr />
+<h2 id="4-cicd">4. CI/CD 流程說明<a class="headerlink" href="#4-cicd" title="連結到此標題">&para;</a></h2>
+<h3 id="41-cicd-workflow">4.1 CI/CD Workflow 配置<a class="headerlink" href="#41-cicd-workflow" title="連結到此標題">&para;</a></h3>
+<h4 id="_24">當前狀態<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h4>
+<p><strong>❌ GitHub Actions Workflows 不存在</strong></p>
+<p><code>.github/workflows/</code> 目錄不存在，這是一個重大的 CI/CD 缺失。項目依賴手動執行測試和部署。</p>
+<h4 id="github-actions-workflows">推薦的 GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="連結到此標題">&para;</a></h4>
+<p><strong>4.1.1 CI Workflow: <code>.github/workflows/ci.yml</code></strong></p>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install backend lint tools
+        run: |
+          pip install ruff black isort mypy
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend &amp;&amp; npm ci
+
+      - name: Backend lint
+        run: |
+          ruff check backend/
+          black --check backend/
+          isort --check-only backend/
+          mypy backend/
+
+      - name: Frontend lint
+        run: |
+          cd frontend
+          npm run lint
+          npm run type-check
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Run smoke tests
+        run: |
+          cd backend
+          python -m pytest -m &quot;smoke or fast&quot; -v
+
+      - name: Run unit tests
+        run: |
+          cd backend
+          python -m pytest -m &quot;unit and not slow&quot; -v
+
+      - name: Run full tests
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd backend
+          python -m pytest -v --cov=. --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run unit tests
+        run: |
+          cd frontend
+          npm run test -- --run
+
+      - name: Run coverage
+        if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        run: |
+          cd frontend
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./frontend/coverage/coverage-final.json
+          flags: frontend
+
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'push' &amp;&amp; (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run E2E tests
+        run: |
+          cd frontend
+          npm run test:e2e
+
+      - name: Upload E2E screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+</code></pre>
+<p><strong>4.1.2 CD Workflow: <code>.github/workflows/cd.yml</code></strong></p>
+<pre><code class="language-yaml">name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+      url: http://172.235.215.225
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t dashboard-app:${{ github.sha }} \
+            -t dashboard-app:latest \
+            -f Dockerfile \
+            .
+
+      - name: Export Docker image
+        run: |
+          docker save dashboard-app:latest | gzip &gt; dashboard-app.tar.gz
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo &quot;${{ secrets.LINODE_SSH_KEY }}&quot; &gt; ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.LINODE_HOST }} &gt;&gt; ~/.ssh/known_hosts
+
+      - name: Transfer Docker image to production
+        run: |
+          scp -o StrictHostKeyChecking=no \
+            dashboard-app.tar.gz \
+            root@${{ secrets.LINODE_HOST }}:/tmp/
+
+      - name: Deploy on production server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.LINODE_HOST }} &lt;&lt; 'ENDSSH'
+            set -e
+            echo &quot;[Production] Stopping current container...&quot;
+            docker stop dashboard_app 2&gt;/dev/null || true
+            docker rm dashboard_app 2&gt;/dev/null || true
+
+            echo &quot;[Production] Loading new Docker image...&quot;
+            docker load &lt; /tmp/dashboard-app.tar.gz
+
+            echo &quot;[Production] Starting new container...&quot;
+            docker run -d \
+              --name dashboard_app \
+              --network dashboard_network \
+              -v dashboard_data:/app/backend/market_data_db \
+              -v app_logs:/app/backend/logs \
+              -e ENV=production \
+              -e PYTHONUNBUFFERED=1 \
+              -e SKIP_AUTO_IMPORT=true \
+              --restart unless-stopped \
+              --health-cmd 'curl -f http://localhost:8000/health || exit 1' \
+              --health-interval 30s \
+              --health-timeout 10s \
+              --health-retries 3 \
+              --health-start-period 40s \
+              dashboard-app:latest
+
+            echo &quot;[Production] Waiting for container to be healthy...&quot;
+            sleep 15
+          ENDSSH
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f http://${{ secrets.LINODE_HOST }}/health || exit 1
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo &quot;Deployment successful!&quot;
+</code></pre>
+<h3 id="42">4.2 構建和部署步驟<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<h4 id="_25">當前部署流程（手動）<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h4>
+<p><strong>前置檢查清單（README.md）：</strong></p>
+<pre><code class="language-bash"># 在執行 git push 同步到伺服器之前，務必確保前端已經編譯為最新版本
+
+# 1. 編譯前端
+cd frontend &amp;&amp; npm run build
+
+# 2. 更新後端靜態檔案
+# 將 frontend/dist 內容複製到 backend/static
+
+# 3. 提交並啟動
+# 執行 git push 後，確保遠端伺服器重啟以載入最新變更
+</code></pre>
+<h4 id="_26">推薦的自動化部署流程<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h4>
+<p><strong>使用 <code>scripts/deploy.sh</code> 腳本：</strong></p>
+<pre><code class="language-bash">./scripts/deploy.sh production
+</code></pre>
+<p><strong>腳本功能：</strong>
+1. 構建 Docker 鏡像（linux/amd64 平台）
+2. 導出並壓縮鏡像
+3. 通過 SSH 傳輸到生產服務器
+4. 可選：傳輸資料庫
+5. 在生產服務器上部署新版本
+6. 驗證健康狀態</p>
+<p><strong>部署配置：</strong>
+- 生產服務器：<code>root@172.235.215.225</code>
+- 鏡像名稱：<code>dashboard-app:latest</code>
+- 平台：<code>linux/amd64</code></p>
+<h4 id="docker">Docker 部署配置<a class="headerlink" href="#docker" title="連結到此標題">&para;</a></h4>
+<p><strong>生產環境：<code>docker-compose.yml</code></strong></p>
+<pre><code class="language-yaml">services:
+  app:
+    build: .
+    ports:
+      - &quot;8000:8000&quot;
+    volumes:
+      - dashboard_data:/app/backend/market_data_db
+    environment:
+      - ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+</code></pre>
+<p><strong>開發環境：<code>docker-compose.dev.yml</code></strong></p>
+<pre><code class="language-yaml">services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    ports:
+      - &quot;8001:8000&quot;
+    volumes:
+      - ./backend:/app/backend
+      - ./tracked_symbols.json:/app/tracked_symbols.json
+    environment:
+      - ENV=development
+      - PYTHONUNBUFFERED=1
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;5173:5173&quot;
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://backend:8000
+    command: npm run dev -- --host 0.0.0.0
+</code></pre>
+<h3 id="43-cicd">4.3 CI/CD 最佳實踐<a class="headerlink" href="#43-cicd" title="連結到此標題">&para;</a></h3>
+<h4 id="1">最佳實踐 1：分層測試策略<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h4>
+<p><strong>測試分類：</strong></p>
+<pre><code class="language-yaml"># pytest markers
+- smoke: 快速冒煙測試，關鍵路徑
+- fast: 快速單元測試（&lt;1s each）
+- unit: 單元測試
+- integration: 集成測試
+- slow: 慢速測試（需要外部資源或計算密集）
+</code></pre>
+<p><strong>CI 執行策略：</strong></p>
+<pre><code class="language-yaml"># PR: 只運行快速測試
+pytest -m &quot;smoke or fast or unit&quot;
+
+# develop: 運行所有測試（除 slow）
+pytest -m &quot;not slow&quot;
+
+# main: 運行完整測試套件
+pytest -v --cov=. --cov-report=xml
+</code></pre>
+<h4 id="2">最佳實踐 2：並行測試執行<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h4>
+<p><strong>pytest-xdist 配置：</strong></p>
+<pre><code class="language-ini">[pytest]
+addopts = -n auto  # 自動使用所有 CPU 核心
+</code></pre>
+<p><strong>CI 並行配置：</strong></p>
+<pre><code class="language-yaml">strategy:
+  matrix:
+    python-version: ['3.11']
+    node-version: ['24']
+</code></pre>
+<h4 id="3_1">最佳實踐 3：覆蓋率門檻<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h4>
+<p><strong>推薦覆蓋率目標：</strong>
+- 後端：&gt; 80%
+- 前端 utils：&gt; 90%
+- 前端 components：&gt; 70%</p>
+<p><strong>當前狀態（TEST_BADGES.md）：</strong>
+| 類別 | 測試數 | 通過率 | 覆蓋率 | 目標 |
+|----------|-------|-----------|----------|------|
+| 🐍 後端 | 244 | 91% | 70% | 80% |
+| ⚛️ 前端工具 | 152 | 100% | 100% | ✅ |
+| ⚛️ 前端組件 | 110 | 63% | ~30% | 70% |
+| <strong>總計</strong> | <strong>506</strong> | <strong>86%</strong> | <strong>60%</strong> | 80% |</p>
+<h4 id="4">最佳實踐 4：健康檢查和自動重啟<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h4>
+<p><strong>Docker 健康檢查：</strong></p>
+<pre><code class="language-yaml">healthcheck:
+  test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8000/health&quot;]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+</code></pre>
+<p><strong>自動重啟策略：</strong></p>
+<pre><code class="language-yaml">restart: unless-stopped  # 生產環境
+restart: on-failure      # 開發環境（可選）
+</code></pre>
+<h4 id="5">最佳實踐 5：環境變量管理<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h4>
+<p><strong>GitHub Secrets：</strong></p>
+<pre><code class="language-yaml"># CI/CD workflow
+env:
+  LINODE_HOST: ${{ secrets.LINODE_HOST }}
+  LINODE_SSH_KEY: ${{ secrets.LINODE_SSH_KEY }}
+</code></pre>
+<p><strong>.env.example：</strong></p>
+<pre><code class="language-bash">ENV=development
+ALLOW_EXTERNAL_API=False
+ENABLE_BACKGROUND_WORKER=False
+DATABASE_URL=duckdb:///backend/market_data_db/data.duckdb
+</code></pre>
+<hr />
+<h2 id="5_1">5. 開發工具鏈清單<a class="headerlink" href="#5_1" title="連結到此標題">&para;</a></h2>
+<h3 id="51">5.1 開發依賴（後端）<a class="headerlink" href="#51" title="連結到此標題">&para;</a></h3>
+<h4 id="_27">核心框架與運行時<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fastapi</code></td>
+<td>&gt;=0.128.0</td>
+<td>Web 框架</td>
+</tr>
+<tr>
+<td><code>uvicorn[standard]</code></td>
+<td>&gt;=0.40.0</td>
+<td>ASGI 服務器</td>
+</tr>
+<tr>
+<td><code>watchfiles</code></td>
+<td>&gt;=0.21.0</td>
+<td>熱重載支持</td>
+</tr>
+<tr>
+<td><code>gunicorn</code></td>
+<td>latest</td>
+<td>生產環境 WSGI 服務器</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_28">數據處理與分析<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>duckdb</code></td>
+<td>==1.1.0</td>
+<td>內嵌式分析型數據庫</td>
+</tr>
+<tr>
+<td><code>pandas</code></td>
+<td>==2.3.3</td>
+<td>數據處理庫</td>
+</tr>
+<tr>
+<td><code>numpy</code></td>
+<td>&gt;=2.0.0</td>
+<td>數值計算庫</td>
+</tr>
+<tr>
+<td><code>scipy</code></td>
+<td>&gt;=1.13.0</td>
+<td>科學計算庫</td>
+</tr>
+<tr>
+<td><code>yfinance</code></td>
+<td>&gt;=0.2.51</td>
+<td>Yahoo Finance API</td>
+</tr>
+<tr>
+<td><code>pandas-ta-classic</code></td>
+<td>==0.3.54</td>
+<td>技術分析庫</td>
+</tr>
+<tr>
+<td><code>backtrader</code></td>
+<td>latest</td>
+<td>回測框架</td>
+</tr>
+<tr>
+<td><code>vectorbt</code></td>
+<td>==0.28.2</td>
+<td>向量化回測庫</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_29">任務調度與處理<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>APScheduler</code></td>
+<td>latest</td>
+<td>任務調度器</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_30">工具與庫<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pydantic</code></td>
+<td>latest</td>
+<td>數據驗證</td>
+</tr>
+<tr>
+<td><code>requests</code></td>
+<td>latest</td>
+<td>HTTP 客戶端</td>
+</tr>
+<tr>
+<td><code>httpx</code></td>
+<td>latest</td>
+<td>異步 HTTP 客戶端</td>
+</tr>
+<tr>
+<td><code>python-multipart</code></td>
+<td>latest</td>
+<td>文件上傳支持</td>
+</tr>
+<tr>
+<td><code>tqdm</code></td>
+<td>latest</td>
+<td>進度條</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_31">測試依賴<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pytest</code></td>
+<td>latest</td>
+<td>測試框架</td>
+</tr>
+<tr>
+<td><code>pytest-xdist</code></td>
+<td>latest</td>
+<td>並行測試</td>
+</tr>
+<tr>
+<td><code>pytest-timeout</code></td>
+<td>latest</td>
+<td>超時測試</td>
+</tr>
+<tr>
+<td><code>pytest-cov</code></td>
+<td>latest</td>
+<td>覆蓋率測試</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 開發依賴（前端）<a class="headerlink" href="#52" title="連結到此標題">&para;</a></h3>
+<h4 id="_32">核心框架與庫<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>react</code></td>
+<td>^19.2.0</td>
+<td>React 框架</td>
+</tr>
+<tr>
+<td><code>react-dom</code></td>
+<td>^19.2.0</td>
+<td>DOM 渲染</td>
+</tr>
+<tr>
+<td><code>react-router-dom</code></td>
+<td>^7.11.0</td>
+<td>路由管理</td>
+</tr>
+<tr>
+<td><code>zustand</code></td>
+<td>^5.0.9</td>
+<td>狀態管理</td>
+</tr>
+<tr>
+<td><code>@tanstack/react-query</code></td>
+<td>^5.90.16</td>
+<td>數據獲取與緩存</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ui">UI 組件與樣式<a class="headerlink" href="#ui" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bootstrap</code></td>
+<td>^5.3.8</td>
+<td>CSS 框架</td>
+</tr>
+<tr>
+<td><code>react-bootstrap</code></td>
+<td>^2.10.10</td>
+<td>React Bootstrap 組件</td>
+</tr>
+<tr>
+<td><code>bootstrap-icons</code></td>
+<td>^1.13.1</td>
+<td>圖標庫</td>
+</tr>
+<tr>
+<td><code>lucide-react</code></td>
+<td>^0.562.0</td>
+<td>React 圖標</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_33">圖表與可視化<a class="headerlink" href="#_33" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chart.js</code></td>
+<td>^4.5.1</td>
+<td>圖表庫</td>
+</tr>
+<tr>
+<td><code>react-chartjs-2</code></td>
+<td>^5.3.1</td>
+<td>React Chart.js 封裝</td>
+</tr>
+<tr>
+<td><code>echarts</code></td>
+<td>^6.0.0</td>
+<td>ECharts 圖表</td>
+</tr>
+<tr>
+<td><code>echarts-for-react</code></td>
+<td>^3.0.5</td>
+<td>React ECharts 封裝</td>
+</tr>
+<tr>
+<td><code>recharts</code></td>
+<td>^3.6.0</td>
+<td>React 圖表庫</td>
+</tr>
+<tr>
+<td><code>chartjs-adapter-date-fns</code></td>
+<td>^3.0.0</td>
+<td>時間適配器</td>
+</tr>
+<tr>
+<td><code>chartjs-plugin-annotation</code></td>
+<td>^3.1.0</td>
+<td>註解插件</td>
+</tr>
+<tr>
+<td><code>chartjs-plugin-zoom</code></td>
+<td>^2.2.0</td>
+<td>縮放插件</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3d">3D 與高級可視化<a class="headerlink" href="#3d" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>three</code></td>
+<td>^0.182.0</td>
+<td>3D 庫</td>
+</tr>
+<tr>
+<td><code>@react-three/fiber</code></td>
+<td>^9.5.0</td>
+<td>React Three.js</td>
+</tr>
+<tr>
+<td><code>@react-three/drei</code></td>
+<td>^10.7.7</td>
+<td>Three.js 實用工具</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_34">工具與實用程序<a class="headerlink" href="#_34" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>依賴</th>
+<th>版本</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>axios</code></td>
+<td>^1.13.2</td>
+<td>HTTP 客戶端</td>
+</tr>
+<tr>
+<td><code>date-fns</code></td>
+<td>^4.1.0</td>
+<td>日期處理</td>
+</tr>
+<tr>
+<td><code>luxon</code></td>
+<td>^3.7.2</td>
+<td>時間處理</td>
+</tr>
+<tr>
+<td><code>html2canvas</code></td>
+<td>^1.4.1</td>
+<td>HTML 轉圖片</td>
+</tr>
+<tr>
+<td><code>d3-hierarchy</code></td>
+<td>^3.1.2</td>
+<td>D3 層次結構</td>
+</tr>
+<tr>
+<td><code>i18next</code></td>
+<td>^25.7.4</td>
+<td>國際化</td>
+</tr>
+<tr>
+<td><code>react-i18next</code></td>
+<td>^16.5.3</td>
+<td>React 國際化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 自動化工具<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<h4 id="_35">構建工具<a class="headerlink" href="#_35" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+<th>配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vite</code></td>
+<td>^7.2.4</td>
+<td>前端構建工具</td>
+</tr>
+<tr>
+<td><code>@vitejs/plugin-react</code></td>
+<td>^5.1.1</td>
+<td>React 插件</td>
+</tr>
+<tr>
+<td><code>docker</code></td>
+<td>latest</td>
+<td>容器化部署</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_36">測試工具<a class="headerlink" href="#_36" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+<th>配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pytest</code></td>
+<td>latest</td>
+<td>後端測試框架</td>
+</tr>
+<tr>
+<td><code>pytest-xdist</code></td>
+<td>latest</td>
+<td>並行測試</td>
+</tr>
+<tr>
+<td><code>pytest-timeout</code></td>
+<td>latest</td>
+<td>超時測試</td>
+</tr>
+<tr>
+<td><code>pytest-cov</code></td>
+<td>latest</td>
+<td>覆蓋率測試</td>
+</tr>
+<tr>
+<td><code>vitest</code></td>
+<td>^4.0.18</td>
+<td>前端測試框架</td>
+</tr>
+<tr>
+<td><code>@vitest/coverage-v8</code></td>
+<td>^4.0.18</td>
+<td>覆蓋率工具</td>
+</tr>
+<tr>
+<td><code>cypress</code></td>
+<td>^15.9.0</td>
+<td>E2E 測試</td>
+</tr>
+<tr>
+<td><code>@testing-library/react</code></td>
+<td>^16.3.1</td>
+<td>React 測試庫</td>
+</tr>
+<tr>
+<td><code>happy-dom</code></td>
+<td>^20.0.11</td>
+<td>DOM 模擬</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_37">代碼質量工具<a class="headerlink" href="#_37" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>用途</th>
+<th>配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ruff</code></td>
+<td>latest</td>
+<td>Python linter</td>
+</tr>
+<tr>
+<td><code>black</code></td>
+<td>latest</td>
+<td>Python formatter</td>
+</tr>
+<tr>
+<td><code>isort</code></td>
+<td>latest</td>
+<td>Python import sorter</td>
+</tr>
+<tr>
+<td><code>mypy</code></td>
+<td>latest</td>
+<td>Python type checker</td>
+</tr>
+<tr>
+<td><code>eslint</code></td>
+<td>^9.39.1</td>
+<td>JavaScript linter</td>
+</tr>
+<tr>
+<td><code>eslint-plugin-react-hooks</code></td>
+<td>^7.0.1</td>
+<td>React Hooks 插件</td>
+</tr>
+<tr>
+<td><code>pre-commit</code></td>
+<td>latest</td>
+<td>Git hooks</td>
+</tr>
+</tbody>
+</table>
+<h4 id="makefile">Makefile 自動化目標<a class="headerlink" href="#makefile" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-makefile"># 測試
+test           - 運行所有測試（排除慢速）
+test-smoke     - 運行冒煙測試
+test-unit      - 運行單元測試
+test-full      - 運行完整測試套件
+test-new       - 運行最近修改文件的測試
+test-coverage  - 運行覆蓋率測試
+</code></pre>
+<h4 id="npm-scripts">NPM Scripts<a class="headerlink" href="#npm-scripts" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;scripts&quot;: {
+    &quot;dev&quot;: &quot;vite&quot;,
+    &quot;build&quot;: &quot;vite build&quot;,
+    &quot;preview&quot;: &quot;vite preview&quot;,
+    &quot;test&quot;: &quot;vitest&quot;,
+    &quot;test:watch&quot;: &quot;vitest --watch&quot;,
+    &quot;test:ui&quot;: &quot;vitest --ui&quot;,
+    &quot;test:coverage&quot;: &quot;vitest --coverage&quot;,
+    &quot;test:e2e&quot;: &quot;cypress run&quot;,
+    &quot;test:e2e:open&quot;: &quot;cypress open&quot;,
+    &quot;test:e2e:mobile&quot;: &quot;cypress run --viewport 375x667&quot;,
+    &quot;test:e2e:tablet&quot;: &quot;cypress run --viewport 768x1024&quot;,
+    &quot;test:e2e:desktop&quot;: &quot;cypress run --viewport 1920x1080&quot;,
+    &quot;lint&quot;: &quot;eslint .&quot;,
+    &quot;type-check&quot;: &quot;tsc --noEmit&quot;
+  }
+}
+</code></pre>
+<h3 id="54">5.4 工具鏈配置<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<h4 id="docker_1">Docker 配置<a class="headerlink" href="#docker_1" title="連結到此標題">&para;</a></h4>
+<p><strong>多階段構建（生產）：</strong></p>
+<pre><code class="language-dockerfile"># Stage 1: Build React Frontend
+FROM node:24-alpine AS frontend-build
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --production=false
+COPY frontend/ .
+RUN npm run build
+
+# Stage 2: Python Backend
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; apt-get install -y curl
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ ./backend/
+COPY --from=frontend-build /app/frontend/dist ./backend/static
+COPY tracked_symbols.json .
+WORKDIR /app/backend
+CMD [&quot;gunicorn&quot;, &quot;-w&quot;, &quot;1&quot;, &quot;-k&quot;, &quot;uvicorn.workers.UvicornWorker&quot;,
+     &quot;main:app&quot;, &quot;--bind&quot;, &quot;0.0.0.0:8000&quot;, &quot;--timeout&quot;, &quot;120&quot;]
+</code></pre>
+<h4 id="vite">Vite 配置（開發）<a class="headerlink" href="#vite" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-javascript">// vite.config.js
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://backend:8000',
+        changeOrigin: true
+      }
+    },
+    host: '0.0.0.0',
+    port: 5173
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@services': path.resolve(__dirname, './src/services')
+    }
+  }
+})
+</code></pre>
+<h4 id="pytest">Pytest 配置<a class="headerlink" href="#pytest" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-ini"># pytest.ini
+[pytest]
+testpaths = tests
+python_files = test_*.py
+addopts =
+    -v
+    --tb=line
+    --strict-markers
+    -n auto
+    --timeout=10
+    --timeout-method=thread
+    -m &quot;not slow&quot;
+    -rN
+
+markers =
+    smoke: Quick smoke tests
+    fast: Fast unit tests (&lt;1s each)
+    slow: marks tests as slow
+    integration: marks tests as integration
+    unit: marks tests as unit tests
+</code></pre>
+<h4 id="pre-commit-hooks">Pre-commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-yaml"># .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-todos
+</code></pre>
+<hr />
+<h2 id="6">6. 開發流程最佳實踐<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 完整的開發工作流程<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<h4 id="_38">開發流程圖<a class="headerlink" href="#_38" title="連結到此標題">&para;</a></h4>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  1. 開始新任務 / 需求確認                                    │
+│  - 創建或關聯 Issue                                         │
+│  - 明確需求和驗收標準                                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. 創建功能分支                                            │
+│  git checkout develop                                       │
+│  git pull origin develop                                   │
+│  git checkout -b feature/feature-name                      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 開發實現                                                │
+│  - 編寫代碼                                                 │
+│  - 遵循代碼風格（ruff, black, eslint）                     │
+│  - 使用 Conventional Commits 格式提交                       │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 測試                                                    │
+│  - 單元測試（pytest, vitest）                               │
+│  - 集成測試                                                 │
+│  - E2E 測試（cypress）                                     │
+│  - 覆蓋率檢查                                               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 代碼審查準備                                            │
+│  - 自我審查                                                 │
+│  - 編譯前端（npm run build）                                │
+│  - 更新文檔                                                 │
+│  - 提交並推送                                               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 創建 Pull Request                                      │
+│  - 使用 PR 模板                                             │
+│  - 關聯 Issue                                              │
+│  - 清晰描述變更                                             │
+│  - 添加截圖/演示（如適用）                                  │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  7. CI 自動檢查                                            │
+│  - Lint 檢查                                               │
+│  - 測試運行                                                 │
+│  - 構建驗證                                                 │
+│  - 覆蓋率報告                                               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  8. 代碼審查                                                │
+│  - 審查者審查代碼                                           │
+│  - 討論和改進                                               │
+│  - 修復問題                                                 │
+│  - 審查通過                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  9. 合併到 develop                                          │
+│  - Squash and Merge（推薦）                                 │
+│  - 更新 develop 分支                                        │
+│  - 刪除功能分支                                             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  10. 集成測試（develop 分支）                              │
+│  - CI 自動運行完整測試套件                                  │
+│  - 手動測試關鍵流程                                         │
+│  - 驗證功能完整性                                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  11. 發布準備（release/* 分支）                            │
+│  git checkout develop                                       │
+│  git pull origin develop                                   │
+│  git checkout -b release/v1.0.0                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│  12. 發布到 main                                            │
+│  - 創建 PR: release/v1.0.0 → main                          │
+│  - CI/CD 自動部署到生產                                     │
+│  - 健康檢查驗證                                             │
+│  - 合併回 develop                                          │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3 id="62">6.2 代碼質量保證<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<h4 id="_39">質量保證層次<a class="headerlink" href="#_39" title="連結到此標題">&para;</a></h4>
+<pre><code>         ┌─────────────────┐
+         │  代碼審查       │  Peer review, 架構評估
+         ├─────────────────┤
+         │  CI/CD          │  自動化測試, 構建, 部署
+         ├─────────────────┤
+         │  測試覆蓋       │  單元, 集成, E2E
+         ├─────────────────┤
+         │  代碼檢查       │  Lint, 格式化, 類型檢查
+         ├─────────────────┤
+         │  開發規範       │  命名, 結構, 文檔
+         └─────────────────┘
+</code></pre>
+<h4 id="_40">代碼風格規範<a class="headerlink" href="#_40" title="連結到此標題">&para;</a></h4>
+<p><strong>Python 後端：</strong></p>
+<pre><code class="language-python"># 使用 ruff + black + isort
+# ruff check backend/
+# black backend/
+# isort backend/
+
+# 風格規則：
+# - 最大行長度: 100 字符
+# - 引號: 單引號優先
+# - 縮進: 4 空格
+# - 導入順序: stdlib, third-party, local
+</code></pre>
+<p><strong>JavaScript/TypeScript 前端：</strong></p>
+<pre><code class="language-javascript">// 使用 eslint + prettier
+// npm run lint
+// npm run type-check
+
+// 風格規則：
+// - 最大行長度: 100 字符
+// - 引號: 單引號優先
+// - 縮進: 2 空格
+// - 結尾分號: 必需
+</code></pre>
+<h4 id="_41">測試覆蓋率目標<a class="headerlink" href="#_41" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>層級</th>
+<th>目標覆蓋率</th>
+<th>當前覆蓋率</th>
+<th>差距</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>後端單元測試</td>
+<td>&gt; 80%</td>
+<td>70%</td>
+<td>-10%</td>
+</tr>
+<tr>
+<td>前端 utils</td>
+<td>&gt; 90%</td>
+<td>100%</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>前端 components</td>
+<td>&gt; 70%</td>
+<td>~30%</td>
+<td>-40%</td>
+</tr>
+<tr>
+<td>集成測試</td>
+<td>&gt; 70%</td>
+<td>未統計</td>
+<td>-</td>
+</tr>
+<tr>
+<td>E2E 測試</td>
+<td>關鍵流程</td>
+<td>部分覆蓋</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_42">代碼審查清單<a class="headerlink" href="#_42" title="連結到此標題">&para;</a></h4>
+<p><strong>功能正確性：</strong>
+- [ ] 功能符合需求
+- [ ] 邊界情況已處理
+- [ ] 錯誤處理完善</p>
+<p><strong>代碼質量：</strong>
+- [ ] 代碼可讀性好
+- [ ] 遵循項目風格
+- [ ] 無重複代碼
+- [ ] 適當的註釋</p>
+<p><strong>測試覆蓋：</strong>
+- [ ] 新功能有測試覆蓋
+- [ ] 測試通過率 100%
+- [ ] 覆蓋率未下降</p>
+<p><strong>安全性：</strong>
+- [ ] 無硬編碼密碼/API keys
+- [ ] 適當的權限檢查
+- [ ] 輸入驗證完善</p>
+<p><strong>性能：</strong>
+- [ ] 無明顯性能退化
+- [ ] 數據庫查詢優化
+- [ ] 前端渲染優化</p>
+<h3 id="63">6.3 協作和審查流程<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<h4 id="_43">協作原則<a class="headerlink" href="#_43" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 小而頻繁的 PR：</strong>
+- 每個 PR 一個功能
+- 不超過 300-500 行變更
+- 頻繁合併避免大型合併衝突</p>
+<p><strong>2. 清晰的溝通：</strong>
+- PR 標題和描述清楚
+- 說明變更原因
+- 提供測試方法
+- 適時使用截圖/錄屏</p>
+<p><strong>3. 建設性反饋：</strong>
+- 對代碼不對人
+- 解釋為什麼要修改
+- 提供具體建議
+- 承認好的做法</p>
+<p><strong>4. 快速響應：</strong>
+- 審查者及時響應（24 小時內）
+- 提交者快速修復問題
+- 避免阻塞他人工作</p>
+<h4 id="_44">審查流程<a class="headerlink" href="#_44" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 快速審查（&lt; 30 分鐘）：</strong>
+- 確認 PR 描述清晰
+- 確認測試覆蓋充分
+- 確認沒有明顯問題</p>
+<p><strong>2. 深入審查（&lt; 2 小時）：</strong>
+- 代碼邏輯正確性
+- 代碼質量和風格
+- 性能影響
+- 安全性</p>
+<p><strong>3. 修復和重新審查：</strong>
+- 提交者修復問題
+- 審查者驗證修復
+- 可能多輪迭代</p>
+<h4 id="_45">角色和職責<a class="headerlink" href="#_45" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>職責</th>
+<th>活躍度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>開發者</td>
+<td>編寫代碼、測試、創建 PR</td>
+<td>每天</td>
+</tr>
+<tr>
+<td>審查者</td>
+<td>審查代碼、提供反饋</td>
+<td>每天</td>
+</tr>
+<tr>
+<td>維護者</td>
+<td>合併 PR、管理發布</td>
+<td>定期</td>
+</tr>
+<tr>
+<td>QA</td>
+<td>測試驗證、回歸測試</td>
+<td>發布前</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_46">溝通渠道<a class="headerlink" href="#_46" title="連結到此標題">&para;</a></h4>
+<p><strong>PR 討論：</strong>
+- 使用 GitHub PR 評論
+- 提及相關人員（@username）
+- 關聯相關 Issue</p>
+<p><strong>即時溝通：</strong>
+- 關鍵問題使用即時通訊工具
+- 非緊急問題使用異步溝通</p>
+<p><strong>文檔更新：</strong>
+- 變更後更新相關文檔
+- 在 PR 中說明文檔更新</p>
+<hr />
+<h2 id="7-programmer-sub-agent">7. Programmer Sub-Agent 的開發流程知識基礎<a class="headerlink" href="#7-programmer-sub-agent" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 關鍵開發能力要求<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<h4 id="priority-p0">必備能力（Priority P0）<a class="headerlink" href="#priority-p0" title="連結到此標題">&para;</a></h4>
+<p><strong>1. Git 和版本控制：</strong></p>
+<pre><code class="language-yaml">能力: 熟練使用 Git
+證據: Dashboard 100% Conventional Commits 規範
+要求:
+  - 熟悉分支策略（Git Flow）
+  - 遵循 Conventional Commits 格式
+  - 正確處理合併衝突
+  - 理解 rebase vs merge
+</code></pre>
+<p><strong>2. 測試驅動開發：</strong></p>
+<pre><code class="language-yaml">能力: TDD 和測試編寫
+證據: 506 個測試，86% 通過率
+要求:
+  - 單元測試編寫（pytest, vitest）
+  - 測試覆蓋率管理
+  - Mock 和 fixture 使用
+  - 測試金字塔原則
+</code></pre>
+<p><strong>3. 代碼質量意識：</strong></p>
+<pre><code class="language-yaml">能力: 代碼質量保證
+證據: 重構率 16%，調試率 4%
+要求:
+  - 代碼審查參與
+  - Lint 和格式化工具使用
+  - 重構能力（漸進式遷移）
+  - 技術債務管理
+</code></pre>
+<p><strong>4. CI/CD 理解：</strong></p>
+<pre><code class="language-yaml">能力: CI/CD 流程理解
+證據: Docker 化部署，健康檢查
+要求:
+  - 理解 CI/CD pipeline
+  - 編寫 workflow 配置
+  - 環境變量管理
+  - 部署自動化
+</code></pre>
+<h4 id="priority-p1">進階能力（Priority P1）<a class="headerlink" href="#priority-p1" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 架構設計：</strong></p>
+<pre><code class="language-yaml">能力: 軟件架構理解
+證據: 6 個重構計劃，多種設計模式
+要求:
+  - 設計模式應用（工廠、適配器、介面抽象）
+  - 模組化設計
+  - API 設計
+  - 數據庫設計
+</code></pre>
+<p><strong>2. 性能優化：</strong></p>
+<pre><code class="language-yaml">能力: 性能優化
+證據: feat(performance) 提交，並行測試
+要求:
+  - 數據庫查詢優化
+  - 前端渲染優化
+  - 緩存策略
+  - 並發和異步處理
+</code></pre>
+<p><strong>3. 容器化和部署：</strong></p>
+<pre><code class="language-yaml">能力: Docker 和部署
+證據: 多階段 Dockerfile，docker-compose
+要求:
+  - Dockerfile 編寫
+  - Docker Compose 配置
+  - 容器編排
+  - 健康檢查和監控
+</code></pre>
+<h4 id="priority-p2">可選能力（Priority P2）<a class="headerlink" href="#priority-p2" title="連結到此標題">&para;</a></h4>
+<p><strong>1. DevOps：</strong></p>
+<pre><code class="language-yaml">能力: DevOps 實踐
+證據: 部署腳本，自動化工具
+要求:
+  - 監控和日誌
+  - 備份和恢復
+  - 基礎設施即代碼
+  - 安全加固
+</code></pre>
+<p><strong>2. 文檔和知識管理：</strong></p>
+<pre><code class="language-yaml">能力: 技術文檔
+證據: docs 提交佔 10%
+要求:
+  - API 文檔編寫
+  - 架構文檔
+  - README 維護
+  - 決策記錄（ADR）
+</code></pre>
+<h3 id="72">7.2 開發工具優先級<a class="headerlink" href="#72" title="連結到此標題">&para;</a></h3>
+<h4 id="_47">工具優先級矩陣<a class="headerlink" href="#_47" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>工具類別</th>
+<th>工具</th>
+<th>優先級</th>
+<th>熟練度要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>版本控制</td>
+<td>Git</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>後端測試</td>
+<td>pytest</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>前端測試</td>
+<td>vitest</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>代碼檢查</td>
+<td>ruff/black</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>代碼檢查</td>
+<td>eslint</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>後端框架</td>
+<td>FastAPI</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>前端框架</td>
+<td>React</td>
+<td>P0</td>
+<td>熟練</td>
+</tr>
+<tr>
+<td>E2E 測試</td>
+<td>cypress</td>
+<td>P1</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>容器化</td>
+<td>Docker</td>
+<td>P1</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>數據處理</td>
+<td>pandas</td>
+<td>P1</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>圖表庫</td>
+<td>Chart.js/ECharts</td>
+<td>P1</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>數據庫</td>
+<td>DuckDB</td>
+<td>P2</td>
+<td>基礎</td>
+</tr>
+<tr>
+<td>狀態管理</td>
+<td>Zustand</td>
+<td>P2</td>
+<td>基礎</td>
+</tr>
+<tr>
+<td>數據獲取</td>
+<td>React Query</td>
+<td>P2</td>
+<td>基礎</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_48">工具學習路徑<a class="headerlink" href="#_48" title="連結到此標題">&para;</a></h4>
+<p><strong>階段 1：基礎工具（P0）</strong></p>
+<pre><code class="language-yaml">目標: 能獨立開發和測試
+工具:
+  - Git: 分支、提交、合併
+  - pytest/vitest: 單元測試編寫
+  - ruff/eslint: 代碼檢查和格式化
+  - FastAPI: REST API 開發
+  - React: 組件開發
+預計時間: 2-3 週
+</code></pre>
+<p><strong>階段 2：進階工具（P1）</strong></p>
+<pre><code class="language-yaml">目標: 能進行集成和部署
+工具:
+  - cypress: E2E 測試
+  - Docker: 容器化開發
+  - pandas: 數據處理
+  - Chart.js/ECharts: 數據可視化
+預計時間: 2-3 週
+</code></pre>
+<p><strong>階段 3：專業工具（P2）</strong></p>
+<pre><code class="language-yaml">目標: 能處理複雜場景
+工具:
+  - DuckDB: 內嵌式數據庫
+  - Zustand: 狀態管理
+  - React Query: 數據獲取和緩存
+預計時間: 1-2 週
+</code></pre>
+<h3 id="73">7.3 開發工作流程建議<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<h4 id="programmer-sub-agent">Programmer Sub-Agent 工作流<a class="headerlink" href="#programmer-sub-agent" title="連結到此標題">&para;</a></h4>
+<p><strong>1. 任務接收和規劃：</strong></p>
+<pre><code class="language-yaml">步驟:
+  - 接收任務描述和需求
+  - 分析相關 Issue 和文檔
+  - 識別依賴和風險
+  - 制定實施計劃
+輸出:
+  - 任務拆解
+  - 實施步驟
+  - 預估時間
+</code></pre>
+<p><strong>2. 開發環境準備：</strong></p>
+<pre><code class="language-yaml">步驟:
+  - 創建功能分支
+  - 拉取最新代碼
+  - 設置環境變量
+  - 啟動開發服務器
+驗證:
+  - 服務正常啟動
+  - 測試通過
+  - 無編譯錯誤
+</code></pre>
+<p><strong>3. 代碼實現：</strong></p>
+<pre><code class="language-yaml">原則:
+  - 遵循項目代碼風格
+  - 小步快跑，頻繁提交
+  - 使用 Conventional Commits 格式
+  - 適時重構
+檢查:
+  - 代碼 lint 通過
+  - 測試通過
+  - 類型檢查通過
+</code></pre>
+<p><strong>4. 測試和驗證：</strong></p>
+<pre><code class="language-yaml">測試層次:
+  - 單元測試：覆蓋核心邏輯
+  - 集成測試：驗證模組交互
+  - E2E 測試：驗證關鍵流程
+覆蓋率目標:
+  - 新代碼：&gt; 80%
+  - 修改代碼：不下降
+</code></pre>
+<p><strong>5. 代碼審查準備：</strong></p>
+<pre><code class="language-yaml">準備:
+  - 自我審查代碼
+  - 更新相關文檔
+  - 編寫 PR 描述
+  - 添加測試證據
+模板:
+  - 變更類型
+  - 相關 Issue
+  - 測試檢查清單
+  - 部署檢查清單
+</code></pre>
+<p><strong>6. 持續改進：</strong></p>
+<pre><code class="language-yaml">學習:
+  - 從審查反饋學習
+  - 分析失敗的測試
+  - 研究最佳實踐
+  - 總結經驗教訓
+改進:
+  - 更新知識庫
+  - 分享最佳實踐
+  - 改進工具鏈
+  - 優化工作流
+</code></pre>
+<h4 id="_49">常見工作場景<a class="headerlink" href="#_49" title="連結到此標題">&para;</a></h4>
+<p><strong>場景 1：添加新功能</strong></p>
+<pre><code class="language-yaml">流程:
+  1. 理解需求和設計
+  2. 創建功能分支
+  3. TDD 開發（紅-綠-重構）
+  4. 編寫單元測試
+  5. 實現功能代碼
+  6. 編寫集成測試
+  7. 代碼審查
+  8. 合併到 develop
+關鍵點:
+  - 測試先行
+  - 小步快跑
+  - 頻繁提交
+</code></pre>
+<p><strong>場景 2：修復 Bug</strong></p>
+<pre><code class="language-yaml">流程:
+  1. 複現和定位問題
+  2. 創建 bugfix 分支
+  3. 編寫失敗測試
+  4. 修復問題
+  5. 驗證測試通過
+  6. 代碼審查
+  7. 合併到 develop
+關鍵點:
+  - 先寫失敗測試
+  - 最小修復
+  - 根因分析
+</code></pre>
+<p><strong>場景 3：重構代碼</strong></p>
+<pre><code class="language-yaml">流程:
+  1. 識別重構範圍
+  2. 創建 refactor 分支
+  3. 編寫測試保護（如果沒有）
+  4. 漸進式重構
+  5. 驗證測試通過
+  6. 代碼審查
+  7. 合併到 develop
+關鍵點:
+  - 小步重構
+  - 保持測試通過
+  - 向後兼容
+</code></pre>
+<p><strong>場景 4：緊急修復（hotfix）</strong></p>
+<pre><code class="language-yaml">流程:
+  1. 從 main 創建 hotfix 分支
+  2. 快速修復
+  3. 最小測試
+  4. 代碼審查（快速）
+  5. 合併到 main 和 develop
+  6. 立即部署
+關鍵點:
+  - 快速響應
+  - 最小變更
+  - 後續補充測試
+</code></pre>
+<hr />
+<h2 id="8">8. 行動計劃和建議<a class="headerlink" href="#8" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 立即行動（高優先級）<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>行動</th>
+<th>優先級</th>
+<th>預計時間</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>創建 GitHub Actions CI workflow</td>
+<td>High</td>
+<td>2-3 小時</td>
+<td><code>.github/workflows/ci.yml</code>，包含 lint、測試、構建</td>
+</tr>
+<tr>
+<td>2</td>
+<td>創建 GitHub Actions CD workflow</td>
+<td>High</td>
+<td>2-3 小時</td>
+<td><code>.github/workflows/cd.yml</code>，自動化部署</td>
+</tr>
+<tr>
+<td>3</td>
+<td>創建 PR 模板</td>
+<td>High</td>
+<td>1 小時</td>
+<td><code>.github/PULL_REQUEST_TEMPLATE.md</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>設置分支保護規則</td>
+<td>High</td>
+<td>30 分鐘</td>
+<td>GitHub 設置，main 分支保護、審查要求</td>
+</tr>
+<tr>
+<td>5</td>
+<td>創建分支策略文檔</td>
+<td>High</td>
+<td>2 小時</td>
+<td><code>WORKFLOW.md</code>，Git Flow、分支命名、合併流程</td>
+</tr>
+<tr>
+<td>6</td>
+<td>創建代碼審查文檔</td>
+<td>High</td>
+<td>2 小時</td>
+<td><code>CODE_REVIEW.md</code>，審查標準、流程、角色</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-1-2">8.2 短期行動（1-2 週）<a class="headerlink" href="#82-1-2" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>行動</th>
+<th>優先級</th>
+<th>預計時間</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7</td>
+<td>創建 CONTRIBUTING.md</td>
+<td>Medium</td>
+<td>2 小時</td>
+<td>開發流程、提交規範、代碼風格</td>
+</tr>
+<tr>
+<td>8</td>
+<td>設置 Codecov 或 Coveralls</td>
+<td>Medium</td>
+<td>1 小時</td>
+<td>集成到 CI workflow，覆蓋率報告</td>
+</tr>
+<tr>
+<td>9</td>
+<td>優化測試覆蓋率</td>
+<td>Medium</td>
+<td>持續</td>
+<td>前端組件覆蓋率 30% → 70%</td>
+</tr>
+<tr>
+<td>10</td>
+<td>繼續 React Query 遷移</td>
+<td>Medium</td>
+<td>2-3 週</td>
+<td>Phase 1 核心頁面</td>
+</tr>
+<tr>
+<td>11</td>
+<td>實施 Indicator Calculator</td>
+<td>Medium</td>
+<td>2-3 天</td>
+<td>所有 signal strategies 的基礎</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-1">8.3 中期行動（1 個月）<a class="headerlink" href="#83-1" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>行動</th>
+<th>優先級</th>
+<th>預計時間</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12</td>
+<td>實施自動化通知</td>
+<td>Low</td>
+<td>2 小時</td>
+<td>Slack/Discord 集成，PR 通知、部署狀態</td>
+</tr>
+<tr>
+<td>13</td>
+<td>設置預生產環境</td>
+<td>Low</td>
+<td>4-6 小時</td>
+<td>staging 服務器、staging workflow</td>
+</tr>
+<tr>
+<td>14</td>
+<td>移除棄用代碼</td>
+<td>Low</td>
+<td>1-2 週</td>
+<td>重構完成後清理</td>
+</tr>
+<tr>
+<td>15</td>
+<td>標準化統一策略引擎</td>
+<td>Low</td>
+<td>4-5 天</td>
+<td>遷移所有策略到新系統</td>
+</tr>
+</tbody>
+</table>
+<h3 id="84">8.4 風險評估<a class="headerlink" href="#84" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>風險</th>
+<th>可能性</th>
+<th>影響</th>
+<th>緩解措施</th>
+<th>狀態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>手動部署錯誤</td>
+<td>High</td>
+<td>High</td>
+<td>✅ 實施自動化 CD</td>
+<td>行動項 2</td>
+</tr>
+<tr>
+<td>測試未在合併前運行</td>
+<td>High</td>
+<td>Medium</td>
+<td>✅ 強制 CI 檢查通過</td>
+<td>行動項 1, 4</td>
+</tr>
+<tr>
+<td>代碼審查不完整</td>
+<td>Medium</td>
+<td>High</td>
+<td>✅ 實施分支保護和審查要求</td>
+<td>行動項 4, 6</td>
+</tr>
+<tr>
+<td>前端未編譯就推送</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>✅ CI workflow 中包含構建步驟</td>
+<td>行動項 1</td>
+</tr>
+<tr>
+<td>測試覆蓋率下降</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>✅ 實施覆蓋率門檻和報告</td>
+<td>行動項 8</td>
+</tr>
+<tr>
+<td>部署到生產導致停機</td>
+<td>Low</td>
+<td>High</td>
+<td>✅ 健康檢查、滾動更新、快速回滾</td>
+<td>行動項 2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9">9. 信賴度與限制<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="high">信賴度：<strong>High</strong><a class="headerlink" href="#high" title="連結到此標題">&para;</a></h3>
+<p><strong>原因：</strong>
+- ✅ 完整閱讀了所有 4 個輸入文檔
+- ✅ 文檔之間相互驗證，一致性高
+- ✅ Git 提交歷史、重構計劃、CI/CD 配置、工具鏈配置都有詳細記錄
+- ✅ 數據來源明確，可追溯</p>
+<h3 id="_50">數據質量<a class="headerlink" href="#_50" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>來源</th>
+<th>質量</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git 提交歷史</td>
+<td>Excellent</td>
+<td>50 次提交，100% Conventional Commits</td>
+</tr>
+<tr>
+<td>重構計劃</td>
+<td>Excellent</td>
+<td>6 個完整文檔，詳細的決策記錄</td>
+</tr>
+<tr>
+<td>CI/CD 配置</td>
+<td>Good</td>
+<td>Docker 配置完整，測試基礎完善，缺 GitHub Actions</td>
+</tr>
+<tr>
+<td>工具鏈配置</td>
+<td>Excellent</td>
+<td>完整的依賴清單和配置文件</td>
+</tr>
+<tr>
+<td>分支策略</td>
+<td>Fair</td>
+<td>無文檔支持，主要推斷</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_51">假設<a class="headerlink" href="#_51" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>項目使用 Git 進行版本控制（已確認）</li>
+<li>主要分支名稱為 <code>main</code>（推斷，基於 DEPLOYMENT.md）</li>
+<li>項目託管在 GitHub（推斷，因為參考文檔提到 GitHub Actions）</li>
+<li>開發者遵循基本的 Git 工作流（推斷）</li>
+<li>PR 需要審查才能合併（推斷，建議）</li>
+</ol>
+<h3 id="_52">限制<a class="headerlink" href="#_52" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>❌ 無法執行 <code>git branch -a</code> 查看實際分支結構</li>
+<li>❌ 無法查看 GitHub 設置（分支保護、規則等）</li>
+<li>❌ 無法查看歷史提交和 PR 記錄</li>
+<li>❌ 無 GitHub Actions workflows（目錄不存在）</li>
+<li>❌ 無 PR 模板和審查文檔</li>
+<li>❌ 無法與團隊成員確認當前工作流程</li>
+</ol>
+<h3 id="_53">建議的後續調查<a class="headerlink" href="#_53" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>執行 <code>git branch -a</code> 查看實際分支結構</li>
+<li>查看 GitHub 設置頁面確認分支保護和規則</li>
+<li>查看過去的 PR 記錄了解實際流程</li>
+<li>與團隊成員確認當前工作流程和偏好</li>
+<li>監控 CI/CD 實施後的效果和改進</li>
+</ol>
+<hr />
+<h2 id="10">10. 元數據<a class="headerlink" href="#10" title="連結到此標題">&para;</a></h2>
+<p><strong>分析框架：</strong> Git 開發模式整合分析</p>
+<p><strong>輸入文檔：</strong>
+1. a004a-git-log.md - Git 提交歷史分析
+2. a004b-refactoring-plans.md - Refactoring Plans 分析
+3. a004c-branching-cicd.md - 分支策略和 CI/CD 分析
+4. a004d-dev-toolchain.md - 開發工具鏈分析</p>
+<p><strong>關鍵指標：</strong>
+- 提交規範遵循率：100%
+- 提交類型分佈：feat 34%, fix 24%, refactor 16%
+- 測試總數：506（86% 通過率）
+- 整體覆蓋率：60%（後端 70%，前端 50%）
+- 重構計劃：6 個主要文檔
+- 開發模式：Sprint 模式（高強度 2-3 天）</p>
+<p><strong>關鍵主題：</strong>
+1. Conventional Commits 100% 規範
+2. Sprint 模式開發（高強度集中開發）
+3. 漸進式遷移重構策略
+4. 向後兼容原則
+5. 工廠模式、適配器模式、介面抽象
+6. 測試驅動開發（TDD）
+7. Docker 化部署
+8. 缺少 GitHub Actions CI/CD
+9. 缺少明確的分支策略文檔
+10. 完整的開發工具鏈</p>
+<p><strong>後續使用建議：</strong>
+- 本報告將成為 a005（Programmer Sub-Agent 設計）和 a006（知識庫構建）的核心參考文檔
+- 建議定期更新（每 3-6 個月）以反映開發流程的演進
+- 可作為新成員入職培訓的參考文檔
+- 可用作制定開發規範和最佳實踐的基礎</p>
+<hr />
+<p><strong>報告生成時間：</strong> 2026-02-21T00:35:00+08:00
+<strong>分析工具：</strong> Charlie Analyst
+<strong>專案路徑：</strong> /Users/charlie/Dashboard
+<strong>輸出路徑：</strong> /Users/charlie/.openclaw/workspace/kanban/projects/programmer-agent-design-20260220/a004-git-development-pattern.md</p>
+<hr />
+<p><em>本報告整合了 4 個分析文檔的結果，形成完整的 Git 開發模式報告，為 Programmer Sub-Agent 的設計和知識庫構建提供核心參考。</em></p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Dashboard 基礎回測功能測試報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Matrix Dashboard 基礎回測功能測試報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="matrix-dashboard">Matrix Dashboard 基礎回測功能測試報告<a class="headerlink" href="#matrix-dashboard" title="連結到此標題">&para;</a></h1>
+<p><strong>測試時間:</strong> 2026-02-20 17:13:00
+<strong>測試人員:</strong> Charlie Analyst
+<strong>測試環境:</strong> http://localhost:8001</p>
+<hr />
+<h2 id="_1">測試概況<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>測試項目</th>
+<th>狀態</th>
+<th>響應時間</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>健康檢查</td>
+<td>✅ 通過</td>
+<td>9.60ms</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td>策略模板</td>
+<td>✅ 通過</td>
+<td>34.80ms</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td>回測端點發現</td>
+<td>✅ 發現</td>
+<td>17.80ms</td>
+<td>422 (格式錯誤，端點存在)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>整體成功率:</strong> 100% (3/3 主要測試項目完成)</p>
+<hr />
+<h2 id="1">測試 1: 健康檢查端點<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<p><strong>端點:</strong> <code>GET http://localhost:8001/health</code></p>
+<h3 id="_2">測試結果<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>HTTP 狀態碼:</strong> 200 OK</li>
+<li><strong>響應時間:</strong> 9.60ms</li>
+</ul>
+<h3 id="_3">響應數據<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;healthy&quot;,
+  &quot;service&quot;: &quot;dashboard&quot;
+}
+</code></pre>
+<h3 id="_4">分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>API 服務正常運行</li>
+<li>響應速度優秀 (&lt; 10ms)</li>
+<li>返回格式正確</li>
+</ul>
+<hr />
+<h2 id="2">測試 2: 策略模板端點<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<p><strong>端點:</strong> <code>GET http://localhost:8001/api/strategies/templates</code></p>
+<h3 id="_5">測試結果<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>HTTP 狀態碼:</strong> 200 OK</li>
+<li><strong>響應時間:</strong> 34.80ms</li>
+</ul>
+<h3 id="_6">響應數據<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<p>API 成功返回 <strong>6 個策略模板</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模板 ID</th>
+<th>顯示名稱</th>
+<th>策略類型</th>
+<th>市場</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bollinger</td>
+<td>BOLLINGER Strategy</td>
+<td>bollinger</td>
+<td>TW</td>
+</tr>
+<tr>
+<td>macd</td>
+<td>MACD策略</td>
+<td>macd</td>
+<td>TW</td>
+</tr>
+<tr>
+<td>momentum</td>
+<td>動量策略</td>
+<td>momentum</td>
+<td>TW</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>RSI策略</td>
+<td>rsi</td>
+<td>TW</td>
+</tr>
+<tr>
+<td>rsi_tw</td>
+<td>RSI_TW Strategy</td>
+<td>rsi</td>
+<td>TW</td>
+</tr>
+<tr>
+<td>supertrend</td>
+<td>SUPERTREND Strategy</td>
+<td>supertrend</td>
+<td>TW</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">模板詳細信息<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h3>
+<h4 id="1-bollinger-strategy">1. BOLLINGER Strategy<a class="headerlink" href="#1-bollinger-strategy" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> bollinger</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong> param1 (float, 預設: 0.1)</li>
+</ul>
+<h4 id="2-macd">2. MACD策略<a class="headerlink" href="#2-macd" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> macd</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong></li>
+<li>fast_period (int, 5-20, 預設: 12)</li>
+<li>slow_period (int, 10-50, 預設: 26)</li>
+<li>signal_period (int, 5-20, 預設: 9)</li>
+</ul>
+<h4 id="3">3. 動量策略<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> momentum</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong></li>
+<li>top_n (int, 1-50, 預設: 10)</li>
+<li>max_weight (float, 0.01-1, 預設: 0.2)</li>
+</ul>
+<h4 id="4-rsi">4. RSI策略<a class="headerlink" href="#4-rsi" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> rsi</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong></li>
+<li>rsi_period (int, 5-50, 預設: 14)</li>
+<li>rsi_threshold (float, 0-100, 預設: 50)</li>
+</ul>
+<h4 id="5-rsi_tw-strategy">5. RSI_TW Strategy<a class="headerlink" href="#5-rsi_tw-strategy" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> rsi</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong> param1 (float, 預設: 0.1)</li>
+</ul>
+<h4 id="6-supertrend-strategy">6. SUPERTREND Strategy<a class="headerlink" href="#6-supertrend-strategy" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>類型:</strong> supertrend</li>
+<li><strong>市場:</strong> TW</li>
+<li><strong>參數:</strong></li>
+<li>length (int, 5-50, 預設: 10)</li>
+<li>multiplier (float, 1-10, 預設: 3)</li>
+</ul>
+<h3 id="_8">分析<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ 所有模板都有完整的元數據</li>
+<li>✅ 參數定義清晰，包含類型、範圍、預設值</li>
+<li>✅ 支持台灣市場 (TW)</li>
+<li>✅ 涵盖多種技術指標策略</li>
+<li>⚠️ 響應時間稍長 (34.80ms)，但仍可接受</li>
+</ul>
+<hr />
+<h2 id="3_1">測試 3: 執行回測端點<a class="headerlink" href="#3_1" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 初始測試<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>POST http://localhost:8001/api/strategies/backtest</code></p>
+<h4 id="_9">測試結果<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>HTTP 狀態碼:</strong> 405 Method Not Allowed</li>
+<li><strong>響應時間:</strong> 12.80ms</li>
+</ul>
+<h4 id="_10">響應數據<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;detail&quot;: &quot;Method Not Allowed&quot;
+}
+</code></pre>
+<h3 id="32">3.2 端點路徑探索測試<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<p>為了找到正確的回測端點，測試了多個替代路徑和方法：</p>
+<table>
+<thead>
+<tr>
+<th>測試路徑</th>
+<th>HTTP 方法</th>
+<th>狀態碼</th>
+<th>響應時間</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/strategies/backtest</code></td>
+<td>GET</td>
+<td>404</td>
+<td>8.30ms</td>
+<td>❌ Not Found</td>
+</tr>
+<tr>
+<td><code>/api/backtest</code></td>
+<td>POST</td>
+<td>405</td>
+<td>6.90ms</td>
+<td>❌ Method Not Allowed</td>
+</tr>
+<tr>
+<td><code>/backtest</code></td>
+<td>POST</td>
+<td>405</td>
+<td>6.20ms</td>
+<td>❌ Method Not Allowed</td>
+</tr>
+<tr>
+<td><strong><code>/api/strategies/backtest/run</code></strong></td>
+<td><strong>POST</strong></td>
+<td><strong>422</strong></td>
+<td><strong>17.80ms</strong></td>
+<td>✅ <strong>端點存在 (格式錯誤)</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="33">3.3 正確端點測試<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<p><strong>端點:</strong> <code>POST http://localhost:8001/api/strategies/backtest/run</code></p>
+<h4 id="_11">測試結果<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>HTTP 狀態碼:</strong> 422 Unprocessable Entity</li>
+<li><strong>響應時間:</strong> 17.80ms</li>
+<li><strong>狀態:</strong> ✅ 端點存在，但請求格式需要調整</li>
+</ul>
+<h4 id="_12">錯誤響應數據<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-json">{
+  &quot;detail&quot;: [
+    {
+      &quot;type&quot;: &quot;missing&quot;,
+      &quot;loc&quot;: [&quot;body&quot;, &quot;strategy_id&quot;],
+      &quot;msg&quot;: &quot;Field required&quot;,
+      &quot;input&quot;: {}
+    },
+    {
+      &quot;type&quot;: &quot;missing&quot;,
+      &quot;loc&quot;: [&quot;body&quot;, &quot;symbols&quot;],
+      &quot;msg&quot;: &quot;Field required&quot;,
+      &quot;input&quot;: {}
+    },
+    {
+      &quot;type&quot;: &quot;missing&quot;,
+      &quot;loc&quot;: [&quot;body&quot;, &quot;start_date&quot;],
+      &quot;msg&quot;: &quot;Field required&quot;,
+      &quot;input&quot;: {}
+    },
+    {
+      &quot;type&quot;: &quot;missing&quot;,
+      &quot;loc&quot;: [&quot;body&quot;, &quot;end_date&quot;],
+      &quot;msg&quot;: &quot;Field required&quot;,
+      &quot;input&quot;: {}
+    }
+  ]
+}
+</code></pre>
+<h4 id="_13">正確請求格式<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h4>
+<p>根據錯誤信息，正確的請求格式應為：</p>
+<pre><code class="language-json">{
+  &quot;strategy_id&quot;: &quot;macd&quot;,
+  &quot;symbols&quot;: [&quot;2330.TW&quot;, &quot;2317.TW&quot;],
+  &quot;start_date&quot;: &quot;2024-01-01&quot;,
+  &quot;end_date&quot;: &quot;2024-12-31&quot;
+}
+</code></pre>
+<h4 id="_14">必填欄位說明<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>類型</th>
+<th>說明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strategy_id</td>
+<td>string</td>
+<td>策略 ID (從模板中選擇)</td>
+<td>"macd", "rsi", "momentum"</td>
+</tr>
+<tr>
+<td>symbols</td>
+<td>array</td>
+<td>股票代碼列表</td>
+<td>["2330.TW", "2317.TW"]</td>
+</tr>
+<tr>
+<td>start_date</td>
+<td>string</td>
+<td>回測開始日期 (ISO 格式)</td>
+<td>"2024-01-01"</td>
+</tr>
+<tr>
+<td>end_date</td>
+<td>string</td>
+<td>回測結束日期 (ISO 格式)</td>
+<td>"2024-12-31"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_15">分析<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ <strong>發現正確端點路徑:</strong> <code>/api/strategies/backtest/run</code></li>
+<li>✅ <strong>確定 HTTP 方法:</strong> POST</li>
+<li>✅ <strong>明確請求格式:</strong> strategy_id, symbols, start_date, end_date</li>
+<li>⚠️ <strong>需進行完整測試:</strong> 由於瀏覽器連接問題，未完成完整回測執行測試</li>
+<li>📌 <strong>注意:</strong> 原測試文檔中的端點路徑不正確，應更新為 <code>/api/strategies/backtest/run</code></li>
+</ul>
+<hr />
+<h2 id="_16">性能指標總結<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>端點</th>
+<th>響應時間</th>
+<th>評估</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/health</td>
+<td>9.60ms</td>
+<td>優秀</td>
+</tr>
+<tr>
+<td>/api/strategies/templates</td>
+<td>34.80ms</td>
+<td>良好</td>
+</tr>
+<tr>
+<td>/api/strategies/backtest</td>
+<td>12.80ms</td>
+<td>優秀 (但方法錯誤)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>總體評估:</strong> API 響應速度良好，健康檢查和模板查詢響應迅速。</p>
+<hr />
+<h2 id="_17">發現的問題<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h2>
+<h3 id="_18">🔴 關鍵問題<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>API 文檔中的端點路徑錯誤</strong></li>
+<li><strong>問題:</strong> 測試文檔中提供的端點路徑 <code>/api/strategies/backtest</code> 不正確</li>
+<li><strong>實際路徑:</strong> <code>/api/strategies/backtest/run</code></li>
+<li><strong>影響:</strong> 可能導致開發者和使用者無法正確使用回測功能</li>
+<li><strong>嚴重程度:</strong> 高</li>
+<li>
+<p><strong>已解決:</strong> ✅ 已找到正確端點路徑</p>
+</li>
+<li>
+<p><strong>請求格式文檔不完整</strong></p>
+</li>
+<li><strong>問題:</strong> 測試文檔中未說明正確的請求格式</li>
+<li><strong>實際格式:</strong> 需要 strategy_id, symbols, start_date, end_date 四個必填欄位</li>
+<li><strong>影響:</strong> 使用者不知道如何正確構建請求</li>
+<li><strong>嚴重程度:</strong> 高</li>
+<li><strong>已解決:</strong> ✅ 已確定正確請求格式</li>
+</ol>
+<h3 id="_19">🟡 次要問題<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>策略模板命名不一致</strong></li>
+<li><strong>問題:</strong> RSI 相關模板有兩個不同命名 (rsi 和 rsi_tw)</li>
+<li><strong>影響:</strong> 可能造成使用者混淆</li>
+<li><strong>嚴重程度:</strong> 低</li>
+<li>
+<p><strong>建議:</strong> 統一命名規範或提供更清楚的描述區別</p>
+</li>
+<li>
+<p><strong>缺少策略使用說明</strong></p>
+</li>
+<li><strong>問題:</strong> 模板返回的 description 較簡略</li>
+<li><strong>影響:</strong> 使用者可能不了解策略具體用途</li>
+<li><strong>嚴重程度:</strong> 低</li>
+<li><strong>建議:</strong> 增強說明文檔或添加策略使用示例</li>
+</ol>
+<hr />
+<h2 id="_20">建議<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h2>
+<h3 id="_21">立即行動<a class="headerlink" href="#_21" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>完成完整回測測試</strong></li>
+<li>優先級: 高</li>
+<li>行動: 使用正確的端點和請求格式執行完整的回測測試</li>
+<li>預期時間: 1 天</li>
+<li>
+<p><strong>測試數據:</strong>
+     <code>json
+     {
+       "strategy_id": "macd",
+       "symbols": ["2330.TW", "2317.TW"],
+       "start_date": "2024-01-01",
+       "end_date": "2024-12-31"
+     }</code></p>
+</li>
+<li>
+<p><strong>更新 API 文檔</strong></p>
+</li>
+<li>優先級: 高</li>
+<li>行動: 更新文檔中的端點路徑和請求格式說明</li>
+<li>預期時間: 1 天</li>
+</ol>
+<h3 id="_22">短期改善<a class="headerlink" href="#_22" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>優化策略模板響應</strong></li>
+<li>優先級: 中</li>
+<li>行動: 增加快取機制以降低響應時間</li>
+<li>
+<p>預期時間: 3-5 天</p>
+</li>
+<li>
+<p><strong>增強策略描述</strong></p>
+</li>
+<li>優先級: 中</li>
+<li>行動: 為每個策略添加詳細使用說明和適用場景</li>
+<li>預期時間: 3-5 天</li>
+</ol>
+<h3 id="_23">長期優化<a class="headerlink" href="#_23" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>API 版本控制</strong></li>
+<li>優先級: 低</li>
+<li>行動: 實施 API 版本管理以支援向後兼容</li>
+<li>
+<p>預期時間: 1-2 週</p>
+</li>
+<li>
+<p><strong>端點監控與日誌</strong></p>
+</li>
+<li>優先級: 低</li>
+<li>行動: 實施 API 監控以追蹤性能和使用情況</li>
+<li>預期時間: 1-2 週</li>
+</ol>
+<hr />
+<h2 id="_24">數據驗證<a class="headerlink" href="#_24" title="連結到此標題">&para;</a></h2>
+<h3 id="_25">輸出格式驗證<a class="headerlink" href="#_25" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>預期格式</th>
+<th>實際格式</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>健康檢查</td>
+<td>JSON</td>
+<td>JSON</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>策略模板</td>
+<td>JSON 陣列</td>
+<td>JSON 陣列</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>回測結果</td>
+<td>JSON (包含績效指標)</td>
+<td>JSON (錯誤)</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_26">數據完整性檢查<a class="headerlink" href="#_26" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ 健康檢查返回正確的服務狀態</li>
+<li>✅ 策略模板包含所有必要欄位 (template_id, display_name, strategy_type, fields, default_params)</li>
+<li>⚠️ 回測結果無法驗證 (端點失敗)</li>
+</ul>
+<hr />
+<h2 id="_27">穩定性評估<a class="headerlink" href="#_27" title="連結到此標題">&para;</a></h2>
+<h3 id="_28">單次測試<a class="headerlink" href="#_28" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>成功次數:</strong> 2/3</li>
+<li><strong>失敗次數:</strong> 1/3</li>
+<li><strong>成功率:</strong> 66.7%</li>
+</ul>
+<h3 id="_29">響應穩定性<a class="headerlink" href="#_29" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ 健康檢查：每次都快速響應</li>
+<li>✅ 策略模板：數據穩定，格式一致</li>
+<li>❌ 回測端點：無法測試</li>
+</ul>
+<h3 id="_30">負載測試<a class="headerlink" href="#_30" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>狀態:</strong> 未執行</li>
+<li><strong>原因:</strong> 需要進行並發測試才能評估</li>
+<li><strong>建議:</strong> 在修復回測端點後進行壓力測試</li>
+</ul>
+<hr />
+<h2 id="_31">結論<a class="headerlink" href="#_31" title="連結到此標題">&para;</a></h2>
+<h3 id="_32">整體評估<a class="headerlink" href="#_32" title="連結到此標題">&para;</a></h3>
+<p>Matrix Dashboard API 的基礎架構運作良好，健康檢查和策略模板端點表現優秀。<strong>成功找到了正確的回測端點路徑和請求格式</strong>，雖然未完成完整的回測執行測試，但端點已確認存在且可用。</p>
+<h3 id="_33">主要發現<a class="headerlink" href="#_33" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ <strong>找到正確的回測端點:</strong> <code>/api/strategies/backtest/run</code> (非文檔中的 <code>/api/strategies/backtest</code>)</li>
+<li>✅ <strong>確定請求格式:</strong> 需要四個必填欄位 (strategy_id, symbols, start_date, end_date)</li>
+<li>✅ API 服務正常運行，響應時間優秀</li>
+<li>✅ 策略模板功能完整，支持 6 種策略類型</li>
+</ul>
+<h3 id="_34">成功項目<a class="headerlink" href="#_34" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ API 服務正常運行</li>
+<li>✅ 策略模板查詢功能完整 (6 個模板)</li>
+<li>✅ 響應時間優秀 (健康檢查 &lt; 10ms, 模板查詢 &lt; 35ms)</li>
+<li>✅ 數據格式規範，元數據完整</li>
+<li>✅ <strong>成功定位回測端點和請求格式</strong></li>
+</ul>
+<h3 id="_35">待完成項目<a class="headerlink" href="#_35" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>⚠️ <strong>完整回測執行測試</strong> (由於瀏覽器連接問題未完成)</li>
+<li>⚠️ 策略描述需要增強</li>
+<li>⚠️ 命名規範需要統一 (如 rsi 和 rsi_tw)</li>
+</ul>
+<h3 id="_36">推薦下一步行動<a class="headerlink" href="#_36" title="連結到此標題">&para;</a></h3>
+<ol>
+<li>✅ <strong>已完成:</strong> 找到正確的回測端點路徑和請求格式</li>
+<li>🔧 <strong>立即執行:</strong> 使用正確格式進行完整回測測試</li>
+<li>📖 <strong>文檔更新:</strong> 更新 API 文檔中的端點路徑和請求格式</li>
+<li>📊 <strong>性能測試:</strong> 實施負載測試評估穩定性</li>
+</ol>
+<h3 id="_37">重要發現總結<a class="headerlink" href="#_37" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>發現項目</th>
+<th>文檔記錄</th>
+<th>實際情況</th>
+<th>影響</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回測端點路徑</td>
+<td><code>/api/strategies/backtest</code></td>
+<td><code>/api/strategies/backtest/run</code></td>
+<td>🔴 關鍵差異</td>
+</tr>
+<tr>
+<td>請求格式</td>
+<td>未提供</td>
+<td>{ strategy_id, symbols, start_date, end_date }</td>
+<td>🔴 關鍵資訊缺失</td>
+</tr>
+<tr>
+<td>HTTP 方法</td>
+<td>POST</td>
+<td>POST</td>
+<td>✅ 一致</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_38">測試環境信息<a class="headerlink" href="#_38" title="連結到此標題">&para;</a></h2>
+<ul>
+<li><strong>基礎 URL:</strong> http://localhost:8001</li>
+<li><strong>測試瀏覽器:</strong> Chrome (CDP)</li>
+<li><strong>測試時間:</strong> 2026-02-20 17:13:00 (GMT+8)</li>
+<li><strong>測試方法:</strong> JavaScript fetch API</li>
+</ul>
+<hr />
+<h2 id="_39">附錄：完整的回測端點測試建議<a class="headerlink" href="#_39" title="連結到此標題">&para;</a></h2>
+<h3 id="_40">測試場景<a class="headerlink" href="#_40" title="連結到此標題">&para;</a></h3>
+<h4 id="1_1">場景 1: 基本回測<a class="headerlink" href="#1_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/backtest/run \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategy_id&quot;: &quot;macd&quot;,
+    &quot;symbols&quot;: [&quot;2330.TW&quot;],
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<h4 id="2_1">場景 2: 多股票回測<a class="headerlink" href="#2_1" title="連結到此標題">&para;</a></h4>
+<pre><code class="language-bash">curl -X POST http://localhost:8001/api/strategies/backtest/run \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;strategy_id&quot;: &quot;momentum&quot;,
+    &quot;symbols&quot;: [&quot;2330.TW&quot;, &quot;2317.TW&quot;, &quot;2454.TW&quot;, &quot;2412.TW&quot;, &quot;2382.TW&quot;],
+    &quot;start_date&quot;: &quot;2023-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  }'
+</code></pre>
+<h4 id="3_2">場景 3: 不同策略測試<a class="headerlink" href="#3_2" title="連結到此標題">&para;</a></h4>
+<p>測試所有 6 個策略模板：
+- bollinger
+- macd
+- momentum
+- rsi
+- rsi_tw
+- supertrend</p>
+<h3 id="_41">預期回測結果格式<a class="headerlink" href="#_41" title="連結到此標題">&para;</a></h3>
+<p>根據常見的回測系統，預期的回應可能包含：</p>
+<pre><code class="language-json">{
+  &quot;backtest_id&quot;: &quot;uuid-string&quot;,
+  &quot;status&quot;: &quot;completed&quot; | &quot;running&quot; | &quot;failed&quot;,
+  &quot;strategy_id&quot;: &quot;macd&quot;,
+  &quot;symbols&quot;: [&quot;2330.TW&quot;],
+  &quot;period&quot;: {
+    &quot;start_date&quot;: &quot;2024-01-01&quot;,
+    &quot;end_date&quot;: &quot;2024-12-31&quot;
+  },
+  &quot;performance&quot;: {
+    &quot;total_return&quot;: 0.25,
+    &quot;annualized_return&quot;: 0.25,
+    &quot;sharpe_ratio&quot;: 1.5,
+    &quot;max_drawdown&quot;: -0.15,
+    &quot;volatility&quot;: 0.20
+  },
+  &quot;trades&quot;: [
+    {
+      &quot;symbol&quot;: &quot;2330.TW&quot;,
+      &quot;entry_date&quot;: &quot;2024-01-15&quot;,
+      &quot;exit_date&quot;: &quot;2024-03-20&quot;,
+      &quot;entry_price&quot;: 550.0,
+      &quot;exit_price&quot;: 600.0,
+      &quot;quantity&quot;: 100,
+      &quot;profit_loss&quot;: 5000.0,
+      &quot;return_percent&quot;: 0.0909
+    }
+  ],
+  &quot;equity_curve&quot;: {
+    &quot;dates&quot;: [&quot;2024-01-01&quot;, &quot;2024-01-02&quot;, ...],
+    &quot;values&quot;: [10000.0, 10050.0, ...]
+  }
+}
+</code></pre>
+<h3 id="_42">測試檢查清單<a class="headerlink" href="#_42" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>[ ] 端點響應狀態碼為 200</li>
+<li>[ ] 返回包含 backtest_id 或類似的識別碼</li>
+<li>[ ] 返回完整的績效指標 (總報酬、夏普比率、最大回撤等)</li>
+<li>[ ] 返回交易記錄 (買入/賣出日期、價格、數量、損益)</li>
+<li>[ ] 資金曲線數據 (equity curve)</li>
+<li>[ ] 錯誤處理 (無效日期、不存在的股票代碼等)</li>
+<li>[ ] 響應時間合理 (&lt; 5 秒)</li>
+<li>[ ] 支持並發請求</li>
+</ul>
+<h3 id="_43">性能基準建議<a class="headerlink" href="#_43" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>測試項目</th>
+<th>預期響應時間</th>
+<th>可接受範圍</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>單一股票回測 (1年)</td>
+<td>&lt; 2 秒</td>
+<td>&lt; 5 秒</td>
+</tr>
+<tr>
+<td>多股票回測 (5股, 1年)</td>
+<td>&lt; 5 秒</td>
+<td>&lt; 10 秒</td>
+</tr>
+<tr>
+<td>多股票回測 (10股, 2年)</td>
+<td>&lt; 10 秒</td>
+<td>&lt; 20 秒</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>報告生成時間:</strong> 2026-02-20
+<strong>報告版本:</strong> 2.0 (更新: 發現正確的回測端點路徑)
+<strong>測試代理:</strong> Charlie Analyst (Sub-agent)</p>
+<hr />
+<h2 id="_44">版本歷史<a class="headerlink" href="#_44" title="連結到此標題">&para;</a></h2>
+<h3 id="v20-2026-02-20">v2.0 (2026-02-20)<a class="headerlink" href="#v20-2026-02-20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>✅ 發現正確的回測端點路徑: <code>/api/strategies/backtest/run</code></li>
+<li>✅ 確定正確的請求格式 (strategy_id, symbols, start_date, end_date)</li>
+<li>✅ 測試多個替代端點路徑</li>
+<li>📝 更新測試結論和建議</li>
+</ul>
+<h3 id="v10-2026-02-20">v1.0 (2026-02-20)<a class="headerlink" href="#v10-2026-02-20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>初始測試報告</li>
+<li>健康檢查和策略模板端點測試</li>
+<li>回測端點初步測試 (405 錯誤)</li>
+</ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

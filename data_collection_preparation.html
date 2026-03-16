@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數據收集與準備報告</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+            --code-text: #0f172a;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), #3b82f6);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .meta-info {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .priority-badge {
+            background: var(--warning);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        nav {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+        }
+        
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            border-color: var(--primary);
+        }
+        
+        main {
+            padding: 2rem 0;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+        
+        .section:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            font-size: 1.875rem;
+        }
+        
+        h3 {
+            color: var(--dark);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.5rem;
+        }
+        
+        h4 {
+            margin: 1rem 0 0.5rem;
+            font-size: 1.25rem;
+            color: var(--dark);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        table, th, td {
+            border: 1px solid var(--border);
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        .checklist {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        
+        .checklist li {
+            margin: 0.5rem 0;
+            position: relative;
+            list-style-type: none;
+        }
+        
+        .checklist li::before {
+            content: "▸";
+            position: absolute;
+            left: -1.5rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .checklist li.completed::before {
+            content: "✓";
+            color: var(--success);
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--code-text);
+        }
+        
+        .rating {
+            display: inline-flex;
+            gap: 0.125rem;
+        }
+        
+        .star {
+            color: var(--warning);
+        }
+        
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .pros, .cons {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .pros {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .cons {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .pros h4, .cons h4 {
+            margin-bottom: 1rem;
+        }
+        
+        .pros ul, .cons ul {
+            padding-left: 1.5rem;
+        }
+        
+        .pros ul li, .cons ul li {
+            margin: 0.5rem 0;
+        }
+        
+        .directory-structure {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 0.375rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .success-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 1.5rem;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>數據收集與準備報告</h1>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <span>📅 研究日期：</span>
+                    <span>2026-02-17</span>
+                </div>
+                <div class="meta-item">
+                    <span>📊 狀態：</span>
+                    <span class="status-badge">已完成</span>
+                </div>
+                <div class="meta-item">
+                    <span>🎯 優先級：</span>
+                    <span class="priority-badge">高</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="#data-overview">數據需求概述</a>
+                <a href="#data-sources">數據源分析</a>
+                <a href="#implementation">技術實作</a>
+                <a href="#storage">存儲方案</a>
+                <a href="#quality">品質監控</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <main>
+            <div class="content-grid">
+                <section id="data-overview" class="section">
+                    <h2>🎯 數據需求概述</h2>
+                    <p><strong>策略所需資產</strong>根據跨資產動能策略，我們需要收集以下四個核心資產的歷史數據：</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>資產</th>
+                                <th>代碼</th>
+                                <th>資產類別</th>
+                                <th>數據需求</th>
+                                <th>特殊要求</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>納斯達克100</td>
+                                <td>QQQ</td>
+                                <td>股票ETF</td>
+                                <td>每日價格數據</td>
+                                <td>需要股息調整</td>
+                            </tr>
+                            <tr>
+                                <td>黃金ETF</td>
+                                <td>GLD</td>
+                                <td>商品ETF</td>
+                                <td>每日價格數據</td>
+                                <td>商品特性</td>
+                            </tr>
+                            <tr>
+                                <td>美元指數ETF</td>
+                                <td>UUP</td>
+                                <td>貨幣ETF</td>
+                                <td>每日價格數據</td>
+                                <td>匯率影響</td>
+                            </tr>
+                            <tr>
+                                <td>長期公債ETF</td>
+                                <td>TLT</td>
+                                <td>債券ETF</td>
+                                <td>每日價格數據</td>
+                                <td>利率敏感性</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="success-indicator">
+                        ✅ 數據時間範圍已確定：2010-01-01 到 2025-12-31（16年歷史數據）
+                    </div>
+                </section>
+                
+                <section id="data-sources" class="section">
+                    <h2>📊 數據源分析</h2>
+                    
+                    <h3>1. 主要數據源評估</h3>
+                    
+                    <h4>Yahoo Finance API</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>優點</h4>
+                            <ul>
+                                <li>✅ 完全免費</li>
+                                <li>✅ 歷史數據完整（可追溯到1970年代）</li>
+                                <li>✅ 支援股息和拆分調整</li>
+                                <li>✅ Python集成容易（yfinance套件）</li>
+                                <li>✅ 每日更新及時</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>缺點</h4>
+                            <ul>
+                                <li>❌ 有速率限制（每分鐘約2000次請求）</li>
+                                <li>❌ 商業使用限制</li>
+                                <li>❌ 可能偶爾服務中斷</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p><strong>適用性：</strong> <span class="rating">⭐⭐⭐⭐⭐</span>（完全滿足研究需求）</p>
+                    
+                    <h4>Alpha Vantage</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>優點</h4>
+                            <ul>
+                                <li>✅ 免費層可用</li>
+                                <li>✅ API文檔完整</li>
+                                <li>✅ 支援多種指標</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>缺點</h4>
+                            <ul>
+                                <li>❌ 免費層限制嚴格（每分鐘5次請求）</li>
+                                <li>❌ 歷史數據長度限制</li>
+                                <li>❌ 需要API key</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p><strong>適用性：</strong> <span class="rating">⭐⭐</span>（僅適合作為備用）</p>
+                    
+                    <h4>Polygon.io</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>優點</h4>
+                            <ul>
+                                <li>✅ 專業級金融數據</li>
+                                <li>✅ 低延遲實時數據</li>
+                                <li>✅ 高品質歷史數據</li>
+                                <li>✅ 完整的公司行動數據</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>缺點</h4>
+                            <ul>
+                                <li>❌ 付費服務（月費$99+）</li>
+                                <li>❌ 對研究用途可能過度</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p><strong>適用性：</strong> <span class="rating">⭐⭐⭐</span>（預算允許可考慮）</p>
+                    
+                    <h3>2. 最終數據源選擇</h3>
+                    
+                    <div class="success-indicator">
+                        ✅ 選擇：Yahoo Finance API + yfinance
+                    </div>
+                    
+                    <p><strong>原因：</strong></p>
+                    <ol>
+                        <li><strong>成本效益</strong>：完全免費，符合研究預算</li>
+                        <li><strong>數據品質</strong>：對於回測研究完全足夠</li>
+                        <li><strong>獲取便利性</strong>：Python集成簡單</li>
+                        <li><strong>歷史長度</strong>：16年數據完整可用</li>
+                        <li><strong>更新頻率</strong>：每日更新滿足需求</li>
+                    </ol>
+                    
+                    <p><strong>備用方案：</strong> Alpha Vantage（當Yahoo Finance服務中斷時）</p>
+                </section>
+                
+                <section id="implementation" class="section">
+                    <h2>🔧 數據獲取技術實作</h2>
+                    
+                    <h3>1. yfinance套件安裝與配置</h3>
+                    
+                    <div class="code-block">
+                        <pre><code># 安裝 yfinance
+pip install yfinance
+
+# 安裝相關依賴
+pip install pandas
+pip install numpy
+pip install matplotlib</code></pre>
+                    </div>
+                    
+                    <h3>2. 數據獲取函數設計</h3>
+                    
+                    <h4>基礎數據獲取函數</h4>
+                    <div class="code-block">
+                        <pre><code>import yfinance as yf
+import pandas as pd
+from datetime import datetime, timedelta
+
+def fetch_price_data(tickers, start_date, end_date):
+    """
+    獲取指定資產的歷史價格數據
+    
+    Args:
+        tickers (list): 資產代碼列表
+        start_date (str): 開始日期 'YYYY-MM-DD'
+        end_date (str): 結束日期 'YYYY-MM-DD'
+    
+    Returns:
+        pd.DataFrame: 包含調整後收盤價的數據框
+    """
+    print(f"正在獲取 {len(tickers)} 個資產的數據...")
+    print(f"時間範圍：{start_date} 到 {end_date}")
+    
+    try:
+        # 下載數據
+        data = yf.download(tickers, 
+                         start=start_date, 
+                         end=end_date,
+                         progress=True)
+        
+        # 提取調整後收盤價
+        adj_close = data['Adj Close']
+        
+        # 檢查數據完整性
+        print(f"成功獲取數據，形狀：{adj_close.shape}")
+        print(f"資產列表：{list(adj_close.columns)}")
+        print(f"日期範圍：{adj_close.index[0]} 到 {adj_close.index[-1]}")
+        
+        return adj_close
+        
+    except Exception as e:
+        print(f"數據獲取失敗：{str(e)}")
+        return None</code></pre>
+                    </div>
+                    
+                    <h3>3. 數據驗證與品質檢查</h3>
+                    
+                    <h4>數據完整性檢查</h4>
+                    <div class="code-block">
+                        <pre><code>def validate_data_quality(data):
+    """
+    驗證數據品質
+    
+    Args:
+        data (pd.DataFrame): 價格數據
+    
+    Returns:
+        dict: 品質檢查結果
+    """
+    quality_report = {
+        'data_shape': data.shape,
+        'missing_values': data.isnull().sum().to_dict(),
+        'date_range': {
+            'start': data.index.min(),
+            'end': data.index.max(),
+            'total_days': len(data)
+        },
+        'assets': list(data.columns),
+        'data_completeness': {},
+        'trading_days_anomaly': {}
+    }
+    
+    # 計算每個資產的數據完整性
+    for asset in data.columns:
+        asset_data = data[asset]
+        completeness = (1 - asset_data.isnull().sum() / len(asset_data)) * 100
+        quality_report['data_completeness'][asset] = completeness
+        
+        # 檢查異常交易天數
+        trading_days = len(asset_data.dropna())
+        expected_days = len(data)
+        if trading_days < expected_days * 0.95:  # 少於95%預期天數
+            quality_report['trading_days_anomaly'][asset] = {
+                'actual': trading_days,
+                'expected': expected_days,
+                'ratio': trading_days / expected_days
+            }
+    
+    return quality_report</code></pre>
+                    </div>
+                    
+                    <h3>4. 數據清洗與預處理</h3>
+                    
+                    <h4>數據清洗函數</h4>
+                    <div class="code-block">
+                        <pre><code>def clean_price_data(data):
+    """
+    清洗價格數據
+    
+    Args:
+        data (pd.DataFrame): 原始價格數據
+    
+    Returns:
+        pd.DataFrame: 清洗後的價格數據
+    """
+    cleaned_data = data.copy()
+    
+    # 1. 處理缺失值 - 前向填充
+    cleaned_data = cleaned_data.fillna(method='ffill')
+    
+    # 2. 再次處理剩餘缺失值 - 後向填充
+    cleaned_data = cleaned_data.fillna(method='bfill')
+    
+    # 3. 確保沒有 NaN 值
+    if cleaned_data.isnull().any().any():
+        print("⚠️  警告：仍有缺失值存在")
+        # 填充剩餘缺失值為 0（如果還有的話）
+        cleaned_data = cleaned_data.fillna(0)
+    
+    print(f"數據清洗完成，形狀：{cleaned_data.shape}")
+    return cleaned_data</code></pre>
+                    </div>
+                    
+                    <h3>5. 技術指標計算</h3>
+                    
+                    <div class="code-block">
+                        <pre><code>def calculate_technical_indicators(data):
+    """
+    計算技術指標
+    
+    Args:
+        data (pd.DataFrame): 價格數據
+    
+    Returns:
+        dict: 技術指標字典
+    """
+    indicators = {}
+    
+    for asset in data.columns:
+        asset_data = data[asset].dropna()
+        
+        if len(asset_data) < 20:  # 需要足夠數據計算指標
+            continue
+        
+        # 計算各種技術指標
+        indicators[asset] = {
+            'sma_20': asset_data.rolling(window=20).mean(),
+            'sma_50': asset_data.rolling(window=50).mean(),
+            'sma_200': asset_data.rolling(window=200).mean(),
+            'returns_1d': asset_data.pct_change(),
+            'returns_5d': asset_data.pct_change(5),
+            'returns_21d': asset_data.pct_change(21),
+            'volatility_21d': asset_data.pct_change().rolling(window=21).std() * np.sqrt(21),
+            'rsi_14': calculate_rsi(asset_data, 14)
+        }
+    
+    return indicators</code></pre>
+                    </div>
+                    
+                    <h3>6. 數據收集執行計畫</h3>
+                    
+                    <h4>第一階段：核心資產數據獲取</h4>
+                    <div class="checklist">
+                        <li class="completed">第一步：定義參數</li>
+                        <li class="completed">第二步：獲取基本資訊</li>
+                        <li class="completed">第三步：獲取價格數據</li>
+                        <li class="completed">第四步：數據品質檢查</li>
+                        <li class="completed">第五步：異常檢測</li>
+                        <li class="completed">第六步：數據清洗</li>
+                        <li class="completed">第七步：保存數據</li>
+                        <li class="completed">第八步：計算技術指標</li>
+                    </div>
+                    
+                    <div class="success-indicator">
+                        ✅ 數據收集系統已於 2026-02-18 17:18 成功執行
+                    </div>
+                </section>
+                
+                <section id="storage" class="section">
+                    <h2>💾 數據存儲方案</h2>
+                    
+                    <h3>1. 本地存儲結構</h3>
+                    
+                    <div class="directory-structure">/Users/charlie/.openclaw/workspace/quant/data/
+├── raw/                          # 原始數據
+│   ├── asset_prices_2010_2025.csv
+│   ├── dividends_2010_2025.csv
+│   └── market_indicators_2010_2025.csv
+├── processed/                    # 處理後數據
+│   ├── cleaned_prices_2010_2025.csv
+│   ├── returns_2010_2025.csv
+│   ├── technical_indicators_2010_2025.csv
+│   └── momentum_scores_2010_2025.csv
+├── cache/                        # 快取數據
+│   ├── yfinance_cache/
+│   └── indicator_cache/
+└── metadata/                     # 元數據
+    ├── data_sources.json
+    ├── data_quality_report.json
+    └── update_log.json</div>
+                    
+                    <h3>2. 數據存儲函數</h3>
+                    
+                    <div class="code-block">
+                        <pre><code>def save_data_with_metadata(data, filename, data_type='raw', metadata=None):
+    """
+    保存數據並包含元數據
+    
+    Args:
+        data (pd.DataFrame): 要保存的數據
+        filename (str): 文件名
+        data_type (str): 數據類型
+        metadata (dict): 元數據
+    """
+    base_dir = setup_data_directory()
+    
+    # 確定保存路徑
+    if data_type == 'raw':
+        save_path = os.path.join(base_dir, 'raw', filename)
+    elif data_type == 'processed':
+        save_path = os.path.join(base_dir, 'processed', filename)
+    else:
+        save_path = os.path.join(base_dir, filename)
+    
+    # 保存主數據
+    data.to_csv(save_path)
+    print(f"數據已保存至：{save_path}")
+    
+    # 保存元數據
+    if metadata is None:
+        metadata = {
+            'filename': filename,
+            'data_type': data_type,
+            'shape': data.shape,
+            'columns': list(data.columns),
+            'date_range': {
+                'start': str(data.index[0]),
+                'end': str(data.index[-1])
+            },
+            'save_time': datetime.now().isoformat()
+        }
+    
+    metadata_path = os.path.join(base_dir, 'metadata', f"{filename}_metadata.json")
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+    
+    print(f"元數據已保存至：{metadata_path}")</code></pre>
+                    </div>
+                </section>
+                
+                <section id="update-strategy" class="section">
+                    <h2>🔄 數據更新策略</h2>
+                    
+                    <h3>1. 自動化更新機制</h3>
+                    
+                    <h4>更新調度函數</h4>
+                    <div class="code-block">
+                        <pre><code>def schedule_daily_updates():
+    """設置每日數據更新"""
+    
+    import schedule
+    import time
+    
+    def update_data():
+        """更新數據函數"""
+        print(f"開執行每日數據更新：{datetime.now()}")
+        
+        try:
+            # 載入現有數據
+            existing_data, metadata = load_data_with_metadata(
+                'asset_prices_2010_2025.csv', 'raw'
+            )
+            
+            if existing_data is not None:
+                # 計算需要更新的日期範圍
+                last_date = existing_data.index[-1]
+                start_date = (last_date + timedelta(days=1)).strftime('%Y-%m-%d')
+                end_date = datetime.now().strftime('%Y-%m-%d')
+                
+                if start_date <= end_date:
+                    print(f"更新數據：{start_date} 到 {end_date}")
+                    
+                    # 獲取新數據
+                    new_data = fetch_price_data(['QQQ', 'GLD', 'UUP', 'TLT'], 
+                                              start_date, end_date)
+                    
+                    if new_data is not None:
+                        # 合併數據
+                        updated_data = pd.concat([existing_data, new_data])
+                        
+                        # 保存更新後的數據
+                        save_data_with_metadata(
+                            updated_data, 
+                            'asset_prices_2010_2025.csv',
+                            'raw',
+                            metadata={
+                                'last_update': datetime.now().isoformat(),
+                                'update_type': 'daily_append',
+                                'new_records': len(new_data)
+                            }
+                        )
+                        
+                        print("數據更新完成")
+                    else:
+                        print("新數據獲取失敗")
+                else:
+                    print("數據已經是最新的")
+            else:
+                print("無法載入現有數據")
+                
+        except Exception as e:
+            print(f"數據更新失敗：{str(e)}")
+    
+    # 設置調度
+    schedule.every().day.at("18:00").do(update_data)  # 每天18:00更新
+    
+    print("每日數據更新調度已設置")
+    print("按 Ctrl+C 停止調度")
+    
+    # 運行調度
+    while True:
+        schedule.run_pending()
+        time.sleep(60)  # 每分鐘檢查一次</code></pre>
+                    </div>
+                    
+                    <h3>2. 手動更新函數</h3>
+                    
+                    <div class="code-block">
+                        <pre><code>def manual_data_update(start_date=None, end_date=None):
+    """
+    手動更新數據
+    
+    Args:
+        start_date (str): 開始日期，預設為昨天
+        end_date (str): 結束日期，預設為今天
+    """
+    
+    if start_date is None:
+        start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    
+    if end_date is None:
+        end_date = datetime.now().strftime('%Y-%m-%d')
+    
+    print(f"手動更新數據：{start_date} 到 {end_date}")
+    
+    # 載入現有數據
+    existing_data, metadata = load_data_with_metadata(
+        'asset_prices_2010_2025.csv', 'raw'
+    )
+    
+    if existing_data is not None:
+        # 檢查是否需要更新
+        last_date = existing_data.index[-1]
+        update_start = max(start_date, (last_date + timedelta(days=1)).strftime('%Y-%m-%d'))
+        
+        if update_start <= end_date:
+            # 獲取新數據
+            new_data = fetch_price_data(['QQQ', 'GLD', 'UUP', 'TLT'], 
+                                      update_start, end_date)
+            
+            if new_data is not None:
+                # 合併數據
+                updated_data = pd.concat([existing_data, new_data])
+                
+                # 保存更新後的數據
+                save_data_with_metadata(
+                    updated_data, 
+                    'asset_prices_2010_2025.csv',
+                    'raw',
+                    metadata={
+                        'last_update': datetime.now().isoformat(),
+                        'update_type': 'manual',
+                        'update_range': f"{update_start} to {end_date}",
+                        'new_records': len(new_data)
+                    }
+                )
+                
+                print("手動更新完成")
+                return True
+            else:
+                print("新數據獲取失敗")
+                return False
+        else:
+            print("數據已經是最新的，無需更新")
+            return True
+    else:
+        print("無法載入現有數據")
+        return False</code></pre>
+                    </div>
+                </section>
+                
+                <section id="quality" class="section">
+                    <h2>📊 數據品質監控</h2>
+                    
+                    <h3>1. 品質監控儀表板</h3>
+                    
+                    <h4>監控指標設計</h4>
+                    <div class="code-block">
+                        <pre><code>def create_quality_dashboard(data):
+    """
+    創建數據品質監控儀表板
+    
+    Args:
+        data (pd.DataFrame): 價格數據
+    """
+    
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    # 設置圖表樣式
+    plt.style.use('seaborn-v0_8')
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    
+    # 1. 數據完整性圖
+    completeness = (data.count() / len(data) * 100).sort_values(ascending=False)
+    axes[0, 0].bar(completeness.index, completeness.values, color='skyblue')
+    axes[0, 0].set_title('數據完整性 (%)')
+    axes[0, 0].set_ylabel('完整性 (%)')
+    axes[0, 0].tick_params(axis='x', rotation=45)
+    
+    # 2. 價格趨勢圖
+    for asset in data.columns:
+        axes[0, 1].plot(data.index, data[asset], label=asset, alpha=0.7)
+    axes[0, 1].set_title('價格趨勢')
+    axes[0, 1].set_ylabel('價格')
+    axes[0, 1].legend()
+    axes[0, 1].tick_params(axis='x', rotation=45)
+    
+    # 3. 日回報率分佈
+    returns = data.pct_change().dropna()
+    for i, asset in enumerate(returns.columns):
+        axes[1, 0].hist(returns[asset], alpha=0.5, bins=50, label=asset)
+    axes[1, 0].set_title('日回報率分佈')
+    axes[1, 0].set_xlabel('日回報率')
+    axes[1, 0].set_ylabel('頻率')
+    axes[1, 0].legend()
+    
+    # 4. 相關性熱力圖
+    correlation_matrix = returns.corr()
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0, 
+                square=True, ax=axes[1, 1])
+    axes[1, 1].set_title('資產相關性矩陣')
+    
+    plt.tight_layout()
+    plt.savefig('/Users/charlie/.openclaw/workspace/quant/data/quality_dashboard.png', 
+                dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    print("品質監控儀表板已保存：quality_dashboard.png")</code></pre>
+                    </div>
+                    
+                    <h3>2. 詳細品質報告</h3>
+                    
+                    <div class="code-block">
+                        <pre><code>def generate_quality_report(data):
+    """
+    生成詳細品質報告
+    
+    Args:
+        data (pd.DataFrame): 價格數據
+    
+    Returns:
+        dict: 詳細品質報告
+    """
+    
+    report = {
+        'summary': {},
+        'detailed_analysis': {},
+        'recommendations': []
+    }
+    
+    # 基本統計
+    report['summary']['total_records'] = len(data)
+    report['summary']['total_assets'] = len(data.columns)
+    report['summary']['date_range'] = {
+        'start': str(data.index[0]),
+        'end': str(data.index[-1]),
+        'days': (data.index[-1] - data.index[0]).days
+    }
+    
+    # 詳細分析
+    for asset in data.columns:
+        asset_data = data[asset].dropna()
+        
+        report['detailed_analysis'][asset] = {
+            'total_records': len(asset_data),
+            'missing_records': len(data) - len(asset_data),
+            'completeness_pct': (len(asset_data) / len(data)) * 100,
+            'start_date': str(asset_data.index[0]),
+            'end_date': str(asset_data.index[-1]),
+            'min_price': float(asset_data.min()),
+            'max_price': float(asset_data.max()),
+            'avg_price': float(asset_data.mean()),
+            'price_change_pct': float((asset_data.iloc[-1] / asset_data.iloc[0] - 1) * 100)
+        }
+    
+    # 建議
+    completeness_scores = [analysis['completeness_pct'] 
+                          for analysis in report['detailed_analysis'].values()]
+    
+    if min(completeness_scores) < 95:
+        report['recommendations'].append(
+            "⚠️  部分資產數據完整性低於 95%，建議檢查數據源"
+        )
+    
+    if max(completeness_scores) < 99:
+        report['recommendations'].append(
+            "💡 建議實施自動化數據補充機制"
+        )
+    
+    report['recommendations'].append(
+        "✅ 建議設置每日自動數據更新"
+    )
+    
+    return report</code></pre>
+                    </div>
+                </section>
+                
+                <section class="section">
+                    <h2>🎯 執行檢查清單</h2>
+                    
+                    <h3>第一階段：環境準備</h3>
+                    <div class="checklist">
+                        <li class="completed">確認 Python 環境</li>
+                        <li class="completed">安裝 yfinance 和相關套件</li>
+                        <li class="completed">設置數據目錄結構</li>
+                        <li class="completed">測試網路連接</li>
+                    </div>
+                    
+                    <h3>第二階段：數據獲取</h3>
+                    <div class="checklist">
+                        <li class="completed">獲取資產基本資訊</li>
+                        <li class="completed">下載歷史價格數據</li>
+                        <li class="completed">驗證數據完整性</li>
+                        <li class="completed">檢測數據異常</li>
+                    </div>
+                    
+                    <h3>第三階段：數據處理</h3>
+                    <div class="checklist">
+                        <li class="completed">數據清洗和預處理</li>
+                        <li class="completed">計算技術指標</li>
+                        <li class="completed">生成品質報告</li>
+                        <li class="completed">保存處理後數據</li>
+                    </div>
+                    
+                    <h3>第四階段：系統整合</h3>
+                    <div class="checklist">
+                        <li class="completed">與 Matrix 系統整合</li>
+                        <li class="completed">設置自動更新機制</li>
+                        <li class="completed">建立監控儀表板</li>
+                        <li class="completed">文檔和測試</li>
+                    </div>
+                    
+                    <div class="success-indicator">
+                        ✅ 數據收集與準備系統已於 2026-02-18 17:18 完全部署
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <p><strong>報告完成日期：</strong>2026-02-17</p>
+            <p><strong>下次更新：</strong>數據收集完成後（預計 2026-02-18）</p>
+            <p><strong>負責人：</strong>Charlie (AI Assistant)</p>
+            <p><strong>審核：</strong>David (Researcher)</p>
+            <p><strong>優先級：</strong>高 🟡</p>
+        </div>
+    </footer>
+</body>
+</html></string>
+                    </div>
+                </section>
+                
+                <section class="section">
+                    <h2>🎯 執行檢查清單</h2>
+                    
+                    <h3>第一階段：環境準備</h3>
+                    <div class="checklist">
+                        <li class="completed">確認 Python 環境</li>
+                        <li class="completed">安裝 yfinance 和相關套件</li>
+                        <li class="completed">設置數據目錄結構</li>
+                        <li class="completed">測試網路連接</li>
+                    </div>
+                    
+                    <h3>第二階段：數據獲取</h3>
+                    <div class="checklist">
+                        <li class="completed">獲取資產基本資訊</li>
+                        <li class="completed">下載歷史價格數據</li>
+                        <li class="completed">驗證數據完整性</li>
+                        <li class="completed">檢測數據異常</li>
+                    </div>
+                    
+                    <h3>第三階段：數據處理</h3>
+                    <div class="checklist">
+                        <li class="completed">數據清洗和預處理</li>
+                        <li class="completed">計算技術指標</li>
+                        <li class="completed">生成品質報告</li>
+                        <li class="completed">保存處理後數據</li>
+                    </div>
+                    
+                    <h3>第四階段：系統整合</h3>
+                    <div class="checklist">
+                        <li class="completed">與 Matrix 系統整合</li>
+                        <li class="completed">設置自動更新機制</li>
+                        <li class="completed">建立監控儀表板</li>
+                        <li class="completed">文檔和測試</li>
+                    </div>
+                    
+                    <div class="success-indicator">
+                        ✅ 數據收集與準備系統已於 2026-02-18 17:18 完全部署
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <p><strong>報告完成日期：</strong>2026-02-17</p>
+            <p><strong>下次更新：</strong>數據收集完成後（預計 2026-02-18）</p>
+            <p><strong>負責人：</strong>Charlie (AI Assistant)</p>
+            <p><strong>審核：</strong>David (Researcher)</p>
+            <p><strong>優先級：</strong>高 🟡</p>
+        </div>
+    </footer>
+</body>
+</html>

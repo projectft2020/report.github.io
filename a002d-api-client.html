@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard API 客戶端分析 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>Dashboard API 客戶端分析</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="dashboard-api">Dashboard API 客戶端分析<a class="headerlink" href="#dashboard-api" title="連結到此標題">&para;</a></h1>
+<p><strong>分析目標：</strong> 分析 Dashboard 前端的 API 調用和服務層，為設計 programmer sub-agent 提供完整的 API 集成知識。</p>
+<p><strong>分析日期：</strong> 2026-02-21</p>
+<p><strong>Dashboard 路徑：</strong> <code>/Users/charlie/Dashboard/</code></p>
+<p><strong>技術棧：</strong>
+- 前端框架：React 19.2.0
+- HTTP 客戶端：Axios 1.13.2
+- 數據獲取：@tanstack/react-query 5.90.16
+- 構建工具：Vite 7.2.4
+- 語言：JavaScript (非 TypeScript)</p>
+<hr />
+<h2 id="1-api">1. API 客戶端配置說明<a class="headerlink" href="#1-api" title="連結到此標題">&para;</a></h2>
+<h3 id="11-axios">1.1 Axios 實例配置<a class="headerlink" href="#11-axios" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/services/api.js</code></p>
+<pre><code class="language-javascript">import axios from 'axios';
+
+const API_BASE_URL = '/api';
+
+const apiClient = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    paramsSerializer: {
+        indexes: null // 使用 format: sma=20&amp;sma=44 而不是 sma[0]=20&amp;sma[1]=44
+    }
+});
+</code></pre>
+<p><strong>關鍵配置：</strong>
+- <code>baseURL</code>: 使用相對路徑 <code>/api</code>，自動適應當前主機（localhost 或遠程 IP）
+- <code>paramsSerializer.indexes: null</code>: 關鍵配置，用於處理數組參數，避免方括號格式
+- 支持自定義 <code>paramsSerializer</code> 以兼容 FastAPI 的參數處理</p>
+<h3 id="12-">1.2 請求攔截器 - 認證處理<a class="headerlink" href="#12-" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">apiClient.interceptors.request.use((config) =&gt; {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+        config.headers['X-Admin-Token'] = token;
+    }
+    return config;
+}, (error) =&gt; {
+    return Promise.reject(error);
+});
+</code></pre>
+<p><strong>認證策略：</strong>
+- 使用 <code>X-Admin-Token</code> header 傳遞管理員令牌
+- Token 存儲在 <code>localStorage</code> 中
+- 統一攔截器自動注入，無需手動添加</p>
+<h3 id="13-react-query">1.3 React Query 全局配置<a class="headerlink" href="#13-react-query" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/main.jsx</code></p>
+<pre><code class="language-javascript">const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: CONFIG.refetchOnWindowFocus,
+            retry: 1,
+            staleTime: CONFIG.staleTime,
+            gcTime: CONFIG.cacheTime,
+            refetchOnMount: CONFIG.refetchOnMount,
+        },
+    },
+});
+</code></pre>
+<p><strong>環境差異：</strong></p>
+<table>
+<thead>
+<tr>
+<th>配置項</th>
+<th>開發環境</th>
+<th>生產環境</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>staleTime</code></td>
+<td>0</td>
+<td>2 分鐘</td>
+<td>開發無快取（測試最新代碼）</td>
+</tr>
+<tr>
+<td><code>gcTime</code></td>
+<td>0</td>
+<td>5 分鐘</td>
+<td>快取保留時間</td>
+</tr>
+<tr>
+<td><code>refetchOnWindowFocus</code></td>
+<td>false</td>
+<td>true</td>
+<td>視窗聚焦時自動刷新</td>
+</tr>
+<tr>
+<td><code>retry</code></td>
+<td>1</td>
+<td>1</td>
+<td>失敗重試次數</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-api">2. 所有 API 函數清單（按模塊分類）<a class="headerlink" href="#2-api" title="連結到此標題">&para;</a></h2>
+<h3 id="21-stockapi-">2.1 StockApi - 股票數據服務<a class="headerlink" href="#21-stockapi-" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/services/api.js</code></p>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getAllStocks()</code></td>
+<td>GET</td>
+<td><code>/stocks</code></td>
+<td>獲取所有追蹤股票的基本概覽</td>
+</tr>
+<tr>
+<td><code>getHistory(symbol, params)</code></td>
+<td>GET</td>
+<td><code>/stocks/{symbol}/history</code></td>
+<td>獲取股票歷史數據及技術指標</td>
+</tr>
+<tr>
+<td><code>getStockDetail(symbol, days)</code></td>
+<td>GET</td>
+<td><code>/stock/{symbol}</code></td>
+<td>獲取單個股票詳細信息</td>
+</tr>
+<tr>
+<td><code>getBatchStocks(symbols, days)</code></td>
+<td>POST</td>
+<td><code>/stocks/batch</code></td>
+<td>批量獲取股票數據（優化版）</td>
+</tr>
+<tr>
+<td><code>addTrackedSymbols(symbols)</code></td>
+<td>POST</td>
+<td><code>/tracked_symbols</code></td>
+<td>添加符號到追蹤列表</td>
+</tr>
+<tr>
+<td><code>deleteTrackedSymbol(symbol)</code></td>
+<td>DELETE</td>
+<td><code>/tracked_symbols/{symbol}</code></td>
+<td>刪除追蹤符號</td>
+</tr>
+<tr>
+<td><code>getTrackedSymbols()</code></td>
+<td>GET</td>
+<td><code>/tracked_symbols</code></td>
+<td>獲取追蹤符號列表</td>
+</tr>
+<tr>
+<td><code>getQuarterlyMetric(symbol, metric)</code></td>
+<td>GET</td>
+<td><code>/stock/{symbol}/quarterly-metric</code></td>
+<td>獲取季度財務指標</td>
+</tr>
+<tr>
+<td><code>getQuarterlyFundamentals(symbol)</code></td>
+<td>GET</td>
+<td><code>/stock/{symbol}/quarterly-fundamentals</code></td>
+<td>獲取季度基本面數據</td>
+</tr>
+</tbody>
+</table>
+<p><strong>使用示例：</strong></p>
+<pre><code class="language-javascript">import { StockApi } from './services/api';
+
+// 獲取股票歷史數據，帶技術指標
+const data = await StockApi.getHistory('AAPL', {
+    sma: [20, 60],
+    macd: true,
+    rsi: true,
+    supertrend: true,
+    extremes: true
+});
+</code></pre>
+<h3 id="22-marketapi-">2.2 MarketApi - 市場數據服務<a class="headerlink" href="#22-marketapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getMovers()</code></td>
+<td>GET</td>
+<td><code>/market/movers</code></td>
+<td>獲取市場漲跌幅榜</td>
+</tr>
+<tr>
+<td><code>getHeatmap(targetDate, market)</code></td>
+<td>GET</td>
+<td><code>/market/heatmap</code></td>
+<td>獲取市場熱力圖</td>
+</tr>
+<tr>
+<td><code>getSectorHeatmap(targetDate, market)</code></td>
+<td>GET</td>
+<td><code>/market/sector-heatmap</code></td>
+<td>獲取板塊熱力圖</td>
+</tr>
+<tr>
+<td><code>getMarketScore()</code></td>
+<td>GET</td>
+<td><code>/market/score</code></td>
+<td>獲取市場評分</td>
+</tr>
+<tr>
+<td><code>getTwDashboard()</code></td>
+<td>GET</td>
+<td><code>/tw/dashboard</code></td>
+<td>獲取台灣市場儀表板</td>
+</tr>
+<tr>
+<td><code>getTwPulse()</code></td>
+<td>GET</td>
+<td><code>/tw/pulse</code></td>
+<td>獲取台灣市場脈動</td>
+</tr>
+<tr>
+<td><code>getTwHeatmap(mode)</code></td>
+<td>GET</td>
+<td><code>/market/heatmap</code></td>
+<td>獲取台灣市場熱力圖</td>
+</tr>
+<tr>
+<td><code>getTwSectorHeatmap()</code></td>
+<td>GET</td>
+<td><code>/tw/heatmap/sector</code></td>
+<td>獲取台灣板塊熱力圖</td>
+</tr>
+<tr>
+<td><code>getTwStockDetail(symbol, days)</code></td>
+<td>GET</td>
+<td><code>/stocks/{symbol}</code></td>
+<td>獲取台灣股票詳情</td>
+</tr>
+<tr>
+<td><code>getTwStockHistory(symbol, days)</code></td>
+<td>GET</td>
+<td><code>/stocks/{symbol}/history</code></td>
+<td>獲取台灣股票歷史</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-systemapi-">2.3 SystemApi - 系統操作服務<a class="headerlink" href="#23-systemapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>refreshSymbol(symbol, full)</code></td>
+<td>POST</td>
+<td><code>/system/refresh</code></td>
+<td>刷新單個股票數據</td>
+</tr>
+<tr>
+<td><code>refreshAll(full)</code></td>
+<td>POST</td>
+<td><code>/system/refresh-all</code></td>
+<td>刷新所有股票數據</td>
+</tr>
+<tr>
+<td><code>getStatus()</code></td>
+<td>GET</td>
+<td><code>/system/status</code></td>
+<td>獲取系統狀態</td>
+</tr>
+<tr>
+<td><code>backfillStrategies(years, batch_size)</code></td>
+<td>POST</td>
+<td><code>/system/backfill-strategies</code></td>
+<td>回填策略數據</td>
+</tr>
+<tr>
+<td><code>yfinanceTwFast(years)</code></td>
+<td>POST</td>
+<td><code>/system/yfinance-tw-fast</code></td>
+<td>快速獲取台灣數據</td>
+</tr>
+<tr>
+<td><code>yfinanceTwRetryFailed(years)</code></td>
+<td>POST</td>
+<td><code>/system/yfinance-tw-retry-failed</code></td>
+<td>重試失敗的台灣數據</td>
+</tr>
+<tr>
+<td><code>backfillSymbol(symbol, years, market)</code></td>
+<td>POST</td>
+<td><code>/system/backfill-symbol</code></td>
+<td>回填單個符號歷史</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-screenerapi-">2.4 ScreenerApi - 篩選器服務<a class="headerlink" href="#24-screenerapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getSuperTrend(params)</code></td>
+<td>GET</td>
+<td><code>/market/screener/supertrend</code></td>
+<td>SuperTrend 篩選</td>
+</tr>
+<tr>
+<td><code>getMacd(params)</code></td>
+<td>GET</td>
+<td><code>/market/screener/macd</code></td>
+<td>MACD 篩選</td>
+</tr>
+<tr>
+<td><code>getExtremes(params)</code></td>
+<td>GET</td>
+<td><code>/market/screener/extremes</code></td>
+<td>極值篩選</td>
+</tr>
+<tr>
+<td><code>getRsi(params)</code></td>
+<td>GET</td>
+<td><code>/market/screener/rsi</code></td>
+<td>RSI 篩選</td>
+</tr>
+<tr>
+<td><code>getFIndex(params)</code></td>
+<td>GET</td>
+<td><code>/market/screener/f-index</code></td>
+<td>F-Index 篩選</td>
+</tr>
+<tr>
+<td><code>getSectorSimilarity(targetDate, market)</code></td>
+<td>GET</td>
+<td><code>/sector/similarity</code></td>
+<td>板塊相似性分析</td>
+</tr>
+</tbody>
+</table>
+<h3 id="25-momentumapi-">2.5 MomentumApi - 動量策略服務<a class="headerlink" href="#25-momentumapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getIndex(years, config)</code></td>
+<td>GET</td>
+<td><code>/momentum/index</code></td>
+<td>美國動量指數</td>
+</tr>
+<tr>
+<td><code>getType2Index(years, config)</code></td>
+<td>GET</td>
+<td><code>/momentum/type2</code></td>
+<td>動量指數 Type 2</td>
+</tr>
+<tr>
+<td><code>getTwIndex(years, config)</code></td>
+<td>GET</td>
+<td><code>/momentum/tw-index</code></td>
+<td>台灣動量指數</td>
+</tr>
+<tr>
+<td><code>getTwIndexType2(years, config)</code></td>
+<td>GET</td>
+<td><code>/momentum/tw-index-type2</code></td>
+<td>台灣動量指數 Type 2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-allocationapi-">2.6 AllocationApi - 資產配置服務<a class="headerlink" href="#26-allocationapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get6040Strategy(years)</code></td>
+<td>GET</td>
+<td><code>/strategy/6040</code></td>
+<td>60/40 策略回測</td>
+</tr>
+<tr>
+<td><code>getAllWeatherStrategy(years)</code></td>
+<td>GET</td>
+<td><code>/strategy/all-weather</code></td>
+<td>All-Weather 策略</td>
+</tr>
+<tr>
+<td><code>getGoldenButterflyStrategy(years)</code></td>
+<td>GET</td>
+<td><code>/strategy/golden-butterfly</code></td>
+<td>Golden Butterfly 策略</td>
+</tr>
+<tr>
+<td><code>getStrategySummary()</code></td>
+<td>GET</td>
+<td><code>/strategy/summary</code></td>
+<td>策略摘要</td>
+</tr>
+</tbody>
+</table>
+<h3 id="27-dualmomentumapi-">2.7 DualMomentumApi - 雙動量服務<a class="headerlink" href="#27-dualmomentumapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runBacktest(config)</code></td>
+<td>POST</td>
+<td><code>/dual-momentum/backtest</code></td>
+<td>運行雙動量回測</td>
+</tr>
+<tr>
+<td><code>getDefaultConfig()</code></td>
+<td>GET</td>
+<td><code>/dual-momentum/default-config</code></td>
+<td>獲取默認配置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="28-historyapi-">2.8 HistoryApi - 回測歷史服務<a class="headerlink" href="#28-historyapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list(strategyType, market, limit)</code></td>
+<td>GET</td>
+<td><code>/history</code></td>
+<td>獲取回測歷史列表</td>
+</tr>
+<tr>
+<td><code>getById(id)</code></td>
+<td>GET</td>
+<td><code>/history/{id}</code></td>
+<td>獲取單條回測記錄</td>
+</tr>
+<tr>
+<td><code>save(data)</code></td>
+<td>POST</td>
+<td><code>/history</code></td>
+<td>保存回測結果</td>
+</tr>
+<tr>
+<td><code>delete(id)</code></td>
+<td>DELETE</td>
+<td><code>/history/{id}</code></td>
+<td>刪除回測記錄</td>
+</tr>
+<tr>
+<td><code>compare(ids)</code></td>
+<td>POST</td>
+<td><code>/history/compare</code></td>
+<td>比較多個回測結果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="29-analysisapi-">2.9 AnalysisApi - 分析儀表板服務<a class="headerlink" href="#29-analysisapi-" title="連結到此標題">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>方法</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getRegimePerformance(runId, params)</code></td>
+<td>GET</td>
+<td><code>/analysis/regime-performance/{runId}</code></td>
+<td>市場週期績效分析</td>
+</tr>
+<tr>
+<td><code>getCrossValidation(runId)</code></td>
+<td>GET</td>
+<td><code>/analysis/cross-validation/{runId}</code></td>
+<td>交叉驗證結果</td>
+</tr>
+<tr>
+<td><code>getSignalQuality(runId)</code></td>
+<td>GET</td>
+<td><code>/analysis/signal-quality/{runId}</code></td>
+<td>信號質量分析</td>
+</tr>
+<tr>
+<td><code>getMonteCarlo(runId)</code></td>
+<td>GET</td>
+<td><code>/analysis/monte-carlo/{runId}</code></td>
+<td>蒙特卡羅模擬</td>
+</tr>
+<tr>
+<td><code>getPerformanceAttribution(runId)</code></td>
+<td>GET</td>
+<td><code>/analysis/attribution/{runId}</code></td>
+<td>績效歸因分析</td>
+</tr>
+<tr>
+<td><code>getScenarioAnalysis(runId, params)</code></td>
+<td>GET</td>
+<td><code>/analysis/scenario/{runId}</code></td>
+<td>情境分析</td>
+</tr>
+<tr>
+<td><code>getShadowTrading(runId, params)</code></td>
+<td>GET</td>
+<td><code>/analysis/shadow-trading/{runId}</code></td>
+<td>影子交易分析</td>
+</tr>
+<tr>
+<td><code>getTornadoAnalysis(runId, params)</code></td>
+<td>GET</td>
+<td><code>/analysis/tornado/{runId}</code></td>
+<td>龍捲風圖分析</td>
+</tr>
+</tbody>
+</table>
+<h3 id="210-api-usestrategyapi">2.10 策略系統 API (useStrategyAPI)<a class="headerlink" href="#210-api-usestrategyapi" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/pages/StrategyPage/hooks/useStrategyAPI.js</code></p>
+<p><strong>基礎端點：</strong> <code>/api/strategies</code></p>
+<h4 id="templates">Templates（策略模板）<a class="headerlink" href="#templates" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getTemplates()</code></td>
+<td><code>/templates</code></td>
+<td>獲取所有模板</td>
+</tr>
+<tr>
+<td><code>getTemplate(templateId)</code></td>
+<td><code>/templates/{id}</code></td>
+<td>獲取單個模板</td>
+</tr>
+<tr>
+<td><code>getTemplateMarkets(templateId)</code></td>
+<td><code>/templates/{id}/markets</code></td>
+<td>獲取模板支持的市场</td>
+</tr>
+</tbody>
+</table>
+<h4 id="markets">Markets（市場）<a class="headerlink" href="#markets" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getMarkets()</code></td>
+<td><code>/markets</code></td>
+<td>獲取所有市场</td>
+</tr>
+<tr>
+<td><code>getMarket(marketId)</code></td>
+<td><code>/markets/{id}</code></td>
+<td>獲取單個市场</td>
+</tr>
+</tbody>
+</table>
+<h4 id="universes">Universes（股票池）<a class="headerlink" href="#universes" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getUniverses(marketId)</code></td>
+<td><code>/universes</code></td>
+<td>獲取股票池列表</td>
+</tr>
+<tr>
+<td><code>getUniverse(universeId)</code></td>
+<td><code>/universes/{id}</code></td>
+<td>獲取單個股票池</td>
+</tr>
+</tbody>
+</table>
+<h4 id="strategy-instances">Strategy Instances（策略實例）<a class="headerlink" href="#strategy-instances" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getInstances(filters)</code></td>
+<td><code>/instances</code></td>
+<td>獲取策略實例列表</td>
+</tr>
+<tr>
+<td><code>getInstance(instanceId)</code></td>
+<td><code>/crud/strategies</code></td>
+<td>獲取單個策略實例</td>
+</tr>
+<tr>
+<td><code>createInstance(data)</code></td>
+<td><code>/instances</code></td>
+<td>創建策略實例</td>
+</tr>
+<tr>
+<td><code>updateInstance(instanceId, updates)</code></td>
+<td><code>/crud/strategies/{id}</code></td>
+<td>更新策略實例</td>
+</tr>
+<tr>
+<td><code>deleteInstance(instanceId)</code></td>
+<td><code>/crud/strategies/{id}</code></td>
+<td>刪除策略實例</td>
+</tr>
+<tr>
+<td><code>duplicateInstance(instanceId, newName)</code></td>
+<td>-</td>
+<td>複製策略實例</td>
+</tr>
+</tbody>
+</table>
+<h4 id="backtest">Backtest（回測）<a class="headerlink" href="#backtest" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runBacktest(request)</code></td>
+<td><code>/backtest/run</code></td>
+<td>運行自定義回測</td>
+</tr>
+<tr>
+<td><code>runSavedBacktest(strategyId)</code></td>
+<td><code>/backtest/run-saved</code></td>
+<td>運行已保存策略回測</td>
+</tr>
+</tbody>
+</table>
+<h4 id="history">History（歷史）<a class="headerlink" href="#history" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getHistory(filters)</code></td>
+<td><code>/history</code></td>
+<td>獲取回測歷史</td>
+</tr>
+<tr>
+<td><code>getHistoryRecord(recordId)</code></td>
+<td><code>/history/{id}</code></td>
+<td>獲取單條記錄</td>
+</tr>
+<tr>
+<td><code>deleteHistoryRecord(recordId)</code></td>
+<td><code>/history/{id}</code></td>
+<td>刪除記錄</td>
+</tr>
+</tbody>
+</table>
+<h4 id="resonance">Resonance（共振信號）<a class="headerlink" href="#resonance" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getResonanceStrategies()</code></td>
+<td><code>/resonance/strategies</code></td>
+<td>獲取共振策略列表</td>
+</tr>
+<tr>
+<td><code>getResonanceSymbol(symbol, ...)</code></td>
+<td><code>/resonance/symbol/{symbol}</code></td>
+<td>獲取單個符號共振</td>
+</tr>
+<tr>
+<td><code>discoverResonanceSymbols(options)</code></td>
+<td><code>/resonance/discover</code></td>
+<td>發現高共振符號</td>
+</tr>
+<tr>
+<td><code>getDailySummary(options)</code></td>
+<td><code>/resonance/summary</code></td>
+<td>獲取每日摘要</td>
+</tr>
+<tr>
+<td><code>runManualScan(market, date)</code></td>
+<td><code>/resonance/scan</code></td>
+<td>手動運行掃描</td>
+</tr>
+</tbody>
+</table>
+<h4 id="showcase">Showcase（展示）<a class="headerlink" href="#showcase" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getShowcaseConfigs()</code></td>
+<td><code>/showcase/configs</code></td>
+<td>獲取展示配置</td>
+</tr>
+<tr>
+<td><code>getShowcaseData(strategyType, ...)</code></td>
+<td><code>/showcase/{type}</code></td>
+<td>獲取展示數據</td>
+</tr>
+<tr>
+<td><code>clearShowcaseCache()</code></td>
+<td><code>/showcase/cache</code></td>
+<td>清除展示快取</td>
+</tr>
+</tbody>
+</table>
+<h4 id="comparison">Comparison（比較）<a class="headerlink" href="#comparison" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getComparison(options)</code></td>
+<td><code>/comparison</code></td>
+<td>獲取策略比較</td>
+</tr>
+</tbody>
+</table>
+<h4 id="cache">Cache（快取管理）<a class="headerlink" href="#cache" title="連結到此標題">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>函數名</th>
+<th>端點</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getCacheStats()</code></td>
+<td><code>/cache/stats</code></td>
+<td>獲取快取統計</td>
+</tr>
+<tr>
+<td><code>clearCache()</code></td>
+<td><code>/cache</code></td>
+<td>清除快取</td>
+</tr>
+</tbody>
+</table>
+<h3 id="211-fetch">2.11 其他直接 fetch 調用<a class="headerlink" href="#211-fetch" title="連結到此標題">&para;</a></h3>
+<p><strong>動量頁面：</strong>
+- <code>GET /api/momentum/{market}?years=...&amp;top_n=...&amp;weighting_method=...</code>
+- <code>GET /api/allocation/{strategy}?years=...&amp;rebalance_freq=...</code></p>
+<p><strong>信號儀表板：</strong>
+- <code>GET /api/resonance/home?market=...&amp;target_date=...&amp;signal_mode=...</code>
+- <code>GET /api/resonance/strategies</code>
+- <code>GET /api/resonance/summary?market=...&amp;target_date=...</code></p>
+<p><strong>期貨回測：</strong>
+- <code>POST /api/futures-backtest/run</code></p>
+<hr />
+<h2 id="3">3. 錯誤處理和重試策略<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 請求保護機制<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/utils/requestProtection.js</code></p>
+<p><strong>核心功能：</strong>
+- 請求去重（防止重複請求）
+- 請求超時處理（默認 30 秒）
+- 指數退避重試（最多 3 次）
+- AbortController 支持（可取消）
+- 處理 React Strict Mode 雙重調用</p>
+<p><strong>配置：</strong></p>
+<pre><code class="language-javascript">const CONFIG = {
+  debounceMs: 300,           // 去重時間窗口
+  maxConcurrent: 1,          // 最大併發請求數
+  maxRetries: 3,             // 最大重試次數
+  baseRetryDelay: 1000,      // 基礎重試延遲（ms）
+  requestTimeout: 30000,     // 請求超時（ms）
+};
+</code></pre>
+<p><strong>重試策略：</strong>
+- 僅對服務器錯誤（5xx）重試
+- 不重試客戶端錯誤（4xx），包括 429（速率限制）
+- 指數退避：<code>baseRetryDelay * 2^attempt</code></p>
+<p><strong>使用示例：</strong></p>
+<pre><code class="language-javascript">import { protectedFetch } from '../utils/requestProtection';
+
+const response = await protectedFetch('/api/strategies/templates', {
+  method: 'GET',
+  headers: { 'Content-Type': 'application/json' }
+});
+</code></pre>
+<h3 id="32-react-query">3.2 React Query 重試配置<a class="headerlink" href="#32-react-query" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/hooks/useApiCache.js</code></p>
+<pre><code class="language-javascript">retry: (failureCount, error) =&gt; {
+    // 不重試客戶端錯誤（4xx）
+    if (error?.response?.status &gt;= 400 &amp;&amp; error?.response?.status &lt; 500) {
+        return false;
+    }
+    // 不重試速率限制（429）
+    if (error?.response?.status === 429) {
+        return false;
+    }
+    // 重試服務器錯誤最多 2 次
+    return failureCount &lt; 2;
+}
+</code></pre>
+<h3 id="33-react-errorboundary">3.3 React ErrorBoundary<a class="headerlink" href="#33-react-errorboundary" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/components/shared/ErrorBoundary.jsx</code></p>
+<p><strong>功能：</strong>
+- 捕獲組件樹中的 JavaScript 錯誤
+- 顯示友好錯誤 UI
+- 開發模式下顯示詳細錯誤信息
+- 支持自定義 fallback UI
+- 提供重試和返回首頁按鈕</p>
+<p><strong>使用示例：</strong></p>
+<pre><code class="language-jsx">&lt;ErrorBoundary&gt;
+  &lt;YourComponent /&gt;
+&lt;/ErrorBoundary&gt;
+</code></pre>
+<h3 id="34">3.4 統一錯誤處理模式<a class="headerlink" href="#34" title="連結到此標題">&para;</a></h3>
+<p><strong>在組件中處理錯誤：</strong></p>
+<pre><code class="language-javascript">const { data, error, isLoading } = useApiCache(
+    ['momentum', market, years],
+    fetchMomentumData
+);
+
+if (isLoading) return &lt;LoadingSpinner /&gt;;
+if (error) return &lt;ErrorMessage message={error.message} /&gt;;
+</code></pre>
+<p><strong>在異步操作中處理錯誤：</strong></p>
+<pre><code class="language-javascript">try {
+    const response = await api.post('/api/backtest/run', config);
+    setResults(response.data);
+} catch (err) {
+    const errorMsg = err.response?.data?.detail || err.message || 'Failed to run backtest';
+    setError(errorMsg);
+}
+</code></pre>
+<hr />
+<h2 id="4-api">4. API 類型定義和接口<a class="headerlink" href="#4-api" title="連結到此標題">&para;</a></h2>
+<p><strong>注意：</strong> 項目使用 JavaScript 而非 TypeScript，類型通過 JSDoc 註釋和 API 響應結構定義。</p>
+<h3 id="41-jsdoc">4.1 JSDoc 註釋示例<a class="headerlink" href="#41-jsdoc" title="連結到此標題">&para;</a></h3>
+<p><strong>股票 API：</strong></p>
+<pre><code class="language-javascript">/**
+ * Get stock history with optional indicators.
+ * @param {string} symbol - Stock symbol (e.g., 'AAPL')
+ * @param {Object} params - Query parameters
+ * @param {Array&lt;number&gt;} params.sma - SMA periods (e.g., [20, 60])
+ * @param {boolean} params.macd - Include MACD indicator
+ * @param {boolean} params.rsi - Include RSI indicator
+ * @param {boolean} params.supertrend - Include SuperTrend indicator
+ * @param {boolean} params.extremes - Include Extremes indicator
+ * @returns {Promise&lt;Object&gt;} Stock history data with indicators
+ */
+getHistory: async (symbol, params = {}) =&gt; {
+    const response = await apiClient.get(`/stocks/${symbol}/history`, { params });
+    return response.data;
+}
+</code></pre>
+<h3 id="42">4.2 常見數據結構<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<p><strong>股票數據響應：</strong></p>
+<pre><code class="language-javascript">{
+    symbol: &quot;AAPL&quot;,
+    dates: [&quot;2024-01-01&quot;, &quot;2024-01-02&quot;, ...],
+    close: [150.0, 152.3, ...],
+    volume: [5000000, 5500000, ...],
+    // Indicators (optional)
+    sma_20: [148.5, 149.2, ...],
+    rsi: [55.3, 57.2, ...],
+    macd: { signal: [...], macd: [...], histogram: [...] }
+}
+</code></pre>
+<p><strong>回測結果響應：</strong></p>
+<pre><code class="language-javascript">{
+    run_id: &quot;uuid&quot;,
+    strategy_id: &quot;strategy-123&quot;,
+    status: &quot;completed&quot;,
+    metrics: {
+        total_return: 0.25,
+        cagr: 0.08,
+        mdd: -0.15,
+        sharpe: 1.2,
+        win_rate: 0.65,
+        volatility: 0.12
+    },
+    equity_curve: [...],
+    return_series: [...],
+    trades: [...]
+}
+</code></pre>
+<p><strong>共振信號響應：</strong></p>
+<pre><code class="language-javascript">{
+    resonance_symbols: [
+        {
+            symbol: &quot;AAPL&quot;,
+            resonance_count: 4,
+            strategies: [&quot;rsi&quot;, &quot;macd&quot;, &quot;supertrend&quot;, &quot;momentum&quot;],
+            last_signal: &quot;buy&quot;
+        }
+    ],
+    by_strategy: {
+        &quot;rsi&quot;: { symbols: [...], signal: &quot;buy&quot; }
+    }
+}
+</code></pre>
+<h3 id="43">4.3 配置常量<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/config.js</code></p>
+<pre><code class="language-javascript">export const CONFIG = {
+    enableAutoRefresh: false,
+    autoRefreshInterval: 0,
+    enableStatusPolling: false,
+    statusPollInterval: 0,
+    staleTime: IS_DEV ? 0 : 2 * 60 * 1000,
+    cacheTime: IS_DEV ? 0 : 5 * 60 * 1000,
+    refetchOnWindowFocus: !IS_DEV,
+    refetchOnMount: false,
+    enableDebugLogging: IS_DEV,
+};
+</code></pre>
+<hr />
+<h2 id="5-react-query-hooks">5. React Query Hooks 使用模式<a class="headerlink" href="#5-react-query-hooks" title="連結到此標題">&para;</a></h2>
+<h3 id="51-useapicache-hook">5.1 useApiCache - 統一查詢 Hook<a class="headerlink" href="#51-useapicache-hook" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/hooks/useApiCache.js</code></p>
+<p><strong>基本使用：</strong></p>
+<pre><code class="language-javascript">import { useApiCache } from '../hooks/useApiCache';
+
+const { data, isLoading, error, refetch } = useApiCache(
+    'strategies',
+    () =&gt; api.getStrategies()
+);
+</code></pre>
+<p><strong>帶參數的查詢：</strong></p>
+<pre><code class="language-javascript">const { data } = useApiCache(
+    ['strategy', id],
+    () =&gt; api.getStrategy(id),
+    { staleTime: 10 * 60 * 1000 }
+);
+</code></pre>
+<p><strong>返回值：</strong>
+- <code>data</code>: API 響應數據
+- <code>isLoading</code>: 加載狀態
+- <code>error</code>: 錯誤對象
+- <code>refetch</code>: 手動刷新函數
+- <code>isFetching</code>: 請求進行中（包含後台刷新）</p>
+<h3 id="52-useapimutation-hook">5.2 useApiMutation - 統一變異 Hook<a class="headerlink" href="#52-useapimutation-hook" title="連結到此標題">&para;</a></h3>
+<p><strong>位置：</strong> <code>/Users/charlie/Dashboard/frontend/src/hooks/useApiCache.js</code></p>
+<p><strong>基本使用：</strong></p>
+<pre><code class="language-javascript">import { useApiMutation } from '../hooks/useApiCache';
+
+const { mutate, mutateAsync, isLoading, error } = useApiMutation(
+    (data) =&gt; api.createStrategy(data),
+    {
+        invalidateKeys: ['strategies'],
+        onSuccess: () =&gt; console.log('Strategy created'),
+    }
+);
+
+// 使用
+mutate(strategyData);
+// 或
+await mutateAsync(strategyData);
+</code></pre>
+<p><strong>特性：</strong>
+- 自動使相關查詢失效（invalidateKeys）
+- 支持成功/失敗回調
+- 支持 <code>mutate</code>（不返回 Promise）和 <code>mutateAsync</code>（返回 Promise）</p>
+<h3 id="53">5.3 快取預設<a class="headerlink" href="#53" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">export const cachePresets = {
+    static: {
+        staleTime: 60 * 60 * 1000,   // 1 小時
+        gcTime: 24 * 60 * 60 * 1000, // 24 小時
+    },
+    user: {
+        staleTime: 5 * 60 * 1000,   // 5 分鐘
+        gcTime: 30 * 60 * 1000,     // 30 分鐘
+    },
+    dynamic: {
+        staleTime: 30 * 1000,       // 30 秒
+        gcTime: 5 * 60 * 1000,      // 5 分鐘
+    },
+    realtime: {
+        staleTime: 0,
+        gcTime: 0,
+    },
+};
+</code></pre>
+<h3 id="54">5.4 快取工具函數<a class="headerlink" href="#54" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">import { cacheUtils } from '../hooks/useApiCache';
+
+// 使查詢失效
+cacheUtils.invalidate('strategies');
+
+// 清除所有快取
+cacheUtils.clear();
+
+// 預取數據
+await cacheUtils.prefetch('strategies', () =&gt; api.getStrategies());
+
+// 獲取快取數據
+const data = cacheUtils.getData('strategies');
+
+// 設置快取數據
+cacheUtils.setData('strategies', newData);
+</code></pre>
+<h3 id="55">5.5 頁面級別使用模式<a class="headerlink" href="#55" title="連結到此標題">&para;</a></h3>
+<p><strong>MomentumPage:</strong></p>
+<pre><code class="language-javascript">const fetchMomentumData = useCallback(async () =&gt; {
+    const params = new URLSearchParams({
+        years,
+        top_n: config.top_n,
+        weighting_method: config.weighting_method,
+        // ...
+    });
+    const response = await fetch(`/api/momentum/${market.toLowerCase()}?${params}`);
+    return response.json();
+}, [market, config, years]);
+
+const { data, isLoading, error, refetch } = useApiCache(
+    ['momentum', market, years, JSON.stringify(config)],
+    fetchMomentumData,
+    momentumCacheConfig
+);
+</code></pre>
+<p><strong>AllocationPage:</strong></p>
+<pre><code class="language-javascript">const fetchAllocationData = useCallback(async () =&gt; {
+    const response = await fetch(
+        `/api/allocation/${selectedStrategy}?years=${years}&amp;rebalance_freq=${rebalanceFreq}`
+    );
+    return response.json();
+}, [selectedStrategy, years, rebalanceFreq]);
+
+const { data, isLoading, error, refetch } = useApiCache(
+    ['allocation', selectedStrategy, years, rebalanceFreq],
+    fetchAllocationData,
+    allocationCacheConfig
+);
+</code></pre>
+<h3 id="56-queryclient">5.6 全局 QueryClient 訪問<a class="headerlink" href="#56-queryclient" title="連結到此標題">&para;</a></h3>
+<p><strong>在 main.jsx 中暴露：</strong></p>
+<pre><code class="language-javascript">if (typeof window !== 'undefined') {
+    window.__queryClient = queryClient;
+}
+</code></pre>
+<p><strong>在任何地方使用：</strong></p>
+<pre><code class="language-javascript">const queryClient = window.__queryClient;
+queryClient.invalidateQueries({ queryKey: ['strategies'] });
+</code></pre>
+<hr />
+<h2 id="6-api">6. API 集成最佳實踐<a class="headerlink" href="#6-api" title="連結到此標題">&para;</a></h2>
+<h3 id="61-react-query">6.1 統一使用 React Query<a class="headerlink" href="#61-react-query" title="連結到此標題">&para;</a></h3>
+<p><strong>✅ 推薦做法：</strong></p>
+<pre><code class="language-javascript">import { useApiCache } from '../hooks/useApiCache';
+
+const { data, isLoading, error } = useApiCache(
+    'endpoint',
+    fetchFunction,
+    { staleTime: 2 * 60 * 1000 }
+);
+</code></pre>
+<p><strong>❌ 不推薦：</strong></p>
+<pre><code class="language-javascript">// 直接使用 fetch/axios（缺少快取、重試、去重）
+useEffect(() =&gt; {
+    fetch('/api/data').then(res =&gt; res.json()).then(setData);
+}, []);
+</code></pre>
+<h3 id="62-protectedfetch">6.2 使用 protectedFetch 防止重複請求<a class="headerlink" href="#62-protectedfetch" title="連結到此標題">&para;</a></h3>
+<p><strong>適用場景：</strong>
+- React Strict Mode 環境
+- 頻繁觸發的用戶操作
+- 可能並發發起相同請求的情況</p>
+<p><strong>使用示例：</strong></p>
+<pre><code class="language-javascript">import { protectedFetch } from '../utils/requestProtection';
+
+const data = await protectedFetch('/api/endpoint', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+});
+</code></pre>
+<h3 id="63">6.3 統一錯誤處理<a class="headerlink" href="#63" title="連結到此標題">&para;</a></h3>
+<p><strong>在組件層面：</strong></p>
+<pre><code class="language-javascript">const { data, error, isLoading } = useApiCache(key, fetcher);
+
+if (isLoading) return &lt;LoadingSpinner /&gt;;
+if (error) return &lt;ErrorAlert message={error.message} /&gt;;
+if (!data) return &lt;EmptyState /&gt;;
+</code></pre>
+<p><strong>在 API 層面：</strong></p>
+<pre><code class="language-javascript">try {
+    const response = await api.post('/api/backtest/run', config);
+    return response.data;
+} catch (err) {
+    // 提取詳細錯誤信息
+    const errorMsg = err.response?.data?.detail || err.message || 'Operation failed';
+    throw new Error(errorMsg);
+}
+</code></pre>
+<h3 id="64">6.4 合理設置快取策略<a class="headerlink" href="#64" title="連結到此標題">&para;</a></h3>
+<p><strong>靜態數據（策略配置、市場列表）：</strong></p>
+<pre><code class="language-javascript">useApiCache('markets', fetchMarkets, cachePresets.static);
+</code></pre>
+<p><strong>用戶數據（用戶策略、投資組合）：</strong></p>
+<pre><code class="language-javascript">useApiCache(['user-strategies', userId], fetchUserStrategies, cachePresets.user);
+</code></pre>
+<p><strong>動態數據（市場價格、信號）：</strong></p>
+<pre><code class="language-javascript">useApiCache('market-prices', fetchMarketPrices, cachePresets.dynamic);
+</code></pre>
+<p><strong>實時數據（回測結果）：</strong></p>
+<pre><code class="language-javascript">useApiCache(['backtest', runId], fetchBacktestResult, cachePresets.realtime);
+</code></pre>
+<h3 id="65-query-keys">6.5 使用 Query Keys 進行精確控制<a class="headerlink" href="#65-query-keys" title="連結到此標題">&para;</a></h3>
+<p><strong>多參數查詢：</strong></p>
+<pre><code class="language-javascript">// 使用數組作為 key，參數變化時自動重新獲取
+useApiCache(
+    ['momentum', market, years, JSON.stringify(config)],
+    fetchMomentumData
+);
+</code></pre>
+<p><strong>使相關查詢失效：</strong></p>
+<pre><code class="language-javascript">// 使所有動量查詢失效
+cacheUtils.invalidate(['momentum']);
+
+// 使特定市場的動量查詢失效
+cacheUtils.invalidate(['momentum', 'US']);
+</code></pre>
+<h3 id="66-mutation-postputdelete">6.6 使用 Mutation 處理 POST/PUT/DELETE<a class="headerlink" href="#66-mutation-postputdelete" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">const createStrategy = useApiMutation(
+    (data) =&gt; api.createStrategy(data),
+    {
+        invalidateKeys: ['strategies'],
+        onSuccess: (data) =&gt; {
+            console.log('Strategy created:', data);
+            // 導航到新策略頁面
+            navigate(`/strategies/builder?instance_id=${data.instance_id}`);
+        },
+        onError: (error) =&gt; {
+            console.error('Failed to create strategy:', error);
+            alert(`Failed: ${error.message}`);
+        }
+    }
+);
+
+createStrategy.mutate(strategyData);
+</code></pre>
+<h3 id="67">6.7 環境感知配置<a class="headerlink" href="#67" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">import { IS_DEV } from '../config';
+
+const cacheConfig = IS_DEV ? {} : {
+    staleTime: 2 * 60 * 1000,  // 開發無快取
+    gcTime: 10 * 60 * 1000,
+};
+
+const { data } = useApiCache(key, fetcher, cacheConfig);
+</code></pre>
+<h3 id="68-api">6.8 組件拆分與 API 獲取<a class="headerlink" href="#68-api" title="連結到此標題">&para;</a></h3>
+<p><strong>保持 API 邏輯在自定義 Hooks 中：</strong></p>
+<pre><code class="language-javascript">// hooks/useMomentum.js
+export const useMomentum = () =&gt; {
+    const [market, setMarket] = useState('US');
+    const [config, setConfig] = useState(defaultConfig);
+
+    const { data, isLoading, error } = useApiCache(
+        ['momentum', market, JSON.stringify(config)],
+        fetchMomentumData
+    );
+
+    return { market, setMarket, config, setConfig, data, isLoading, error };
+};
+</code></pre>
+<p><strong>組件只關心 UI：</strong></p>
+<pre><code class="language-javascript">const MomentumPage = () =&gt; {
+    const { market, config, data, isLoading } = useMomentum();
+    // 只渲染 UI
+};
+</code></pre>
+<h3 id="69-localstorage">6.9 使用 localStorage 持久化偏好<a class="headerlink" href="#69-localstorage" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">// 讀取保存的偏好
+const getInitialMarket = () =&gt; {
+    return localStorage.getItem('marketScanner_market') || 'US';
+};
+
+// 保存變更
+const handleMarketChange = (market) =&gt; {
+    setSelectedMarket(market);
+    localStorage.setItem('marketScanner_market', market);
+};
+</code></pre>
+<h3 id="610">6.10 統一的認證處理<a class="headerlink" href="#610" title="連結到此標題">&para;</a></h3>
+<p><strong>使用 utils/auth.js：</strong></p>
+<pre><code class="language-javascript">import { getAuthHeaders, isAdmin, isVIP } from '../utils/auth';
+
+// 獲取認證 headers
+const headers = getAuthHeaders();
+
+// 檢查權限
+if (!isAdmin()) {
+    return &lt;Navigate to=&quot;/&quot; replace /&gt;;
+}
+
+// 自動處理（通過 axios 攔截器）
+// 無需手動添加 token
+</code></pre>
+<h3 id="611">6.11 防止記憶體洩漏<a class="headerlink" href="#611" title="連結到此標題">&para;</a></h3>
+<p><strong>清理 useEffect：</strong></p>
+<pre><code class="language-javascript">useEffect(() =&gt; {
+    const fetchData = async () =&gt; {
+        // ...
+    };
+    fetchData();
+
+    // 如果設置了輪詢，需要清理
+    const interval = setInterval(fetchData, 5000);
+    return () =&gt; clearInterval(interval);
+}, [dependencies]);
+</code></pre>
+<h3 id="612-suspense-errorboundary">6.12 使用 Suspense 和 ErrorBoundary<a class="headerlink" href="#612-suspense-errorboundary" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">&lt;Suspense fallback={&lt;LoadingSpinner /&gt;}&gt;
+    &lt;ErrorBoundary&gt;
+        &lt;YourComponent /&gt;
+    &lt;/ErrorBoundary&gt;
+&lt;/Suspense&gt;
+</code></pre>
+<h3 id="613">6.13 日誌和調試<a class="headerlink" href="#613" title="連結到此標題">&para;</a></h3>
+<p><strong>開發環境啟用日誌：</strong></p>
+<pre><code class="language-javascript">import { IS_DEV } from '../config';
+
+if (IS_DEV &amp;&amp; options.enableDebugLogging) {
+    console.debug('[useApiCache] Query:', { queryKey, options });
+}
+</code></pre>
+<h3 id="614">6.14 避免無限循環<a class="headerlink" href="#614" title="連結到此標題">&para;</a></h3>
+<p><strong>使用 useCallback 和依賴數組：</strong></p>
+<pre><code class="language-javascript">const fetchData = useCallback(async () =&gt; {
+    const response = await fetch(`/api/data?param=${value}`);
+    return response.json();
+}, [value]); // 正確的依賴
+
+useEffect(() =&gt; {
+    fetchData();
+}, [fetchData]); // fetchData 變化時重新執行
+</code></pre>
+<h3 id="615-debounce-throttle">6.15 使用 debounce 和 throttle<a class="headerlink" href="#615-debounce-throttle" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">import { debounce, throttle } from '../utils/requestProtection';
+
+// 防抖：防止頻繁觸發
+const debouncedSearch = debounce((query) =&gt; {
+    // 發起搜索請求
+}, 300);
+
+// 節流：限制調用頻率
+const throttledRefresh = throttle(() =&gt; {
+    // 刷新數據
+}, 1000);
+</code></pre>
+<hr />
+<h2 id="7">7. 架構總結<a class="headerlink" href="#7" title="連結到此標題">&para;</a></h2>
+<h3 id="71">7.1 分層架構<a class="headerlink" href="#71" title="連結到此標題">&para;</a></h3>
+<pre><code>┌─────────────────────────────────────┐
+│         React Components           │  (UI 層)
+├─────────────────────────────────────┤
+│      Custom Hooks (useXXX)        │  (狀態管理層)
+├─────────────────────────────────────┤
+│   useApiCache / useApiMutation    │  (數據獲取層)
+├─────────────────────────────────────┤
+│     React Query (TanStack)        │  (快取和狀態)
+├─────────────────────────────────────┤
+│   protectedFetch (請求保護)        │  (網絡層)
+├─────────────────────────────────────┤
+│      Axios Instance               │  (HTTP 客戶端)
+├─────────────────────────────────────┤
+│           Backend API              │  (FastAPI 後端)
+└─────────────────────────────────────┘
+</code></pre>
+<h3 id="72">7.2 數據流<a class="headerlink" href="#72" title="連結到此標題">&para;</a></h3>
+<pre><code>用戶操作 → UI 組件 → Hook → useApiCache
+                                ↓
+                        React Query 檢查快取
+                                ↓
+                    (miss) → protectedFetch → Axios → Backend API
+                                ↓
+                        React Query 快取數據
+                                ↓
+                        組件重新渲染
+</code></pre>
+<h3 id="73">7.3 關鍵設計模式<a class="headerlink" href="#73" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>統一 API 客戶端：</strong> 所有 HTTP 請求通過 Axios 實例</li>
+<li><strong>統一認證：</strong> 攔截器自動注入 token</li>
+<li><strong>統一錯誤處理：</strong> React Query + ErrorBoundary</li>
+<li><strong>統一快取策略：</strong> React Query + 環境配置</li>
+<li><strong>請求保護：</strong> 去重、超時、重試</li>
+<li><strong>Hooks 抽象：</strong> 封裝業務邏輯，組件只關注 UI</li>
+<li><strong>Query Keys 管理：</strong> 精確控制快取失效</li>
+<li><strong>環境感知：</strong> 開發/生產不同的配置</li>
+</ol>
+<hr />
+<h2 id="8-programmer-sub-agent">8. 為 Programmer Sub-Agent 的建議<a class="headerlink" href="#8-programmer-sub-agent" title="連結到此標題">&para;</a></h2>
+<h3 id="81">8.1 遵循現有模式<a class="headerlink" href="#81" title="連結到此標題">&para;</a></h3>
+<p>當創建新功能時：
+1. 在 <code>services/api.js</code> 中添加 API 函數（如果需要）
+2. 創建自定義 Hook（如 <code>useFeatureName</code>）
+3. 在 Hook 中使用 <code>useApiCache</code> 或 <code>useApiMutation</code>
+4. 在組件中使用 Hook，不直接調用 API</p>
+<h3 id="82">8.2 使用組件庫<a class="headerlink" href="#82" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">import { Skeleton, EmptyState, EmptyStatePresets } from '../../components/shared';
+
+// Loading 狀態
+&lt;Skeleton.PageLoader text=&quot;Loading...&quot; /&gt;
+
+// 空狀態
+&lt;EmptyStatePresets.NoData /&gt;
+
+// 錯誤狀態
+&lt;EmptyStatePresets.LoadError message={error.message} /&gt;
+</code></pre>
+<h3 id="83">8.3 使用現有常量和工具<a class="headerlink" href="#83" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">import { IS_DEV, CONFIG } from '../config';
+import { cachePresets } from '../hooks/useApiCache';
+import { getAuthHeaders, isAdmin } from '../utils/auth';
+import { protectedFetch } from '../utils/requestProtection';
+</code></pre>
+<h3 id="84">8.4 錯誤處理模板<a class="headerlink" href="#84" title="連結到此標題">&para;</a></h3>
+<pre><code class="language-javascript">try {
+    const response = await api.someMethod(params);
+    return response.data;
+} catch (err) {
+    const errorMsg = err.response?.data?.detail || err.message || 'Operation failed';
+    console.error('Error details:', err);
+    throw new Error(errorMsg);
+}
+</code></pre>
+<h3 id="85">8.5 命名約定<a class="headerlink" href="#85" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>API 函數：<code>getSomething</code>, <code>createSomething</code>, <code>updateSomething</code>, <code>deleteSomething</code></li>
+<li>Hooks：<code>useFeatureName</code>（駝峰命名）</li>
+<li>文件命名：<code>FeaturePage/index.jsx</code>, <code>hooks/useFeature.js</code></li>
+<li>Query Keys：<code>['feature', id]</code> 或 <code>['feature', param1, param2]</code></li>
+</ul>
+<hr />
+<h2 id="9">9. 參考文檔和資源<a class="headerlink" href="#9" title="連結到此標題">&para;</a></h2>
+<h3 id="91">9.1 關鍵文件路徑<a class="headerlink" href="#91" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>API 客戶端：<code>/Users/charlie/Dashboard/frontend/src/services/api.js</code></li>
+<li>React Query 配置：<code>/Users/charlie/Dashboard/frontend/src/hooks/useApiCache.js</code></li>
+<li>請求保護：<code>/Users/charlie/Dashboard/frontend/src/utils/requestProtection.js</code></li>
+<li>認證工具：<code>/Users/charlie/Dashboard/frontend/src/utils/auth.js</code></li>
+<li>配置文件：<code>/Users/charlie/Dashboard/frontend/src/config.js</code></li>
+<li>ErrorBoundary：<code>/Users/charlie/Dashboard/frontend/src/components/shared/ErrorBoundary.jsx</code></li>
+<li>入口文件：<code>/Users/charlie/Dashboard/frontend/src/main.jsx</code></li>
+</ul>
+<h3 id="92">9.2 外部文檔<a class="headerlink" href="#92" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>React Query 文檔：https://tanstack.com/query/latest</li>
+<li>Axios 文檔：https://axios-http.com/</li>
+<li>React Router：https://reactrouter.com/</li>
+</ul>
+<hr />
+<p><strong>分析完成</strong></p>
+<p><strong>生成者：</strong> Charlie Analyst Sub-agent</p>
+<p><strong>最後更新：</strong> 2026-02-21</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

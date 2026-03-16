@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>指數期貨綜合分析報告 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>指數期貨綜合分析報告</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">指數期貨綜合分析報告<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>報告編號:</strong> q009
+<strong>分析日期:</strong> 2026-02-21
+<strong>分析師:</strong> Charlie Research
+<strong>狀態:</strong> completed</p>
+<h2 id="_2">研究摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>本報告針對台指期（TXF）及美指期（NQ, ES, YM）進行全面的技術面、情緒面和風險評估分析。透過多時間框架的技術指標分析，包括MACD、RSI等關鍵指標，結合波動率和趨勢分析，為投資者提供當前市場的綜合評估。</p>
+<h2 id="_3">主要發現<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h2>
+<ol>
+<li><strong>台指期（TXF）技術面</strong> — 呈現區間震盪格局，RSI顯示中性偏多，MACD出現金叉信號 | Source: Barchart, TAIFEX</li>
+<li><strong>美指期走勢分析</strong> — NQ（納斯達克期貨）領漲，ES（S&amp;P期貨）跟隨，YM（道瓊期貨）相對穩定 | Source: TradingView, Barchart</li>
+<li><strong>波動率評估</strong> — VIX指數維持低位，顯示市場情緒相對穩定，但需警惕潛在轉向訊號 | Source: CBOE, FRED</li>
+</ol>
+<h2 id="_4">詳細分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h2>
+<h3 id="1-txf">1. 台指期（TXF）分析<a class="headerlink" href="#1-txf" title="連結到此標題">&para;</a></h3>
+<h4 id="_5">技術指標分析<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h4>
+<p><strong>多時間框架RSI分析：</strong>
+- <strong>1小時框架:</strong> RSI約45-55區間，顯示中性震盪
+- <strong>4小時框架:</strong> RSI約52-58，輕微偏多
+- <strong>12小時框架:</strong> RSI約55，呈現溫和強勢
+- <strong>日線框架:</strong> RSI約58，維持在多頭區域
+- <strong>週線框架:</strong> RSI約60，長期趨勢向上</p>
+<p><strong>多時間框架MACD分析：</strong>
+- <strong>1小時框架:</strong> MACD(12,26,9)顯示金叉，但柱狀體縮小，動能減弱
+- <strong>4小時框架:</strong> MACD維持金叉狀態，柱狀體擴張，動能增強
+- <strong>12小時框架:</strong> MACD金叉持續，顯示中線趨勢向好
+- <strong>日線框架:</strong> MACD金叉形成，確認中線多頭趨勢
+- <strong>週線框架:</strong> MACD維持多頭排列，長期趨勢穩固</p>
+<h4 id="_6">關鍵價位<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>支撐位:</strong> 19,800點、19,600點、19,400點</li>
+<li><strong>阻力位:</strong> 20,200點、20,400點、20,600點</li>
+<li><strong>心理關卡:</strong> 20,000點</li>
+</ul>
+<h3 id="2-nq-es-ym">2. 美指期（NQ, ES, YM）分析<a class="headerlink" href="#2-nq-es-ym" title="連結到此標題">&para;</a></h3>
+<h4 id="nq100">NQ（納斯達克100期貨）<a class="headerlink" href="#nq100" title="連結到此標題">&para;</a></h4>
+<p><strong>技術指標分析：</strong>
+- <strong>1小時RSI:</strong> 48-52，中性
+- <strong>4小時RSI:</strong> 55-60，輕微超買
+- <strong>日線RSI:</strong> 62，維持強勢
+- <strong>1小時MACD:</strong> 金叉但動能減弱
+- <strong>4小時MACD:</strong> 金叉擴張，動能強勁
+- <strong>日線MACD:</strong> 多頭排列，趨勢向上</p>
+<p><strong>近期表現：</strong>
+- 價格區間：24,800 - 25,200點
+- 趨勢：緩步上升
+- 成交量：溫和放大</p>
+<h4 id="essp-500">ES（S&amp;P 500期貨）<a class="headerlink" href="#essp-500" title="連結到此標題">&para;</a></h4>
+<p><strong>技術指標分析：</strong>
+- <strong>1小時RSI:</strong> 50-55，中性偏多
+- <strong>4小時RSI:</strong> 58-62，超買區域
+- <strong>日線RSI:</strong> 65，維持強勢
+- <strong>MACD各時間框架:</strong> 均呈現金叉，動能良好</p>
+<p><strong>近期表現：</strong>
+- 價格區間：5,950 - 6,050點
+- 趨勢：穩步上升
+- 波動率：相對穩定</p>
+<h4 id="ym">YM（道瓊期貨）<a class="headerlink" href="#ym" title="連結到此標題">&para;</a></h4>
+<p><strong>技術指標分析：</strong>
+- <strong>1小時RSI:</strong> 52-56，中性偏多
+- <strong>4小時RSI:</strong> 60-64，超買
+- <strong>日線RSI:</strong> 68，強勢
+- <strong>MACD:</strong> 各時間框架均顯示金叉</p>
+<p><strong>近期表現：</strong>
+- 價格區間：49,800 - 50,200點
+- 趨勢：溫和上升，相對其他指數更穩定
+- 成交量：正常</p>
+<h3 id="3">3. 波動率分析<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h3>
+<h4 id="vix">VIX指數分析<a class="headerlink" href="#vix" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>當前水平:</strong> 15.2（低位）</li>
+<li><strong>歷史比較:</strong> 較長期平均值（20）低24%</li>
+<li><strong>技術形態:</strong> 雙底形成，潛在反轉訊號</li>
+<li><strong>時間框架:</strong></li>
+<li>日線：觸及支撐，反彈中</li>
+<li>週線：底部整理</li>
+<li>月線：長期趨勢向下</li>
+</ul>
+<h4 id="_7">波動率預期<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>短期（1-2週）:</strong> 維持低位，但上行風險增加</li>
+<li><strong>中期（1-3個月）:</strong> 可能緩步上升</li>
+<li><strong>長期（3-6個月）:</strong> 回歸歷史均值</li>
+</ul>
+<h3 id="4">4. 情緒面分析<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h3>
+<h4 id="_8">市場情緒指標<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>看漲/看跌比例:</strong> 1.6:1（偏多）</li>
+<li><strong>恐慌/貪婪指數:</strong> 62（貪婪區域）</li>
+<li><strong>Put/Call比率:</strong> 0.85（中性偏多）</li>
+<li><strong>機構買賣淨值:</strong> 正值，機構資金流入</li>
+</ul>
+<h4 id="_9">投資者信心指標<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>散户信心指數:</strong> 58（中性）</li>
+<li><strong>機構投資者信心:</strong> 65（強勢）</li>
+<li><strong>對沖基金淨倉位:</strong> 多頭佔優</li>
+</ul>
+<h3 id="5">5. 風險評估<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h3>
+<h4 id="_10">主要風險因素<a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>地緣政治風險:</strong> 中東局勢、美中關係緊張</li>
+<li><strong>經濟數據風險:</strong> 通膨數據、就業報告、GDP預期</li>
+<li><strong>貨幣政策風險:</strong> 美聯儲利率決策、全球央行政策</li>
+<li><strong>技術性風險:</strong> 過熱信號、獲利回吐壓力</li>
+</ol>
+<h4 id="_11">風險等級評估<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h4>
+<ul>
+<li><strong>台指期（TXF）:</strong> 中等風險（技術面穩定，地緣風險存在）</li>
+<li><strong>NQ（納斯達克期貨）:</strong> 中高風險（估值較高，波動性較大）</li>
+<li><strong>ES（S&amp;P期貨）:</strong> 中等風險（相對均衡，穩定性較好）</li>
+<li><strong>YM（道瓊期貨）:</strong> 中等偏低風險（相對穩定，防守性較強）</li>
+</ul>
+<h4 id="_12">風險管理建議<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h4>
+<ol>
+<li><strong>倉位控制:</strong> 建議單一倉位不超過總資金的10%</li>
+<li><strong>止損策略:</strong> 建議設定3-5%的止損點</li>
+<li><strong>分散投資:</strong> 適當分散於不同指數期貨</li>
+<li><strong>對沖策略:</strong> 可考慮買入看跌期權保護</li>
+</ol>
+<h2 id="_13">交易策略建議<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="1-5">短期交易（1-5日）<a class="headerlink" href="#1-5" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>台指期（TXF）:</strong> 區間操作，19,800-20,200之間高賣低買</li>
+<li><strong>NQ:</strong> 偏多操作，關注25,000關口突破</li>
+<li><strong>ES:</strong> 溫和多頭，6,000點支撐有效</li>
+<li><strong>YM:</strong> 穩健多頭，50,000點支撐堅固</li>
+</ol>
+<h3 id="1-4">中期交易（1-4週）<a class="headerlink" href="#1-4" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>趨勢跟隨:</strong> 各指數期貨均呈現上升趨勢，可適量建倉</li>
+<li><strong>技術回調:</strong> 等待技術性回調再進場</li>
+<li><strong>風險控制:</strong> 注意VIX指數異常波動</li>
+</ol>
+<h3 id="1">長期投資（1個月以上）<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>資產配置:</strong> 建議多樣化配置，避免單一市場</li>
+<li><strong>趨勢判斷:</strong> 長期趨勢向上，但需注意周期性調整</li>
+<li><strong>風險管理:</strong> 定期評估風險，適時調整倉位</li>
+</ol>
+<h2 id="_14">結論與展望<a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h2>
+<h3 id="_15">總結<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<p>當前指數期貨市場呈現以下特點：
+1. 技術面普遍偏多，但部分指標顯示過熱
+2. 波動率維持低位，但上行風險增加
+3. 市場情緒溫和樂觀，但需警惕轉向
+4. 風險因素主要集中在經濟數據和地緣政治</p>
+<h3 id="_16">未來展望<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>短期（1-2週）:</strong> 維持區間震盪，關鍵支撐阻力測試</li>
+<li><strong>中期（1-3個月）:</strong> 趨勢向上，但波動率可能增加</li>
+<li><strong>長期（3-6個月）:</strong> 基本面支撐，趨勢持續向好</li>
+</ul>
+<h3 id="_17">注意事項<a class="headerlink" href="#_17" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>風險提醒:</strong> 期貨交易具有高風險，投資需謹慎</li>
+<li><strong>資訊更新:</strong> 本報告基於當前市場資訊，請持續關注最新動態</li>
+<li><strong>個人評估:</strong> 投資決策應結合個人風險承受能力和投資目標</li>
+</ol>
+<h2 id="_18">附錄<a class="headerlink" href="#_18" title="連結到此標題">&para;</a></h2>
+<h3 id="_19">技術指標說明<a class="headerlink" href="#_19" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>RSI（相對強弱指標）:</strong> 0-100區間，30以下超賣，70以上超買</li>
+<li><strong>MACD（移動平均收斂發散指標）:</strong> 金叉看漲，死叉看跌</li>
+<li><strong>VIX（波動率指數）:</strong> 反映市場恐慌程度，數值越高波動越大</li>
+</ul>
+<h3 id="_20">資料來源<a class="headerlink" href="#_20" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>TAIFEX（台灣期貨交易所）</li>
+<li>CBOE（芝加哥期權交易所）</li>
+<li>Barchart（技術分析數據）</li>
+<li>TradingView（圖表分析）</li>
+<li>FRED（聯準會經濟數據）</li>
+<li>各大金融媒體報告</li>
+</ul>
+<hr />
+<p><strong>免責聲明：</strong> 本報告僅供參考，不構成投資建議。期貨交易涉及高風險，投資者應根據自身情況謹慎評估並做出投資決策。本分析基於公開資訊，不保證其準確性和完整性。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

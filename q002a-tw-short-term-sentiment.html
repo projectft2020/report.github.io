@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台股市場情緒分析（短期） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>台股市場情緒分析（短期）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">台股市場情緒分析（短期）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務編號：</strong> q002a<br />
+<strong>分析師：</strong> Charlie Research<br />
+<strong>分析日期：</strong> 2026-02-21<br />
+<strong>數據截止：</strong> 2026年2月中旬  </p>
+<h2 id="_2">研究摘要<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<p>本次分析顯示台股市場短期情緒呈現「偏多謹慎」的特徵。三大法人買賣超呈現震盪格局，融資餘額略有減少，外資態度分化。AI相關板塊持續吸引資金流入，但市場波動性指標顯示投資人謹慎情緒仍在，短期內需注意技術性回檔風險。</p>
+<h2 id="1">1. 情緒指標分析<a class="headerlink" href="#1" title="連結到此標題">&para;</a></h2>
+<h3 id="11">1.1 融資融券餘額變化<a class="headerlink" href="#11" title="連結到此標題">&para;</a></h3>
+<p><strong>融資餘額（單位：億元）</strong>
+- 2026/02/11：3,680.5億元（減少45.4億元）
+- 2026/02/10：3,725.9億元（減少28.8億元）
+- 2026/02/09：3,754.7億元（增加14.8億元）
+- 2026/02/06：3,739.9億元（減少89.3億元）</p>
+<p><strong>融券餘額（單位：張）</strong>
+- 2026/02/11：248,353張（減少1,771張）
+- 2026/02/10：250,124張（減少9,864張）
+- 2026/02/09：259,988張（減少2,276張）
+- 2026/02/06：262,264張（減少4,443張）</p>
+<p><strong>分析：</strong>
+- 融資餘額呈現緩步下降趨勢，顯示散戶加碼意願減弱
+- 融券餘額持續減少，空頭力道轉弱
+- 融資減少、融券也減少，反映市場進入觀望期</p>
+<h3 id="12">1.2 外資買賣超（單位：億元）<a class="headerlink" href="#12" title="連結到此標題">&para;</a></h3>
+<p><strong>近三日外資買賣超表現：</strong>
+- 2026/02/11：外資買超523.6億元
+- 2026/02/10：外資買超557.11億元
+- 2026/02/09：外資買超247.69億元</p>
+<p><strong>分析：</strong>
+- 外資連續三日買超，顯示國際資金對台股信心回溫
+- 買超金額依日遞減，顯示追價意願有所收斂
+- 外資成為近期市場主要支撐力道</p>
+<h3 id="13">1.3 大戶籌碼變化<a class="headerlink" href="#13" title="連結到此標題">&para;</a></h3>
+<p><strong>三大法人買賣超總計（單位：億元）：</strong>
+- 2026/02/11：總計買超578.26億元
+- 2026/02/10：總計買超632.04億元
+- 2026/02/09：總計買超363.42億元
+- 2026/02/06：總計賣超192.75億元</p>
+<p><strong>分解分析：</strong>
+- <strong>外資</strong>：由賣轉買，且買超幅度擴大
+- <strong>投信</strong>：小幅買超，操作相對保守
+- <strong>自營商</strong>：買賣互見，避險部位增加</p>
+<h3 id="14">1.4 散戶指標<a class="headerlink" href="#14" title="連結到此標題">&para;</a></h3>
+<p><strong>觀察指標：</strong>
+- 融資使用率：約11.6-11.8%（處於中等水平）
+- 散戶買賣超：缺乏具體數據，但從融資餘額減少推斷散戶偏保守
+- 市場活躍度：日成交金額維持在6,500億元以上，顯示市場仍具流動性</p>
+<h2 id="2">2. 資金流向分析<a class="headerlink" href="#2" title="連結到此標題">&para;</a></h2>
+<h3 id="21">2.1 三大法人買賣超結構<a class="headerlink" href="#21" title="連結到此標題">&para;</a></h3>
+<p><strong>資金動向特徵：</strong>
+- 外資：轉為積極買超，AI半導體為主要標的
+- 投信：保守操作，小幅買超為主
+- 自營商：避險意識增強，自營避險部位增加</p>
+<p><strong>近期趨勢：</strong>
+- 外資由1月下旬的連續賣超轉為買超
+- 三大法人合力買超，顯示機構投資人對短期行情偏多</p>
+<h3 id="22">2.2 類股資金流向<a class="headerlink" href="#22" title="連結到此標題">&para;</a></h3>
+<p><strong>熱門板塊資金流向：</strong>
+- <strong>AI供應鏈</strong>：持續吸引大單買盤
+- <strong>半導體</strong>：資金持續匯入，設備股表現突出
+- <strong>記憶體</strong>：供需改善，資金回籠
+- <strong>光通訊</strong>：AI需求帶動，資金流入增加</p>
+<p><strong>分析：</strong>
+- AI相關產業鏈持續獲得資青睞
+- 傳統產業資金流入相對緩慢
+- 市場資金明顯偏好成長性產業</p>
+<h3 id="23">2.3 熱點板塊資金<a class="headerlink" href="#23" title="連結到此標題">&para;</a></h3>
+<p><strong>六大熱門族群：</strong>
+1. <strong>記憶體</strong>：AI需求強勁，供需缺口擴大
+2. <strong>半導體廠務與設備</strong>：台積電擴產帶動
+3. <strong>光通訊</strong>：高速運算需求激增
+4. <strong>散熱</strong>：AI伺服器高功率需求
+5. <strong>電源供應</strong>：BBU供應鏈受惠
+6. <strong>CCL/PCB</strong>：AI伺服器板需求增加</p>
+<h2 id="3">3. 市場情緒特徵<a class="headerlink" href="#3" title="連結到此標題">&para;</a></h2>
+<h3 id="31">3.1 恐慌/貪婪指數<a class="headerlink" href="#31" title="連結到此標題">&para;</a></h3>
+<p><strong>參考指標：</strong>
+- <strong>台指VIX（VIXTWN）</strong>：反映台股期貨30天預期波動率
+- <strong>MM台灣恐懼貪婪指數</strong>：綜合股價表現、跌幅、波動性等指標</p>
+<p><strong>當前狀態：</strong>
+- VIX指數：根據外圍市場參考，約26.42點（較前日上漲11.67%）
+- 市場情緒：由恐慌區域向中性區域轉換
+- 投資人情緒：由悲觀轉為審慎樂觀</p>
+<h3 id="32">3.2 市場活躍度<a class="headerlink" href="#32" title="連結到此標題">&para;</a></h3>
+<p><strong>活躍度指標：</strong>
+- 日成交金額：6,500-7,500億元之間
+- 漲跌家數比例：上漲家數略多於下跌家數
+- 熱門個股：信驊、鴻勁、川湖、台光電等持續熱門</p>
+<p><strong>評估：</strong> 市場活躍度維持在中等偏高水平，流動性充足</p>
+<h3 id="33">3.3 交易者情緒（樂觀/悲觀）<a class="headerlink" href="#33" title="連結到此標題">&para;</a></h3>
+<p><strong>情緒分層：</strong>
+- <strong>外資</strong>：轉為樂觀，主動買盤增加
+- <strong>投信</strong>：中性偏多，操作保守
+- <strong>自營商</strong>：中性偏空，避險意識強
+- <strong>散戶</strong>：觀望為主，加碼意願減弱</p>
+<p><strong>整體情緒：</strong> 機構投資人偏多，散戶相對保守</p>
+<h2 id="4">4. 短期情緒預測<a class="headerlink" href="#4" title="連結到此標題">&para;</a></h2>
+<h3 id="41">4.1 情緒趨勢判斷<a class="headerlink" href="#41" title="連結到此標題">&para;</a></h3>
+<p><strong>技術面指標：</strong>
+- 加權指數：33,072.97點（漲跌+668.35點，漲幅+2.06%）
+- 均線系統：短期均線呈現多頭排列
+- 成交量：維持在攻擊量水平</p>
+<p><strong>情緒趨勢：</strong>
+- 短期情緒由中性偏多轉為偏多
+- 外資態度轉變是關鍵因素
+- AI產業持續發燒提供支撐</p>
+<h3 id="42">4.2 情緒極點識別<a class="headerlink" href="#42" title="連結到此標題">&para;</a></h3>
+<p><strong>監控指標：</strong>
+- 融資使用率：接近11.8%，未達過熱警戒線（15%）
+- 融券餘額：持續減少，空頭力道減弱
+- 市場波動率：溫和上升，未達恐慌水準</p>
+<p><strong>極點判斷：</strong>
+- 當前情緒未達極端樂觀或悲觀
+- 需監控融資使用率是否快速攀升
+- 注意外資買超是否持續擴大</p>
+<h3 id="43">4.3 情緒反轉預警<a class="headerlink" href="#43" title="連結到此標題">&para;</a></h3>
+<p><strong>預警信號：</strong>
+- <strong>正向信號</strong>：
+  - 外資連續買超超過3日
+  - 融券餘額持續減少
+  - AI產業利多不斷</p>
+<ul>
+<li><strong>負向信號</strong>：</li>
+<li>融資餘額開始縮減</li>
+<li>自營商避險部位增加</li>
+<li>外資買超幅度遞減</li>
+</ul>
+<p><strong>風險預警：</strong>
+- 技術性回檔壓力增大
+- 獲利了結賣壓可能湧現
+- 關注美國聯準會政策變化</p>
+<h2 id="5">5. 對股市的影響分析<a class="headerlink" href="#5" title="連結到此標題">&para;</a></h2>
+<h3 id="51-1-3">5.1 短期影響（1-3天）<a class="headerlink" href="#51-1-3" title="連結到此標題">&para;</a></h3>
+<p><strong>正面因素：</strong>
+- 三大法人合力買超形成支撐
+- AI供應鏈持續發燒
+- 外資態度轉向樂觀</p>
+<p><strong>負面因素：</strong>
+- 技術面漲幅過大，回檔壓力增加
+- 散戶追價意願減弱
+- 獲利了結賣壓可能出現</p>
+<p><strong>預期走勢：</strong> 震盪向上，但上檔壓力增加</p>
+<h3 id="52-4-7">5.2 中期影響（4-7天）<a class="headerlink" href="#52-4-7" title="連結到此標題">&para;</a></h3>
+<p><strong>關鍵因素：</strong>
+- AI產業持續性
+- 國際市場情緒變化
+- 技術支撐位測試</p>
+<p><strong>風險評估：</strong>
+- 中性偏多，但波動性可能增加
+- 需關注國際股市變化
+- 觀察融資餘額變化趨勢</p>
+<h2 id="6">6. 結論與建議<a class="headerlink" href="#6" title="連結到此標題">&para;</a></h2>
+<h3 id="61">6.1 綜合評估<a class="headerlink" href="#61" title="連結到此標題">&para;</a></h3>
+<p>台股市場短期情緒呈現「偏多謹慎」的格局。三大法人買賣超轉向買超，外資態度明顯轉變，AI相關板塊持續吸引資金流入。然而，融資餘額縮減、自營商避險意識增強，顯示市場仍存在不確定性。</p>
+<h3 id="62">6.2 操作建議<a class="headerlink" href="#62" title="連結到此標題">&para;</a></h3>
+<p><strong>策略建議：</strong>
+- 短期可參與AI供應鏈相關個股
+- 注意控制部位，避免過度追高
+- 密切關注外資動向和融資餘額變化
+- 預留現金等待技術性回檔機會</p>
+<p><strong>風險控管：</strong>
+- 設定停損點位
+- 避免單一產業集中持有
+- 關注國際市場變化對台股的影響</p>
+<hr />
+<p><strong>數據來源：</strong>
+- 臺灣證券交易所三大法人買賣超統計
+- HiStock金融資訊網
+- MacroMicro宏觀經濟數據
+- 各大券商研究報告</p>
+<p><strong>免責聲明：</strong>
+本分析報告僅供參考，不構成投資建議。投資人應根據自身情況評估風險，並自行負責投資決策。</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

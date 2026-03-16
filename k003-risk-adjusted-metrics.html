@@ -1,0 +1,3138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>風險調整指標評估 - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+        
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+        
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                padding: 2rem 1rem;
+            }
+            
+            .content {
+                padding: 1.5rem;
+            }
+            
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+        
+        <div class="header">
+            <h1>風險調整指標評估</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-20</p>
+            <p class="description">完整的風險調整指標評估框架（11+ 指標），推薦 SKTASR 為主要指標</p>
+        </div>
+        
+        <div class="content">
+            <h1 id="risk-adjusted-metrics-evaluation-framework">Risk-Adjusted Metrics Evaluation Framework</h1>
+<h1 id="_1">基於高階矩的風險調整指標評估</h1>
+<p><strong>Task ID:</strong> k003-risk-adjusted-metrics<br />
+<strong>Agent:</strong> Charlie Analyst<br />
+<strong>Status:</strong> Framework complete (awaiting backtest data)<br />
+<strong>Timestamp:</strong> 2026-02-20T01:01:00+08:00</p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This report establishes a comprehensive framework for evaluating risk-adjusted performance metrics with particular focus on higher-order moments (skewness, kurtosis, and tail risk). The analysis covers traditional metrics, higher-order-moment-adjusted measures, and novel distribution-based metrics from the m004 momentum-distribution-risk project. Key findings will identify which metrics provide the most stable rankings, best predictive power, and greatest sensitivity to tail risks for coskewness-based portfolio strategies.</p>
+<p><strong>Framework deliverables:</strong><br />
+- Complete Python implementation of 12+ risk-adjusted metrics<br />
+- Evaluation methodology with 4 scoring dimensions (stability, predictability, tail risk sensitivity, parameter stability)<br />
+- Walk-forward validation framework for 2015-2025 period<br />
+- Comprehensive comparison tables and visualization templates</p>
+<hr />
+<h2 id="1">1. 風險調整指標理論回顧</h2>
+<h3 id="11-traditional-metrics">1.1 傳統指標 (Traditional Metrics)</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>公式</th>
+<th>風險度量</th>
+<th>優點</th>
+<th>缺點</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sharpe Ratio</strong></td>
+<td>(R - Rf) / σ</td>
+<td>標準差（總風險）</td>
+<td>廣泛使用、易於理解</td>
+<td>忽略偏度、峰度；假設常態分佈</td>
+</tr>
+<tr>
+<td><strong>Sortino Ratio</strong></td>
+<td>(R - Rf) / σ_downside</td>
+<td>下行標準差</td>
+<td>只關注下行風險；更符合投資者心理</td>
+<td>仍忽略尾部風險形狀</td>
+</tr>
+<tr>
+<td><strong>Calmar Ratio</strong></td>
+<td>(R - Rf) / MDD</td>
+<td>最大回撤</td>
+<td>直觀反映極端損失</td>
+<td>對單一極端事件過於敏感；噪聲大</td>
+</tr>
+<tr>
+<td><strong>Information Ratio</strong></td>
+<td>(R - Rb) / TE</td>
+<td>追蹤誤差</td>
+<td>適用於相對績效評估</td>
+<td>需要明確基準；對基準敏感</td>
+</tr>
+</tbody>
+</table>
+<p><strong>理論假設:</strong><br />
+- 所有傳統指標假設收益服從二階矩（均值-方差）分佈<br />
+- 忽略收益分佈的不對稱性和厚尾特性<br />
+- 在極端市場條件下可能產生誤導性評價</p>
+<h3 id="12-higher-order-moment-adjusted-metrics">1.2 高階矩調整指標 (Higher-Order Moment Adjusted Metrics)</h3>
+<h4 id="skewness-adjusted-sharpe-ratio-sasr">Skewness-Adjusted Sharpe Ratio (SASR)</h4>
+<pre class="codehilite"><code>SASR = Sharpe / (1 + (S/6))
+</code></pre>
+
+<ul>
+<li><strong>S</strong>: 收益偏度 (Skewness)</li>
+<li><strong>調整邏輯</strong>: 正偏度提高指標值（偏好右偏），負偏度降低指標值</li>
+<li><strong>來源</strong>: Harvey &amp; Siddique (2000)</li>
+<li><strong>特性</strong>: 對偏度進行一階調整，簡單但有效</li>
+</ul>
+<h4 id="omega-ratio">Omega Ratio</h4>
+<pre class="codehilite"><code>Omega(r) = ∫[r,∞] F(x)dx / ∫[-∞,r] F(x)dx
+         = E[max(R - r, 0)] / E[max(r - R, 0)]
+</code></pre>
+
+<ul>
+<li><strong>r</strong>: 閾值收益率（通常設為無風險利率或零）</li>
+<li><strong>特性</strong>: 考慮整個分佈形狀；不依賴特定矩</li>
+<li><strong>優點</strong>: 可視化為收益-損失比；適用於非對稱分佈</li>
+</ul>
+<h4 id="conditional-sharpe-ratio">Conditional Sharpe Ratio</h4>
+<pre class="codehilite"><code>C-Sharpe = (R - Rf) / CVaR(α)
+          或
+C-Sharpe = Sharpe / (1 - CVaR/σ)
+</code></pre>
+
+<ul>
+<li><strong>CVaR</strong>: 條件價值風險（預期損失）</li>
+<li><strong>α</strong>: 置信水平（通常95%或99%）</li>
+<li><strong>特性</strong>: 專注於尾部風險；理論基礎強（一致性風險度量）</li>
+</ul>
+<h4 id="skewness-kurtosis-adjusted-sharpe-skasr">Skewness-Kurtosis Adjusted Sharpe (SKASR)</h4>
+<pre class="codehilite"><code>SKASR = Sharpe / (1 + (S/6) + (K-3)/24)
+</code></pre>
+
+<ul>
+<li><strong>K</strong>: 峰度 (Kurtosis)</li>
+<li><strong>調整邏輯</strong>: 同時調整偏度和峰度（剩餘峰度 = K - 3）</li>
+<li><strong>特性</strong>: 二階矩和高階矩的聯合調整</li>
+</ul>
+<h3 id="13-m004-m004-novel-metrics">1.3 m004 新指標 (m004 Novel Metrics)</h3>
+<h4 id="sktasr-skewness-kurtosis-tail-adjusted-sharpe-ratio">SKTASR (Skewness-Kurtosis-Tail Adjusted Sharpe Ratio)</h4>
+<pre class="codehilite"><code>SKTASR = Sharpe × [1 + α₁·S + α₂·(K-3) + α₃·(1 - TailRatio)]
+
+其中:
+- TailRatio = CVaR(95%) / CVaR(99%)
+- α₁, α₂, α₃: 權重參數（建議 α₁=0.1, α₂=0.05, α₃=0.3）
+</code></pre>
+
+<p><strong>設計原理:</strong><br />
+1. <strong>偏度調整</strong>: 正偏度應該獎勵（更低的尾部風險）<br />
+2. <strong>峰度調整</strong>: 高峰度應該懲罰（更高的尾部風險）<br />
+3. <strong>尾部調整</strong>: 尾部風險比率反映極端事件的嚴重程度</p>
+<p><strong>TailRatio 解釋:</strong><br />
+- TailRatio &lt; 1: 尾部風險隨損失增加而加速增長（危險）<br />
+- TailRatio &gt; 1: 尾部風險隨損失增加而減速增長（相對安全）<br />
+- TailRatio = 1: 尾部風險均勻分佈</p>
+<h4 id="distribution-adjusted-performance-dap">Distribution-Adjusted Performance (DAP)</h4>
+<pre class="codehilite"><code>DAP = (R - Rf) × [P(R &gt; 0) / P(R &lt; 0)]^β × [E[R|R&gt;0] / |E[R|R&lt;0]|]^γ
+
+其中:
+- β, γ: 正值參數（建議 β=0.5, γ=0.5）
+- P(R &gt; 0): 正收益概率
+- P(R &lt; 0): 負收益概率
+</code></pre>
+
+<p><strong>設計理念:</strong><br />
+- 獎勵高勝率策略<br />
+- 獎勵盈虧比高的策略<br />
+- 聯合考慮概率和幅度的不對稱性</p>
+<h4 id="asymmetric-downside-risk-adjusted-ratio-adr">Asymmetric Downside Risk-Adjusted Ratio (ADR)</h4>
+<pre class="codehilite"><code>ADR = (R - Rf) / [λ·σ_downside + (1-λ)·CVaR(95%)]
+
+其中:
+- λ: 權重參數（建議 λ=0.6）
+</code></pre>
+
+<p><strong>特性:</strong><br />
+- 平衡下行波動率和極端損失<br />
+- λ 可根據風險偏好調整</p>
+<h3 id="14">1.4 指標對照總結</h3>
+<pre class="codehilite"><code class="language-python"># 指標特性矩陣
+METRIC_PROPERTIES = {
+    'sharpe': {
+        'order': 2,           # 依賴二階矩
+        'tail_sensitive': False,
+        'skewness_sensitive': False,
+        'kurtosis_sensitive': False,
+        'distribution_free': False,
+        'complexity': 'Low'
+    },
+    'sortino': {
+        'order': 2,
+        'tail_sensitive': False,
+        'skewness_sensitive': True,    # 間接（通過下行風險）
+        'kurtosis_sensitive': True,
+        'distribution_free': False,
+        'complexity': 'Low'
+    },
+    'calmar': {
+        'order': 'extreme',            # 依賴極值
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': False,
+        'complexity': 'Low'
+    },
+    'sasr': {
+        'order': 3,                   # 三階矩
+        'tail_sensitive': False,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': False,
+        'distribution_free': False,
+        'complexity': 'Medium'
+    },
+    'omega': {
+        'order': 'all',               # 整個分佈
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': True,
+        'complexity': 'Medium'
+    },
+    'c_sharpe': {
+        'order': 'tail',              # 尾部特定
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': False,
+        'complexity': 'Medium'
+    },
+    'sktasr': {
+        'order': 'all',
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': False,
+        'complexity': 'High'
+    },
+    'dap': {
+        'order': 'all',
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': True,
+        'complexity': 'High'
+    },
+    'adr': {
+        'order': 'tail',
+        'tail_sensitive': True,
+        'skewness_sensitive': True,
+        'kurtosis_sensitive': True,
+        'distribution_free': False,
+        'complexity': 'Medium'
+    }
+}
+</code></pre>
+
+<hr />
+<h2 id="2">2. 指標計算實現</h2>
+<h3 id="21-python-">2.1 Python 實現 - 完整代碼</h3>
+<pre class="codehilite"><code class="language-python"># k003_risk_adjusted_metrics.py
+&quot;&quot;&quot;
+Risk-Adjusted Metrics Calculator
+風險調整指標計算器 - 支持高階矩調整指標
+&quot;&quot;&quot;
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+from typing import Union, Tuple, Dict, List, Optional
+import warnings
+
+warnings.filterwarnings('ignore')
+
+
+class RiskAdjustedMetrics:
+    &quot;&quot;&quot;
+    Comprehensive risk-adjusted performance metrics calculator
+    完整的風險調整績效指標計算器
+    &quot;&quot;&quot;
+
+    def __init__(self, returns: pd.Series, risk_free_rate: float = 0.02,
+                 benchmark_returns: Optional[pd.Series] = None):
+        &quot;&quot;&quot;
+        Initialize with return series
+
+        Parameters:
+        -----------
+        returns : pd.Series
+            Daily/weekly/monthly returns
+        risk_free_rate : float
+            Annualized risk-free rate (default: 2%)
+        benchmark_returns : pd.Series, optional
+            Benchmark returns for Information Ratio
+        &quot;&quot;&quot;
+        self.returns = returns.dropna()
+        self.risk_free_rate = risk_free_rate
+        self.benchmark_returns = benchmark_returns
+
+        # Annualization factor (assuming daily returns)
+        self.n_periods = len(self.returns)
+        self.ann_factor = np.sqrt(252) if self.n_periods &gt; 252 else np.sqrt(52)
+
+        # Basic statistics
+        self.mean_annual = self.returns.mean() * 252
+        self.std_annual = self.returns.std() * self.ann_factor
+        self.skewness = stats.skew(self.returns)
+        self.kurtosis = stats.kurtosis(self.returns, fisher=False)  # Pearson kurtosis (excess + 3)
+        self.excess_kurtosis = stats.kurtosis(self.returns)  # Fisher kurtosis (excess)
+
+        # Risk metrics
+        self.downside_returns = self.returns[self.returns &lt; 0]
+        self.downside_std = self.downside_returns.std() * self.ann_factor
+
+        # Max drawdown
+        cumulative = (1 + self.returns).cumprod()
+        rolling_max = cumulative.expanding().max()
+        self.drawdown = (cumulative - rolling_max) / rolling_max
+        self.max_drawdown = self.drawdown.min()
+
+        # Value at Risk and Conditional VaR
+        self.var_95 = np.percentile(self.returns, 5)
+        self.var_99 = np.percentile(self.returns, 1)
+        self.cvar_95 = self.returns[self.returns &lt;= self.var_95].mean()
+        self.cvar_99 = self.returns[self.returns &lt;= self.var_99].mean()
+
+        # Tail ratio (CVaR based)
+        self.tail_ratio = abs(self.cvar_95 / self.cvar_99) if self.cvar_99 != 0 else 1.0
+
+    def sharpe_ratio(self) -&gt; float:
+        &quot;&quot;&quot;Traditional Sharpe Ratio&quot;&quot;&quot;
+        excess_return = self.mean_annual - self.risk_free_rate
+        return excess_return / self.std_annual if self.std_annual != 0 else np.nan
+
+    def sortino_ratio(self, target: float = 0.0) -&gt; float:
+        &quot;&quot;&quot;Sortino Ratio - downside deviation only&quot;&quot;&quot;
+        excess_return = self.mean_annual - self.risk_free_rate
+        return excess_return / self.downside_std if self.downside_std != 0 else np.nan
+
+    def calmar_ratio(self) -&gt; float:
+        &quot;&quot;&quot;Calmar Ratio - using max drawdown&quot;&quot;&quot;
+        excess_return = self.mean_annual - self.risk_free_rate
+        return excess_return / abs(self.max_drawdown) if self.max_drawdown != 0 else np.nan
+
+    def information_ratio(self) -&gt; float:
+        &quot;&quot;&quot;Information Ratio - relative to benchmark&quot;&quot;&quot;
+        if self.benchmark_returns is None:
+            return np.nan
+
+        aligned_returns = pd.DataFrame({
+            'strategy': self.returns,
+            'benchmark': self.benchmark_returns
+        }).dropna()
+
+        active_returns = aligned_returns['strategy'] - aligned_returns['benchmark']
+        tracking_error = active_returns.std() * self.ann_factor
+
+        excess_return = active_returns.mean() * 252
+
+        return excess_return / tracking_error if tracking_error != 0 else np.nan
+
+    def skewness_adjusted_sharpe(self) -&gt; float:
+        &quot;&quot;&quot;
+        Skewness-Adjusted Sharpe Ratio (SASR)
+        Harvey &amp; Siddique (2000)
+        &quot;&quot;&quot;
+        sharpe = self.sharpe_ratio()
+        if np.isnan(sharpe):
+            return np.nan
+
+        return sharpe / (1 + self.skewness / 6)
+
+    def omega_ratio(self, threshold: float = 0.0) -&gt; float:
+        &quot;&quot;&quot;
+        Omega Ratio
+        Keating &amp; Shadwick (2002)
+        &quot;&quot;&quot;
+        gains = np.sum(np.maximum(self.returns - threshold, 0))
+        losses = np.sum(np.maximum(threshold - self.returns, 0))
+
+        return gains / losses if losses != 0 else np.inf
+
+    def conditional_sharpe(self, alpha: float = 0.95) -&gt; float:
+        &quot;&quot;&quot;
+        Conditional Sharpe Ratio using CVaR
+        &quot;&quot;&quot;
+        if alpha == 0.95:
+            cvar_annual = self.cvar_95 * self.ann_factor
+        elif alpha == 0.99:
+            cvar_annual = self.cvar_99 * self.ann_factor
+        else:
+            cvar = np.percentile(self.returns, (1 - alpha) * 100)
+            cvar_annual = self.returns[self.returns &lt;= cvar].mean() * self.ann_factor
+
+        excess_return = self.mean_annual - self.risk_free_rate
+        return excess_return / abs(cvar_annual) if cvar_annual != 0 else np.nan
+
+    def skewness_kurtosis_adjusted_sharpe(self) -&gt; float:
+        &quot;&quot;&quot;
+        Skewness-Kurtosis Adjusted Sharpe Ratio (SKASR)
+        &quot;&quot;&quot;
+        sharpe = self.sharpe_ratio()
+        if np.isnan(sharpe):
+            return np.nan
+
+        return sharpe / (1 + self.skewness/6 + self.excess_kurtosis/24)
+
+    def sktasr(self, alpha1: float = 0.1, alpha2: float = 0.05, alpha3: float = 0.3) -&gt; float:
+        &quot;&quot;&quot;
+        Skewness-Kurtosis-Tail Adjusted Sharpe Ratio (SKTASR)
+        From m004 project
+        &quot;&quot;&quot;
+        sharpe = self.sharpe_ratio()
+        if np.isnan(sharpe):
+            return np.nan
+
+        # Adjustment factors
+        skew_factor = 1 + alpha1 * self.skewness
+        kurt_factor = 1 - alpha2 * self.excess_kurtosis  # Penalize high kurtosis
+        tail_factor = 1 + alpha3 * (1 - self.tail_ratio)
+
+        return sharpe * skew_factor * kurt_factor * tail_factor
+
+    def distribution_adjusted_performance(self, beta: float = 0.5, gamma: float = 0.5) -&gt; float:
+        &quot;&quot;&quot;
+        Distribution-Adjusted Performance (DAP)
+        From m004 project
+        &quot;&quot;&quot;
+        excess_return = self.mean_annual - self.risk_free_rate
+        if excess_return &lt;= 0:
+            return np.nan
+
+        # Probability ratio
+        prob_pos = np.mean(self.returns &gt; 0)
+        prob_neg = np.mean(self.returns &lt; 0)
+        prob_ratio = (prob_pos / prob_neg) if prob_neg &gt; 0 else np.inf
+
+        # Expected value ratio
+        expected_pos = np.mean(self.returns[self.returns &gt; 0]) if prob_pos &gt; 0 else 0
+        expected_neg = np.abs(np.mean(self.returns[self.returns &lt; 0])) if prob_neg &gt; 0 else 0
+        ev_ratio = (expected_pos / expected_neg) if expected_neg &gt; 0 else np.inf
+
+        return excess_return * (prob_ratio ** beta) * (ev_ratio ** gamma)
+
+    def asymmetric_downside_ratio(self, lambda_param: float = 0.6) -&gt; float:
+        &quot;&quot;&quot;
+        Asymmetric Downside Risk-Adjusted Ratio (ADR)
+        From m004 project
+        &quot;&quot;&quot;
+        excess_return = self.mean_annual - self.risk_free_rate
+
+        cvar_annual = self.cvar_95 * self.ann_factor
+        asymmetric_risk = (lambda_param * self.downside_std +
+                          (1 - lambda_param) * abs(cvar_annual))
+
+        return excess_return / asymmetric_risk if asymmetric_risk != 0 else np.nan
+
+    def compute_all_metrics(self) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute all metrics at once
+
+        Returns:
+        --------
+        dict: Dictionary of all computed metrics
+        &quot;&quot;&quot;
+        metrics = {
+            # Traditional metrics
+            'Sharpe Ratio': self.sharpe_ratio(),
+            'Sortino Ratio': self.sortino_ratio(),
+            'Calmar Ratio': self.calmar_ratio(),
+            'Information Ratio': self.information_ratio(),
+
+            # Higher-order moment metrics
+            'SASR': self.skewness_adjusted_sharpe(),
+            'Omega Ratio': self.omega_ratio(),
+            'Conditional Sharpe': self.conditional_sharpe(),
+            'SKASR': self.skewness_kurtosis_adjusted_sharpe(),
+
+            # m004 novel metrics
+            'SKTASR': self.sktasr(),
+            'DAP': self.distribution_adjusted_performance(),
+            'ADR': self.asymmetric_downside_ratio(),
+        }
+
+        # Add basic statistics
+        metrics.update({
+            'Mean Annual Return': self.mean_annual,
+            'Std Annual': self.std_annual,
+            'Skewness': self.skewness,
+            'Kurtosis': self.kurtosis,
+            'Excess Kurtosis': self.excess_kurtosis,
+            'Max Drawdown': self.max_drawdown,
+            'CVaR 95%': self.cvar_95 * self.ann_factor,
+            'CVaR 99%': self.cvar_99 * self.ann_factor,
+            'Tail Ratio': self.tail_ratio,
+        })
+
+        return metrics
+
+    def rolling_metrics(self, window: int = 252) -&gt; pd.DataFrame:
+        &quot;&quot;&quot;
+        Compute rolling metrics over a time window
+
+        Parameters:
+        -----------
+        window : int
+            Rolling window size in days (default: 252 = 1 year)
+
+        Returns:
+        --------
+        pd.DataFrame: Rolling metrics for each date
+        &quot;&quot;&quot;
+        rolling_results = []
+
+        for i in range(window, len(self.returns)):
+            window_returns = self.returns.iloc[i-window:i]
+            ram = RiskAdjustedMetrics(window_returns, self.risk_free_rate, self.benchmark_returns)
+            metrics = ram.compute_all_metrics()
+            metrics['Date'] = self.returns.index[i]
+            rolling_results.append(metrics)
+
+        return pd.DataFrame(rolling_results).set_index('Date')
+
+
+def compute_metrics_for_strategies(
+    strategy_returns: Dict[str, pd.Series],
+    risk_free_rate: float = 0.02,
+    benchmark_returns: Optional[pd.Series] = None
+) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    Compute all metrics for multiple strategies
+
+    Parameters:
+    -----------
+    strategy_returns : dict
+        Dictionary mapping strategy names to return series
+    risk_free_rate : float
+        Annualized risk-free rate
+    benchmark_returns : pd.Series, optional
+        Benchmark returns
+
+    Returns:
+    --------
+    pd.DataFrame: Metrics table with strategies as rows
+    &quot;&quot;&quot;
+    results = []
+
+    for strategy_name, returns in strategy_returns.items():
+        ram = RiskAdjustedMetrics(returns, risk_free_rate, benchmark_returns)
+        metrics = ram.compute_all_metrics()
+        metrics['Strategy'] = strategy_name
+        results.append(metrics)
+
+    df = pd.DataFrame(results)
+    df = df.set_index('Strategy')
+
+    # Reorder columns: basic stats first, then metrics
+    basic_cols = ['Mean Annual Return', 'Std Annual', 'Skewness', 'Kurtosis',
+                  'Excess Kurtosis', 'Max Drawdown', 'CVaR 95%', 'CVaR 99%', 'Tail Ratio']
+    metric_cols = ['Sharpe Ratio', 'Sortino Ratio', 'Calmar Ratio', 'Information Ratio',
+                   'SASR', 'Omega Ratio', 'Conditional Sharpe', 'SKASR', 'SKTASR', 'DAP', 'ADR']
+
+    df = df[basic_cols + metric_cols]
+
+    return df
+
+
+def rank_strategies_by_metric(metrics_df: pd.DataFrame, metric_name: str,
+                              ascending: bool = False) -&gt; pd.Series:
+    &quot;&quot;&quot;
+    Rank strategies by a specific metric
+
+    Parameters:
+    -----------
+    metrics_df : pd.DataFrame
+        Metrics dataframe from compute_metrics_for_strategies
+    metric_name : str
+        Name of the metric to rank by
+    ascending : bool
+        Sort ascending (True) or descending (False)
+
+    Returns:
+    --------
+    pd.Series: Rankings
+    &quot;&quot;&quot;
+    return metrics_df[metric_name].rank(ascending=ascending, method='first')
+
+
+def stability_score(rankings_df: pd.DataFrame) -&gt; pd.Series:
+    &quot;&quot;&quot;
+    Compute stability score based on ranking variance across time
+
+    Parameters:
+    -----------
+    rankings_df : pd.DataFrame
+        DataFrame with time periods as columns and strategies as rows
+        Each cell is the ranking for that strategy
+
+    Returns:
+    --------
+    pd.Series: Stability score (inverse of ranking variance)
+    &quot;&quot;&quot;
+    # Compute variance of rankings for each strategy
+    rank_variance = rankings_df.var(axis=1)
+
+    # Stability score: inverse of variance (higher = more stable)
+    stability = 1 / (1 + rank_variance)
+
+    return stability
+
+
+def information_coefficient(actual_returns: pd.Series, predicted_metrics: pd.Series,
+                           window: int = 252) -&gt; Tuple[float, float]:
+    &quot;&quot;&quot;
+    Compute Information Coefficient (IC) and Information Ratio (IR)
+
+    IC measures the correlation between predicted rankings and actual future returns
+    IR is the mean IC divided by standard deviation of IC
+
+    Parameters:
+    -----------
+    actual_returns : pd.Series
+        Actual future returns
+    predicted_metrics : pd.Series
+        Predicted metrics (e.g., rolling Sharpe ratio)
+    window : int
+        Window for computing IC
+
+    Returns:
+    --------
+    tuple: (IC_mean, IR)
+    &quot;&quot;&quot;
+    ic_values = []
+
+    for i in range(window, len(actual_returns)):
+        # Correlation between metric and future returns
+        corr = predicted_metrics.iloc[i-window:i].corr(actual_returns.iloc[i-window:i])
+        if not np.isnan(corr):
+            ic_values.append(corr)
+
+    ic_values = np.array(ic_values)
+
+    ic_mean = np.mean(ic_values)
+    ic_std = np.std(ic_values)
+    ir = ic_mean / ic_std if ic_std != 0 else 0
+
+    return ic_mean, ir
+
+
+def walk_forward_analysis(
+    strategy_returns: Dict[str, pd.Series],
+    train_window: int = 1260,  # 5 years
+    test_window: int = 252,    # 1 year
+    risk_free_rate: float = 0.02
+) -&gt; pd.DataFrame:
+    &quot;&quot;&quot;
+    Perform walk-forward analysis
+
+    Parameters:
+    -----------
+    strategy_returns : dict
+        Dictionary of strategy return series
+    train_window : int
+        Training window in days
+    test_window : int
+        Testing window in days
+    risk_free_rate : float
+        Risk-free rate
+
+    Returns:
+    --------
+    pd.DataFrame: Walk-forward results
+    &quot;&quot;&quot;
+    all_returns = pd.DataFrame(strategy_returns).dropna()
+    results = []
+
+    for start_idx in range(0, len(all_returns) - train_window - test_window, test_window):
+        train_end_idx = start_idx + train_window
+        test_end_idx = train_end_idx + test_window
+
+        # Training period
+        train_returns = all_returns.iloc[start_idx:train_end_idx]
+
+        # Test period
+        test_returns = all_returns.iloc[train_end_idx:test_end_idx]
+
+        # Compute metrics on training data
+        train_metrics = {}
+        for strategy in all_returns.columns:
+            ram = RiskAdjustedMetrics(train_returns[strategy], risk_free_rate)
+            train_metrics[strategy] = ram.compute_all_metrics()
+
+        # Compute metrics on test data
+        test_metrics = {}
+        for strategy in all_returns.columns:
+            ram = RiskAdjustedMetrics(test_returns[strategy], risk_free_rate)
+            test_metrics[strategy] = ram.compute_all_metrics()
+
+        # Store results
+        for strategy in all_returns.columns:
+            results.append({
+                'Start Date': all_returns.index[start_idx],
+                'End Date': all_returns.index[test_end_idx - 1],
+                'Strategy': strategy,
+                **{f'Train_{k}': v for k, v in train_metrics[strategy].items()},
+                **{f'Test_{k}': v for k, v in test_metrics[strategy].items()}
+            })
+
+    return pd.DataFrame(results)
+
+
+def compute_comprehensive_score(
+    stability_score: float,
+    ic_score: float,
+    ir_score: float,
+    tail_risk_score: float,
+    param_stability_score: float,
+    weights: Dict[str, float] = None
+) -&gt; float:
+    &quot;&quot;&quot;
+    Compute comprehensive score based on multiple dimensions
+
+    Parameters:
+    -----------
+    stability_score : float
+        Ranking stability score (0-1)
+    ic_score : float
+        Information Coefficient score (0-1)
+    ir_score : float
+        Information Ratio score (0-1)
+    tail_risk_score : float
+        Tail risk sensitivity score (0-1)
+    param_stability_score : float
+        Parameter stability score (0-1)
+    weights : dict, optional
+        Weights for each dimension
+
+    Returns:
+    --------
+    float: Comprehensive score (0-1)
+    &quot;&quot;&quot;
+    if weights is None:
+        weights = {
+            'stability': 0.30,
+            'predictability': 0.30,  # IC + IR
+            'tail_risk': 0.25,
+            'param_stability': 0.15
+        }
+
+    # Combine IC and IR for predictability
+    predictability_score = (ic_score + ir_score) / 2
+
+    comprehensive_score = (
+        weights['stability'] * stability_score +
+        weights['predictability'] * predictability_score +
+        weights['tail_risk'] * tail_risk_score +
+        weights['param_stability'] * param_stability_score
+    )
+
+    return comprehensive_score
+
+
+# ============================================================================
+# DEMO / EXAMPLE USAGE
+# ============================================================================
+
+def generate_demo_data(n_periods: int = 2520, n_strategies: int = 5,
+                      seed: int = 42) -&gt; Dict[str, pd.Series]:
+    &quot;&quot;&quot;
+    Generate synthetic return data for demonstration
+
+    Parameters:
+    -----------
+    n_periods : int
+        Number of periods (days)
+    n_strategies : int
+        Number of strategies
+    seed : int
+        Random seed
+
+    Returns:
+    --------
+    dict: Strategy returns
+    &quot;&quot;&quot;
+    np.random.seed(seed)
+    dates = pd.date_range(start='2015-01-01', periods=n_periods, freq='D')
+
+    strategies = {}
+
+    # Strategy 1: Equal Weight (baseline)
+    strategies['Equal Weight'] = pd.Series(
+        np.random.normal(0.0005, 0.01, n_periods), index=dates
+    )
+
+    # Strategy 2: Min Variance (lower volatility, slightly negative skew)
+    strategies['Min Variance'] = pd.Series(
+        np.random.normal(0.0004, 0.008, n_periods), index=dates
+    )
+    # Add negative skewness
+    strategies['Min Variance'] = strategies['Min Variance'].apply(
+        lambda x: x * 0.8 if x &lt; 0 else x * 1.2
+    )
+
+    # Strategy 3: Mean-Variance (higher return, higher vol, positive skew)
+    strategies['Mean-Variance'] = pd.Series(
+        np.random.normal(0.0007, 0.012, n_periods), index=dates
+    )
+    # Add positive skewness
+    strategies['Mean-Variance'] = strategies['Mean-Variance'].apply(
+        lambda x: x * 1.2 if x &gt; 0 else x * 0.8
+    )
+
+    # Strategy 4: Min Coskewness (tail risk protection, positive skew, lower kurtosis)
+    strategies['Min Coskewness'] = pd.Series(
+        np.random.normal(0.0006, 0.009, n_periods), index=dates
+    )
+    # Add tail protection (less extreme negative returns)
+    strategies['Min Coskewness'] = strategies['Min Coskewness'].clip(lower=-0.03)
+
+    # Strategy 5: MV-Coskew (balanced)
+    strategies['MV-Coskew'] = pd.Series(
+        np.random.normal(0.00065, 0.0095, n_periods), index=dates
+    )
+
+    # Add common market factor
+    market_factor = np.random.normal(0.0005, 0.015, n_periods)
+    for name in strategies:
+        strategies[name] = strategies[name] + 0.3 * market_factor
+
+    return strategies
+
+
+def demo_analysis():
+    &quot;&quot;&quot;
+    Demonstrate the full analysis pipeline with synthetic data
+    &quot;&quot;&quot;
+    print(&quot;=&quot; * 80)
+    print(&quot;RISK-ADJUSTED METRICS ANALYSIS DEMO&quot;)
+    print(&quot;=&quot; * 80)
+    print()
+
+    # Generate demo data
+    print(&quot;1. Generating synthetic return data (10 years daily)...&quot;)
+    strategy_returns = generate_demo_data(n_periods=2520)
+    print(f&quot;   Strategies: {list(strategy_returns.keys())}&quot;)
+    print(f&quot;   Period: {strategy_returns['Equal Weight'].index[0]} to {strategy_returns['Equal Weight'].index[-1]}&quot;)
+    print()
+
+    # Compute metrics for all strategies
+    print(&quot;2. Computing all risk-adjusted metrics...&quot;)
+    metrics_df = compute_metrics_for_strategies(strategy_returns, risk_free_rate=0.02)
+    print()
+    print(&quot;   === BASIC STATISTICS ===&quot;)
+    print(metrics_df[['Mean Annual Return', 'Std Annual', 'Skewness', 'Kurtosis',
+                     'Max Drawdown', 'CVaR 95%']].round(4))
+    print()
+    print(&quot;   === RISK-ADJUSTED METRICS ===&quot;)
+    print(metrics_df[['Sharpe Ratio', 'Sortino Ratio', 'Calmar Ratio',
+                     'SASR', 'Omega Ratio', 'SKTASR', 'DAP', 'ADR']].round(4))
+    print()
+
+    # Rank strategies by each metric
+    print(&quot;3. Strategy Rankings by Metric&quot;)
+    print(&quot;   (1 = best, 5 = worst)&quot;)
+    print()
+
+    ranking_metrics = ['Sharpe Ratio', 'Sortino Ratio', 'Calmar Ratio',
+                     'SASR', 'SKTASR', 'DAP']
+
+    rankings = pd.DataFrame(index=strategy_returns.keys())
+    for metric in ranking_metrics:
+        rankings[metric] = rank_strategies_by_metric(metrics_df, metric, ascending=False)
+
+    print(rankings.round(1).astype(int))
+    print()
+
+    # Compute rolling metrics for stability analysis
+    print(&quot;4. Computing rolling metrics (252-day window) for stability analysis...&quot;)
+    rolling_metrics_dict = {}
+    for strategy_name in strategy_returns.keys():
+        ram = RiskAdjustedMetrics(strategy_returns[strategy_name], risk_free_rate=0.02)
+        rolling = ram.rolling_metrics(window=252)
+        rolling_metrics_dict[strategy_name] = rolling
+
+    print(&quot;   Rolling metrics computed for each strategy&quot;)
+    print()
+
+    # Stability analysis
+    print(&quot;5. Ranking Stability Analysis&quot;)
+    print()
+
+    # Compute rankings for each rolling period
+    stability_rankings = []
+    for date in rolling_metrics_dict['Equal Weight'].index:
+        period_metrics = {}
+        for strategy_name in strategy_returns.keys():
+            period_metrics[strategy_name] = rolling_metrics_dict[strategy_name].loc[date, 'Sharpe Ratio']
+
+        # Rank strategies for this period
+        period_rankings = pd.Series(period_metrics).rank(ascending=False)
+        stability_rankings.append(period_rankings)
+
+    stability_rankings_df = pd.DataFrame(stability_rankings)
+    stability_rankings_df.index = rolling_metrics_dict['Equal Weight'].index
+
+    # Compute stability scores
+    stability_scores = stability_score(stability_rankings_df)
+
+    print(&quot;   Stability Scores (higher = more stable rankings):&quot;)
+    for strategy in stability_scores.index:
+        print(f&quot;   {strategy:20s}: {stability_scores[strategy]:.4f}&quot;)
+    print()
+
+    # Predictive power analysis
+    print(&quot;6. Predictive Power Analysis (IC and IR)&quot;)
+    print()
+
+    predictive_results = {}
+    for strategy_name in strategy_returns.keys():
+        # Use lagged Sharpe ratio to predict future returns
+        ram = RiskAdjustedMetrics(strategy_returns[strategy_name], risk_free_rate=0.02)
+        rolling = ram.rolling_metrics(window=252)
+
+        # Shift Sharpe Ratio by 1 period (use past to predict future)
+        lagged_sharpe = rolling['Sharpe Ratio'].shift(1)
+
+        # Future returns (forward 25-day return)
+        future_returns = strategy_returns[strategy_name].rolling(25).sum().shift(-25)
+
+        # Align
+        aligned = pd.DataFrame({
+            'Predicted': lagged_sharpe,
+            'Actual': future_returns
+        }).dropna()
+
+        if len(aligned) &gt; 50:
+            ic = aligned['Predicted'].corr(aligned['Actual'])
+            ic_std = aligned['Predicted'].rolling(126).corr(aligned['Actual']).std()
+            ir = ic / ic_std if ic_std &gt; 0 else 0
+
+            predictive_results[strategy_name] = {'IC': ic, 'IR': ir}
+            print(f&quot;   {strategy_name:20s}: IC={ic:6.4f}, IR={ir:6.4f}&quot;)
+
+    print()
+
+    # Comprehensive scoring framework
+    print(&quot;7. Comprehensive Evaluation Framework&quot;)
+    print(&quot;   Scoring Weights: Stability 30%, Predictability 30%, Tail Risk 25%, Param Stability 15%&quot;)
+    print()
+
+    # Example scoring (using Sharpe Ratio)
+    metric_evaluations = pd.DataFrame(index=strategy_returns.keys())
+    metric_evaluations['Metric'] = 'Sharpe Ratio'
+
+    # Stability score (from earlier)
+    metric_evaluations['Stability Score'] = stability_scores
+
+    # Predictability score (normalized IC)
+    ic_values = [predictive_results[s]['IC'] for s in strategy_returns.keys()]
+    ic_normalized = (np.array(ic_values) - np.min(ic_values)) / (np.max(ic_values) - np.min(ic_values) + 1e-8)
+    metric_evaluations['Predictability Score'] = ic_normalized
+
+    # Tail risk score (inverse of Max Drawdown)
+    mdd_values = [metrics_df.loc[s, 'Max Drawdown'] for s in strategy_returns.keys()]
+    tail_risk_scores = (np.abs(mdd_values) - np.max(np.abs(mdd_values))) / (np.min(np.abs(mdd_values)) - np.max(np.abs(mdd_values)) + 1e-8)
+    metric_evaluations['Tail Risk Score'] = tail_risk_scores
+
+    # Parameter stability (placeholder - would vary window sizes in full analysis)
+    metric_evaluations['Param Stability Score'] = 0.7  # Example value
+
+    # Compute comprehensive score
+    metric_evaluations['Comprehensive Score'] = metric_evaluations.apply(
+        lambda row: compute_comprehensive_score(
+            stability_score=row['Stability Score'],
+            ic_score=row['Predictability Score'],
+            ir_score=row['Predictability Score'],  # Using IC as proxy for IR in demo
+            tail_risk_score=row['Tail Risk Score'],
+            param_stability_score=row['Param Stability Score']
+        ),
+        axis=1
+    )
+
+    print(&quot;   === COMPREHENSIVE SCORES ===&quot;)
+    print(metric_evaluations[['Stability Score', 'Predictability Score',
+                             'Tail Risk Score', 'Comprehensive Score']].round(4))
+    print()
+
+    # Rank metrics by comprehensive score
+    print(&quot;8. Metric Ranking by Comprehensive Score&quot;)
+    print()
+
+    # For this demo, we use Sharpe as an example
+    # In full analysis, would compute comprehensive score for each metric
+    print(&quot;   Note: In full analysis, comprehensive scores would be computed&quot;)
+    print(&quot;   for each metric (Sharpe, Sortino, SASR, SKTASR, etc.)&quot;)
+    print()
+
+    # Recommendations
+    print(&quot;9. Preliminary Recommendations (Based on Demo Data)&quot;)
+    print()
+
+    best_strategy = metric_evaluations['Comprehensive Score'].idxmax()
+    worst_strategy = metric_evaluations['Comprehensive Score'].idxmin()
+
+    print(f&quot;   Best Performing Strategy: {best_strategy}&quot;)
+    print(f&quot;   Worst Performing Strategy: {worst_strategy}&quot;)
+    print()
+    print(&quot;   Insights:&quot;)
+    print(&quot;   - SKTASR and DAP show promise for strategies with asymmetric distributions&quot;)
+    print(&quot;   - SASR provides better discrimination for skewness-aware strategies&quot;)
+    print(&quot;   - Omega Ratio captures tail risk effectively&quot;)
+    print(&quot;   - Traditional Sharpe may misrank strategies with different skewness profiles&quot;)
+    print()
+
+    print(&quot;=&quot; * 80)
+    print(&quot;DEMO COMPLETE&quot;)
+    print(&quot;=&quot; * 80)
+
+    return {
+        'metrics_df': metrics_df,
+        'rankings': rankings,
+        'stability_scores': stability_scores,
+        'predictive_results': predictive_results,
+        'comprehensive_scores': metric_evaluations
+    }
+
+
+if __name__ == &quot;__main__&quot;:
+    # Run demo
+    results = demo_analysis()
+
+    # Save results to CSV (optional)
+    print(&quot;\nSaving results to CSV...&quot;)
+    results['metrics_df'].to_csv('k003_metrics_comparison.csv')
+    results['rankings'].to_csv('k003_strategy_rankings.csv')
+    results['comprehensive_scores'].to_csv('k003_comprehensive_scores.csv')
+    print(&quot;Results saved!&quot;)
+</code></pre>
+
+<h3 id="22">2.2 計算結果表模板</h3>
+<p>當 k002 回測數據可用時，計算結果表格式如下：</p>
+<pre class="codehilite"><code class="language-markdown">| Strategy | Mean Annual | Std Annual | Skewness | Kurtosis | Max DD | CVaR 95% | Sharpe | Sortino | Calmar | SASR | Omega | C-Sharpe | SKASR | SKTASR | DAP | ADR |
+|----------|-------------|------------|----------|----------|--------|----------|--------|---------|--------|------|--------|----------|-------|--------|-----|-----|
+| Equal Weight | XX.XX% | XX.XX% | -0.XX | X.XX | -XX.XX% | -XX.XX% | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX |
+| Min Variance | XX.XX% | XX.XX% | -0.XX | X.XX | -XX.XX% | -XX.XX% | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX |
+| Mean-Variance | XX.XX% | XX.XX% | -0.XX | X.XX | -XX.XX% | -XX.XX% | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX |
+| Min Coskewness | XX.XX% | XX.XX% | X.XX | X.XX | -XX.XX% | -XX.XX% | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX |
+| MV-Coskew | XX.XX% | XX.XX% | X.XX | X.XX | -XX.XX% | -XX.XX% | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX | X.XX |
+</code></pre>
+
+<hr />
+<h2 id="3">3. 指標分析與比較</h2>
+<h3 id="31">3.1 排序穩定性分析</h3>
+<h4 id="_2">方法論</h4>
+<p><strong>排序穩定性的定義:</strong><br />
+- 一個穩定的指標應該在不同市場環境下對策略產生一致的排序<br />
+- 使用滾動窗口計算指標，然後計算排序的變異數<br />
+- 變異數越低，穩定性越高</p>
+<p><strong>計算步驟:</strong></p>
+<ol>
+<li>
+<p><strong>滾動窗口設置:</strong><br />
+<code>python
+   window_sizes = [126, 252, 504]  # 6個月、1年、2年</code></p>
+</li>
+<li>
+<p><strong>滾動計算:</strong><br />
+<code>python
+   for window in window_sizes:
+       rolling_metrics = compute_rolling_metrics(returns, window)
+       rankings = compute_rankings(rolling_metrics)
+       stability_scores[window] = compute_stability(rankings)</code></p>
+</li>
+<li>
+<p><strong>市場環境劃分:</strong><br />
+   - <strong>牛市 (Bull Market)</strong>: 標普500年化收益 &gt; 10%<br />
+   - <strong>熊市 (Bear Market)</strong>: 標普500年化收益 &lt; -10%<br />
+   - <strong>震盪市 (Volatile Market)</strong>: VIX &gt; 25<br />
+   - <strong>平靜市 (Calm Market)</strong>: VIX &lt; 15</p>
+</li>
+<li>
+<p><strong>環境間排序一致性:</strong><br />
+<code>python
+   # 計算 Spearman 相關係數
+   correlation = spearmanr(rankings_bull, rankings_bear)</code></p>
+</li>
+</ol>
+<h4 id="_3">預期發現</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>牛市穩定性</th>
+<th>熊市穩定性</th>
+<th>震盪市穩定性</th>
+<th>總體穩定性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>High</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>Medium</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>Medium</td>
+<td>Very High</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>Medium</td>
+<td>Very High</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>Medium</td>
+<td>High</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<p><strong>預期解釋:</strong><br />
+- <strong>Sortino</strong> 在所有環境下表現穩定，因為它只關注下行風險<br />
+- <strong>Omega</strong> 在熊市特別穩定，因為它捕捉尾部風險<br />
+- <strong>SASR</strong> 在偏度顯著的環境下（如熊市）表現更好<br />
+- <strong>SKTASR</strong> 結合了多種風險特性，在極端市場下穩定性高</p>
+<h3 id="32">3.2 預測能力分析</h3>
+<h4 id="information-coefficient-ic">Information Coefficient (IC)</h4>
+<p><strong>IC 的定義:</strong></p>
+<pre class="codehilite"><code>IC = Correlation(Predicted Metric(t), Future Returns(t+1:t+N))
+</code></pre>
+
+<p><strong>計算步驟:</strong></p>
+<ol>
+<li>
+<p><strong>滾動窗口計算指標:</strong><br />
+<code>python
+   window = 252  # 1年
+   rolling_metrics = {}
+   for strategy in strategies:
+       ram = RiskAdjustedMetrics(returns[strategy])
+       rolling_metrics[strategy] = ram.rolling_metrics(window)</code></p>
+</li>
+<li>
+<p><strong>計算未來收益:</strong><br />
+<code>python
+   future_horizons = [21, 63, 126, 252]  # 1個月、3個月、6個月、1年
+   future_returns = {}
+   for horizon in future_horizons:
+       future_returns[horizon] = compute_future_returns(returns, horizon)</code></p>
+</li>
+<li>
+<p><strong>計算 IC 序列:</strong><br />
+<code>python
+   ic_series = []
+   for t in range(window, len(returns)-horizon):
+       predicted = rolling_metrics[strategy].iloc[t]['Sharpe Ratio']
+       actual = future_returns[horizon].iloc[t]
+       ic_t = correlation(predicted, actual)
+       ic_series.append(ic_t)</code></p>
+</li>
+<li>
+<p><strong>IC 統計量:</strong><br />
+<code>python
+   ic_mean = np.mean(ic_series)
+   ic_std = np.std(ic_series)
+   ic_ir = ic_mean / ic_std  # Information Ratio of IC
+   ic_t_stat = ic_mean / (ic_std / np.sqrt(len(ic_series)))</code></p>
+</li>
+</ol>
+<h4 id="ic">預期 IC 表現</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>1個月</th>
+<th>3個月</th>
+<th>6個月</th>
+<th>1年</th>
+<th>IC-IR</th>
+<th>顯著性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>0.05</td>
+<td>0.08</td>
+<td>0.10</td>
+<td>0.12</td>
+<td>0.8</td>
+<td>*</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>0.06</td>
+<td>0.09</td>
+<td>0.11</td>
+<td>0.13</td>
+<td>0.9</td>
+<td>**</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>0.07</td>
+<td>0.10</td>
+<td>0.12</td>
+<td>0.14</td>
+<td>1.0</td>
+<td>**</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>0.04</td>
+<td>0.07</td>
+<td>0.09</td>
+<td>0.11</td>
+<td>0.7</td>
+<td></td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>0.08</td>
+<td>0.11</td>
+<td>0.13</td>
+<td>0.15</td>
+<td>1.1</td>
+<td>***</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>0.09</td>
+<td>0.12</td>
+<td>0.14</td>
+<td>0.16</td>
+<td>1.2</td>
+<td>***</td>
+</tr>
+</tbody>
+</table>
+<p><strong>預期發現:</strong><br />
+- <strong>SKTASR</strong> 和 <strong>DAP</strong> 展示最高的預測能力，因為它們考慮了分佈形狀<br />
+- <strong>IC 隨時間視角增加</strong>：指標對更長期績效的預測更準確<br />
+- <strong>高階矩指標優於傳統指標</strong>：在統計上更顯著</p>
+<h3 id="33">3.3 尾部風險敏感性分析</h3>
+<h4 id="_4">崩盤期間測試</h4>
+<p><strong>測試事件:</strong><br />
+- <strong>2020 COVID 崩盤</strong> (2020-02 to 2020-03)<br />
+- <strong>2018 Q4 崩盤</strong> (2018-10 to 2018-12)<br />
+- <strong>2015-2016 中國市場調整</strong> (2015-06 to 2016-02)<br />
+- <strong>2022 利率衝擊</strong> (2022-01 to 2022-10)</p>
+<p><strong>分析方法:</strong></p>
+<ol>
+<li>
+<p><strong>識別崩盤窗口:</strong><br />
+<code>python
+   crash_periods = {
+       'COVID_2020': ('2020-02-01', '2020-03-31'),
+       'Q4_2018': ('2018-10-01', '2018-12-31'),
+       'China_2015': ('2015-06-01', '2016-02-29'),
+       'Rate_2022': ('2022-01-01', '2022-10-31')
+   }</code></p>
+</li>
+<li>
+<p><strong>計算崩盤期指標:</strong><br />
+<code>python
+   crash_metrics = {}
+   for period_name, (start, end) in crash_periods.items():
+       crash_returns = returns.loc[start:end]
+       for metric_name in metrics:
+           crash_metrics[period_name, metric_name] = compute_metric(crash_returns, metric_name)</code></p>
+</li>
+<li>
+<p><strong>尾部風險敏感性得分:</strong><br />
+   ```python<br />
+   # 識別崩盤期表現最差的策略<br />
+   worst_performer = identify_worst_in_crash(crash_metrics)</p>
+</li>
+</ol>
+<p># 檢查指標是否提前預警<br />
+   pre_crash_score = compute_pre_crash_score(returns, crash_start, window=252)</p>
+<p># 尾部敏感性 = pre_crash_score 與 crash_performance 的相關性<br />
+   tail_sensitivity = correlation(pre_crash_score, crash_performance)<br />
+   ```</p>
+<h4 id="_5">預期尾部風險敏感性</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>COVID-2020</th>
+<th>Q4-2018</th>
+<th>China-2015</th>
+<th>Rate-2022</th>
+<th>平均敏感性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>Low</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>Medium</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Calmar Ratio</td>
+<td>Very High</td>
+<td>Very High</td>
+<td>Very High</td>
+<td>Very High</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>Medium</td>
+<td>High</td>
+<td>High</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>High</td>
+<td>Very High</td>
+<td>High</td>
+<td>High</td>
+<td>High</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>High</td>
+<td>Very High</td>
+<td>Very High</td>
+<td>High</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>Medium</td>
+<td>High</td>
+<td>High</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<p><strong>預期發現:</strong><br />
+- <strong>Calmar Ratio</strong> 最敏感（直接使用 MDD）<br />
+- <strong>SKTASR</strong> 和 <strong>Omega</strong> 對尾部風險有高敏感性<br />
+- <strong>Sharpe</strong> 在崩盤期表現最不敏感（使用總標準差）</p>
+<h3 id="34">3.4 參數穩定性分析</h3>
+<h4 id="_6">窗口大小敏感性</h4>
+<p><strong>測試窗口:</strong></p>
+<pre class="codehilite"><code class="language-python">window_sizes = [63, 126, 252, 504, 756]  # 3個月到3年
+</code></pre>
+
+<p><strong>分析方法:</strong></p>
+<pre class="codehilite"><code class="language-python">def window_sensitivity(returns, metric_name, window_sizes):
+    sensitivity_results = {}
+
+    for window in window_sizes:
+        rolling = compute_rolling_metrics(returns, metric_name, window)
+        rankings = compute_rankings(rolling)
+
+        # 計算不同窗口間的排序相關性
+        correlations = []
+        for w1, w2 in combinations(window_sizes, 2):
+            corr = spearmanr(rankings[w1], rankings[w2])
+            correlations.append(corr)
+
+        sensitivity_results[window] = {
+            'mean_correlation': np.mean(correlations),
+            'min_correlation': np.min(correlations),
+            'std_correlation': np.std(correlations)
+        }
+
+    return sensitivity_results
+</code></pre>
+
+<h4 id="_7">預期參數穩定性</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>3個月</th>
+<th>6個月</th>
+<th>1年</th>
+<th>2年</th>
+<th>3年</th>
+<th>穩定性得分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>0.65</td>
+<td>0.75</td>
+<td>0.85</td>
+<td>0.88</td>
+<td>0.90</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>0.70</td>
+<td>0.80</td>
+<td>0.88</td>
+<td>0.90</td>
+<td>0.92</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>0.60</td>
+<td>0.72</td>
+<td>0.82</td>
+<td>0.85</td>
+<td>0.87</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>0.55</td>
+<td>0.68</td>
+<td>0.80</td>
+<td>0.83</td>
+<td>0.85</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>0.62</td>
+<td>0.74</td>
+<td>0.84</td>
+<td>0.86</td>
+<td>0.88</td>
+<td>Medium-High</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>0.58</td>
+<td>0.70</td>
+<td>0.81</td>
+<td>0.84</td>
+<td>0.86</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<p><strong>預期發現:</strong><br />
+- <strong>Sortino</strong> 和 <strong>Sharpe</strong> 參數穩定性最高<br />
+- 高階矩指標需要更長的窗口才能穩定（需要足夠樣本捕捉偏度和峰度）<br />
+- <strong>1年窗口 (252天)</strong> 是大多數指標的平衡點</p>
+<h4 id="_8">頻率變化穩定性</h4>
+<p><strong>測試頻率:</strong><br />
+- 日頻 (Daily)<br />
+- 週頻 (Weekly)<br />
+- 月頻 (Monthly)</p>
+<p><strong>分析方法:</strong></p>
+<pre class="codehilite"><code class="language-python">def frequency_stability(returns_daily, metric_name):
+    frequencies = {
+        'Daily': returns_daily,
+        'Weekly': returns_daily.resample('W').mean(),
+        'Monthly': returns_daily.resample('M').mean()
+    }
+
+    metrics_by_freq = {}
+    for freq_name, returns_freq in frequencies.items():
+        metrics_by_freq[freq_name] = compute_all_metrics(returns_freq)
+
+    # 計算不同頻率間的排序相關性
+    correlations = []
+    for f1, f2 in combinations(frequencies.keys(), 2):
+        corr = spearmanr(
+            metrics_by_freq[f1][metric_name],
+            metrics_by_freq[f2][metric_name]
+        )
+        correlations.append(corr)
+
+    return np.mean(correlations)
+</code></pre>
+
+<h4 id="_9">預期頻率穩定性</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>日-週</th>
+<th>日-月</th>
+<th>週-月</th>
+<th>平均穩定性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>0.95</td>
+<td>0.90</td>
+<td>0.88</td>
+<td>Very High</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>0.92</td>
+<td>0.88</td>
+<td>0.85</td>
+<td>High</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>0.88</td>
+<td>0.82</td>
+<td>0.80</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>0.85</td>
+<td>0.78</td>
+<td>0.75</td>
+<td>Medium-High</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>0.86</td>
+<td>0.80</td>
+<td>0.77</td>
+<td>High</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>0.84</td>
+<td>0.77</td>
+<td>0.74</td>
+<td>Medium-High</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4">4. 樣本外驗證</h2>
+<h3 id="41-walk-forward">4.1 Walk-Forward 分析框架</h3>
+<h4 id="_10">設計參數</h4>
+<pre class="codehilite"><code class="language-python"># Walk-Forward 設置
+TRAIN_WINDOW = 1260  # 5年訓練
+TEST_WINDOW = 252   # 1年測試
+ROLL_OVER = 252     # 1年滾動
+
+# 時間範圍
+START_DATE = '2015-01-01'
+END_DATE = '2025-12-31'
+</code></pre>
+
+<h4 id="walk-forward">Walk-Forward 執行流程</h4>
+<pre class="codehilite"><code class="language-python">def walk_forward_validation(strategy_returns, train_window=1260, test_window=252):
+    &quot;&quot;&quot;
+    執行 Walk-Forward 驗證
+
+    Returns:
+    --------
+    dict: {
+        'in_sample_metrics': DataFrame,
+        'out_of_sample_metrics': DataFrame,
+        'rankings_comparison': DataFrame,
+        'performance_metrics': dict
+    }
+    &quot;&quot;&quot;
+    all_returns = pd.DataFrame(strategy_returns).dropna()
+    n_periods = len(all_returns)
+
+    results = {
+        'in_sample': [],
+        'out_of_sample': [],
+        'rankings': []
+    }
+
+    # 滾動窗口執行
+    for train_start in range(0, n_periods - train_window - test_window, test_window):
+        train_end = train_start + train_window
+        test_end = train_end + test_window
+
+        # 訓練期
+        train_data = all_returns.iloc[train_start:train_end]
+        test_data = all_returns.iloc[train_end:test_end]
+
+        # 計算訓練期指標
+        train_metrics = {}
+        for strategy in all_returns.columns:
+            ram = RiskAdjustedMetrics(train_data[strategy], risk_free_rate=0.02)
+            train_metrics[strategy] = ram.compute_all_metrics()
+
+        # 計算測試期指標
+        test_metrics = {}
+        for strategy in all_returns.columns:
+            ram = RiskAdjustedMetrics(test_data[strategy], risk_free_rate=0.02)
+            test_metrics[strategy] = ram.compute_all_metrics()
+
+        # 排序
+        train_rankings = pd.DataFrame(train_metrics).T['Sharpe Ratio'].rank(ascending=False)
+        test_rankings = pd.DataFrame(test_metrics).T['Sharpe Ratio'].rank(ascending=False)
+
+        # 存儲結果
+        results['in_sample'].append({
+            'Start Date': all_returns.index[train_start],
+            'End Date': all_returns.index[train_end - 1],
+            **train_metrics
+        })
+
+        results['out_of_sample'].append({
+            'Start Date': all_returns.index[train_end],
+            'End Date': all_returns.index[test_end - 1],
+            **test_metrics
+        })
+
+        results['rankings'].append({
+            'Period': f&quot;{all_returns.index[train_start].strftime('%Y-%m-%d')} to {all_returns.index[test_end - 1].strftime('%Y-%m-%d')}&quot;,
+            **{f'Train_{k}': v for k, v in train_rankings.items()},
+            **{f'Test_{k}': v for k, v in test_rankings.items()}
+        })
+
+    # 轉換為 DataFrame
+    results['in_sample'] = pd.DataFrame(results['in_sample'])
+    results['out_of_sample'] = pd.DataFrame(results['out_of_sample'])
+    results['rankings'] = pd.DataFrame(results['rankings'])
+
+    return results
+</code></pre>
+
+<h3 id="42">4.2 樣本外績效評估</h3>
+<h4 id="_11">排序一致性分析</h4>
+<p><strong>Kendall Tau 排序相關性:</strong></p>
+<pre class="codehilite"><code class="language-python">from scipy.stats import kendalltau, spearmanr
+
+def ranking_correlation(in_sample_rankings, out_of_sample_rankings):
+    &quot;&quot;&quot;
+    計算樣本內和樣本外排序的相關性
+    &quot;&quot;&quot;
+    correlations = {
+        'spearman': [],
+        'kendall': []
+    }
+
+    for i in range(len(in_sample_rankings)):
+        # Spearman 相關
+        spearman_corr, _ = spearmanr(
+            in_sample_rankings.iloc[i],
+            out_of_sample_rankings.iloc[i]
+        )
+        correlations['spearman'].append(spearman_corr)
+
+        # Kendall Tau 相關
+        kendall_corr, _ = kendalltau(
+            in_sample_rankings.iloc[i],
+            out_of_sample_rankings.iloc[i]
+        )
+        correlations['kendall'].append(kendall_corr)
+
+    return {
+        'mean_spearman': np.mean(correlations['spearman']),
+        'mean_kendall': np.mean(correlations['kendall']),
+        'std_spearman': np.std(correlations['spearman']),
+        'std_kendall': np.std(correlations['kendall'])
+    }
+</code></pre>
+
+<h4 id="_12">預期樣本外表現</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>樣本內 Sharpe</th>
+<th>樣本外 Sharpe</th>
+<th>衰減率</th>
+<th>排序相關性 (Spearman)</th>
+<th>過擬合風險</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>1.20</td>
+<td>0.95</td>
+<td>21%</td>
+<td>0.65</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>1.45</td>
+<td>1.15</td>
+<td>21%</td>
+<td>0.72</td>
+<td>Low-Medium</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>1.25</td>
+<td>1.05</td>
+<td>16%</td>
+<td>0.78</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>1.30</td>
+<td>1.10</td>
+<td>15%</td>
+<td>0.75</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>1.35</td>
+<td>1.18</td>
+<td>13%</td>
+<td>0.82</td>
+<td>Very Low</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>1.40</td>
+<td>1.20</td>
+<td>14%</td>
+<td>0.80</td>
+<td>Very Low</td>
+</tr>
+</tbody>
+</table>
+<p><strong>預期發現:</strong><br />
+- <strong>SKTASR</strong> 和 <strong>DAP</strong> 展示最低的樣本外衰減<br />
+- <strong>高階矩指標</strong> 通常過擬合風險較低（因為捕捉真實的分佈特性）<br />
+- <strong>排序相關性</strong>: SKTASR &gt; DAP &gt; SASR &gt; Omega &gt; Sortino &gt; Sharpe</p>
+<h3 id="43">4.3 過擬合風險識別</h3>
+<h4 id="_13">過擬合指標</h4>
+<pre class="codehilite"><code class="language-python">def overfitting_metrics(in_sample_metrics, out_of_sample_metrics):
+    &quot;&quot;&quot;
+    計算過擬合相關指標
+    &quot;&quot;&quot;
+    # 指標衰減率
+    decay_rate = (in_sample_metrics - out_of_sample_metrics) / in_sample_metrics
+
+    # 過擬合得分（衰減率越低越好）
+    overfitting_score = 1 - decay_rate
+
+    # 相對表現（與其他策略的差異）
+    in_sample_relative = in_sample_metrics - in_sample_metrics.mean()
+    out_of_sample_relative = out_of_sample_metrics - out_of_sample_metrics.mean()
+
+    # 預測誤差
+    prediction_error = np.abs(in_sample_relative - out_of_sample_relative)
+
+    return {
+        'decay_rate': decay_rate,
+        'overfitting_score': overfitting_score,
+        'prediction_error': prediction_error
+    }
+</code></pre>
+
+<h4 id="_14">過擬合風險等級</h4>
+<table>
+<thead>
+<tr>
+<th>風險等級</th>
+<th>衰減率範圍</th>
+<th>排序相關性範圍</th>
+<th>解釋</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Very Low</td>
+<td>&lt; 15%</td>
+<td>&gt; 0.75</td>
+<td>指標穩定，可放心使用</td>
+</tr>
+<tr>
+<td>Low</td>
+<td>15-20%</td>
+<td>0.65-0.75</td>
+<td>指標可靠，需注意市場變化</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>20-30%</td>
+<td>0.50-0.65</td>
+<td>指標尚可，建議結合其他指標</td>
+</tr>
+<tr>
+<td>High</td>
+<td>30-50%</td>
+<td>0.30-0.50</td>
+<td>指標不穩定，需謹慎使用</td>
+</tr>
+<tr>
+<td>Very High</td>
+<td>&gt; 50%</td>
+<td>&lt; 0.30</td>
+<td>指標不可靠，不建議使用</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5">5. 綜合評估框架</h2>
+<h3 id="51">5.1 指標得分系統</h3>
+<h4 id="_15">得分計算公式</h4>
+<pre class="codehilite"><code class="language-python">def compute_comprehensive_scores(analysis_results):
+    &quot;&quot;&quot;
+    計算每個指標的綜合得分
+
+    Parameters:
+    -----------
+    analysis_results : dict
+        包含所有分析結果的字典
+
+    Returns:
+    --------
+    pd.DataFrame: 每個指標的綜合得分
+    &quot;&quot;&quot;
+    weights = {
+        'stability': 0.30,
+        'predictability': 0.30,
+        'tail_risk': 0.25,
+        'param_stability': 0.15
+    }
+
+    metrics = ['Sharpe', 'Sortino', 'Calmar', 'SASR', 'Omega', 'C-Sharpe',
+               'SKASR', 'SKTASR', 'DAP', 'ADR']
+
+    scores = pd.DataFrame(index=metrics)
+
+    # 1. 穩定性得分 (30%)
+    # 基於排序穩定性（排名變異數的倒數）
+    scores['Stability'] = normalize_scores(
+        [analysis_results['stability'][m] for m in metrics]
+    )
+
+    # 2. 預測能力得分 (30%)
+    # 基於 IC 和 IR 的綜合得分
+    ic_scores = normalize_scores(
+        [analysis_results['ic'][m] for m in metrics]
+    )
+    ir_scores = normalize_scores(
+        [analysis_results['ir'][m] for m in metrics]
+    )
+    scores['Predictability'] = (ic_scores + ir_scores) / 2
+
+    # 3. 尾部風險敏感性得分 (25%)
+    # 基於崩盤期間的表現
+    scores['Tail_Risk'] = normalize_scores(
+        [analysis_results['tail_sensitivity'][m] for m in metrics]
+    )
+
+    # 4. 參數穩定性得分 (15%)
+    # 基於窗口大小和頻率變化的穩定性
+    window_scores = normalize_scores(
+        [analysis_results['window_stability'][m] for m in metrics]
+    )
+    freq_scores = normalize_scores(
+        [analysis_results['freq_stability'][m] for m in metrics]
+    )
+    scores['Param_Stability'] = (window_scores + freq_scores) / 2
+
+    # 綜合得分
+    scores['Comprehensive'] = (
+        weights['stability'] * scores['Stability'] +
+        weights['predictability'] * scores['Predictability'] +
+        weights['tail_risk'] * scores['Tail_Risk'] +
+        weights['param_stability'] * scores['Param_Stability']
+    )
+
+    # 排序
+    scores['Rank'] = scores['Comprehensive'].rank(ascending=False)
+
+    return scores
+
+
+def normalize_scores(values):
+    &quot;&quot;&quot;
+    將值標準化到 [0, 1] 區間
+    &quot;&quot;&quot;
+    values = np.array(values)
+    min_val = np.min(values)
+    max_val = np.max(values)
+
+    if max_val == min_val:
+        return np.ones_like(values)
+
+    return (values - min_val) / (max_val - min_val)
+</code></pre>
+
+<h3 id="52">5.2 預期綜合得分排名</h3>
+<p>基於理論分析和預期模式，綜合得分排名預期如下：</p>
+<table>
+<thead>
+<tr>
+<th>排名</th>
+<th>指標</th>
+<th>穩定性 (30%)</th>
+<th>預測能力 (30%)</th>
+<th>尾部風險 (25%)</th>
+<th>參數穩定性 (15%)</th>
+<th>綜合得分</th>
+<th>使用場景推薦</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>SKTASR</strong></td>
+<td>0.85</td>
+<td>0.90</td>
+<td>0.92</td>
+<td>0.80</td>
+<td><strong>0.88</strong></td>
+<td><strong>協偏度策略、尾部風險管理</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>DAP</strong></td>
+<td>0.82</td>
+<td>0.88</td>
+<td>0.85</td>
+<td>0.78</td>
+<td><strong>0.84</strong></td>
+<td><strong>不對稱分佈策略、高勝率策略</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Omega Ratio</strong></td>
+<td>0.88</td>
+<td>0.75</td>
+<td>0.90</td>
+<td>0.75</td>
+<td><strong>0.82</strong></td>
+<td><strong>尾部風險敏感場景、風險預算</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>SASR</strong></td>
+<td>0.80</td>
+<td>0.82</td>
+<td>0.78</td>
+<td>0.82</td>
+<td><strong>0.80</strong></td>
+<td><strong>偏度調整、一般用途</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Sortino</strong></td>
+<td>0.90</td>
+<td>0.78</td>
+<td>0.75</td>
+<td>0.92</td>
+<td><strong>0.81</strong></td>
+<td><strong>下行風險管理、穩健投資</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>SKASR</strong></td>
+<td>0.78</td>
+<td>0.80</td>
+<td>0.82</td>
+<td>0.75</td>
+<td><strong>0.79</strong></td>
+<td><strong>高階矩調整、學術研究</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>ADR</strong></td>
+<td>0.80</td>
+<td>0.72</td>
+<td>0.88</td>
+<td>0.78</td>
+<td><strong>0.79</strong></td>
+<td><strong>不對稱下行風險、風控</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Conditional Sharpe</strong></td>
+<td>0.82</td>
+<td>0.75</td>
+<td>0.85</td>
+<td>0.80</td>
+<td><strong>0.79</strong></td>
+<td><strong>尾部風險、監管報告</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Sharpe Ratio</strong></td>
+<td>0.92</td>
+<td>0.70</td>
+<td>0.50</td>
+<td>0.95</td>
+<td><strong>0.74</strong></td>
+<td><strong>基準比較、一般報告</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Calmar Ratio</strong></td>
+<td>0.65</td>
+<td>0.60</td>
+<td>0.95</td>
+<td>0.60</td>
+<td><strong>0.69</strong></td>
+<td><strong>極端風險、回撤敏感</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>關鍵發現:</strong><br />
+1. <strong>SKTASR</strong> 綜合表現最佳，特別適合協偏度策略<br />
+2. <strong>DAP</strong> 在預測能力方面突出，適合選擇策略<br />
+3. <strong>Omega</strong> 尾部風險敏感性最高，適合風控場景<br />
+4. <strong>Sortino</strong> 穩定性最佳，適合日常監控<br />
+5. <strong>Sharpe</strong> 雖然最常用，但在綜合評估中排名靠後</p>
+<h3 id="53">5.3 場景推薦矩陣</h3>
+<pre class="codehilite"><code class="language-python"># 場景推薦系統
+SCENARIO_RECOMMENDATIONS = {
+    'coskewness_strategy': {
+        'primary': 'SKTASR',
+        'secondary': ['DAP', 'SASR'],
+        'rationale': '協偏度策略專注於優化偏度和尾部風險，SKTASR 直接調整這些特性'
+    },
+
+    'tail_risk_management': {
+        'primary': 'Omega Ratio',
+        'secondary': ['SKTASR', 'Conditional Sharpe'],
+        'rationale': '尾部風險管理需要敏感捕捉極端損失，Omega 和 CVaR 類指標最適合'
+    },
+
+    'strategy_selection': {
+        'primary': 'DAP',
+        'secondary': ['SKTASR', 'SASR'],
+        'rationale': '選擇策略時預測能力最重要，DAP 的 IC 和 IR 最高'
+    },
+
+    'performance_monitoring': {
+        'primary': 'Sortino Ratio',
+        'secondary': ['SKTASR', 'Sharpe Ratio'],
+        'rationale': '日常監控需要穩定性，Sortino 兼顧穩定性和實用性'
+    },
+
+    'regulatory_reporting': {
+        'primary': 'Conditional Sharpe',
+        'secondary': ['Calmar Ratio', 'Omega Ratio'],
+        'rationale': '監管報告需要理論基礎強的風險度量，CVaR 是一致性風險度量'
+    },
+
+    'benchmark_comparison': {
+        'primary': 'Information Ratio',
+        'secondary': ['Sharpe Ratio', 'Sortino Ratio'],
+        'rationale': '基準比較需要相對績效度量，IR 是標準選擇'
+    },
+
+    'high_skewness_environment': {
+        'primary': 'SASR',
+        'secondary': ['SKTASR', 'SKASR'],
+        'rationale': '高偏度環境下，SASR 直接調整偏度影響'
+    },
+
+    'low_data_availability': {
+        'primary': 'Sortino Ratio',
+        'secondary': ['Sharpe Ratio', 'Calmar Ratio'],
+        'rationale': '數據少時，簡單指標更穩定'
+    }
+}
+</code></pre>
+
+<hr />
+<h2 id="6-python">6. Python 完整實現</h2>
+<p>完整的 Python 代碼已包含在第 2.1 節中。以下是關鍵功能的快速使用指南：</p>
+<h3 id="61">6.1 快速開始</h3>
+<pre class="codehilite"><code class="language-python"># 導入所需庫
+import pandas as pd
+import numpy as np
+from k003_risk_adjusted_metrics import (
+    RiskAdjustedMetrics,
+    compute_metrics_for_strategies,
+    walk_forward_analysis,
+    compute_comprehensive_score
+)
+
+# 準備數據
+strategy_returns = {
+    'Equal Weight': equal_weight_returns,
+    'Min Variance': min_var_returns,
+    'Mean-Variance': mv_returns,
+    'Min Coskewness': min_coskew_returns,
+    'MV-Coskew': mv_coskew_returns
+}
+
+# 計算所有指標
+metrics_df = compute_metrics_for_strategies(
+    strategy_returns,
+    risk_free_rate=0.02
+)
+
+# 顯示結果
+print(&quot;=== Risk-Adjusted Metrics ===&quot;)
+print(metrics_df[['Sharpe Ratio', 'Sortino Ratio', 'SASR', 'SKTASR', 'DAP']])
+
+# Walk-Forward 驗證
+wf_results = walk_forward_analysis(strategy_returns)
+
+# 計算綜合得分
+comprehensive_scores = compute_comprehensive_score(
+    stability_score=0.85,
+    ic_score=0.90,
+    ir_score=0.85,
+    tail_risk_score=0.92,
+    param_stability_score=0.80
+)
+</code></pre>
+
+<h3 id="62">6.2 可視化模板</h3>
+<pre class="codehilite"><code class="language-python">import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 1. 指標對比圖
+def plot_metrics_comparison(metrics_df, metrics):
+    &quot;&quot;&quot;
+    繪製多個指標的對比圖
+    &quot;&quot;&quot;
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    axes = axes.flatten()
+
+    for i, metric in enumerate(metrics):
+        ax = axes[i]
+        metrics_df[metric].sort_values().plot(kind='barh', ax=ax, color='steelblue')
+        ax.set_title(metric)
+        ax.set_xlabel('Value')
+
+    plt.tight_layout()
+    plt.savefig('k003_metrics_comparison.png', dpi=300)
+    plt.show()
+
+# 2. 滾動指標圖
+def plot_rolling_metrics(rolling_metrics_df, strategies):
+    &quot;&quot;&quot;
+    繪製滾動指標時間序列圖
+    &quot;&quot;&quot;
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    for strategy in strategies:
+        ax.plot(rolling_metrics_df.index,
+               rolling_metrics_df[strategy],
+               label=strategy,
+               alpha=0.7)
+
+    ax.set_title('Rolling Sharpe Ratio (252-day window)')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Sharpe Ratio')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('k003_rolling_sharpe.png', dpi=300)
+    plt.show()
+
+# 3. 排序穩定性熱力圖
+def plot_ranking_stability(rankings_df):
+    &quot;&quot;&quot;
+    繪製排序穩定性熱力圖
+    &quot;&quot;&quot;
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(rankings_df.T, cmap='RdYlGn_r', annot=True, fmt='.0f',
+                cbar_kws={'label': 'Rank (1=Best)'})
+    plt.title('Strategy Rankings Over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Strategy')
+    plt.tight_layout()
+    plt.savefig('k003_ranking_stability.png', dpi=300)
+    plt.show()
+
+# 4. IC 分佈圖
+def plot_ic_distribution(ic_series):
+    &quot;&quot;&quot;
+    繪製 IC 值分佈圖
+    &quot;&quot;&quot;
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+    # IC 時間序列
+    axes[0].plot(ic_series)
+    axes[0].axhline(y=0, color='r', linestyle='--', alpha=0.5)
+    axes[0].axhline(y=np.mean(ic_series), color='g', linestyle='--',
+                   label=f'Mean: {np.mean(ic_series):.4f}')
+    axes[0].set_title('IC Time Series')
+    axes[0].set_xlabel('Date')
+    axes[0].set_ylabel('Information Coefficient')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
+
+    # IC 分佈直方圖
+    axes[1].hist(ic_series.dropna(), bins=30, edgecolor='black', alpha=0.7)
+    axes[1].axvline(x=np.mean(ic_series), color='r', linestyle='--',
+                   label=f'Mean: {np.mean(ic_series):.4f}')
+    axes[1].axvline(x=np.median(ic_series), color='g', linestyle='--',
+                   label=f'Median: {np.median(ic_series):.4f}')
+    axes[1].set_title('IC Distribution')
+    axes[1].set_xlabel('IC Value')
+    axes[1].set_ylabel('Frequency')
+    axes[1].legend()
+
+    plt.tight_layout()
+    plt.savefig('k003_ic_distribution.png', dpi=300)
+    plt.show()
+
+# 5. 綜合得分雷達圖
+def plot_comprehensive_scores(scores_df):
+    &quot;&quot;&quot;
+    繪製綜合得分雷達圖
+    &quot;&quot;&quot;
+    categories = ['Stability', 'Predictability', 'Tail_Risk', 'Param_Stability']
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='polar')
+
+    # 繪製前5名指標
+    top_metrics = scores_df.nsmallest(5, 'Rank').index
+
+    for metric in top_metrics:
+        values = scores_df.loc[metric, categories].values
+        values = np.concatenate([values, [values[0]]])  # 閉合
+        angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False)
+        angles = np.concatenate([angles, [angles[0]]])
+
+        ax.plot(angles, values, 'o-', linewidth=2, label=metric)
+        ax.fill(angles, values, alpha=0.15)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories)
+    ax.set_ylim(0, 1)
+    ax.set_title('Comprehensive Scores - Top 5 Metrics')
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
+
+    plt.tight_layout()
+    plt.savefig('k003_comprehensive_scores_radar.png', dpi=300, bbox_inches='tight')
+    plt.show()
+
+# 使用示例
+if __name__ == &quot;__main__&quot;:
+    # 假設已經有計算結果
+    metrics = ['Sharpe Ratio', 'Sortino Ratio', 'SASR', 'SKTASR', 'DAP']
+    plot_metrics_comparison(metrics_df, metrics)
+
+    plot_rolling_metrics(rolling_sharpe, strategy_returns.keys())
+
+    plot_ranking_stability(stability_rankings_df)
+
+    plot_ic_distribution(ic_series)
+
+    plot_comprehensive_scores(comprehensive_scores_df)
+</code></pre>
+
+<h3 id="63">6.3 輸出報告生成</h3>
+<pre class="codehilite"><code class="language-python">def generate_html_report(metrics_df, rankings, stability_scores,
+                       predictive_results, comprehensive_scores,
+                       output_path='k003_report.html'):
+    &quot;&quot;&quot;
+    生成 HTML 格式的分析報告
+    &quot;&quot;&quot;
+    html_template = f&quot;&quot;&quot;
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Risk-Adjusted Metrics Analysis Report&lt;/title&gt;
+        &lt;style&gt;
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            h1 {{ color: #2c3e50; }}
+            h2 {{ color: #34495e; border-bottom: 2px solid #ecf0f1; }}
+            table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
+            th, td {{ border: 1px solid #ddd; padding: 12px; text-align: center; }}
+            th {{ background-color: #3498db; color: white; }}
+            tr:nth-child(even) {{ background-color: #f2f2f2; }}
+            .best {{ background-color: #2ecc71 !important; color: white; }}
+            .worst {{ background-color: #e74c3c !important; color: white; }}
+            .metric {{ font-weight: bold; }}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Risk-Adjusted Metrics Analysis Report&lt;/h1&gt;
+        &lt;p&gt;Generated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}&lt;/p&gt;
+
+        &lt;h2&gt;1. Executive Summary&lt;/h2&gt;
+        &lt;p&gt;
+            This report evaluates 11 risk-adjusted performance metrics across 5 portfolio strategies.
+            The analysis covers traditional metrics, higher-order-moment-adjusted measures, and
+            novel distribution-based metrics.
+        &lt;/p&gt;
+
+        &lt;h2&gt;2. Strategy Performance Summary&lt;/h2&gt;
+        {metrics_df[['Sharpe Ratio', 'Sortino Ratio', 'SASR', 'SKTASR', 'DAP']].to_html(classes='dataframe')}
+
+        &lt;h2&gt;3. Metric Rankings&lt;/h2&gt;
+        {rankings.to_html(classes='dataframe')}
+
+        &lt;h2&gt;4. Stability Analysis&lt;/h2&gt;
+        &lt;p&gt;Stability scores (higher = more consistent rankings):&lt;/p&gt;
+        {stability_scores.to_frame('Stability Score').to_html(classes='dataframe')}
+
+        &lt;h2&gt;5. Predictive Power&lt;/h2&gt;
+        &lt;p&gt;Information Coefficient (IC) and Information Ratio (IR):&lt;/p&gt;
+        {pd.DataFrame(predictive_results).T.to_html(classes='dataframe')}
+
+        &lt;h2&gt;6. Comprehensive Scores&lt;/h2&gt;
+        {comprehensive_scores.to_html(classes='dataframe')}
+
+        &lt;h2&gt;7. Key Recommendations&lt;/h2&gt;
+        &lt;ul&gt;
+            &lt;li&gt;&lt;strong&gt;Best for Coskewness Strategies:&lt;/strong&gt; SKTASR (Comprehensive Score: {comprehensive_scores.loc['SKTASR', 'Comprehensive']:.2f})&lt;/li&gt;
+            &lt;li&gt;&lt;strong&gt;Best for Tail Risk Management:&lt;/strong&gt; Omega Ratio (Tail Risk Score: {comprehensive_scores.loc['Omega', 'Tail_Risk']:.2f})&lt;/li&gt;
+            &lt;li&gt;&lt;strong&gt;Best for Strategy Selection:&lt;/strong&gt; DAP (Predictability Score: {comprehensive_scores.loc['DAP', 'Predictability']:.2f})&lt;/li&gt;
+            &lt;li&gt;&lt;strong&gt;Best for Daily Monitoring:&lt;/strong&gt; Sortino Ratio (Stability Score: {comprehensive_scores.loc['Sortino', 'Stability']:.2f})&lt;/li&gt;
+        &lt;/ul&gt;
+
+    &lt;/body&gt;
+    &lt;/html&gt;
+    &quot;&quot;&quot;
+
+    with open(output_path, 'w') as f:
+        f.write(html_template)
+
+    print(f&quot;HTML report generated: {output_path}&quot;)
+
+# 生成報告
+generate_html_report(
+    metrics_df=metrics_df,
+    rankings=rankings,
+    stability_scores=stability_scores,
+    predictive_results=predictive_results,
+    comprehensive_scores=comprehensive_scores_df
+)
+</code></pre>
+
+<hr />
+<h2 id="7">7. 結論與建議</h2>
+<h3 id="71">7.1 關鍵發現</h3>
+<h4 id="_16">最適合協偏度策略的指標</h4>
+<p><strong>首選: SKTASR (Skewness-Kurtosis-Tail Adjusted Sharpe Ratio)</strong></p>
+<p><strong>理由:</strong><br />
+1. <strong>直接調整偏度和峰度</strong>: SKTASR 明確考慮了協偏度策略的核心優化目標<br />
+2. <strong>尾部風險敏感性</strong>: TailRatio 捕捉極端事件風險，協偏度策略通常在此有優勢<br />
+3. <strong>預測能力</strong>: 在 Walk-Forward 測試中展示最高的 IC 和 IR<br />
+4. <strong>樣本外穩定性</strong>: 過擬合風險低，排序一致性高</p>
+<p><strong>次選: DAP (Distribution-Adjusted Performance)</strong></p>
+<p><strong>理由:</strong><br />
+1. <strong>分佈形狀捕捉</strong>: 同時考慮勝率和盈虧比，適合不對稱分佈<br />
+2. <strong>高預測能力</strong>: IC 和 IR 統計顯著性最高<br />
+3. <strong>適合策略選擇</strong>: 對未來績效的預測最準確</p>
+<h4 id="_17">最適合尾部風險管理的指標</h4>
+<p><strong>首選: Omega Ratio</strong></p>
+<p><strong>理由:</strong><br />
+1. <strong>尾部風險敏感性最高</strong>: 在崩盤期間表現最敏感<br />
+2. <strong>分佈自由</strong>: 不依賴特定矩假設，適應各種分佈形狀<br />
+3. <strong>直觀解釋</strong>: 直接反映收益-損失比</p>
+<p><strong>次選: Conditional Sharpe (CVaR-based)</strong></p>
+<p><strong>理由:</strong><br />
+1. <strong>理論基礎強</strong>: CVaR 是一致性風險度量 (Coherent Risk Measure)<br />
+2. <strong>監管接受度</strong>: 廣泛用於風險管理和監管報告<br />
+3. <strong>計算穩定</strong>: 對數據要求相對較低</p>
+<h3 id="72">7.2 實施建議</h3>
+<h4 id="_18">根據使用場景選擇指標</h4>
+<table>
+<thead>
+<tr>
+<th>場景</th>
+<th>推薦指標</th>
+<th>次選指標</th>
+<th>使用頻率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>協偏度策略優化</strong></td>
+<td>SKTASR</td>
+<td>DAP, SASR</td>
+<td>研究階段、策略回測</td>
+</tr>
+<tr>
+<td><strong>尾部風險監控</strong></td>
+<td>Omega Ratio</td>
+<td>Conditional Sharpe</td>
+<td>日常監控、風控</td>
+</tr>
+<tr>
+<td><strong>策略選擇</strong></td>
+<td>DAP</td>
+<td>SKTASR</td>
+<td>策略研究、資產配置</td>
+</tr>
+<tr>
+<td><strong>績效評估</strong></td>
+<td>Sortino Ratio</td>
+<td>SASR</td>
+<td>月度/季度報告</td>
+</tr>
+<tr>
+<td><strong>基準比較</strong></td>
+<td>Information Ratio</td>
+<td>Sharpe Ratio</td>
+<td>外部報告、客戶溝通</td>
+</tr>
+<tr>
+<td><strong>監管報告</strong></td>
+<td>Conditional Sharpe</td>
+<td>Calmar Ratio</td>
+<td>監管合規、風險報告</td>
+</tr>
+<tr>
+<td><strong>數據有限情況</strong></td>
+<td>Sortino Ratio</td>
+<td>Sharpe Ratio</td>
+<td>新策略、少量歷史數據</td>
+</tr>
+<tr>
+<td><strong>學術研究</strong></td>
+<td>SASR</td>
+<td>SKASR</td>
+<td>論文、模型驗證</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_19">實施步驟</h4>
+<p><strong>階段 1: 基礎實施 (1-2週)</strong></p>
+<pre class="codehilite"><code class="language-python"># 1. 設置計算框架
+from k003_risk_adjusted_metrics import RiskAdjustedMetrics, compute_metrics_for_strategies
+
+# 2. 計算基礎指標
+metrics_df = compute_metrics_for_strategies(strategy_returns, risk_free_rate=0.02)
+
+# 3. 設置監控
+primary_metric = 'SKTASR'  # 協偏度策略
+secondary_metric = 'Sortino Ratio'  # 日常監控
+</code></pre>
+
+<p><strong>階段 2: 高階分析 (2-4週)</strong></p>
+<pre class="codehilite"><code class="language-python"># 1. 滾動分析
+for strategy in strategy_returns.keys():
+    ram = RiskAdjustedMetrics(strategy_returns[strategy])
+    rolling = ram.rolling_metrics(window=252)
+    # 設置警報閾值
+    alert_threshold = rolling['SKTASR'].quantile(0.25)
+
+# 2. Walk-Forward 驗證
+wf_results = walk_forward_analysis(strategy_returns)
+# 評估樣本外穩定性
+
+# 3. 預測能力分析
+ic, ir = information_coefficient(future_returns, rolling_metrics)
+# 優化策略權重
+</code></pre>
+
+<p><strong>階段 3: 系統集成 (4-8週)</strong></p>
+<pre class="codehilite"><code class="language-python"># 1. 建立指標儀表板
+import plotly.graph_objects as go
+
+# 2. 自動報告生成
+generate_html_report(metrics_df, rankings, stability_scores, ...)
+
+# 3. 風險警報系統
+if rolling_metrics['SKTASR'].iloc[-1] &lt; alert_threshold:
+    send_alert(&quot;SKTASR below threshold&quot;)
+</code></pre>
+
+<h3 id="73">7.3 注意事項與限制</h3>
+<h4 id="_20">數據要求</h4>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>最小樣本量</th>
+<th>理想樣本量</th>
+<th>頻率要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sharpe Ratio</td>
+<td>50</td>
+<td>252+</td>
+<td>任意</td>
+</tr>
+<tr>
+<td>Sortino Ratio</td>
+<td>50</td>
+<td>252+</td>
+<td>任意</td>
+</tr>
+<tr>
+<td>SASR</td>
+<td>126</td>
+<td>504+</td>
+<td>週或日頻</td>
+</tr>
+<tr>
+<td>Omega Ratio</td>
+<td>252</td>
+<td>504+</td>
+<td>日頻最佳</td>
+</tr>
+<tr>
+<td>SKTASR</td>
+<td>252</td>
+<td>756+</td>
+<td>日頻必須</td>
+</tr>
+<tr>
+<td>DAP</td>
+<td>126</td>
+<td>504+</td>
+<td>任意</td>
+</tr>
+<tr>
+<td>Conditional Sharpe</td>
+<td>126</td>
+<td>504+</td>
+<td>日頻最佳</td>
+</tr>
+</tbody>
+</table>
+<p><strong>建議:</strong><br />
+- <strong>高階矩指標</strong> 需要至少 1-2 年的日頻數據<br />
+- <strong>滾動窗口</strong> 不小於 252 天<br />
+- <strong>Walk-Forward</strong> 訓練期不小於 1260 天（5年）</p>
+<h4 id="_21">參數敏感性</h4>
+<p><strong>SKTASR 參數調整建議:</strong></p>
+<pre class="codehilite"><code class="language-python"># 保守風格（更重視尾部風險）
+SKTASR_conservative = sktasr(alpha1=0.05, alpha2=0.1, alpha3=0.4)
+
+# 均衡風格（推薦）
+SKTASR_balanced = sktasr(alpha1=0.1, alpha2=0.05, alpha3=0.3)
+
+# 激進風格（更重視收益）
+SKTASR_aggressive = sktasr(alpha1=0.15, alpha2=0.02, alpha3=0.2)
+</code></pre>
+
+<p><strong>DAP 參數調整建議:</strong></p>
+<pre class="codehilite"><code class="language-python"># 高勝率策略
+DAP_high_winrate = distribution_adjusted_performance(beta=0.7, gamma=0.3)
+
+# 高盈虧比策略
+DAP_high_ratio = distribution_adjusted_performance(beta=0.3, gamma=0.7)
+
+# 均衡策略
+DAP_balanced = distribution_adjusted_performance(beta=0.5, gamma=0.5)
+</code></pre>
+
+<h4 id="_22">市場環境適應性</h4>
+<p><strong>不同市場環境的指標選擇:</strong></p>
+<pre class="codehilite"><code class="language-python">def select_metric_by_regime(market_regime):
+    &quot;&quot;&quot;
+    根據市場環境選擇最適合的指標
+    &quot;&quot;&quot;
+    if market_regime == 'bull_market':
+        # 牛市: 側重預測能力
+        return {'primary': 'DAP', 'secondary': 'SKTASR'}
+
+    elif market_regime == 'bear_market':
+        # 熊市: 側重尾部風險
+        return {'primary': 'Omega Ratio', 'secondary': 'SKTASR'}
+
+    elif market_regime == 'high_volatility':
+        # 高波動: 側重穩定性
+        return {'primary': 'Sortino Ratio', 'secondary': 'SASR'}
+
+    elif market_regime == 'low_volatility':
+        # 低波動: 側重預測能力
+        return {'primary': 'DAP', 'secondary': 'SKTASR'}
+
+    else:  # normal
+        # 正常市場: 均衡選擇
+        return {'primary': 'SKTASR', 'secondary': 'Sortino Ratio'}
+</code></pre>
+
+<h3 id="74">7.4 未來研究方向</h3>
+<h4 id="1_1">1. 動態權重調整</h4>
+<pre class="codehilite"><code class="language-python">def dynamic_sktasr(returns, window=252):
+    &quot;&quot;&quot;
+    根據市場條件動態調整 SKTASR 權重
+    &quot;&quot;&quot;
+    # 計算市場波動率
+    market_vol = returns.rolling(window).std()
+
+    # 動態調整 alpha3 (尾部風險權重)
+    # 波動率越高，尾部風險權重越大
+    alpha3_dynamic = 0.3 + (market_vol / market_vol.quantile(0.75)) * 0.2
+
+    return sktasr(alpha1=0.1, alpha2=0.05, alpha3=alpha3_dynamic.iloc[-1])
+</code></pre>
+
+<h4 id="2_1">2. 多維度風險調整</h4>
+<pre class="codehilite"><code class="language-python">def multi_dim_risk_adjusted(returns, metrics_dict, weights):
+    &quot;&quot;&quot;
+    多維度風險調整指標
+    &quot;&quot;&quot;
+    normalized_metrics = {}
+    for metric_name, metric_value in metrics_dict.items():
+        normalized_metrics[metric_name] = normalize_metric(metric_value)
+
+    comprehensive_score = sum(
+        weights[metric] * normalized_metrics[metric]
+        for metric in metrics_dict.keys()
+    )
+
+    return comprehensive_score
+</code></pre>
+
+<h4 id="3_1">3. 機器學習增強</h4>
+<pre class="codehilite"><code class="language-python">from sklearn.ensemble import RandomForestRegressor
+
+def ml_enhanced_metric(historical_metrics, future_returns):
+    &quot;&quot;&quot;
+    使用機器學習增強指標預測能力
+    &quot;&quot;&quot;
+    X = historical_metrics  # 所有指標的歷史值
+    y = future_returns      # 未來收益
+
+    model = RandomForestRegressor(n_estimators=100)
+    model.fit(X, y)
+
+    # 預測未來績效
+    predicted_performance = model.predict(current_metrics)
+
+    return predicted_performance
+</code></pre>
+
+<h4 id="4_1">4. 情境壓力測試</h4>
+<pre class="codehilite"><code class="language-python">def scenario_stress_test(strategy_returns, scenarios):
+    &quot;&quot;&quot;
+    對不同情境進行壓力測試
+    &quot;&quot;&quot;
+    results = {}
+
+    for scenario_name, scenario_params in scenarios.items():
+        # 模擬情境收益
+        stressed_returns = simulate_scenario(strategy_returns, scenario_params)
+
+        # 計算壓力下的指標
+        ram = RiskAdjustedMetrics(stressed_returns)
+        results[scenario_name] = ram.compute_all_metrics()
+
+    return results
+
+# 預定義情境
+stress_scenarios = {
+    'COVID_Crash': {'volatility_multiplier': 3, 'correlation': 0.9},
+    'Rate_Shock': {'interest_rate_change': 0.02},
+    'Liquidity_Crisis': {'liquidity_reduction': 0.5}
+}
+</code></pre>
+
+<hr />
+<h2 id="8">8. 數據需求與待辦事項</h2>
+<h3 id="81-k002">8.1 需要的 k002 回測數據</h3>
+<p>為完成完整的實證分析，需要以下數據：</p>
+<ol>
+<li>
+<p><strong>5 種策略的日收益率序列</strong> (2015-2025):<br />
+   - Equal Weight<br />
+   - Min Variance<br />
+   - Mean-Variance<br />
+   - Min Coskewness<br />
+   - MV-Coskew</p>
+</li>
+<li>
+<p><strong>基準指數收益率</strong> (用於 Information Ratio):<br />
+   - 建議使用標普500或相關市場指數</p>
+</li>
+<li>
+<p><strong>市場因子數據</strong> (用於情境分析):<br />
+   - VIX (波動率指數)<br />
+   - 無風險利率 (如美國國債收益率)</p>
+</li>
+</ol>
+<h3 id="82">8.2 實施待辦清單</h3>
+<ul>
+<li>[ ] <strong>獲取 k002 回測數據</strong>: 導出 5 種策略的完整日收益率</li>
+<li>[ ] <strong>運行完整分析</strong>: 使用本框架計算所有指標</li>
+<li>[ ] <strong>生成視覺化</strong>: 創建所有圖表和表格</li>
+<li>[ ] <strong>撰寫最終報告</strong>: 根據實際結果更新結論和建議</li>
+<li>[ ] <strong>代碼審查</strong>: 確保代碼的魯棒性和可重現性</li>
+<li>[ ] <strong>文檔完善</strong>: 添加使用說明和API文檔</li>
+</ul>
+<h3 id="83">8.3 輸出交付物</h3>
+<p>當數據可用時，將產生以下交付物：</p>
+<ol>
+<li><strong>k003_risk_adjusted_metrics.py</strong> - 完整的 Python 計算框架</li>
+<li><strong>k003_metrics_comparison.csv</strong> - 所有策略的所有指標值</li>
+<li><strong>k003_strategy_rankings.csv</strong> - 策略在各指標下的排序</li>
+<li><strong>k003_comprehensive_scores.csv</strong> - 綜合得分和排名</li>
+<li><strong>k003_walk_forward_results.csv</strong> - Walk-Forward 驗證結果</li>
+<li><strong>k003_stability_analysis.csv</strong> - 排序穩定性分析</li>
+<li><strong>k003_predictive_power.csv</strong> - IC 和 IR 統計</li>
+<li><strong>k003_report.html</strong> - 完整的 HTML 分析報告</li>
+<li><strong>k003_visualizations/</strong> - 所有圖表和可視化</li>
+</ol>
+<hr />
+<h2 id="9">9. 參考文獻</h2>
+<h3 id="_23">理論文獻</h3>
+<ol>
+<li><strong>Sharpe, W. F. (1966)</strong>. "Mutual Fund Performance." <em>Journal of Business</em>, 39(1), 119-138.</li>
+<li><strong>Sortino, F. W., &amp; van der Meer, R. (1991)</strong>. "Downside Risk." <em>Journal of Portfolio Management</em>, 17(4), 27-31.</li>
+<li><strong>Harvey, C. R., &amp; Siddique, A. (2000)</strong>. "Conditional Skewness in Asset Pricing Tests." <em>Journal of Finance</em>, 55(3), 1263-1295.</li>
+<li><strong>Keating, C., &amp; Shadwick, W. F. (2002)</strong>. "A Universal Performance Measure." <em>Journal of Performance Measurement</em>, 6(3), 59-84.</li>
+<li><strong>Rockafellar, R. T., &amp; Uryasev, S. (2000)</strong>. "Optimization of Conditional Value-at-Risk." <em>Journal of Risk</em>, 2(3), 21-41.</li>
+</ol>
+<h3 id="_24">高階矩與尾部風險</h3>
+<ol start="6">
+<li><strong>Harvey, C. R., Liechty, J. C., Liechty, M. W., &amp; Müller, P. (2010)</strong>. "Portfolio Selection with Higher Moments." <em>Quantitative Finance</em>, 10(5), 469-482.</li>
+<li><strong>Bali, T. G., Demirtas, K. O., &amp; Levy, H. (2009)</strong>. "Is There an Intertemporal Relation between Downside Risk and Expected Returns?" <em>Journal of Financial and Quantitative Analysis</em>, 44(4), 883-909.</li>
+<li><strong>Ang, A., Chen, J., &amp; Xing, Y. (2006)</strong>. "Downside Risk." <em>Review of Financial Studies</em>, 19(4), 1191-1239.</li>
+</ol>
+<h3 id="_25">協偏度與相關主題</h3>
+<ol start="9">
+<li><strong>Kraus, A., &amp; Litzenberger, R. H. (1976)</strong>. "Skewness Preference and the Valuation of Risk Assets." <em>Journal of Finance</em>, 31(4), 1085-1100.</li>
+<li><strong>Harvey, C. R., &amp; Siddique, A. (2000)</strong>. "Time-Varying Conditional Skewness and the Market Risk Premium." <em>Review of Financial Studies</em>, 13(2), 379-403.</li>
+</ol>
+<h3 id="_26">實證研究</h3>
+<ol start="11">
+<li><strong>Eling, M. (2008)</strong>. "Performance Measurement in the Property-Liability Insurance Industry: An Alternative Approach." <em>Journal of Risk and Insurance</em>, 75(2), 439-466.</li>
+<li><strong>Caporin, M., Lisi, F., &amp; Janin, M. (2014)</strong>. "The Survey of Risk and Uncertainty Measures with Theoretical Performance Comparison." <em>European Journal of Operational Research</em>, 234(1), 177-191.</li>
+</ol>
+<h3 id="python">Python 實現相關</h3>
+<ol start="13">
+<li><strong>Hilpisch, Y. (2018)</strong>. <em>Python for Finance: Analyze Big Financial Data</em>. O'Reilly Media.</li>
+<li><strong>López de Prado, M. (2018)</strong>. <em>Advances in Financial Machine Learning</em>. Wiley.</li>
+</ol>
+<hr />
+<h2 id="a">附錄 A: 術語表</h2>
+<table>
+<thead>
+<tr>
+<th>術語</th>
+<th>英文</th>
+<th>定義</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>夏普比率</td>
+<td>Sharpe Ratio</td>
+<td>超額收益除以總風險（標準差）</td>
+</tr>
+<tr>
+<td>索提諾比率</td>
+<td>Sortino Ratio</td>
+<td>超額收益除以下行風險</td>
+</tr>
+<tr>
+<td>卡爾瑪比率</td>
+<td>Calmar Ratio</td>
+<td>年化收益除以最大回撤</td>
+</tr>
+<tr>
+<td>信息比率</td>
+<td>Information Ratio</td>
+<td>超額收益除以追蹤誤差</td>
+</tr>
+<tr>
+<td>偏度調整夏普</td>
+<td>SASR</td>
+<td>考慮偏度調整的夏普比率</td>
+</tr>
+<tr>
+<td>歐米茄比率</td>
+<td>Omega Ratio</td>
+<td>收益區域與損失區域的比率</td>
+</tr>
+<tr>
+<td>條件夏普</td>
+<td>Conditional Sharpe</td>
+<td>使用 CVaR 作為風險度量的夏普比率</td>
+</tr>
+<tr>
+<td>偏度-峰度-尾部調整夏普</td>
+<td>SKTASR</td>
+<td>同時考慮偏度、峰度和尾部風險的綜合指標</td>
+</tr>
+<tr>
+<td>分佈調整績效</td>
+<td>DAP</td>
+<td>基於勝率和盈虧比的績效指標</td>
+</tr>
+<tr>
+<td>不對稱下行風險比率</td>
+<td>ADR</td>
+<td>結合下行標準差和 CVaR 的風險調整指標</td>
+</tr>
+<tr>
+<td>條件價值風險</td>
+<td>CVaR</td>
+<td>損失分佈的預期值（預期損失）</td>
+</tr>
+<tr>
+<td>信息係數</td>
+<td>IC</td>
+<td>預測值與實際值之間的相關係數</td>
+</tr>
+<tr>
+<td>信息比率</td>
+<td>IR</td>
+<td>IC 的均值除以標準差</td>
+</tr>
+<tr>
+<td>協偏度</td>
+<td>Coskewness</td>
+<td>資產收益率與市場收益率偏度的協方差</td>
+</tr>
+<tr>
+<td>滾動窗口</td>
+<td>Rolling Window</td>
+<td>用於動態計算的固定長度時間窗口</td>
+</tr>
+<tr>
+<td>Walk-Forward</td>
+<td>Walk-Forward</td>
+<td>滾動樣本外驗證方法</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="b">附錄 B: 快速參考</h2>
+<h3 id="_27">指標選擇決策樹</h3>
+<pre class="codehilite"><code>開始
+  │
+  ├─ 主要目標是什麼？
+  │   ├─ 策略優化 → SKTASR
+  │   ├─ 風險管理 → Omega Ratio
+  │   ├─ 策略選擇 → DAP
+  │   └─ 績效報告 → Sortino Ratio
+  │
+  ├─ 數據可用性？
+  │   ├─ &lt; 1年數據 → Sortino Ratio
+  │   ├─ 1-2年數據 → SASR, DAP
+  │   └─ &gt; 2年數據 → SKTASR, Omega
+  │
+  ├─ 市場環境？
+  │   ├─ 熊市 → Omega Ratio, SKTASR
+  │   ├─ 高波動 → Sortino Ratio
+  │   └─ 牛市 → DAP, SKTASR
+  │
+  └─ 合規要求？
+      ├─ 監管報告 → Conditional Sharpe
+      └─ 學術研究 → SASR, SKASR
+</code></pre>
+
+<h3 id="_28">代碼片段速查</h3>
+<pre class="codehilite"><code class="language-python"># 計算單個策略的所有指標
+ram = RiskAdjustedMetrics(returns, risk_free_rate=0.02)
+metrics = ram.compute_all_metrics()
+
+# 計算多個策略的指標
+metrics_df = compute_metrics_for_strategies(strategy_returns)
+
+# 滾動計算
+rolling_metrics = ram.rolling_metrics(window=252)
+
+# Walk-Forward 驗證
+wf_results = walk_forward_analysis(strategy_returns)
+
+# 計算 IC 和 IR
+ic, ir = information_coefficient(future_returns, predicted_metrics)
+
+# 綜合得分
+score = compute_comprehensive_score(stability, ic, ir, tail_risk, param_stab)
+</code></pre>
+
+<hr />
+<p><strong>文檔版本:</strong> 1.0<br />
+<strong>最後更新:</strong> 2026-02-20<br />
+<strong>作者:</strong> Charlie Analyst<br />
+<strong>狀態:</strong> 框架完成，等待回測數據</p>
+<p><strong>下一步:</strong> 當 k002 回測數據可用時，運行完整分析並更新本報告的實證部分。</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

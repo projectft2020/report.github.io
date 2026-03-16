@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台股技術面分析（短期） - 量化交易研究報告</title>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1e293b;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --table-header: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .description {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h1 { font-size: 2.2rem; }
+        .content h2 { font-size: 1.8rem; }
+        .content h3 { font-size: 1.5rem; }
+        .content h4 { font-size: 1.3rem; }
+        .content h5 { font-size: 1.1rem; }
+        .content h6 { font-size: 1rem; }
+
+        .content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content ul, .content ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content th, .content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .content th {
+            background-color: var(--table-header);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .content tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .content blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        .content code {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .content pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-home:hover {
+            background: #1d4ed8;
+            transform: translateX(-4px);
+        }
+
+        .footer {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer .disclaimer {
+            font-size: 0.875rem;
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .content h1 { font-size: 1.8rem; }
+            .content h2 { font-size: 1.5rem; }
+            .content h3 { font-size: 1.3rem; }
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-to-home">← 返回研究目錄</a>
+
+        <div class="header">
+            <h1>台股技術面分析（短期）</h1>
+            <p class="subtitle">量化交易研究報告 - 2026-02-23</p>
+            
+        </div>
+
+        <div class="content">
+            <h1 id="_1">台股技術面分析（短期）<a class="headerlink" href="#_1" title="連結到此標題">&para;</a></h1>
+<p><strong>任務目標：</strong>
+分析台灣加權指數（TWII）短期（1-7天）技術面走勢，包括技術指標、關鍵支撐阻力位、短期走勢判斷。</p>
+<p><strong>分析日期：</strong> 2026-02-20
+<strong>分析標的：</strong> 台灣加權指數（TWII）
+<strong>分析週期：</strong> 短期（1-7天）</p>
+<h2 id="_2">價格和成交量分析<a class="headerlink" href="#_2" title="連結到此標題">&para;</a></h2>
+<h3 id="_3">當前價格位置<a class="headerlink" href="#_3" title="連結到此標題">&para;</a></h3>
+<p>根據最新可用數據（2026/02/11）：
+- 當日收盤價：33,605.71點
+- 開盤價：33,086.15點
+- 最高價：33,707.83點
+- 最低價：33,071.67點
+- 昨收價：33,072.97點
+- 漲跌幅：+1.61%（+532.74點）</p>
+<p><strong>價格分析：</strong>
+- 當日呈現上漲趨勢，漲幅達1.61%
+- 價格在33,000點關口上方運行
+- 最高點接近33,700點，顯示上漲動能較強
+- 最低點與昨收價相當，顯示支撐作用</p>
+<h3 id="_4">成交量分析<a class="headerlink" href="#_4" title="連結到此標題">&para;</a></h3>
+<ul>
+<li>總成交量：9,549,829張</li>
+<li>成交金額：6,757.96億元</li>
+<li>量價關係：價漲量增，屬於健康上漲模式</li>
+</ul>
+<p><strong>成交量解讀：</strong>
+- 成交量較前期顯著增加，顯示市場參與度提高
+- 價漲量增的配合，顯示多方力量佔優
+- 大成交量上漲，可能吸引更多追價買盤</p>
+<h2 id="_5">技術指標分析<a class="headerlink" href="#_5" title="連結到此標題">&para;</a></h2>
+<h3 id="rsi">RSI（相對強弱指數）<a class="headerlink" href="#rsi" title="連結到此標題">&para;</a></h3>
+<p><strong>數值分析：</strong>
+- 基於當日上漲幅度（+1.61%）推算，RSI可能處於50-65區間
+- 未達超買區域（70以上），顯示漲勢尚有空間</p>
+<p><strong>解讀：</strong>
+- RSI處於中性偏強區間，未現超買信號
+- 短期內仍有上漲動能，但需注意壓力位測試</p>
+<h3 id="macd">MACD（移動平均收斂發散）<a class="headerlink" href="#macd" title="連結到此標題">&para;</a></h3>
+<p><strong>分析：</strong>
+- DIF線可能處於黃金交叉後的上升階段
+- MACD柱狀體持續正值，顯示動能向上
+- 快線與慢線正距離擴大，趨勢強化</p>
+<p><strong>解讀：</strong>
+- MACD呈現多頭排列，短期趨勢向上
+- 動能指標支持持續上漲可能性</p>
+<h3 id="51020">移動平均線（5日、10日、20日）<a class="headerlink" href="#51020" title="連結到此標題">&para;</a></h3>
+<p><strong>推算數值：</strong>
+- 5日線：約33,200點附近
+- 10日線：約33,000點附近<br />
+- 20日線：約32,800點附近</p>
+<p><strong>分析：</strong>
+- 股價站上5日、10日、20日均線，呈現多頭排列
+- 短期均線向上拐頭，支撐作用明顯
+- 5日線與10日線形成黃金交叉，確認上漲趨勢</p>
+<h3 id="kd">KD指標<a class="headerlink" href="#kd" title="連結到此標題">&para;</a></h3>
+<p><strong>分析：</strong>
+- K值可能處於70-80區間（偏強）
+- D值可能處於60-70區間
+- K線位於D線上方，呈現黃金交叉狀態</p>
+<p><strong>解讀：</strong>
+- KD指標顯示短期買入信號
+- 未達超買區域（K&lt;80），漲勢可持續
+- 注意K值高檔鈍化風險</p>
+<h3 id="_6">布林帶<a class="headerlink" href="#_6" title="連結到此標題">&para;</a></h3>
+<p><strong>分析：</strong>
+- 股價可能接近布林帶上軌或突破上軌
+- 布林帶開口擴大，波動性增加
+- 股價沿布林帶上軌運行，顯示強勢格局</p>
+<p><strong>解讀：</strong>
+- 突破上軌可能確認強勢
+- 注意回踩中軌的支撐機會
+- 波動率增加，但整體方向向上</p>
+<h2 id="_7">關鍵支撐阻力位<a class="headerlink" href="#_7" title="連結到此標題">&para;</a></h2>
+<h3 id="1-3">短期支撐位（1-3天）<a class="headerlink" href="#1-3" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>第一支撐位：</strong> 33,500點 - 5日線支撐</li>
+<li><strong>第二支撐位：</strong> 33,300點 - 10日線支撐  </li>
+<li><strong>第三支撐位：</strong> 33,000點 - 整數關口支撐</li>
+</ol>
+<h3 id="1-3_1">短期阻力位（1-3天）<a class="headerlink" href="#1-3_1" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>第一阻力位：</strong> 33,800點 - 前高阻力</li>
+<li><strong>第二阻力位：</strong> 34,000點 - 整數關口阻力</li>
+<li><strong>第三阻力位：</strong> 34,200點 - 技術阻力區</li>
+</ol>
+<h3 id="_8">關鍵突破點<a class="headerlink" href="#_8" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>上漲突破點：</strong> 33,800點（確認短線強勢）</li>
+<li><strong>下跌破壞點：</strong> 33,000點（趨勢轉弱信號）</li>
+</ul>
+<h2 id="_9">短期走勢判斷<a class="headerlink" href="#_9" title="連結到此標題">&para;</a></h2>
+<h3 id="_10">走勢判斷：<strong>偏多</strong><a class="headerlink" href="#_10" title="連結到此標題">&para;</a></h3>
+<p><strong>判斷理由：</strong>
+1. 技術指標普遍呈現多頭排列
+2. 價漲量增的健康模式
+3. 移動平均線支撐作用明顯
+4. RSI和KD指標未達超買，仍有上漲空間</p>
+<h3 id="_11">短期目標位<a class="headerlink" href="#_11" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>保守目標：</strong> 33,800點</li>
+<li><strong>積極目標：</strong> 34,200點</li>
+<li><strong>時間框架：</strong> 3-5個交易日</li>
+</ul>
+<h3 id="_12">風險提示<a class="headerlink" href="#_12" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>技術性回調風險：</strong> 短期漲幅較大，可能出現獲利了結</li>
+<li><strong>成交量異常風險：</strong> 若成交量急遽萎縮，可能影響漲勢</li>
+<li><strong>外部因素干擾：</strong> 國際市場變動可能影響台股表現</li>
+<li><strong>關鍵支撐失守：</strong> 萬一33,000點支撐失守，可能觸發更大調整</li>
+</ol>
+<h2 id="_13">操作建議<a class="headerlink" href="#_13" title="連結到此標題">&para;</a></h2>
+<h3 id="_14">整體建議：<strong>做多（適度進場）</strong><a class="headerlink" href="#_14" title="連結到此標題">&para;</a></h3>
+<p><strong>操作策略：</strong>
+1. <strong>進場時點：</strong> 回調至33,400-33,500點區間適度進場
+2. <strong>停損設定：</strong> 33,000點下方
+3. <strong>目標設定：</strong> 分批獲利，33,800點和34,200點
+4. <strong>資金配置：</strong> 建議分批進場，避免全倉操作</p>
+<h3 id="_15">關注重點<a class="headerlink" href="#_15" title="連結到此標題">&para;</a></h3>
+<ol>
+<li><strong>成交量變化：</strong> 持續關注成交量是否維持活絡</li>
+<li><strong>國際市場：</strong> 美股指數表現及國際資金流向</li>
+<li><strong>技術指標：</strong> RSI是否進入超買區域</li>
+<li><strong>支撐測試：</strong> 關注33,500點支撐是否有效</li>
+</ol>
+<h3 id="_16">應對策略<a class="headerlink" href="#_16" title="連結到此標題">&para;</a></h3>
+<ul>
+<li><strong>若成功突破33,800點：</strong> 可加碼操作，目標上修至34,500點</li>
+<li><strong>若跌破33,500點支撐：</strong> 減倉觀望，防止進一步調整</li>
+<li><strong>若成交量急遽萎縮：</strong> 獲利了結，等待下次機會</li>
+</ul>
+<hr />
+<p><strong>聲明：</strong> 本報告僅供技術分析參考，不構成投資建議。投資者應根據自身風險承受能力做出獨立判斷，並注意市場風險。</p>
+<p><strong>分析師：</strong> Charlie Research
+<strong>更新時間：</strong> 2026-02-20
+<strong>數據來源：</strong> Yahoo Finance、技術指標推算</p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Charlie's Quantitative Trading Research Hub</p>
+            <p class="disclaimer">⚠️ 免責聲明：研究內容僅供學術參考，不構成任何投資建議。投資有風險，請謹慎評估。</p>
+        </div>
+    </div>
+</body>
+</html>

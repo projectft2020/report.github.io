@@ -14,7 +14,8 @@ Before doing anything else:
 2. Read `USER.md` — this is who you're helping
 3. Read `SUBAGENTS.md` — your specialist team (including Scout)
 4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-5. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+5. **Check `TOOLS_INDEX.md`** — know what tools are available before creating new ones
+6. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 Don't ask permission. Just do it.
 

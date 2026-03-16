@@ -15,9 +15,14 @@ WORKSPACE_ROOT = Path.home() / ".openclaw" / "workspace"
 TURBO_STATUS_FILE = WORKSPACE_ROOT / "kanban-ops" / "TURBO_STATUS.json"
 TASKS_FILE = WORKSPACE_ROOT / "kanban" / "tasks.json"
 SCOUT_SCAN_LOG = Path.home() / ".openclaw" / "workspace-scout" / "SCAN_LOG.md"
+BACKPRESSURE_STATS_FILE = WORKSPACE_ROOT / "kanban-ops" / "backpressure_stats.json"
 
 # 24 小時硬保護（防止 Scout 死鎖）
 HARD_TIMEOUT = 24 * 60 * 60  # 24 小時
+
+# 健康度閾值
+HEALTH_THRESHOLD_HIGH = 0.8
+HEALTH_THRESHOLD_MEDIUM = 0.5
 
 # 日誌配置
 logging.basicConfig(
@@ -71,6 +76,26 @@ def get_last_scan_time():
         return None
 
 
+def get_system_health():
+    """
+    獲取系統健康度（從背壓統計文件）
+
+    Returns:
+        float: 健康度（0.0-1.0），如果無法讀取則返回 1.0
+    """
+    try:
+        if not BACKPRESSURE_STATS_FILE.exists():
+            return 1.0
+
+        with open(BACKPRESSURE_STATS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        return data.get('health', 1.0)
+    except Exception as e:
+        logger.warning(f"獲取系統健康度失敗: {e}")
+        return 1.0
+
+
 def get_pending_task_count():
     """獲取待辦任務數量"""
     try:
@@ -104,19 +129,41 @@ def get_pending_task_count():
 
 
 def should_scan(pending_count, last_scan_time):
-    """判斷是否應該觸發 Scout 掃描"""
+    """
+    判斷是否應該觸發 Scout 掃描
+
+    v4.0 優化：根據系統健康度動態調整掃描頻率
+
+    動態規則：
+    - 健康度 >= 0.8: 頻繁掃描（1 小時間隔，閾值 5）
+    - 0.5 <= 健康度 < 0.8: 正常掃描（2 小時間隔，閾值 3）
+    - 健康度 < 0.5: 保守掃描（4 小時間隔，閾值 3）
+    """
     turbo_mode = is_turbo_mode_active()
+    system_health = get_system_health()
 
     if turbo_mode:
-        # 加速模式：更快補充
+        # 加速模式：最快補充
         threshold = 5  # 待辦 < 5 個就掃描
         min_interval = 30 * 60  # 最少 30 分鐘
         mode = "加速模式"
     else:
-        # 正常模式：保守掃描
-        threshold = 3  # 待辦 < 3 個才掃描
-        min_interval = 2 * 60 * 60  # 最少 2 小時
-        mode = "正常模式"
+        # v4.0 動態掃描：根據系統健康度調整
+        if system_health >= HEALTH_THRESHOLD_HIGH:
+            # 高健康度：頻繁掃描
+            threshold = 5  # 待辦 < 5 個就掃描
+            min_interval = 1 * 60 * 60  # 1 小時
+            mode = f"高健康度掃描 (health={system_health:.2f})"
+        elif system_health >= HEALTH_THRESHOLD_MEDIUM:
+            # 中等健康度：正常掃描
+            threshold = 3  # 待辦 < 3 個才掃描
+            min_interval = 2 * 60 * 60  # 2 小時
+            mode = f"正常掃描 (health={system_health:.2f})"
+        else:
+            # 低健康度：保守掃描
+            threshold = 3  # 待辦 < 3 個才掃描
+            min_interval = 4 * 60 * 60  # 4 小時
+            mode = f"保守掃描 (health={system_health:.2f})"
 
     # 檢查時間間隔
     if last_scan_time:

@@ -33,7 +33,7 @@ class VectorTrajectory:
     通過語義搜索找到相關記憶，並生成可視化軌跡。
     """
     
-    def __init__(self, memory_path: str = "/Users/charlie/.openclaw/workspace/memory"):
+    def __init__(self, memory_path: str = os.environ.get('MEMORY_PATH', '/Users/charlie/.openclaw/workspace/memory')):
         """
         初始化 VectorTrajectory
         

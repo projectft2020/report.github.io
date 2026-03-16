@@ -47,6 +47,8 @@ SPAWN_COMMANDS_FILE = WORKSPACE / "kanban" / "spawn_commands.jsonl"
 
 # ============ 日誌系統 ============
 
+LOG_FILE = WORKSPACE / "kanban-ops" / "auto_research.log"
+
 def log(level, message, daemon=True):
     """記錄日誌"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -63,7 +65,16 @@ def log(level, message, daemon=True):
     icon = icons.get(level, default_icon)
     prefix = "[Daemon] " if daemon else ""
 
-    print(f"{icon} [{timestamp}] {prefix}{message}", flush=True)
+    # 輸出到控制台
+    log_message = f"{icon} [{timestamp}] {prefix}{message}"
+    print(log_message, flush=True)
+
+    # 寫入日誌文件
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(log_message + '\n')
+    except Exception as e:
+        print(f"寫入日誌失敗: {e}", flush=True)
 
 
 # ============ 配置管理 ============
@@ -548,12 +559,13 @@ def start_daemon():
 
     # 啟動守護進程（後台）
     import subprocess
-    subprocess.Popen(
-        [sys.executable, __file__, 'run'],
-        start_new_session=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    with open(LOG_FILE, 'a') as log_file:
+        subprocess.Popen(
+            [sys.executable, __file__, 'run'],
+            start_new_session=True,
+            stdout=log_file,
+            stderr=log_file
+        )
 
     log("SUCCESS", "守護進程已啟動（後台運行）")
     log("INFO", "使用 'python3 kanban-ops/auto_research_daemon.py status' 查看狀態")

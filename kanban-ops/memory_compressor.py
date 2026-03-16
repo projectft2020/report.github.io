@@ -7,6 +7,7 @@
 """
 
 import re
+import os
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
@@ -199,7 +200,7 @@ def main():
     """
     主函數：壓縮記憶檔案
     """
-    memory_dir = Path('/Users/charlie/.openclaw/workspace/memory')
+    memory_dir = Path(os.environ.get('MEMORY_PATH', '/Users/charlie/.openclaw/workspace/memory'))
 
     # 找出大於 100 KB 的記憶檔案
     large_files = [f for f in memory_dir.glob('2026-*.md') if f.stat().st_size > 100 * 1024]
@@ -253,7 +254,7 @@ def main():
 """
 
         # 寫入報告
-        report_path = Path('/Users/charlie/.openclaw/workspace/memory/compression-report.md')
+        report_path = Path(os.environ.get('MEMORY_PATH', '/Users/charlie/.openclaw/workspace/memory')) / 'compression-report.md'
         report_path.write_text(report, encoding='utf-8')
 
         print("\n" + "=" * 60)

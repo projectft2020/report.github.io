@@ -4,6 +4,45 @@ Check these tasks periodically (rotate through them, 2-4 times per day).
 
 ## Priority Tasks (Check Every Heartbeat)
 
+### 0. 睡覺模式任務 (Sleep Mode Tasks) - 重要但不緊急
+
+**觸發條件：**
+- 時間：23:00 - 08:00
+- 距離上次用戶消息 > 2 小時
+- 系統健康度 ≥ 0.5
+
+**執行頻率：** 每次睡覺時間執行 1-2 個任務
+
+**任務類別：**
+1. **商業模式推進** - 研究競爭對手、設計產品、整理需求
+2. **知識整理** - 每日記憶維護、知識圖譜更新
+3. **技能優化** - 代碼重構、文檔更新、測試補充
+4. **技術探索** - 新技術評估、原型開發
+
+**執行方式：**
+```bash
+# 心跳檢查時自動判斷
+if 當前時間在 23:00-08:00 && 距離上次用戶消息 > 2 小時:
+    執行睡覺模式任務
+```
+
+**第二天早上匯報：**
+```
+昨晚我做了什麼：
+✅ 商業模式：研究了 3 個競爭對手
+✅ 知識整理：更新了 memory/topics/quantitative-research.md
+✅ 技能優化：重構了 kanban-ops/task_sync.py
+
+進度：商業模式第一階段 15% 完成
+```
+
+**核心原則：**
+- 這是「重要但不緊急」的執行時間
+- 不打擾你，在背景持續推進
+- 每天都有進展，即使不明顯
+
+---
+
 ### 1. 自動任務啟動器 (Auto Spawn Heartbeat)
 ```bash
 cd ~/.openclaw/workspace && python3 kanban-ops/auto_spawn_heartbeat.py
@@ -306,6 +345,73 @@ cat ~/workspace/memory/learning/$(date +%Y-%m-%d).md
 ```
 
 **注意:** 檢查點報告準備好後，需要調用 `sessions_spawn` 啟動 Mentor 會話進行深度對話。
+
+### 9. 自動改進檢查 (Auto Improve Check) - P0 行動
+```bash
+cd ~/.openclaw/workspace/kanban-ops && python3 auto_improve_daemon.py check
+```
+
+**What it does:**
+- 檢查距離上次改進是否超過 24 小時
+- 如果超過，建議執行改進
+- 記錄改進日誌
+
+**觸發條件：**
+- 距離上次改進 > 24 小時（每天一次）
+- 或用戶手動觸發
+
+**注意：** 這個任務與 cron job 一起使用，確保自動改進的監控和執行
+
+### 8. 記憶維護 (Memory Maintenance) - P0 行動
+```bash
+# 每 28 個 heartbeat 觸發一次（約 7 天）
+cd ~/.openclaw/workspace && python3 skills/memory-maintenance/scripts/maintain.py
+```
+
+**What it does:**
+- 掃描最近 7 天的 daily logs
+- 提取重要的學習點、模式、洞察
+- 更新 MEMORY.md、SOUL.md、topics/
+- 清理過時記憶（> 30 天）
+- 生成維護報告
+
+**觸發邏輯:**
+- 自動觸發：每 28 個 heartbeat（約 7 天）
+- 追蹤文件：`memory/heartbeat-count.json`
+
+**心跳計數追蹤：**
+```bash
+# 創建心跳計數追蹤文件（如果不存在）
+if [ ! -f ~/.openclaw/workspace/memory/heartbeat-count.json ]; then
+    echo '{"heartbeat_count": 0, "last_maintenance": null}' > ~/.openclaw/workspace/memory/heartbeat-count.json
+fi
+
+# 增加心跳計數
+python3 -c "import json; f=open('/Users/charlie/.openclaw/workspace/memory/heartbeat-count.json'); d=json.load(f); d['heartbeat_count']=d.get('heartbeat_count',0)+1; json.dump(d, open(f.name,'w'), indent=2)"
+
+# 檢查是否需要執行記憶維護
+python3 -c "
+import json
+f=open('/Users/charlie/.openclaw/workspace/memory/heartbeat-count.json')
+d=json.load(f)
+if d.get('heartbeat_count',0) % 28 == 0:
+    print('✅ 需要執行記憶維護')
+else:
+    print(f'ℹ️  距離上次記憶維護還有 {28 - (d.get(\"heartbeat_count\",0) % 28)} 個 heartbeat')
+"
+```
+
+**查看報告:**
+```bash
+# 最近的維護報告
+cat ~/.openclaw/workspace/memory/maintenance-report-$(date +%Y%m%d).md
+```
+
+**心跳計數狀態:**
+```bash
+# 查看心跳計數
+cat ~/.openclaw/workspace/memory/heartbeat-count.json
+```
 
 ---
 

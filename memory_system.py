@@ -21,6 +21,7 @@ from obsidian_memory import ObsidianMemory
 from pathlib import Path
 from typing import List, Optional
 import logging
+import os
 
 # 配置日誌
 logging.basicConfig(level=logging.INFO)
@@ -38,14 +39,19 @@ class MemorySystem:
             use_obsidian: 是否使用 Obsidian（默認：True）
         """
         self.use_obsidian = use_obsidian
-        self.workspace_path = Path("/Users/charlie/.openclaw/workspace")
-        self.memory_path = self.workspace_path / "memory"
+        
+        # Use environment variables or fall back to defaults
+        workspace_path = os.environ.get('WORKSPACE_PATH', '/Users/charlie/.openclaw/workspace')
+        memory_path = os.environ.get('MEMORY_PATH', '/app/memory')
+        
+        self.workspace_path = Path(workspace_path)
+        self.memory_path = Path(memory_path)
 
         if use_obsidian:
             self.obsidian_memory = ObsidianMemory()
-            logger.info("Using Obsidian memory system")
+            logger.info(f"Using Obsidian memory system with workspace: {self.workspace_path}")
         else:
-            logger.info("Using traditional Markdown memory system")
+            logger.info(f"Using traditional Markdown memory system with memory: {self.memory_path}")
 
     def store(
         self,

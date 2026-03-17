@@ -9,7 +9,11 @@
 ## 📋 Quick Navigation
 
 ### Core Knowledge (memory/topics/)
-- **[Quantitative Research](memory/topics/quantitative-research.md)** - 動能策略、多因子、機器學習
+- **[Business Model](memory/topics/商業模式.md)** - 商業模式設計、價值主張、目標受眾
+- **[Memory System](memory/topics/記憶系統.md)** - 三層架構、QMD 整合、GPU OOM 解決方案
+- **[System Optimization](memory/topics/系統優化.md)** - 背壓機制、容量規劃、三層超時機制
+- **[Research Reports](memory/topics/研究報告.md)** - 研究品質標準、11 部分模板、實證驗證
+- **[Quantitative Research](memory/topics/量化研究.md)** - 量化交易策略、市場範圍、研究方法
 - **[Risk Management](memory/topics/risk-management.md)** - 風險指標、厚尾分佈、非傳統止損
 - **[System Architecture](memory/topics/system-architecture.md)** - Kanban、監控、自動化
 - **[Scout System](memory/topics/scout-system.md)** - 數據源、偏好學習、掃描器
@@ -466,6 +470,18 @@ ls -la memory/topics/
 
 
 ## 📅 Update Log
+### 2026-03-17 (Today)
+- ✅ 記憶維護執行
+- ✅ 知識提取：0 個學習點
+- ✅ 模式識別：2 個核心模式
+- ✅ 決策記錄：1 個關鍵決策
+- ✅ 記憶系統重構完成（方案 D 改進版）
+  - 移除 kanban-workspace collection（563 files → 0）
+  - 清理空 collections（27 個）
+  - 建立 topics/ 目錄結構（5 個主題文件）
+  - 重建 QMD collections（memory-daily + memory-topics）
+  - GPU OOM 問題解決（102 files vs 657 files）
+
 ### 2026-03-16 (Today)
 - ✅ 記憶維護執行
 - ✅ 知識提取：0 個學習點

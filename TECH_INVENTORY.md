@@ -106,6 +106,72 @@
 - **文檔：** kanban-ops/MONITORING_SYSTEM_SUCCESS.md
 - **最後更新：** 2026-03-05
 
+### 背壓機制
+- **路徑：** kanban-ops/backpressure.py
+- **狀態：** ✅ 已整合到心跳流程
+- **依賴：** Kanban 系統
+- **功能：**
+  - 計算系統健康度（0.0-1.0）
+  - 根據健康度動態調整啟動頻率（65-300 秒）
+  - 根據健康度動態調整並發上限（2-3）
+- **動態調整規則：**
+  | 健康度 | 啟動頻率 | 並發上限 | 狀態 |
+  |--------|----------|----------|------|
+  | ≥ 0.8 | 65 秒 | 3 | 🟢 健康 |
+  | 0.5 - 0.8 | 120 秒 | 3 | 🟡 中等 |
+  | < 0.5 | 300 秒 | 2 | 🔴 不健康 |
+- **實證成果：**
+  - 卡住任務從 6 個降至 0 個（100% 改善）
+  - 回滾時間從 120 分鐘降至 45 分鐘（62.5% 改善）
+  - 系統健康度穩定在 0.67-1.00 之間
+- **文檔：** memory/topics/system-architecture.md
+- **最後更新：** 2026-03-05
+
+### 智能並發啟動器
+- **路徑：** kanban-ops/spawn_tasks_intelligent.py
+- **狀態：** ✅ 已開發，待整合
+- **依賴：** Kanban 系統
+- **功能：**
+  - 預估每個任務的 Token 使用
+  - 按 300k Token 限制分組
+  - 序列啟動各組（間隔 5 分鐘）
+  - 避免同時啟動導致的 rate limit
+- **命令：**
+  ```bash
+  # 查看隊列預估
+  python3 kanban-ops/spawn_tasks_intelligent.py estimate
+
+  # 查看分組計劃
+  python3 kanban-ops/spawn_tasks_intelligent.py group
+
+  # 實際啟動任務
+  python3 kanban-ops/spawn_tasks_intelligent.py spawn [max_tasks]
+  ```
+- **文檔：** HEARTBEAT.md
+- **最後更新：** 2026-03-05
+
+### 自動改進守護進程
+- **路徑：** kanban-ops/auto_improve_daemon.py
+- **狀態：** ✅ 已開發，待整合
+- **依賴：** Kanban 系統
+- **功能：**
+  - 檢查距離上次改進是否超過 24 小時
+  - 如果超過，建議執行改進
+  - 記錄改進日誌
+- **觸發條件：**
+  - 距離上次改進 > 24 小時（每天一次）
+  - 或用戶手動觸發
+- **命令：**
+  ```bash
+  # 檢查是否需要改進
+  python3 kanban-ops/auto_improve_daemon.py check
+
+  # 執行改進
+  python3 kanban-ops/auto_improve_daemon.py improve
+  ```
+- **文檔：** HEARTBEAT.md
+- **最後更新：** 2026-03-05
+
 ---
 
 ## 📈 監控系統
@@ -197,6 +263,33 @@
   - 爬文數據源：threads, quantocracy, quantconnect, nuclear_phynance, quantnet, ssrn, nber, hedge_fund_reports, tradingview, quant_stackexchange
 - **文檔：** kanban/outputs/scout-phase2-complete.md
 - **最後更新：** 2026-02-23
+
+### Scout Reports 項目
+- **路徑：** ~/.openclaw/workspace/ScoutReports/
+- **狀態：** 🟡 設計完成，待實施
+- **依賴：**
+  - FastAPI（後端）
+  - React 19（前端）
+  - SQLite（資料庫）
+- **功能：**
+  - Markdown 報告展示
+  - 全文搜索
+  - 反饋收集
+  - 偏好學習
+  - 分析儀表板
+- **API 端點：**
+  - GET /api/reports - 列出所有報告
+  - GET /api/reports/{id} - 獲取單個報告
+  - POST /api/reports - 創建新報告
+  - PUT /api/reports/{id} - 更新報告
+  - DELETE /api/reports/{id} - 刪除報告
+  - POST /api/reports/{id}/feedback - 提交反饋
+  - GET /api/search?q= - 搜索報告
+  - GET /api/analysis/dashboard - 獲取分析儀表板數據
+- **文檔：** ScoutReports/（5 個文檔，106 KB）
+- **設計完成：** 2026-03-04
+- **預計實施：** 9-13 天
+- **最後更新：** 2026-03-04
 
 ---
 
@@ -327,20 +420,29 @@
 |------|------|------|
 | **向量資料庫** | 1 | ✅ 已整合 |
 | **筆記系統** | 1 | ✅ 已整合 |
-| **任務管理** | 1 | ✅ 已整合 |
+| **任務管理** | 4 | ✅ 已整合 |
 | **監控系統** | 3 | ✅ 已整合 |
 | **Dashboard** | 1 | ✅ 已整合 |
-| **研究系統** | 1 | ✅ 已整合 |
+| **研究系統** | 2 | ✅ 已整合 |
 | **記憶系統** | 1 | 🟡 設計中 |
 | **技能系統** | 27 | ✅ 已整合 |
 | **代理系統** | 9 | ✅ 已整合 |
 | **SOP 文檔** | 10 | ✅ 已整合 |
 | **整合系統** | 1 | ✅ 已整合 |
 
-**總計：** 56 個系統/工具/技能
+**總計：** 60 個系統/工具/技能
 
 ---
 
-**最後更新：** 2026-03-09 01:27 AM
-**版本：** v1.0
+**最後更新：** 2026-03-18 04:10 AM
+**版本：** v1.1
 **維護者：** Charlie
+
+**本次更新（v1.1 → v1.0）：**
+- ✅ 添加 Scout Reports 項目
+- ✅ 添加背壓機制
+- ✅ 添加智能並發啟動器
+- ✅ 添加自動改進守護進程
+- ✅ 更新任務管理類別數量（1 → 4）
+- ✅ 更新研究系統類別數量（1 → 2）
+- ✅ 更新總計（56 → 60）
